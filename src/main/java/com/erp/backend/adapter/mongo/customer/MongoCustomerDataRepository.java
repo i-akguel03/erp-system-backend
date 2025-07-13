@@ -1,4 +1,4 @@
-package com.erp.backend.adapter.mongo;
+package com.erp.backend.adapter.mongo.customer;
 
 import org.springframework.data.mongodb.repository.MongoRepository;
 

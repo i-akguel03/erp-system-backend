@@ -1,4 +1,4 @@
-package com.erp.backend.adapter.mongo;
+package com.erp.backend.adapter.mongo.customer;
 
 import com.erp.backend.domain.Customer;
 import com.erp.backend.repository.CustomerRepository;
