@@ -24,4 +24,5 @@ WORKDIR /app
 COPY --from=build /app/target/*.jar app.jar
 
 # Container starten
+ENV PORT 8080
 ENTRYPOINT ["java","-jar","app.jar"]
