@@ -39,7 +39,7 @@ public class SecurityConfig {
     @Bean
     public CorsFilter corsFilter() {
         CorsConfiguration config = new CorsConfiguration();
-        config.setAllowedOrigins(List.of("http://localhost:4200")); // Angular-Frontend
+        config.setAllowedOrigins(List.of("http://localhost:4200", "https://erp-system-frontend-ghgd70s6m-akibos-projects.vercel.app")); // Angular-Frontend
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(List.of("*"));
         config.setAllowCredentials(true);
