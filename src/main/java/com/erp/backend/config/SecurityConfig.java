@@ -61,6 +61,7 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/auth/**").permitAll()
+                        .requestMatchers("/actuator/health").permitAll() // ✅ wichtig für Frontend-Check
                         .requestMatchers("/api/**").authenticated()
                         .anyRequest().permitAll()
                 )
