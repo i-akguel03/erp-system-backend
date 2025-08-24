@@ -36,16 +36,51 @@ public class CustomerService {
         return customer;
     }
 
-    public Customer createOrUpdateCustomer(Customer customer) {
-        boolean isUpdate = customer.getId() != null && repository.findById(customer.getId()).isPresent();
+    // CustomerService methods:
+    public Customer createCustomer(Customer customer) {
+        // Sicherstellen, dass keine ID mitgegeben wird (wird von DB generiert)
+        customer.setId(null);
+
+        // 8-stellige Kundennummer generieren
+        customer.setCustomerNumber(generateCustomerNumber());
+
         Customer saved = repository.save(customer);
-        if (isUpdate) {
-            logger.info("Updated customer: id={}, email={}", saved.getId(), saved.getEmail());
-        } else {
-            logger.info("Created new customer: id={}, email={}", saved.getId(), saved.getEmail());
-        }
+        logger.info("Created new customer: id={}, customerNumber={}, email={}",
+                saved.getId(), saved.getCustomerNumber(), saved.getEmail());
         return saved;
     }
+
+    private String generateCustomerNumber() {
+        // Generiert eine 8-stellige Kundennummer (10000000 - 99999999)
+        int min = 60000000;
+        int max = 69999999;
+        int customerNumber = (int) (Math.random() * (max - min + 1)) + min;
+
+        // Prüfen ob Nummer bereits existiert, falls ja neue generieren
+        while (repository.existsByCustomerNumber(String.valueOf(customerNumber))) {
+            customerNumber = (int) (Math.random() * (max - min + 1)) + min;
+        }
+
+        return String.valueOf(customerNumber);
+    }
+
+    public Customer updateCustomer(Customer customer) {
+        if (customer.getId() == null || !repository.findById(customer.getId()).isPresent()) {
+            throw new IllegalArgumentException("Customer not found for update");
+        }
+        Customer saved = repository.save(customer);
+        logger.info("Updated customer: id={}, email={}", saved.getId(), saved.getEmail());
+        return saved;
+    }
+
+    public Customer createOrUpdateCustomer(Customer customer) {
+        if (customer.getId() != null && repository.findById(customer.getId()).isPresent()) {
+            return updateCustomer(customer);
+        } else {
+            return createCustomer(customer);
+        }
+    }
+
 
     public void deleteCustomerById(String id) {
         repository.deleteById(id);

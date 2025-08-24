@@ -7,6 +7,7 @@ public class Customer {
     private String lastName;
     private String email;
     private String tel;
+    private String customerNumber;
 
     private String billingAddressId;
     private String shippingAddressId;
@@ -29,6 +30,14 @@ public class Customer {
 
     public void setId(String id) {
         this.id = id;
+    }
+
+    public String getCustomerNumber() {
+        return customerNumber;
+    }
+
+    public void setCustomerNumber(String customerNumber) {
+        this.customerNumber = customerNumber;
     }
 
     public String getFirstName() {
@@ -91,6 +100,7 @@ public class Customer {
     public String toString() {
         return "Customer{" +
                 "id='" + id + '\'' +
+                ", customerNumber='" + customerNumber + '\'' +
                 ", firstName='" + firstName + '\'' +
                 ", lastName='" + lastName + '\'' +
                 ", email='" + email + '\'' +

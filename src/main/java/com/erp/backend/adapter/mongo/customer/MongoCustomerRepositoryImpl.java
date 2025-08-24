@@ -25,6 +25,7 @@ public class MongoCustomerRepositoryImpl implements CustomerRepository {
                 doc.getEmail(),
                 doc.getTel()
         );
+        customer.setCustomerNumber(doc.getCustomerNumber());
         customer.setBillingAddressId(doc.getBillingAddressId());
         customer.setShippingAddressId(doc.getShippingAddressId());
         customer.setResidentialAddressId(doc.getResidentialAddressId());
@@ -39,6 +40,7 @@ public class MongoCustomerRepositoryImpl implements CustomerRepository {
                 customer.getEmail(),
                 customer.getTel()
         );
+        doc.setCustomerNumber(customer.getCustomerNumber());
         doc.setBillingAddressId(customer.getBillingAddressId());
         doc.setShippingAddressId(customer.getShippingAddressId());
         doc.setResidentialAddressId(customer.getResidentialAddressId());
@@ -64,4 +66,10 @@ public class MongoCustomerRepositoryImpl implements CustomerRepository {
     public void deleteById(String id) {
         mongoRepo.deleteById(id);
     }
+
+    @Override
+    public boolean existsByCustomerNumber(String customerNumber) {
+        return mongoRepo.existsByCustomerNumber(customerNumber);
+    }
 }
+

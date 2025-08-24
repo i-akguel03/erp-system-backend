@@ -9,4 +9,6 @@ public interface CustomerRepository {
     List<Customer> findAll();
     Optional<Customer> findById(String id);
     void deleteById(String id);
+
+    boolean existsByCustomerNumber(String s);
 }

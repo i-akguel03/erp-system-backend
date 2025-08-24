@@ -9,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/customers")
@@ -49,29 +50,41 @@ public class CustomerController {
     public ResponseEntity<Customer> createCustomer(@RequestBody Customer customer) {
         logger.info("POST /api/customers - Creating new customer with email {}", customer.getEmail());
         logger.info("RequestBody {}", customer.toString());
-        Customer created = service.createOrUpdateCustomer(customer);
-        logger.debug("Created customer with ID {}", created.getId());
-        return ResponseEntity.status(HttpStatus.CREATED).body(created);
+        try {
+            Customer created = service.createCustomer(customer);
+            logger.debug("Created customer with ID {}", created.getId());
+            return ResponseEntity.status(HttpStatus.CREATED).body(created);
+        } catch (Exception e) {
+            logger.error("Error creating customer: {}", e.getMessage());
+            return ResponseEntity.<Customer>badRequest().build();
+        }
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<Customer> updateCustomer(@PathVariable String id, @RequestBody Customer updated) {
         logger.info("PUT /api/customers/{} - Updating customer", id);
-        return service.getCustomerById(id)
-                .map(existing -> {
-                    logger.debug("Updating fields for customer ID {}", id);
-                    existing.setFirstName(updated.getFirstName());
-                    existing.setLastName(updated.getLastName());
-                    existing.setEmail(updated.getEmail());
-                    existing.setTel(updated.getTel());
-                    Customer saved = service.createOrUpdateCustomer(existing);
-                    logger.info("Updated customer with ID {}", saved.getId());
-                    return ResponseEntity.ok(saved);
-                })
-                .orElseGet(() -> {
-                    logger.warn("Customer with ID {} not found for update", id);
-                    return ResponseEntity.notFound().build();
-                });
+
+        Optional<Customer> existingOpt = service.getCustomerById(id);
+        if (existingOpt.isEmpty()) {
+            logger.warn("Customer with ID {} not found for update", id);
+            return ResponseEntity.notFound().build();
+        }
+
+        Customer existing = existingOpt.get();
+        logger.debug("Updating fields for customer ID {}", id);
+        existing.setFirstName(updated.getFirstName());
+        existing.setLastName(updated.getLastName());
+        existing.setEmail(updated.getEmail());
+        existing.setTel(updated.getTel());
+
+        try {
+            Customer saved = service.updateCustomer(existing);
+            logger.info("Updated customer with ID {}", saved.getId());
+            return ResponseEntity.ok(saved);
+        } catch (IllegalArgumentException e) {
+            logger.error("Error updating customer: {}", e.getMessage());
+            return ResponseEntity.badRequest().build();
+        }
     }
 
     @DeleteMapping("/{id}")
