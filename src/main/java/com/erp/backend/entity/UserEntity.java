@@ -1,84 +1,56 @@
 package com.erp.backend.entity;
 
-import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.mapping.Document;
-import org.springframework.data.mongodb.core.index.Indexed;
-
+import com.erp.backend.entity.Role;
+import jakarta.persistence.*;
 import java.util.HashSet;
 import java.util.Set;
 
-@Document(collection = "users")
+@Entity
+@Table(name = "users")
 public class UserEntity {
 
     @Id
-    private String id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-    @Indexed(unique = true)
+    @Column(unique = true, nullable = false)
     private String username;
 
+    @Column(nullable = false)
     private String password;
 
-    // ✅ WICHTIG: Set direkt initialisieren
+    @ElementCollection(targetClass = Role.class, fetch = FetchType.EAGER)
+    @CollectionTable(name = "user_roles", joinColumns = @JoinColumn(name = "user_id"))
+    @Enumerated(EnumType.STRING)
     private Set<Role> roles = new HashSet<>();
 
-    // Konstruktoren
     public UserEntity() {
-        // Default Constructor - roles ist bereits initialisiert
     }
 
     public UserEntity(String username, String password) {
         this.username = username;
         this.password = password;
-        this.roles = new HashSet<>(); // Sicherheitshalber auch hier
+        this.roles = new HashSet<>();
     }
 
-    // Getter und Setter
-    public String getId() {
-        return id;
-    }
+    // Getter & Setter
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
 
-    public void setId(String id) {
-        this.id = id;
-    }
+    public String getUsername() { return username; }
+    public void setUsername(String username) { this.username = username; }
 
-    public String getUsername() {
-        return username;
-    }
-
-    public void setUsername(String username) {
-        this.username = username;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
+    public String getPassword() { return password; }
+    public void setPassword(String password) { this.password = password; }
 
     public Set<Role> getRoles() {
-        // ✅ Zusätzliche Sicherheit: Lazy Initialization
-        if (roles == null) {
-            roles = new HashSet<>();
-        }
+        if (roles == null) roles = new HashSet<>();
         return roles;
     }
-
-    public void setRoles(Set<Role> roles) {
-        this.roles = roles != null ? roles : new HashSet<>();
-    }
+    public void setRoles(Set<Role> roles) { this.roles = roles != null ? roles : new HashSet<>(); }
 
     // Helper Methods
-    public void addRole(Role role) {
-        getRoles().add(role); // Nutzt die sichere getRoles() Methode
-    }
-
-    public void removeRole(Role role) {
-        getRoles().remove(role);
-    }
-
-    public boolean hasRole(Role role) {
-        return getRoles().contains(role);
-    }
+    public void addRole(Role role) { getRoles().add(role); }
+    public void removeRole(Role role) { getRoles().remove(role); }
+    public boolean hasRole(Role role) { return getRoles().contains(role); }
 }

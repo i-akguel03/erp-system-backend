@@ -1,12 +1,9 @@
 package com.erp.backend.repository;
 
 import com.erp.backend.domain.InventoryItem;
-import java.util.List;
-import java.util.Optional;
+import org.springframework.data.jpa.repository.JpaRepository;
 
-public interface InventoryRepository {
-    InventoryItem save(InventoryItem item);
-    List<InventoryItem> findAll();
-    Optional<InventoryItem> findById(String id);
-    void deleteById(String id);
+public interface InventoryRepository extends JpaRepository<InventoryItem, Long> {
+    // Zusätzliche Abfragen bei Bedarf:
+    // Optional<InventoryItem> findBySku(String sku);
 }

@@ -1,35 +1,76 @@
 package com.erp.backend.domain;
 
+import jakarta.persistence.*;
+
+@Entity
+@Table(name = "addresses")
 public class Address {
-    private String id;
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(nullable = false)
     private String street;
+
+    @Column(name = "postal_code", nullable = false)
     private String postalCode;
+
+    @Column(nullable = false)
     private String city;
+
+    @Column(nullable = false)
     private String country;
 
+    public Address() {
+        // Default-Konstruktor für JPA
+    }
 
-    // Konstruktor mit allen Parametern in der Reihenfolge id, street, postalCode, city, country
-    public Address(String id, String street, String postalCode, String city, String country) {
-        this.id = id;
+    public Address(String street, String postalCode, String city, String country) {
         this.street = street;
         this.postalCode = postalCode;
         this.city = city;
         this.country = country;
     }
 
-    // Getter & Setter für alle Felder
-    public String getId() { return id; }
-    public void setId(String id) { this.id = id; }
+    // Getter & Setter
+    public Long getId() {
+        return id;
+    }
 
-    public String getStreet() { return street; }
-    public void setStreet(String street) { this.street = street; }
+    public void setId(Long id) {
+        this.id = id;
+    }
 
-    public String getPostalCode() { return postalCode; }
-    public void setPostalCode(String postalCode) { this.postalCode = postalCode; }
+    public String getStreet() {
+        return street;
+    }
 
-    public String getCity() { return city; }
-    public void setCity(String city) { this.city = city; }
+    public void setStreet(String street) {
+        this.street = street;
+    }
 
-    public String getCountry() { return country; }
-    public void setCountry(String country) { this.country = country; }
+    public String getPostalCode() {
+        return postalCode;
+    }
+
+    public void setPostalCode(String postalCode) {
+        this.postalCode = postalCode;
+    }
+
+    public String getCity() {
+        return city;
+    }
+
+    public void setCity(String city) {
+        this.city = city;
+    }
+
+    public String getCountry() {
+        return country;
+    }
+
+    public void setCountry(String country) {
+        this.country = country;
+    }
 }

@@ -25,7 +25,7 @@ public class OrderController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Order> getOrderById(@PathVariable String id) {
+    public ResponseEntity<Order> getOrderById(@PathVariable Long id) {
         return service.findById(id)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
@@ -37,8 +37,22 @@ public class OrderController {
         return ResponseEntity.status(HttpStatus.CREATED).body(saved);
     }
 
+    @PutMapping("/{id}")
+    public ResponseEntity<Order> updateOrder(@PathVariable Long id, @RequestBody Order updated) {
+        return service.findById(id)
+                .map(existing -> {
+                    existing.setCustomer(updated.getCustomer());
+                    existing.setItems(updated.getItems());  // statt setProducts
+                    existing.setTotalPrice(updated.getTotalPrice()); // statt setTotalAmount
+                    existing.setOrderDate(updated.getOrderDate());
+                    return ResponseEntity.ok(service.save(existing));
+                })
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteOrder(@PathVariable String id) {
+    public ResponseEntity<Void> deleteOrder(@PathVariable Long id) {
         service.deleteById(id);
         return ResponseEntity.noContent().build();
     }

@@ -1,13 +1,9 @@
 package com.erp.backend.repository;
 
 import com.erp.backend.domain.Order;
+import org.springframework.data.jpa.repository.JpaRepository;
 
-import java.util.List;
-import java.util.Optional;
-
-public interface OrderRepository {
-    Order save(Order order);
-    List<Order> findAll();
-    Optional<Order> findById(String id);
-    void deleteById(String id);
+public interface OrderRepository extends JpaRepository<Order, Long> {
+    // Zusätzliche Abfragen, falls benötigt:
+    // List<Order> findByCustomerId(Long customerId);
 }

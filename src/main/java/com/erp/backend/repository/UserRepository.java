@@ -1,14 +1,14 @@
 package com.erp.backend.repository;
 
 import com.erp.backend.entity.UserEntity;
-import org.springframework.data.mongodb.repository.MongoRepository;
+import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;
 
-public interface UserRepository extends MongoRepository<UserEntity, String> {
+public interface UserRepository extends JpaRepository<UserEntity, Long> {
 
     Optional<UserEntity> findByUsername(String username);
 
-    // ← diese Methode für userExists()
+    // für userExists()
     boolean existsByUsername(String username);
 }

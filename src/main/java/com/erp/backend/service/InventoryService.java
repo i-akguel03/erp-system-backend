@@ -20,7 +20,7 @@ public class InventoryService {
         return repository.findAll();
     }
 
-    public Optional<InventoryItem> getInventoryItemById(String id) {
+    public Optional<InventoryItem> getInventoryItemById(Long id) {
         return repository.findById(id);
     }
 
@@ -28,7 +28,7 @@ public class InventoryService {
         return repository.save(item);
     }
 
-    public void deleteInventoryItemById(String id) {
+    public void deleteInventoryItemById(Long id) {
         repository.deleteById(id);
     }
 }

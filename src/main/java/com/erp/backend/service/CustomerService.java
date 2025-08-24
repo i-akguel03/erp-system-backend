@@ -26,7 +26,7 @@ public class CustomerService {
         return customers;
     }
 
-    public Optional<Customer> getCustomerById(String id) {
+    public Optional<Customer> getCustomerById(Long id) {
         Optional<Customer> customer = repository.findById(id);
         if (customer.isPresent()) {
             logger.info("Found customer with id={}", id);
@@ -36,7 +36,6 @@ public class CustomerService {
         return customer;
     }
 
-    // CustomerService methods:
     public Customer createCustomer(Customer customer) {
         // Sicherstellen, dass keine ID mitgegeben wird (wird von DB generiert)
         customer.setId(null);
@@ -51,12 +50,10 @@ public class CustomerService {
     }
 
     private String generateCustomerNumber() {
-        // Generiert eine 8-stellige Kundennummer (10000000 - 99999999)
         int min = 60000000;
         int max = 69999999;
         int customerNumber = (int) (Math.random() * (max - min + 1)) + min;
 
-        // Prüfen ob Nummer bereits existiert, falls ja neue generieren
         while (repository.existsByCustomerNumber(String.valueOf(customerNumber))) {
             customerNumber = (int) (Math.random() * (max - min + 1)) + min;
         }
@@ -81,10 +78,8 @@ public class CustomerService {
         }
     }
 
-
-    public void deleteCustomerById(String id) {
+    public void deleteCustomerById(Long id) {
         repository.deleteById(id);
         logger.info("Deleted customer with id={}", id);
     }
 }
-

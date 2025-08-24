@@ -20,7 +20,7 @@ public class PaymentService {
         return repository.findAll();
     }
 
-    public Optional<Payment> getPaymentById(String id) {
+    public Optional<Payment> getPaymentById(Long id) {
         return repository.findById(id);
     }
 
@@ -28,7 +28,7 @@ public class PaymentService {
         return repository.save(payment);
     }
 
-    public void deletePaymentById(String id) {
+    public void deletePaymentById(Long id) {
         repository.deleteById(id);
     }
 }

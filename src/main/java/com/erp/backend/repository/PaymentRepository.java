@@ -1,12 +1,9 @@
 package com.erp.backend.repository;
 
 import com.erp.backend.domain.Payment;
-import java.util.List;
-import java.util.Optional;
+import org.springframework.data.jpa.repository.JpaRepository;
 
-public interface PaymentRepository {
-    Payment save(Payment payment);
-    List<Payment> findAll();
-    Optional<Payment> findById(String id);
-    void deleteById(String id);
+public interface PaymentRepository extends JpaRepository<Payment, Long> {
+    // Zusätzliche Abfragen, falls benötigt:
+    // List<Payment> findByCustomerId(Long customerId);
 }

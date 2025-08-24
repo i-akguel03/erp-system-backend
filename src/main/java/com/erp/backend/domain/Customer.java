@@ -1,21 +1,46 @@
 package com.erp.backend.domain;
 
+import jakarta.persistence.*;
+
+@Entity
+@Table(name = "customers")
 public class Customer {
 
-    private String id;
-    private String firstName;
-    private String lastName;
-    private String email;
-    private String tel;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(name = "customer_number", unique = true)
     private String customerNumber;
 
-    private String billingAddressId;
-    private String shippingAddressId;
-    private String residentialAddressId;
+    @Column(name = "first_name", nullable = false)
+    private String firstName;
 
+    @Column(name = "last_name", nullable = false)
+    private String lastName;
 
-    public Customer(String id, String firstName, String lastName, String email, String tel) {
-        this.id = id;
+    @Column(unique = true)
+    private String email;
+
+    private String tel;
+
+    // Beziehungen zu Address-Entitäten
+    @OneToOne
+    @JoinColumn(name = "billing_address_id")
+    private Address billingAddress;
+
+    @OneToOne
+    @JoinColumn(name = "shipping_address_id")
+    private Address shippingAddress;
+
+    @OneToOne
+    @JoinColumn(name = "residential_address_id")
+    private Address residentialAddress;
+
+    public Customer() {
+    }
+
+    public Customer(String firstName, String lastName, String email, String tel) {
         this.firstName = firstName;
         this.lastName = lastName;
         this.email = email;
@@ -24,11 +49,11 @@ public class Customer {
 
     // Getter & Setter
 
-    public String getId() {
+    public Long getId() {
         return id;
     }
 
-    public void setId(String id) {
+    public void setId(Long id) {
         this.id = id;
     }
 
@@ -72,43 +97,42 @@ public class Customer {
         this.tel = tel;
     }
 
-    public String getBillingAddressId() {
-        return billingAddressId;
+    public Address getBillingAddress() {
+        return billingAddress;
     }
 
-    public void setBillingAddressId(String billingAddressId) {
-        this.billingAddressId = billingAddressId;
+    public void setBillingAddress(Address billingAddress) {
+        this.billingAddress = billingAddress;
     }
 
-    public String getShippingAddressId() {
-        return shippingAddressId;
+    public Address getShippingAddress() {
+        return shippingAddress;
     }
 
-    public void setShippingAddressId(String shippingAddressId) {
-        this.shippingAddressId = shippingAddressId;
+    public void setShippingAddress(Address shippingAddress) {
+        this.shippingAddress = shippingAddress;
     }
 
-    public String getResidentialAddressId() {
-        return residentialAddressId;
+    public Address getResidentialAddress() {
+        return residentialAddress;
     }
 
-    public void setResidentialAddressId(String residentialAddressId) {
-        this.residentialAddressId = residentialAddressId;
+    public void setResidentialAddress(Address residentialAddress) {
+        this.residentialAddress = residentialAddress;
     }
 
     @Override
     public String toString() {
         return "Customer{" +
-                "id='" + id + '\'' +
+                "id=" + id +
                 ", customerNumber='" + customerNumber + '\'' +
                 ", firstName='" + firstName + '\'' +
                 ", lastName='" + lastName + '\'' +
                 ", email='" + email + '\'' +
                 ", tel='" + tel + '\'' +
-                ", billingAddressId='" + billingAddressId + '\'' +
-                ", shippingAddressId='" + shippingAddressId + '\'' +
-                ", residentialAddressId='" + residentialAddressId + '\'' +
+                ", billingAddress=" + billingAddress +
+                ", shippingAddress=" + shippingAddress +
+                ", residentialAddress=" + residentialAddress +
                 '}';
     }
-
 }

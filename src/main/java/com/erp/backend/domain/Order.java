@@ -1,36 +1,82 @@
 package com.erp.backend.domain;
 
+import jakarta.persistence.*;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
+@Entity
+@Table(name = "orders")
 public class Order {
-    private String id;
-    private String customerId;
-    private List<OrderItem> items;
-    private String orderDate;
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    // Beziehung zum Kunden
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "customer_id", nullable = false)
+    private Customer customer;
+
+    // OrderItems
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<OrderItem> items = new ArrayList<>();
+
+    @Column(name = "order_date", nullable = false)
+    private LocalDateTime orderDate;
+
+    @Column(name = "total_price", nullable = false)
     private double totalPrice;
 
-    public Order() {}
+    public Order() {
+        // Default-Konstruktor für JPA
+    }
 
-    public Order(String id, String customerId, List<OrderItem> items, String orderDate, double totalPrice) {
-        this.id = id;
-        this.customerId = customerId;
+    public Order(Customer customer, List<OrderItem> items, LocalDateTime orderDate, double totalPrice) {
+        this.customer = customer;
         this.items = items;
         this.orderDate = orderDate;
         this.totalPrice = totalPrice;
     }
 
-    public String getId() { return id; }
-    public void setId(String id) { this.id = id; }
+    // Getter & Setter
+    public Long getId() {
+        return id;
+    }
 
-    public String getCustomerId() { return customerId; }
-    public void setCustomerId(String customerId) { this.customerId = customerId; }
+    public void setId(Long id) {
+        this.id = id;
+    }
 
-    public List<OrderItem> getItems() { return items; }
-    public void setItems(List<OrderItem> items) { this.items = items; }
+    public Customer getCustomer() {
+        return customer;
+    }
 
-    public String getOrderDate() { return orderDate; }
-    public void setOrderDate(String orderDate) { this.orderDate = orderDate; }
+    public void setCustomer(Customer customer) {
+        this.customer = customer;
+    }
 
-    public double getTotalPrice() { return totalPrice; }
-    public void setTotalPrice(double totalPrice) { this.totalPrice = totalPrice; }
+    public List<OrderItem> getItems() {
+        return items;
+    }
+
+    public void setItems(List<OrderItem> items) {
+        this.items = items;
+    }
+
+    public LocalDateTime getOrderDate() {
+        return orderDate;
+    }
+
+    public void setOrderDate(LocalDateTime orderDate) {
+        this.orderDate = orderDate;
+    }
+
+    public double getTotalPrice() {
+        return totalPrice;
+    }
+
+    public void setTotalPrice(double totalPrice) {
+        this.totalPrice = totalPrice;
+    }
 }

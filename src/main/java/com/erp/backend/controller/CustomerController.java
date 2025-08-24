@@ -33,7 +33,7 @@ public class CustomerController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Customer> getCustomerById(@PathVariable String id) {
+    public ResponseEntity<Customer> getCustomerById(@PathVariable Long id) {
         logger.info("GET /api/customers/{} - Fetching customer by ID", id);
         return service.getCustomerById(id)
                 .map(customer -> {
@@ -61,7 +61,7 @@ public class CustomerController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Customer> updateCustomer(@PathVariable String id, @RequestBody Customer updated) {
+    public ResponseEntity<Customer> updateCustomer(@PathVariable Long id, @RequestBody Customer updated) {
         logger.info("PUT /api/customers/{} - Updating customer", id);
 
         Optional<Customer> existingOpt = service.getCustomerById(id);
@@ -88,7 +88,7 @@ public class CustomerController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteCustomer(@PathVariable String id) {
+    public ResponseEntity<Void> deleteCustomer(@PathVariable Long id) {
         logger.info("DELETE /api/customers/{} - Deleting customer", id);
         service.deleteCustomerById(id);
         logger.debug("Deleted customer with ID {}", id);

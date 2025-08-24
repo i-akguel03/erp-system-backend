@@ -24,11 +24,11 @@ public class AddressService {
         return repository.findAll();
     }
 
-    public Optional<Address> findById(String id) {
+    public Optional<Address> findById(Long id) {
         return repository.findById(id);
     }
 
-    public void deleteById(String id) {
+    public void deleteById(Long id) {
         repository.deleteById(id);
     }
 }
