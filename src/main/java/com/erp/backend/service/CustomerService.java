@@ -1,6 +1,8 @@
 package com.erp.backend.service;
 
+import com.erp.backend.domain.Address;
 import com.erp.backend.domain.Customer;
+import com.erp.backend.repository.AddressRepository;
 import com.erp.backend.repository.CustomerRepository;
 import org.springframework.stereotype.Service;
 
@@ -14,20 +16,23 @@ import org.slf4j.LoggerFactory;
 public class CustomerService {
 
     private static final Logger logger = LoggerFactory.getLogger(CustomerService.class);
-    private final CustomerRepository repository;
 
-    public CustomerService(CustomerRepository repository) {
-        this.repository = repository;
+    private final CustomerRepository customerRepository;
+    private final AddressRepository addressRepository;
+
+    public CustomerService(CustomerRepository customerRepository, AddressRepository addressRepository) {
+        this.customerRepository = customerRepository;
+        this.addressRepository = addressRepository;
     }
 
     public List<Customer> getAllCustomers() {
-        List<Customer> customers = repository.findAll();
+        List<Customer> customers = customerRepository.findAll();
         logger.info("Fetched {} customers", customers.size());
         return customers;
     }
 
     public Optional<Customer> getCustomerById(Long id) {
-        Optional<Customer> customer = repository.findById(id);
+        Optional<Customer> customer = customerRepository.findById(id);
         if (customer.isPresent()) {
             logger.info("Found customer with id={}", id);
         } else {
@@ -37,13 +42,46 @@ public class CustomerService {
     }
 
     public Customer createCustomer(Customer customer) {
-        // Sicherstellen, dass keine ID mitgegeben wird (wird von DB generiert)
+        // Keine ID setzen, wird von DB generiert
         customer.setId(null);
 
-        // 8-stellige Kundennummer generieren
+        // Kundennummer generieren
         customer.setCustomerNumber(generateCustomerNumber());
 
-        Customer saved = repository.save(customer);
+        // Adressen prüfen
+        if (customer.getResidentialAddress() != null) {
+            Address residential = customer.getResidentialAddress();
+
+            // Wohnadresse speichern
+            Address savedResidential = addressRepository.save(residential);
+            customer.setResidentialAddress(savedResidential);
+
+            // Falls Billing fehlt, übernehmen
+            if (customer.getBillingAddress() == null) {
+                Address billingCopy = new Address(
+                        savedResidential.getStreet(),
+                        savedResidential.getPostalCode(),
+                        savedResidential.getCity(),
+                        savedResidential.getCountry()
+                );
+                Address savedBilling = addressRepository.save(billingCopy);
+                customer.setBillingAddress(savedBilling);
+            }
+
+            // Falls Shipping fehlt, übernehmen
+            if (customer.getShippingAddress() == null) {
+                Address shippingCopy = new Address(
+                        savedResidential.getStreet(),
+                        savedResidential.getPostalCode(),
+                        savedResidential.getCity(),
+                        savedResidential.getCountry()
+                );
+                Address savedShipping = addressRepository.save(shippingCopy);
+                customer.setShippingAddress(savedShipping);
+            }
+        }
+
+        Customer saved = customerRepository.save(customer);
         logger.info("Created new customer: id={}, customerNumber={}, email={}",
                 saved.getId(), saved.getCustomerNumber(), saved.getEmail());
         return saved;
@@ -54,7 +92,7 @@ public class CustomerService {
         int max = 69999999;
         int customerNumber = (int) (Math.random() * (max - min + 1)) + min;
 
-        while (repository.existsByCustomerNumber(String.valueOf(customerNumber))) {
+        while (customerRepository.existsByCustomerNumber(String.valueOf(customerNumber))) {
             customerNumber = (int) (Math.random() * (max - min + 1)) + min;
         }
 
@@ -62,16 +100,16 @@ public class CustomerService {
     }
 
     public Customer updateCustomer(Customer customer) {
-        if (customer.getId() == null || !repository.findById(customer.getId()).isPresent()) {
+        if (customer.getId() == null || !customerRepository.findById(customer.getId()).isPresent()) {
             throw new IllegalArgumentException("Customer not found for update");
         }
-        Customer saved = repository.save(customer);
+        Customer saved = customerRepository.save(customer);
         logger.info("Updated customer: id={}, email={}", saved.getId(), saved.getEmail());
         return saved;
     }
 
     public Customer createOrUpdateCustomer(Customer customer) {
-        if (customer.getId() != null && repository.findById(customer.getId()).isPresent()) {
+        if (customer.getId() != null && customerRepository.findById(customer.getId()).isPresent()) {
             return updateCustomer(customer);
         } else {
             return createCustomer(customer);
@@ -79,7 +117,7 @@ public class CustomerService {
     }
 
     public void deleteCustomerById(Long id) {
-        repository.deleteById(id);
+        customerRepository.deleteById(id);
         logger.info("Deleted customer with id={}", id);
     }
 }
