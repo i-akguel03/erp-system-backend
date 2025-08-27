@@ -521,3 +521,115 @@ Caused by: org.postgresql.util.PSQLException: ERROR: foreign key constraint "fkg
 2025-08-27T20:35:48.339+02:00  INFO 6652 --- [erp-system-backend] [restartedMain] o.s.b.d.a.OptionalLiveReloadServer       : LiveReload server is running on port 35729
 2025-08-27T20:35:48.411+02:00  INFO 6652 --- [erp-system-backend] [restartedMain] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port 8080 (http) with context path '/'
 2025-08-27T20:35:48.427+02:00  INFO 6652 --- [erp-system-backend] [restartedMain] c.e.backend.ErpSystemBackendApplication  : Started ErpSystemBackendApplication in 16.316 seconds (process running for 16.829)
+2025-08-27T20:38:43.216+02:00  INFO 6652 --- [erp-system-backend] [http-nio-8080-exec-1] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring DispatcherServlet 'dispatcherServlet'
+2025-08-27T20:38:43.216+02:00  INFO 6652 --- [erp-system-backend] [http-nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
+2025-08-27T20:38:43.227+02:00  INFO 6652 --- [erp-system-backend] [http-nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Completed initialization in 11 ms
+2025-08-27T20:38:59.771+02:00  INFO 6652 --- [erp-system-backend] [http-nio-8080-exec-1] c.e.b.controller.CustomerController      : GET /api/customers - Fetching customers (paginated: false)
+2025-08-27T20:38:59.951+02:00  INFO 6652 --- [erp-system-backend] [http-nio-8080-exec-1] c.erp.backend.service.CustomerService    : Fetched 0 customers
+2025-08-27T20:39:00.115+02:00 DEBUG 6652 --- [erp-system-backend] [http-nio-8080-exec-1] c.e.b.controller.CustomerController      : Found 0 customers
+2025-08-27T20:39:01.579+02:00  INFO 6652 --- [erp-system-backend] [http-nio-8080-exec-6] c.e.b.controller.CustomerController      : POST /api/customers - Creating new customer with email tom@example.com
+2025-08-27T20:39:01.579+02:00  INFO 6652 --- [erp-system-backend] [http-nio-8080-exec-4] c.e.b.controller.CustomerController      : POST /api/customers - Creating new customer with email peter@example.com
+2025-08-27T20:39:01.580+02:00 DEBUG 6652 --- [erp-system-backend] [http-nio-8080-exec-4] c.e.b.controller.CustomerController      : RequestBody Customer{id=null, customerNumber='C003', firstName='Peter', lastName='Schmidt', email='peter@example.com', tel='555555555', billingAddress=null, shippingAddress=null, residentialAddress=null}
+2025-08-27T20:39:01.580+02:00 DEBUG 6652 --- [erp-system-backend] [http-nio-8080-exec-6] c.e.b.controller.CustomerController      : RequestBody Customer{id=null, customerNumber='C005', firstName='Tom', lastName='Klein', email='tom@example.com', tel='333333333', billingAddress=null, shippingAddress=null, residentialAddress=null}
+2025-08-27T20:39:01.582+02:00  INFO 6652 --- [erp-system-backend] [http-nio-8080-exec-5] c.e.b.controller.CustomerController      : POST /api/customers - Creating new customer with email laura@example.com
+2025-08-27T20:39:01.582+02:00 DEBUG 6652 --- [erp-system-backend] [http-nio-8080-exec-5] c.e.b.controller.CustomerController      : RequestBody Customer{id=null, customerNumber='C004', firstName='Laura', lastName='Meier', email='laura@example.com', tel='444444444', billingAddress=null, shippingAddress=null, residentialAddress=null}
+2025-08-27T20:39:01.583+02:00  INFO 6652 --- [erp-system-backend] [http-nio-8080-exec-3] c.e.b.controller.CustomerController      : POST /api/customers - Creating new customer with email anna@example.com
+2025-08-27T20:39:01.583+02:00 DEBUG 6652 --- [erp-system-backend] [http-nio-8080-exec-3] c.e.b.controller.CustomerController      : RequestBody Customer{id=null, customerNumber='C002', firstName='Anna', lastName='Müller', email='anna@example.com', tel='987654321', billingAddress=null, shippingAddress=null, residentialAddress=null}
+2025-08-27T20:39:01.596+02:00  INFO 6652 --- [erp-system-backend] [http-nio-8080-exec-2] c.e.b.controller.CustomerController      : POST /api/customers - Creating new customer with email max@example.com
+2025-08-27T20:39:01.596+02:00 DEBUG 6652 --- [erp-system-backend] [http-nio-8080-exec-2] c.e.b.controller.CustomerController      : RequestBody Customer{id=null, customerNumber='C001', firstName='Max', lastName='Mustermann', email='max@example.com', tel='123456789', billingAddress=null, shippingAddress=null, residentialAddress=null}
+2025-08-27T20:39:01.926+02:00  INFO 6652 --- [erp-system-backend] [http-nio-8080-exec-6] c.erp.backend.service.CustomerService    : Created new customer: id=136705bc-d085-498a-922d-054d7e6d66f9, customerNumber=69434287, email=tom@example.com
+2025-08-27T20:39:01.926+02:00  INFO 6652 --- [erp-system-backend] [http-nio-8080-exec-5] c.erp.backend.service.CustomerService    : Created new customer: id=adcaba99-28f6-4fee-8d19-4ee34a524bcd, customerNumber=60711292, email=laura@example.com
+2025-08-27T20:39:01.926+02:00  INFO 6652 --- [erp-system-backend] [http-nio-8080-exec-4] c.erp.backend.service.CustomerService    : Created new customer: id=ec11ec47-7b4f-43ae-8ada-842f988e58b2, customerNumber=66654319, email=peter@example.com
+2025-08-27T20:39:01.931+02:00  INFO 6652 --- [erp-system-backend] [http-nio-8080-exec-3] c.erp.backend.service.CustomerService    : Created new customer: id=132b1395-5016-4d7d-9b42-2bd6f3b4cf54, customerNumber=61986972, email=anna@example.com
+2025-08-27T20:39:01.941+02:00  INFO 6652 --- [erp-system-backend] [http-nio-8080-exec-2] c.erp.backend.service.CustomerService    : Created new customer: id=14ab5ce6-e57d-4134-a890-5c4800e00fed, customerNumber=69659112, email=max@example.com
+2025-08-27T20:39:02.256+02:00  INFO 6652 --- [erp-system-backend] [http-nio-8080-exec-6] c.e.b.controller.CustomerController      : Created customer with ID 136705bc-d085-498a-922d-054d7e6d66f9 and number 69434287
+2025-08-27T20:39:02.256+02:00  INFO 6652 --- [erp-system-backend] [http-nio-8080-exec-4] c.e.b.controller.CustomerController      : Created customer with ID ec11ec47-7b4f-43ae-8ada-842f988e58b2 and number 66654319
+2025-08-27T20:39:02.258+02:00  INFO 6652 --- [erp-system-backend] [http-nio-8080-exec-5] c.e.b.controller.CustomerController      : Created customer with ID adcaba99-28f6-4fee-8d19-4ee34a524bcd and number 60711292
+2025-08-27T20:39:02.263+02:00  INFO 6652 --- [erp-system-backend] [http-nio-8080-exec-3] c.e.b.controller.CustomerController      : Created customer with ID 132b1395-5016-4d7d-9b42-2bd6f3b4cf54 and number 61986972
+2025-08-27T20:39:02.273+02:00  INFO 6652 --- [erp-system-backend] [http-nio-8080-exec-2] c.e.b.controller.CustomerController      : Created customer with ID 14ab5ce6-e57d-4134-a890-5c4800e00fed and number 69659112
+2025-08-27T20:45:52.059+02:00  INFO 6652 --- [erp-system-backend] [SpringApplicationShutdownHook] o.s.b.w.e.tomcat.GracefulShutdown        : Commencing graceful shutdown. Waiting for active requests to complete
+2025-08-27T20:45:52.077+02:00  INFO 6652 --- [erp-system-backend] [tomcat-shutdown] o.s.b.w.e.tomcat.GracefulShutdown        : Graceful shutdown complete
+2025-08-27T20:45:52.097+02:00  INFO 6652 --- [erp-system-backend] [SpringApplicationShutdownHook] j.LocalContainerEntityManagerFactoryBean : Closing JPA EntityManagerFactory for persistence unit 'default'
+2025-08-27T20:45:52.111+02:00  INFO 6652 --- [erp-system-backend] [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown initiated...
+2025-08-27T20:45:53.652+02:00  INFO 6652 --- [erp-system-backend] [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown completed.
+2025-08-27T20:45:59.126+02:00  INFO 6640 --- [erp-system-backend] [restartedMain] c.e.backend.ErpSystemBackendApplication  : Starting ErpSystemBackendApplication using Java 24.0.1 with PID 6640 (C:\Users\ibrah\Desktop\ERP-Backend\erp-system-backend\target\classes started by ibrah in C:\Users\ibrah\Desktop\ERP-Backend\erp-system-backend)
+2025-08-27T20:45:59.128+02:00 DEBUG 6640 --- [erp-system-backend] [restartedMain] c.e.backend.ErpSystemBackendApplication  : Running with Spring Boot v3.5.3, Spring v6.2.8
+2025-08-27T20:45:59.129+02:00  INFO 6640 --- [erp-system-backend] [restartedMain] c.e.backend.ErpSystemBackendApplication  : No active profile set, falling back to 1 default profile: "default"
+2025-08-27T20:45:59.209+02:00  INFO 6640 --- [erp-system-backend] [restartedMain] .e.DevToolsPropertyDefaultsPostProcessor : Devtools property defaults active! Set 'spring.devtools.add-properties' to 'false' to disable
+2025-08-27T20:45:59.209+02:00  INFO 6640 --- [erp-system-backend] [restartedMain] .e.DevToolsPropertyDefaultsPostProcessor : For additional web related logging consider setting the 'logging.level.web' property to 'DEBUG'
+2025-08-27T20:46:00.468+02:00  INFO 6640 --- [erp-system-backend] [restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2025-08-27T20:46:00.566+02:00  INFO 6640 --- [erp-system-backend] [restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 83 ms. Found 9 JPA repository interfaces.
+2025-08-27T20:46:01.288+02:00  INFO 6640 --- [erp-system-backend] [restartedMain] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port 8080 (http)
+2025-08-27T20:46:01.307+02:00  INFO 6640 --- [erp-system-backend] [restartedMain] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2025-08-27T20:46:01.307+02:00  INFO 6640 --- [erp-system-backend] [restartedMain] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.42]
+2025-08-27T20:46:01.362+02:00  INFO 6640 --- [erp-system-backend] [restartedMain] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
+2025-08-27T20:46:01.363+02:00  INFO 6640 --- [erp-system-backend] [restartedMain] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 2152 ms
+2025-08-27T20:46:01.624+02:00  INFO 6640 --- [erp-system-backend] [restartedMain] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: default]
+2025-08-27T20:46:01.701+02:00  INFO 6640 --- [erp-system-backend] [restartedMain] org.hibernate.Version                    : HHH000412: Hibernate ORM core version 6.6.18.Final
+2025-08-27T20:46:01.745+02:00  INFO 6640 --- [erp-system-backend] [restartedMain] o.h.c.internal.RegionFactoryInitiator    : HHH000026: Second-level cache disabled
+2025-08-27T20:46:02.049+02:00  INFO 6640 --- [erp-system-backend] [restartedMain] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2025-08-27T20:46:02.079+02:00  INFO 6640 --- [erp-system-backend] [restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2025-08-27T20:46:04.343+02:00  INFO 6640 --- [erp-system-backend] [restartedMain] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection org.postgresql.jdbc.PgConnection@31e3caed
+2025-08-27T20:46:04.344+02:00  INFO 6640 --- [erp-system-backend] [restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2025-08-27T20:46:04.560+02:00  WARN 6640 --- [erp-system-backend] [restartedMain] org.hibernate.orm.deprecation            : HHH90000025: PostgreSQLDialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2025-08-27T20:46:05.108+02:00  INFO 6640 --- [erp-system-backend] [restartedMain] org.hibernate.orm.connections.pooling    : HHH10001005: Database info:
+	Database JDBC URL [Connecting through datasource 'HikariDataSource (HikariPool-1)']
+	Database driver: undefined/unknown
+	Database version: 17.6
+	Autocommit mode: undefined/unknown
+	Isolation level: undefined/unknown
+	Minimum pool size: undefined/unknown
+	Maximum pool size: undefined/unknown
+2025-08-27T20:46:06.103+02:00  INFO 6640 --- [erp-system-backend] [restartedMain] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2025-08-27T20:46:15.901+02:00  INFO 6640 --- [erp-system-backend] [restartedMain] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2025-08-27T20:46:16.259+02:00 DEBUG 6640 --- [erp-system-backend] [restartedMain] com.erp.backend.config.JwtAuthFilter     : Filter 'jwtAuthFilter' configured for use
+2025-08-27T20:46:16.357+02:00  INFO 6640 --- [erp-system-backend] [restartedMain] o.s.d.j.r.query.QueryEnhancerFactory     : Hibernate is in classpath; If applicable, HQL parser will be used.
+2025-08-27T20:46:17.365+02:00  WARN 6640 --- [erp-system-backend] [restartedMain] JpaBaseConfiguration$JpaWebConfiguration : spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2025-08-27T20:46:17.403+02:00  INFO 6640 --- [erp-system-backend] [restartedMain] r$InitializeUserDetailsManagerConfigurer : Global AuthenticationManager configured with UserDetailsService bean with name userDetailsService
+2025-08-27T20:46:17.792+02:00  INFO 6640 --- [erp-system-backend] [restartedMain] o.s.b.a.e.web.EndpointLinksResolver      : Exposing 4 endpoints beneath base path '/actuator'
+2025-08-27T20:46:18.158+02:00  INFO 6640 --- [erp-system-backend] [restartedMain] o.s.b.d.a.OptionalLiveReloadServer       : LiveReload server is running on port 35729
+2025-08-27T20:46:18.264+02:00  INFO 6640 --- [erp-system-backend] [restartedMain] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port 8080 (http) with context path '/'
+2025-08-27T20:46:18.279+02:00  INFO 6640 --- [erp-system-backend] [restartedMain] c.e.backend.ErpSystemBackendApplication  : Started ErpSystemBackendApplication in 19.758 seconds (process running for 20.275)
+2025-08-27T20:58:18.069+02:00  INFO 6640 --- [erp-system-backend] [SpringApplicationShutdownHook] o.s.b.w.e.tomcat.GracefulShutdown        : Commencing graceful shutdown. Waiting for active requests to complete
+2025-08-27T20:58:18.074+02:00  INFO 6640 --- [erp-system-backend] [tomcat-shutdown] o.s.b.w.e.tomcat.GracefulShutdown        : Graceful shutdown complete
+2025-08-27T20:58:18.081+02:00  INFO 6640 --- [erp-system-backend] [SpringApplicationShutdownHook] j.LocalContainerEntityManagerFactoryBean : Closing JPA EntityManagerFactory for persistence unit 'default'
+2025-08-27T20:58:18.084+02:00  INFO 6640 --- [erp-system-backend] [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown initiated...
+2025-08-27T20:58:19.611+02:00  INFO 6640 --- [erp-system-backend] [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown completed.
+2025-08-27T20:58:24.322+02:00  INFO 13976 --- [erp-system-backend] [restartedMain] c.e.backend.ErpSystemBackendApplication  : Starting ErpSystemBackendApplication using Java 24.0.1 with PID 13976 (C:\Users\ibrah\Desktop\ERP-Backend\erp-system-backend\target\classes started by ibrah in C:\Users\ibrah\Desktop\ERP-Backend\erp-system-backend)
+2025-08-27T20:58:24.325+02:00 DEBUG 13976 --- [erp-system-backend] [restartedMain] c.e.backend.ErpSystemBackendApplication  : Running with Spring Boot v3.5.3, Spring v6.2.8
+2025-08-27T20:58:24.326+02:00  INFO 13976 --- [erp-system-backend] [restartedMain] c.e.backend.ErpSystemBackendApplication  : No active profile set, falling back to 1 default profile: "default"
+2025-08-27T20:58:24.392+02:00  INFO 13976 --- [erp-system-backend] [restartedMain] .e.DevToolsPropertyDefaultsPostProcessor : Devtools property defaults active! Set 'spring.devtools.add-properties' to 'false' to disable
+2025-08-27T20:58:24.392+02:00  INFO 13976 --- [erp-system-backend] [restartedMain] .e.DevToolsPropertyDefaultsPostProcessor : For additional web related logging consider setting the 'logging.level.web' property to 'DEBUG'
+2025-08-27T20:58:25.526+02:00  INFO 13976 --- [erp-system-backend] [restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2025-08-27T20:58:25.625+02:00  INFO 13976 --- [erp-system-backend] [restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 88 ms. Found 10 JPA repository interfaces.
+2025-08-27T20:58:26.290+02:00  INFO 13976 --- [erp-system-backend] [restartedMain] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port 8080 (http)
+2025-08-27T20:58:26.306+02:00  INFO 13976 --- [erp-system-backend] [restartedMain] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2025-08-27T20:58:26.308+02:00  INFO 13976 --- [erp-system-backend] [restartedMain] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.42]
+2025-08-27T20:58:26.357+02:00  INFO 13976 --- [erp-system-backend] [restartedMain] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
+2025-08-27T20:58:26.358+02:00  INFO 13976 --- [erp-system-backend] [restartedMain] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 1965 ms
+2025-08-27T20:58:26.608+02:00  INFO 13976 --- [erp-system-backend] [restartedMain] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: default]
+2025-08-27T20:58:26.658+02:00  INFO 13976 --- [erp-system-backend] [restartedMain] org.hibernate.Version                    : HHH000412: Hibernate ORM core version 6.6.18.Final
+2025-08-27T20:58:26.696+02:00  INFO 13976 --- [erp-system-backend] [restartedMain] o.h.c.internal.RegionFactoryInitiator    : HHH000026: Second-level cache disabled
+2025-08-27T20:58:26.974+02:00  INFO 13976 --- [erp-system-backend] [restartedMain] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2025-08-27T20:58:27.000+02:00  INFO 13976 --- [erp-system-backend] [restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2025-08-27T20:58:28.711+02:00  INFO 13976 --- [erp-system-backend] [restartedMain] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection org.postgresql.jdbc.PgConnection@3292b41a
+2025-08-27T20:58:28.713+02:00  INFO 13976 --- [erp-system-backend] [restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2025-08-27T20:58:28.900+02:00  WARN 13976 --- [erp-system-backend] [restartedMain] org.hibernate.orm.deprecation            : HHH90000025: PostgreSQLDialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2025-08-27T20:58:29.406+02:00  INFO 13976 --- [erp-system-backend] [restartedMain] org.hibernate.orm.connections.pooling    : HHH10001005: Database info:
+	Database JDBC URL [Connecting through datasource 'HikariDataSource (HikariPool-1)']
+	Database driver: undefined/unknown
+	Database version: 17.6
+	Autocommit mode: undefined/unknown
+	Isolation level: undefined/unknown
+	Minimum pool size: undefined/unknown
+	Maximum pool size: undefined/unknown
+2025-08-27T20:58:30.292+02:00  INFO 13976 --- [erp-system-backend] [restartedMain] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2025-08-27T20:58:40.244+02:00  INFO 13976 --- [erp-system-backend] [restartedMain] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2025-08-27T20:58:40.540+02:00 DEBUG 13976 --- [erp-system-backend] [restartedMain] com.erp.backend.config.JwtAuthFilter     : Filter 'jwtAuthFilter' configured for use
+2025-08-27T20:58:40.638+02:00  INFO 13976 --- [erp-system-backend] [restartedMain] o.s.d.j.r.query.QueryEnhancerFactory     : Hibernate is in classpath; If applicable, HQL parser will be used.
+2025-08-27T20:58:41.615+02:00  WARN 13976 --- [erp-system-backend] [restartedMain] JpaBaseConfiguration$JpaWebConfiguration : spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2025-08-27T20:58:41.643+02:00  INFO 13976 --- [erp-system-backend] [restartedMain] r$InitializeUserDetailsManagerConfigurer : Global AuthenticationManager configured with UserDetailsService bean with name userDetailsService
+2025-08-27T20:58:42.057+02:00  INFO 13976 --- [erp-system-backend] [restartedMain] o.s.b.a.e.web.EndpointLinksResolver      : Exposing 4 endpoints beneath base path '/actuator'
+2025-08-27T20:58:42.427+02:00  INFO 13976 --- [erp-system-backend] [restartedMain] o.s.b.d.a.OptionalLiveReloadServer       : LiveReload server is running on port 35729
+2025-08-27T20:58:42.505+02:00  INFO 13976 --- [erp-system-backend] [restartedMain] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port 8080 (http) with context path '/'
+2025-08-27T20:58:42.530+02:00  INFO 13976 --- [erp-system-backend] [restartedMain] c.e.backend.ErpSystemBackendApplication  : Started ErpSystemBackendApplication in 18.693 seconds (process running for 19.121)

@@ -6,8 +6,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @Service
 public class ProductService {
@@ -26,7 +28,7 @@ public class ProductService {
         return products;
     }
 
-    public Optional<Product> getProductById(Long id) {
+    public Optional<Product> getProductById(UUID id) {
         Optional<Product> product = repository.findById(id);
         if (product.isPresent()) {
             logger.info("Found product with id={}", id);
@@ -36,12 +38,19 @@ public class ProductService {
         return product;
     }
 
+    public Optional<Product> getProductByProductNumber(String productNumber) {
+        Optional<Product> product = repository.findByProductNumber(productNumber);
+        logger.info("Search for product with productNumber={}: {}",
+                productNumber, product.isPresent() ? "found" : "not found");
+        return product;
+    }
+
     public Product createProduct(Product product) {
         validate(product);
         product.setId(null); // DB generiert ID
         Product saved = repository.save(product);
-        logger.info("Created new product: id={}, name={}, price={}",
-                saved.getId(), saved.getName(), saved.getPrice());
+        logger.info("Created new product: id={}, productNumber={}, name={}, price={}",
+                saved.getId(), saved.getProductNumber(), saved.getName(), saved.getPrice());
         return saved;
     }
 
@@ -51,8 +60,8 @@ public class ProductService {
             throw new IllegalArgumentException("Product not found for update");
         }
         Product saved = repository.save(product);
-        logger.info("Updated product: id={}, name={}, price={}",
-                saved.getId(), saved.getName(), saved.getPrice());
+        logger.info("Updated product: id={}, productNumber={}, name={}, price={}",
+                saved.getId(), saved.getProductNumber(), saved.getName(), saved.getPrice());
         return saved;
     }
 
@@ -64,7 +73,10 @@ public class ProductService {
         }
     }
 
-    public void deleteProductById(Long id) {
+    public void deleteProductById(UUID id) {
+        if (!repository.existsById(id)) {
+            throw new IllegalArgumentException("Product not found with id=" + id);
+        }
         repository.deleteById(id);
         logger.info("Deleted product with id={}", id);
     }
@@ -73,9 +85,16 @@ public class ProductService {
         if (product.getName() == null || product.getName().isBlank()) {
             throw new IllegalArgumentException("Product name must not be empty");
         }
-        if (product.getPrice() < 0) { // nur auf <0 prüfen
+        if (product.getPrice() == null || product.getPrice().compareTo(BigDecimal.ZERO) < 0) {
             throw new IllegalArgumentException("Product price must be >= 0");
         }
     }
 
+    public List<Product> searchProductsByName(String searchTerm) {
+        return repository.findByNameContainingIgnoreCase(searchTerm);
+    }
+
+    public long getTotalProductCount() {
+        return repository.count();
+    }
 }
