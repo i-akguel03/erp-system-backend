@@ -11,6 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Random;
 import java.util.UUID;
 
 import org.slf4j.Logger;
@@ -29,6 +30,45 @@ public class CustomerService {
         this.customerRepository = customerRepository;
         this.addressRepository = addressRepository;
     }
+
+    @Transactional
+    public void initTestCustomers() {
+        if (customerRepository.count() > 0) return; // nur einmal
+
+        Random random = new Random();
+
+        String[] firstNames = {"Max", "Anna", "Tom", "Laura", "Paul", "Sophie", "Lukas", "Marie", "Felix", "Emma"};
+        String[] lastNames = {"Müller", "Schmidt", "Schneider", "Fischer", "Weber", "Becker", "Hoffmann", "Schäfer", "Koch", "Richter"};
+
+        List<Address> allAddresses = addressRepository.findAll(); // alle Adressen aus DB
+
+        if (allAddresses.size() < 3) {
+            throw new IllegalStateException("Es müssen mindestens 3 Adressen in der Datenbank vorhanden sein.");
+        }
+
+        for (int i = 1; i <= 20; i++) {
+            String firstName = firstNames[random.nextInt(firstNames.length)];
+            String lastName = lastNames[random.nextInt(lastNames.length)];
+            String email = firstName.toLowerCase() + "." + lastName.toLowerCase() + i + "@test.com";
+            String tel = "+49" + (random.nextInt(900000000) + 100000000);
+
+            Customer customer = new Customer(firstName, lastName, email, tel);
+            customer.setCustomerNumber("CUST-" + String.format("%04d", i));
+
+            // Zufällige Adressen aus der DB auswählen
+            Address billing = allAddresses.get(random.nextInt(allAddresses.size()));
+            Address shipping = allAddresses.get(random.nextInt(allAddresses.size()));
+            Address residential = allAddresses.get(random.nextInt(allAddresses.size()));
+
+            customer.setBillingAddress(billing);
+            customer.setShippingAddress(shipping);
+            customer.setResidentialAddress(residential);
+
+            customerRepository.save(customer);
+        }
+    }
+
+
 
     @Transactional(readOnly = true)
     public List<Customer> getAllCustomers() {

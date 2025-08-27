@@ -1,6 +1,9 @@
 package com.erp.backend.domain;
 
 import jakarta.persistence.*;
+
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @Entity
@@ -120,6 +123,23 @@ public class Customer {
 
     public void setResidentialAddress(Address residentialAddress) {
         this.residentialAddress = residentialAddress;
+    }
+
+    @OneToMany(mappedBy = "customer", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<Contract> contracts = new ArrayList<>();
+
+    public List<Contract> getContracts() {
+        return contracts;
+    }
+
+    public void setContracts(List<Contract> contracts) {
+        this.contracts = contracts;
+    }
+
+    // Hilfsmethode zum Hinzufügen eines Vertrags
+    public void addContract(Contract contract) {
+        contracts.add(contract);
+        contract.setCustomer(this);
     }
 
     @Override

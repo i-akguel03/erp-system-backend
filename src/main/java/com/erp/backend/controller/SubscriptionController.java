@@ -36,6 +36,12 @@ public class SubscriptionController {
         this.service = service;
     }
 
+    @PostMapping("/init")
+    public ResponseEntity<String> initTestSubscriptions() {
+        service.initTestSubscriptions();
+        return ResponseEntity.ok("30 Test-Subscriptions wurden zufällig auf Contracts verteilt.");
+    }
+
     @GetMapping
     public ResponseEntity<List<Subscription>> getAllSubscriptions(
             @RequestParam(defaultValue = "false") boolean paginated,

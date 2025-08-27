@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
+import java.util.Random;
 import java.util.UUID;
 
 @Service
@@ -20,6 +21,38 @@ public class ProductService {
 
     public ProductService(ProductRepository repository) {
         this.repository = repository;
+    }
+
+    public void initTestProducts() {
+
+        final Random random = new Random();
+
+        if (repository.count() > 0) return; // nur einmal
+
+        String[] productNames = {
+                "Laptop", "Smartphone", "Monitor", "Tastatur", "Maus",
+                "Drucker", "Scanner", "Router", "Webcam", "Headset",
+                "Software Lizenz", "Cloud Storage", "Support Paket",
+                "Consulting Stunde", "Online Kurs"
+        };
+
+        String[] units = {"Stück", "kg", "m", "Std."};
+        Product.ProductType[] types = Product.ProductType.values();
+
+        for (int i = 0; i < 15; i++) {
+            String name = productNames[i];
+            BigDecimal price = BigDecimal.valueOf(random.nextInt(900) + 100); // 100 - 1000
+            String unit = units[random.nextInt(units.length)];
+            Product.ProductType type = types[random.nextInt(types.length)];
+
+            Product product = new Product();
+            product.setName(name);
+            product.setPrice(price);
+            product.setUnit(unit);
+            product.setProductType(type);
+            product.setProductNumber("PROD-" + String.format("%04d", i + 1));
+            repository.save(product);
+        }
     }
 
     public List<Product> getAllProducts() {

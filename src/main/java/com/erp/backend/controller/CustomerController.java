@@ -29,6 +29,12 @@ public class CustomerController {
         this.service = service;
     }
 
+    @PostMapping("/init")
+    public ResponseEntity<String> initTestCustomers() {
+        service.initTestCustomers();
+        return ResponseEntity.ok("20 Testkunden wurden erstellt.");
+    }
+
     @GetMapping
     public ResponseEntity<List<Customer>> getAllCustomers(
             @RequestParam(defaultValue = "false") boolean paginated,

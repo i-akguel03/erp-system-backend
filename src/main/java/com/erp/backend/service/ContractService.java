@@ -13,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+import java.util.Random;
 import java.util.UUID;
 
 import org.slf4j.Logger;
@@ -30,6 +31,37 @@ public class ContractService {
     public ContractService(ContractRepository contractRepository, CustomerRepository customerRepository) {
         this.contractRepository = contractRepository;
         this.customerRepository = customerRepository;
+    }
+
+    public void initTestContracts() {
+        if(contractRepository.count() > 0) return; // nur einmal
+
+        List<Customer> customers = customerRepository.findAll();
+        if(customers.isEmpty()) return; // Keine Kunden, nichts zu erstellen
+
+        Random random = new Random();
+
+        for(int i = 1; i <= 15; i++) {
+            Customer randomCustomer = customers.get(random.nextInt(customers.size()));
+
+            LocalDate startDate = LocalDate.now().minusDays(random.nextInt(365)); // innerhalb letzten Jahres
+            Contract contract = new Contract(
+                    "Testvertrag " + i,
+                    startDate,
+                    randomCustomer
+            );
+
+            // Zufälliger Status
+            ContractStatus status = ContractStatus.values()[random.nextInt(ContractStatus.values().length)];
+            contract.setContractStatus(status);
+
+            // Optional: Enddatum bei TERMINATED setzen
+            if(status == ContractStatus.TERMINATED) {
+                contract.setEndDate(startDate.plusMonths(random.nextInt(12) + 1));
+            }
+
+            contractRepository.save(contract);
+        }
     }
 
     @Transactional(readOnly = true)

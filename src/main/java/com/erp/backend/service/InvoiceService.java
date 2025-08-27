@@ -1,7 +1,6 @@
 package com.erp.backend.service;
 
-import com.erp.backend.domain.Customer;
-import com.erp.backend.domain.Invoice;
+import com.erp.backend.domain.*;
 import com.erp.backend.repository.CustomerRepository;
 import com.erp.backend.repository.InvoiceRepository;
 import org.slf4j.Logger;
@@ -9,10 +8,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
 @Service
@@ -29,6 +27,63 @@ public class InvoiceService {
         this.invoiceRepository = invoiceRepository;
         this.customerRepository = customerRepository;
     }
+
+    @Transactional
+    public void initTestInvoicesFromSubscriptions() {
+        if (invoiceRepository.count() > 0) return; // nur einmal
+
+        List<Customer> customers = customerRepository.findAll();
+        Random random = new Random();
+
+        for (int i = 1; i <= 40; i++) { // 40 Rechnungen
+            Customer customer = customers.get(random.nextInt(customers.size()));
+            if (customer.getBillingAddress() == null) continue; // Kunde hat keine Rechnungsadresse
+
+            Invoice invoice = new Invoice();
+            invoice.setInvoiceNumber("INV-" + String.format("%04d", i));
+            invoice.setCustomer(customer);
+            invoice.setInvoiceDate(LocalDate.now().minusDays(random.nextInt(30)));
+            invoice.setDueDate(invoice.getInvoiceDate().plusDays(30));
+            invoice.setStatus(Invoice.InvoiceStatus.DRAFT);
+
+            // Rechnungsadresse vom Kunden übernehmen
+            invoice.setBillingAddress(customer.getBillingAddress());
+
+            // Alle Subscriptions des Kunden sammeln
+            List<Subscription> subscriptions = customer.getContracts().stream()
+                    .flatMap(contract -> contract.getSubscriptions().stream())
+                    .filter(sub -> sub.getSubscriptionStatus() == SubscriptionStatus.ACTIVE)
+                    .toList();
+
+            if (subscriptions.isEmpty()) continue; // kein Abo vorhanden, nächste Rechnung
+
+            // 1–3 Subscription-Items pro Rechnung
+            int itemCount = 1 + random.nextInt(Math.min(3, subscriptions.size()));
+            List<Subscription> chosenSubs = new ArrayList<>();
+            for (int j = 0; j < itemCount; j++) {
+                Subscription sub;
+                do {
+                    sub = subscriptions.get(random.nextInt(subscriptions.size()));
+                } while (chosenSubs.contains(sub)); // keine Duplikate
+                chosenSubs.add(sub);
+
+                InvoiceItem item = new InvoiceItem();
+                item.setDescription(sub.getProductName());
+                item.setQuantity(BigDecimal.ONE);
+                item.setUnitPrice(sub.getMonthlyPrice());
+                item.setInvoice(invoice);
+                item.setPosition(j + 1);
+                item.setTaxRate(BigDecimal.valueOf(19)); // generischer Steuersatz
+                invoice.addInvoiceItem(item);
+            }
+
+            invoice.calculateTotals();
+            invoiceRepository.save(invoice);
+        }
+
+        logger.info("40 Test-Invoices basierend auf Subscriptions erstellt (Rechnungsadresse vom Kunden).");
+    }
+
 
     // --- READ ---
 

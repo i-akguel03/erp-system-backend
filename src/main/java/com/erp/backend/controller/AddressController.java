@@ -2,6 +2,7 @@ package com.erp.backend.controller;
 
 import com.erp.backend.domain.Address;
 import com.erp.backend.service.AddressService;
+import jakarta.annotation.PostConstruct;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -28,6 +29,12 @@ public class AddressController {
         return service.findById(id)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
+    }
+
+    @PostMapping("/init")
+    public ResponseEntity<String> initTestAddresses() {
+        service.initTestAddresses();
+        return ResponseEntity.ok("15 Testadressen wurden erstellt.");
     }
 
     @PostMapping

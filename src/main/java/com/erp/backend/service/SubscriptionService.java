@@ -1,12 +1,9 @@
 package com.erp.backend.service;
 
-import com.erp.backend.domain.Contract;
-import com.erp.backend.domain.Customer;
-import com.erp.backend.domain.Subscription;
-import com.erp.backend.domain.SubscriptionStatus;
-import com.erp.backend.domain.BillingCycle;
+import com.erp.backend.domain.*;
 import com.erp.backend.repository.ContractRepository;
 import com.erp.backend.repository.CustomerRepository;
+import com.erp.backend.repository.ProductRepository;
 import com.erp.backend.repository.SubscriptionRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -17,6 +14,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+import java.util.Random;
 import java.util.UUID;
 
 import org.slf4j.Logger;
@@ -31,13 +29,48 @@ public class SubscriptionService {
     private final SubscriptionRepository subscriptionRepository;
     private final ContractRepository contractRepository;
     private final CustomerRepository customerRepository;
+    private final ProductRepository productRepository;
+    private final Random random = new Random();
 
     public SubscriptionService(SubscriptionRepository subscriptionRepository,
                                ContractRepository contractRepository,
-                               CustomerRepository customerRepository) {
+                               CustomerRepository customerRepository, ProductRepository productRepository) {
         this.subscriptionRepository = subscriptionRepository;
         this.contractRepository = contractRepository;
         this.customerRepository = customerRepository;
+        this.productRepository = productRepository;
+    }
+
+    public void initTestSubscriptions() {
+        if (subscriptionRepository.count() > 0) return; // nur einmal
+
+        List<Contract> contracts = contractRepository.findAll();
+        List<Product> products = productRepository.findAll();
+
+        if (contracts.isEmpty() || products.isEmpty()) return;
+
+        for (int i = 1; i <= 30; i++) {
+            Contract contract = contracts.get(random.nextInt(contracts.size()));
+            Product product = products.get(random.nextInt(products.size()));
+
+            LocalDate startDate = LocalDate.now().minusDays(random.nextInt(60));
+            LocalDate endDate = startDate.plusMonths(random.nextInt(12) + 1);
+
+            Subscription subscription = new Subscription();
+            subscription.setSubscriptionNumber("SUB-" + String.format("%04d", i));
+            subscription.setProductName(product.getName());
+            subscription.setMonthlyPrice(product.getPrice());
+            subscription.setStartDate(startDate);
+            subscription.setEndDate(endDate);
+            subscription.setSubscriptionStatus(SubscriptionStatus.ACTIVE);
+            subscription.setBillingCycle(BillingCycle.MONTHLY);
+            subscription.setContract(contract);
+
+            subscriptionRepository.save(subscription);
+
+            // Contract-Relation pflegen
+            contract.addSubscription(subscription);
+        }
     }
 
     @Transactional(readOnly = true)

@@ -32,6 +32,12 @@ public class ContractController {
         this.service = service;
     }
 
+    @PostMapping("/init")
+    public ResponseEntity<String> initTestContracts() {
+        service.initTestContracts();
+        return ResponseEntity.ok("15 Testverträge wurden erstellt.");
+    }
+
     @GetMapping
     public ResponseEntity<List<Contract>> getAllContracts(
             @RequestParam(defaultValue = "false") boolean paginated,

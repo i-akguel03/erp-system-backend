@@ -24,6 +24,12 @@ public class ProductController {
         this.service = service;
     }
 
+    @PostMapping("/init")
+    public ResponseEntity<String> initTestProducts() {
+        service.initTestProducts();
+        return ResponseEntity.ok("15 Testprodukte wurden erstellt.");
+    }
+
     @GetMapping
     public ResponseEntity<List<Product>> getAllProducts(
             @RequestParam(defaultValue = "false") boolean paginated,
