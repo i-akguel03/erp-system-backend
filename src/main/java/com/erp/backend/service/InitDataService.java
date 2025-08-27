@@ -18,7 +18,7 @@ public class InitDataService {
     private final ProductRepository productRepository;
     private final ContractRepository contractRepository;
     private final SubscriptionRepository subscriptionRepository;
-    private final InvoiceService invoiceService; // zum Erstellen von Rechnungen
+    private final InvoiceService invoiceService;
 
     public InitDataService(AddressRepository addressRepository,
                            CustomerRepository customerRepository,
@@ -46,9 +46,42 @@ public class InitDataService {
 
     // --- 1. Adressen ---
     private void initAddresses() {
-        if (addressRepository.count() > 0) return;
-        for (int i = 1; i <= 30; i++) {
-            Address address = new Address("Street " + i, "1000" + i, "City" + i, "Germany");
+        if(addressRepository.count() > 0) return;
+
+        String[][] addressData = {
+                {"Hauptstraße 12", "10115", "Berlin", "Germany"},
+                {"Lindenweg 5", "04109", "Leipzig", "Germany"},
+                {"Gartenstraße 8", "80331", "München", "Germany"},
+                {"Berliner Allee 20", "30159", "Hannover", "Germany"},
+                {"Schillerstraße 15", "50667", "Köln", "Germany"},
+                {"Goetheweg 9", "90402", "Nürnberg", "Germany"},
+                {"Friedrichstraße 3", "01067", "Dresden", "Germany"},
+                {"Rosenweg 18", "28195", "Bremen", "Germany"},
+                {"Bahnhofstraße 4", "20095", "Hamburg", "Germany"},
+                {"Marktstraße 22", "45127", "Essen", "Germany"},
+                {"Kastanienallee 7", "24103", "Kiel", "Germany"},
+                {"Brunnenstraße 11", "66111", "Saarbrücken", "Germany"},
+                {"Königstraße 19", "70173", "Stuttgart", "Germany"},
+                {"Parkweg 2", "18055", "Rostock", "Germany"},
+                {"Wilhelmstraße 30", "90459", "Nürnberg", "Germany"},
+                {"Mozartstraße 25", "60313", "Frankfurt", "Germany"},
+                {"Beethovenstraße 14", "50674", "Köln", "Germany"},
+                {"Talstraße 8", "80331", "München", "Germany"},
+                {"Am Stadtpark 6", "24103", "Kiel", "Germany"},
+                {"Kirchweg 10", "99084", "Erfurt", "Germany"},
+                {"Lindenstraße 5", "01069", "Dresden", "Germany"},
+                {"Brückenstraße 3", "28195", "Bremen", "Germany"},
+                {"Kaiserstraße 9", "65185", "Wiesbaden", "Germany"},
+                {"Schwanenweg 12", "97070", "Würzburg", "Germany"},
+                {"Wallstraße 7", "66111", "Saarbrücken", "Germany"},
+                {"Hindenburgstraße 18", "45127", "Essen", "Germany"},
+                {"Uhlandstraße 4", "60316", "Frankfurt", "Germany"},
+                {"Seestraße 22", "18055", "Rostock", "Germany"},
+                {"Gartenweg 11", "20095", "Hamburg", "Germany"}
+        };
+
+        for (String[] data : addressData) {
+            Address address = new Address(data[0], data[1], data[2], data[3]);
             addressRepository.save(address);
         }
     }
@@ -80,10 +113,33 @@ public class InitDataService {
 
     // --- 3. Produkte ---
     private void initProducts() {
-        if (productRepository.count() > 0) return;
-        for (int i = 1; i <= 15; i++) {
-            Product product = new Product("Product " + i, BigDecimal.valueOf(10 + i), "Stück");
-            product.setProductNumber("PROD-" + String.format("%03d", i));
+        if(productRepository.count() > 0) return;
+
+        Object[][] products = {
+                {"Laptop Dell XPS 13", 1200.0, "Stück"},
+                {"MacBook Pro 14\"", 2200.0, "Stück"},
+                {"Samsung Galaxy S23", 900.0, "Stück"},
+                {"iPhone 15 Pro", 1300.0, "Stück"},
+                {"Logitech MX Master 3", 100.0, "Stück"},
+                {"HP LaserJet Drucker", 250.0, "Stück"},
+                {"Adobe Photoshop Lizenz", 20.0, "Monat"},
+                {"Microsoft 365 Lizenz", 15.0, "Monat"},
+                {"AWS Cloud Hosting", 100.0, "Monat"},
+                {"GitHub Copilot", 10.0, "Monat"},
+                {"Tisch „Ikea Bekant“", 200.0, "Stück"},
+                {"Bürostuhl „Herman Miller“", 800.0, "Stück"},
+                {"Monitor Samsung 27\"", 300.0, "Stück"},
+                {"SSD Samsung 2TB", 150.0, "Stück"},
+                {"Externe Festplatte 5TB", 120.0, "Stück"}
+        };
+
+        for (int i = 0; i < products.length; i++) {
+            Product product = new Product(
+                    (String) products[i][0],
+                    BigDecimal.valueOf((Double) products[i][1]),
+                    (String) products[i][2]
+            );
+            product.setProductNumber("PROD-" + String.format("%03d", i+1));
             productRepository.save(product);
         }
     }
@@ -98,7 +154,6 @@ public class InitDataService {
             Customer customer = customers.get(random.nextInt(customers.size()));
             Contract contract = new Contract("Contract " + i, LocalDate.now().minusDays(random.nextInt(100)), customer);
             contract.setContractNumber("CON-" + String.format("%04d", i));
-            customer.addContract(contract);
             contractRepository.save(contract);
         }
     }
@@ -135,15 +190,19 @@ public class InitDataService {
             invoice.setInvoiceDate(LocalDate.now().minusDays(random.nextInt(30)));
             invoice.setDueDate(invoice.getInvoiceDate().plusDays(30));
 
-            // Füge zufällige InvoiceItems aus Subscriptions des Kunden hinzu
-            customer.getContracts().forEach(contract -> {
-                contract.getSubscriptions().forEach(sub -> {
+            // Alle Subscriptions des Kunden holen
+            List<Contract> contracts = contractRepository.findByCustomer(customer);
+            int positionCounter = 1;
+
+            for (Contract contract : contracts) {
+                for (Subscription sub : contract.getSubscriptions()) {
                     if (random.nextBoolean()) {
                         InvoiceItem item = new InvoiceItem(sub.getProductName(), sub.getMonthlyPrice(), "Stück", sub.getMonthlyPrice());
+                        item.setPosition(positionCounter++); // Position setzen
                         invoice.addInvoiceItem(item);
                     }
-                });
-            });
+                }
+            }
 
             invoiceService.createInvoice(invoice);
         }
