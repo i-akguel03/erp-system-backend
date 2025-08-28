@@ -29,17 +29,17 @@ public class Customer {
     private String tel;
 
     // Beziehungen zu Address-Entitäten
-    @OneToOne
+    @ManyToOne
+    @JoinColumn(name = "residential_address_id")
+    private Address residentialAddress;
+
+    @ManyToOne
     @JoinColumn(name = "billing_address_id")
     private Address billingAddress;
 
-    @OneToOne
+    @ManyToOne
     @JoinColumn(name = "shipping_address_id")
     private Address shippingAddress;
-
-    @OneToOne
-    @JoinColumn(name = "residential_address_id")
-    private Address residentialAddress;
 
     public Customer() {
     }

@@ -62,10 +62,10 @@ public class Invoice {
     private Customer customer;
 
     // Rechnungsadresse (kann von Kundenadresse abweichen)
-    @OneToOne
+    @ManyToOne
     @JoinColumn(name = "billing_address_id")
     private Address billingAddress;
-
+    
     // Rechnungspositionen
     @OneToMany(mappedBy = "invoice", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<InvoiceItem> invoiceItems = new ArrayList<>();
