@@ -24,8 +24,8 @@ public class DueScheduleMapper {
         dto.setPaidAmount(dueSchedule.getPaidAmount());
         dto.setPaymentMethod(dueSchedule.getPaymentMethod());
         dto.setPaymentReference(dueSchedule.getPaymentReference());
-        dto.setCreatedDate(dueSchedule.getCreatedDate());
-        dto.setUpdatedDate(dueSchedule.getUpdatedDate());
+        //dto.setCreatedDate(dueSchedule.getCreatedDate());
+        //dto.setUpdatedDate(dueSchedule.getUpdatedDate());
         dto.setNotes(dueSchedule.getNotes());
         dto.setReminderSent(dueSchedule.getReminderSent());
         dto.setReminderCount(dueSchedule.getReminderCount());

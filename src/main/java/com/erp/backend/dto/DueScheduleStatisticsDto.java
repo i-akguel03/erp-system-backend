@@ -2,66 +2,121 @@ package com.erp.backend.dto;
 
 import java.math.BigDecimal;
 
-// DTO für Statistiken
 public class DueScheduleStatisticsDto {
 
-    private Long totalDueSchedules;
-    private Long pendingDueSchedules;
-    private Long overdueDueSchedules;
-    private Long paidDueSchedules;
+    private long totalCount;
+    private long pendingCount;
+    private long overdueCount;
+    private long paidCount;
+    private long partialPaidCount;
+    private long cancelledCount;
+    private long needingReminderCount;
+
     private BigDecimal totalPendingAmount;
     private BigDecimal totalOverdueAmount;
     private BigDecimal totalPaidAmount;
-    private Long schedulesNeedingReminder;
+    private BigDecimal totalPartialPaidAmount;
 
-    // Constructors
+    // Zusätzliche Statistiken
+    private double paymentRate; // Prozentsatz bezahlter Fälligkeiten
+    private double overdueRate;  // Prozentsatz überfälliger Fälligkeiten
+
+    // Konstruktoren
     public DueScheduleStatisticsDto() {}
 
-    public DueScheduleStatisticsDto(Long totalDueSchedules, Long pendingDueSchedules,
-                                    Long overdueDueSchedules, Long paidDueSchedules,
+    public DueScheduleStatisticsDto(long totalCount, long pendingCount, long overdueCount, long paidCount,
                                     BigDecimal totalPendingAmount, BigDecimal totalOverdueAmount,
-                                    BigDecimal totalPaidAmount, Long schedulesNeedingReminder) {
-        this.totalDueSchedules = totalDueSchedules;
-        this.pendingDueSchedules = pendingDueSchedules;
-        this.overdueDueSchedules = overdueDueSchedules;
-        this.paidDueSchedules = paidDueSchedules;
+                                    BigDecimal totalPaidAmount, long needingReminderCount) {
+        this.totalCount = totalCount;
+        this.pendingCount = pendingCount;
+        this.overdueCount = overdueCount;
+        this.paidCount = paidCount;
         this.totalPendingAmount = totalPendingAmount;
         this.totalOverdueAmount = totalOverdueAmount;
         this.totalPaidAmount = totalPaidAmount;
-        this.schedulesNeedingReminder = schedulesNeedingReminder;
+        this.needingReminderCount = needingReminderCount;
+
+        // Berechnungen
+        this.paymentRate = totalCount > 0 ? (double) paidCount / totalCount * 100 : 0.0;
+        this.overdueRate = totalCount > 0 ? (double) overdueCount / totalCount * 100 : 0.0;
     }
 
-    // Getter & Setter
-    public Long getTotalDueSchedules() {
-        return totalDueSchedules;
+    // Berechnete Felder
+    public BigDecimal getTotalOpenAmount() {
+        return totalPendingAmount.add(totalOverdueAmount).add(totalPartialPaidAmount != null ?
+                totalPartialPaidAmount : BigDecimal.ZERO);
     }
 
-    public void setTotalDueSchedules(Long totalDueSchedules) {
-        this.totalDueSchedules = totalDueSchedules;
+    public BigDecimal getTotalAmount() {
+        return getTotalOpenAmount().add(totalPaidAmount);
     }
 
-    public Long getPendingDueSchedules() {
-        return pendingDueSchedules;
+    public long getActiveCount() {
+        return pendingCount + overdueCount + partialPaidCount;
     }
 
-    public void setPendingDueSchedules(Long pendingDueSchedules) {
-        this.pendingDueSchedules = pendingDueSchedules;
+    public double getCollectionRate() {
+        BigDecimal totalAmount = getTotalAmount();
+        if (totalAmount.compareTo(BigDecimal.ZERO) == 0) return 0.0;
+        return totalPaidAmount.divide(totalAmount, 4, java.math.RoundingMode.HALF_UP)
+                .multiply(BigDecimal.valueOf(100)).doubleValue();
     }
 
-    public Long getOverdueDueSchedules() {
-        return overdueDueSchedules;
+    // Getter und Setter
+    public long getTotalCount() {
+        return totalCount;
     }
 
-    public void setOverdueDueSchedules(Long overdueDueSchedules) {
-        this.overdueDueSchedules = overdueDueSchedules;
+    public void setTotalCount(long totalCount) {
+        this.totalCount = totalCount;
     }
 
-    public Long getPaidDueSchedules() {
-        return paidDueSchedules;
+    public long getPendingCount() {
+        return pendingCount;
     }
 
-    public void setPaidDueSchedules(Long paidDueSchedules) {
-        this.paidDueSchedules = paidDueSchedules;
+    public void setPendingCount(long pendingCount) {
+        this.pendingCount = pendingCount;
+    }
+
+    public long getOverdueCount() {
+        return overdueCount;
+    }
+
+    public void setOverdueCount(long overdueCount) {
+        this.overdueCount = overdueCount;
+    }
+
+    public long getPaidCount() {
+        return paidCount;
+    }
+
+    public void setPaidCount(long paidCount) {
+        this.paidCount = paidCount;
+    }
+
+    public long getPartialPaidCount() {
+        return partialPaidCount;
+    }
+
+    public void setPartialPaidCount(long partialPaidCount) {
+        this.partialPaidCount = partialPaidCount;
+    }
+
+    public long getCancelledCount() {
+        return cancelledCount;
+    }
+
+    public void setCancelledCount(long cancelledCount) {
+        this.cancelledCount = cancelledCount;
+    }
+
+    public long getNeedingReminderCount() {
+        return needingReminderCount;
+    }
+
+    public void setNeedingReminderCount(long needingReminderCount) {
+        this.needingReminderCount = needingReminderCount;
     }
 
     public BigDecimal getTotalPendingAmount() {
@@ -88,11 +143,39 @@ public class DueScheduleStatisticsDto {
         this.totalPaidAmount = totalPaidAmount;
     }
 
-    public Long getSchedulesNeedingReminder() {
-        return schedulesNeedingReminder;
+    public BigDecimal getTotalPartialPaidAmount() {
+        return totalPartialPaidAmount;
     }
 
-    public void setSchedulesNeedingReminder(Long schedulesNeedingReminder) {
-        this.schedulesNeedingReminder = schedulesNeedingReminder;
+    public void setTotalPartialPaidAmount(BigDecimal totalPartialPaidAmount) {
+        this.totalPartialPaidAmount = totalPartialPaidAmount;
+    }
+
+    public double getPaymentRate() {
+        return paymentRate;
+    }
+
+    public void setPaymentRate(double paymentRate) {
+        this.paymentRate = paymentRate;
+    }
+
+    public double getOverdueRate() {
+        return overdueRate;
+    }
+
+    public void setOverdueRate(double overdueRate) {
+        this.overdueRate = overdueRate;
+    }
+
+    @Override
+    public String toString() {
+        return "DueScheduleStatisticsDto{" +
+                "totalCount=" + totalCount +
+                ", pendingCount=" + pendingCount +
+                ", overdueCount=" + overdueCount +
+                ", paidCount=" + paidCount +
+                ", paymentRate=" + String.format("%.2f", paymentRate) + "%" +
+                ", totalPaidAmount=" + totalPaidAmount +
+                '}';
     }
 }

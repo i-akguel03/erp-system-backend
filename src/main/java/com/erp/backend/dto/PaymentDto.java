@@ -1,54 +1,58 @@
 package com.erp.backend.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import jakarta.validation.constraints.DecimalMin;
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.Positive;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
-/**
- * DTO für Zahlungen, die auf einen Fälligkeitsplan verbucht werden.
- */
 public class PaymentDto {
 
-    @NotNull(message = "Bezahlter Betrag ist erforderlich")
-    @DecimalMin(value = "0.01", message = "Bezahlter Betrag muss größer als 0 sein")
+    @NotNull(message = "Zahlungsbetrag ist erforderlich")
+    @Positive(message = "Zahlungsbetrag muss positiv sein")
     private BigDecimal paidAmount;
-
-    @NotBlank(message = "Zahlungsmethode ist erforderlich")
-    @Size(max = 100, message = "Zahlungsmethode darf maximal 100 Zeichen haben")
-    private String paymentMethod;
-
-    @Size(max = 200, message = "Zahlungsreferenz darf maximal 200 Zeichen haben")
-    private String paymentReference;
 
     @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDate paidDate;
 
-    @Size(max = 500, message = "Notizen dürfen maximal 500 Zeichen haben")
+    private String paymentMethod;
+    private String paymentReference;
     private String notes;
 
-    // Constructors
-    public PaymentDto() {}
-
-    public PaymentDto(BigDecimal paidAmount, String paymentMethod, String paymentReference, LocalDate paidDate, String notes) {
-        this.paidAmount = paidAmount;
-        this.paymentMethod = paymentMethod;
-        this.paymentReference = paymentReference;
-        this.paidDate = paidDate;
-        this.notes = notes;
+    // Konstruktoren
+    public PaymentDto() {
+        this.paidDate = LocalDate.now();
     }
 
-    // Getter & Setter
+    public PaymentDto(BigDecimal paidAmount, LocalDate paidDate, String paymentMethod) {
+        this.paidAmount = paidAmount;
+        this.paidDate = paidDate;
+        this.paymentMethod = paymentMethod;
+    }
+
+    public PaymentDto(BigDecimal paidAmount, String paymentMethod, String paymentReference) {
+        this.paidAmount = paidAmount;
+        this.paidDate = LocalDate.now();
+        this.paymentMethod = paymentMethod;
+        this.paymentReference = paymentReference;
+    }
+
+    // Getter und Setter
     public BigDecimal getPaidAmount() {
         return paidAmount;
     }
 
     public void setPaidAmount(BigDecimal paidAmount) {
         this.paidAmount = paidAmount;
+    }
+
+    public LocalDate getPaidDate() {
+        return paidDate;
+    }
+
+    public void setPaidDate(LocalDate paidDate) {
+        this.paidDate = paidDate;
     }
 
     public String getPaymentMethod() {
@@ -67,14 +71,6 @@ public class PaymentDto {
         this.paymentReference = paymentReference;
     }
 
-    public LocalDate getPaidDate() {
-        return paidDate;
-    }
-
-    public void setPaidDate(LocalDate paidDate) {
-        this.paidDate = paidDate;
-    }
-
     public String getNotes() {
         return notes;
     }
@@ -87,10 +83,9 @@ public class PaymentDto {
     public String toString() {
         return "PaymentDto{" +
                 "paidAmount=" + paidAmount +
+                ", paidDate=" + paidDate +
                 ", paymentMethod='" + paymentMethod + '\'' +
                 ", paymentReference='" + paymentReference + '\'' +
-                ", paidDate=" + paidDate +
-                ", notes='" + notes + '\'' +
                 '}';
     }
 }

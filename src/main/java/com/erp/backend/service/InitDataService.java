@@ -18,20 +18,26 @@ public class InitDataService {
     private final ProductRepository productRepository;
     private final ContractRepository contractRepository;
     private final SubscriptionRepository subscriptionRepository;
+    private final DueScheduleRepository dueScheduleRepository;
     private final InvoiceService invoiceService;
+    private final NumberGeneratorService numberGeneratorService;
 
     public InitDataService(AddressRepository addressRepository,
                            CustomerRepository customerRepository,
                            ProductRepository productRepository,
                            ContractRepository contractRepository,
                            SubscriptionRepository subscriptionRepository,
-                           InvoiceService invoiceService) {
+                           DueScheduleRepository dueScheduleRepository,
+                           InvoiceService invoiceService,
+                           NumberGeneratorService numberGeneratorService) {
         this.addressRepository = addressRepository;
         this.customerRepository = customerRepository;
         this.productRepository = productRepository;
         this.contractRepository = contractRepository;
         this.subscriptionRepository = subscriptionRepository;
+        this.dueScheduleRepository = dueScheduleRepository;
         this.invoiceService = invoiceService;
+        this.numberGeneratorService = numberGeneratorService;
     }
 
     @Transactional
@@ -41,6 +47,7 @@ public class InitDataService {
         initProducts();
         initContracts();
         initSubscriptions();
+        initDueSchedules();
         initInvoices();
     }
 
@@ -91,17 +98,20 @@ public class InitDataService {
         if (customerRepository.count() > 0) return;
         List<Address> addresses = addressRepository.findAll();
         Random random = new Random();
-        String[] firstNames = {"Max", "Anna", "Tom", "Laura", "Paul", "Sophie", "Lukas", "Marie", "Felix", "Emma"};
-        String[] lastNames = {"Müller", "Schmidt", "Schneider", "Fischer", "Weber", "Becker", "Hoffmann", "Schäfer", "Koch", "Richter"};
+        String[] firstNames = {"Max", "Anna", "Tom", "Laura", "Paul", "Sophie", "Lukas", "Marie", "Felix", "Emma",
+                "Jonas", "Lena", "David", "Sarah", "Michael", "Lisa", "Alexander", "Julia", "Daniel", "Nina"};
+        String[] lastNames = {"Müller", "Schmidt", "Schneider", "Fischer", "Weber", "Becker", "Hoffmann", "Schäfer",
+                "Koch", "Richter", "Klein", "Wolf", "Neumann", "Braun", "Zimmermann", "Krüger", "Meyer",
+                "Schulz", "Hartmann", "Wagner"};
 
-        for (int i = 1; i <= 20; i++) {
+        for (int i = 1; i <= 25; i++) {
             Customer customer = new Customer(
                     firstNames[random.nextInt(firstNames.length)],
                     lastNames[random.nextInt(lastNames.length)],
                     "customer" + i + "@test.com",
                     "+49" + (random.nextInt(900000000) + 100000000)
             );
-            customer.setCustomerNumber("CUST-" + String.format("%04d", i));
+            customer.setCustomerNumber(numberGeneratorService.generateCustomerNumber());
             // Zufällige Adressen aus DB zuweisen
             customer.setBillingAddress(addresses.get(random.nextInt(addresses.size())));
             customer.setShippingAddress(addresses.get(random.nextInt(addresses.size())));
@@ -122,12 +132,17 @@ public class InitDataService {
                 {"iPhone 15 Pro", 1300.0, "Stück"},
                 {"Logitech MX Master 3", 100.0, "Stück"},
                 {"HP LaserJet Drucker", 250.0, "Stück"},
-                {"Adobe Photoshop Lizenz", 20.0, "Monat"},
-                {"Microsoft 365 Lizenz", 15.0, "Monat"},
-                {"AWS Cloud Hosting", 100.0, "Monat"},
-                {"GitHub Copilot", 10.0, "Monat"},
-                {"Tisch „Ikea Bekant“", 200.0, "Stück"},
-                {"Bürostuhl „Herman Miller“", 800.0, "Stück"},
+                {"Adobe Photoshop Lizenz", 29.99, "Monat"},
+                {"Microsoft 365 Business", 12.50, "Monat"},
+                {"AWS Cloud Hosting", 89.90, "Monat"},
+                {"GitHub Copilot", 10.00, "Monat"},
+                {"Slack Business+", 8.75, "Monat"},
+                {"Zoom Pro", 14.99, "Monat"},
+                {"Dropbox Business", 15.00, "Monat"},
+                {"Netflix Business", 19.99, "Monat"},
+                {"Spotify Premium", 9.99, "Monat"},
+                {"Tisch Ikea Bekant", 200.0, "Stück"},
+                {"Bürostuhl Herman Miller", 800.0, "Stück"},
                 {"Monitor Samsung 27\"", 300.0, "Stück"},
                 {"SSD Samsung 2TB", 150.0, "Stück"},
                 {"Externe Festplatte 5TB", 120.0, "Stück"}
@@ -150,13 +165,33 @@ public class InitDataService {
         List<Customer> customers = customerRepository.findAll();
         Random random = new Random();
 
-        for (int i = 1; i <= 15; i++) {
+        for (int i = 1; i <= 20; i++) {
             Customer customer = customers.get(random.nextInt(customers.size()));
-            Contract contract = new Contract("Contract " + i, LocalDate.now().minusDays(random.nextInt(100)), customer);
-            contract.setContractNumber("CON-" + String.format("%04d", i));
+            LocalDate startDate = LocalDate.now().minusDays(random.nextInt(365));
+
+            Contract contract = new Contract("Contract " + i, startDate, customer);
+
+            // Eindeutige ID erzwingen
+            contract.setId(null);
+
+            // Eindeutige Vertragsnummer generieren
+            contract.setContractNumber(numberGeneratorService.generateContractNumber());
+
+            // Status zufällig setzen (80% ACTIVE, 20% TERMINATED)
+            if (random.nextDouble() < 0.8) {
+                contract.setContractStatus(ContractStatus.ACTIVE);
+                if (random.nextDouble() < 0.3) {
+                    contract.setEndDate(startDate.plusYears(1 + random.nextInt(3)));
+                }
+            } else {
+                contract.setContractStatus(ContractStatus.TERMINATED);
+                contract.setEndDate(startDate.plusDays(random.nextInt(300)));
+            }
+
             contractRepository.save(contract);
         }
     }
+
 
     // --- 5. Abonnements ---
     private void initSubscriptions() {
@@ -165,46 +200,202 @@ public class InitDataService {
         List<Product> products = productRepository.findAll();
         Random random = new Random();
 
-        for (int i = 1; i <= 30; i++) {
+        // Nur monatliche/wiederkehrende Produkte für Abonnements verwenden
+        List<Product> subscriptionProducts = products.stream()
+                .filter(p -> p.getUnit().equals("Monat"))
+                .toList();
+
+        for (int i = 1; i <= 40; i++) {
             Contract contract = contracts.get(random.nextInt(contracts.size()));
-            Product product = products.get(random.nextInt(products.size()));
-            Subscription sub = new Subscription(product.getName(), product.getPrice(), LocalDate.now().minusDays(random.nextInt(30)), contract);
-            sub.setSubscriptionNumber("SUB-" + String.format("%04d", i));
+            Product product = subscriptionProducts.get(random.nextInt(subscriptionProducts.size()));
+
+            LocalDate subscriptionStart = contract.getStartDate().plusDays(random.nextInt(30));
+
+            Subscription sub = new Subscription(product.getName(), product.getPrice(), subscriptionStart, contract);
+            sub.setSubscriptionNumber(numberGeneratorService.generateSubscriptionNumber());
+            sub.setDescription("Monatliches Abonnement für " + product.getName());
+
+            // Billing Cycle setzen
+            BillingCycle[] cycles = BillingCycle.values();
+            sub.setBillingCycle(cycles[random.nextInt(cycles.length)]);
+
+            // Subscription Status basierend auf Contract Status
+            if (contract.getContractStatus() == ContractStatus.ACTIVE) {
+                // 90% aktiv, 10% pausiert/beendet
+                if (random.nextDouble() < 0.9) {
+                    sub.setSubscriptionStatus(SubscriptionStatus.ACTIVE);
+                } else {
+                    SubscriptionStatus[] inactiveStatuses = {SubscriptionStatus.PAUSED, SubscriptionStatus.CANCELLED};
+                    sub.setSubscriptionStatus(inactiveStatuses[random.nextInt(inactiveStatuses.length)]);
+                    sub.setEndDate(subscriptionStart.plusMonths(random.nextInt(12)));
+                }
+            } else {
+                sub.setSubscriptionStatus(SubscriptionStatus.CANCELLED);
+                sub.setEndDate(contract.getEndDate());
+            }
+
+            sub.setAutoRenewal(random.nextBoolean());
+
             contract.addSubscription(sub);
             subscriptionRepository.save(sub);
         }
     }
 
-    // --- 6. Rechnungen ---
-    private void initInvoices() {
-        List<Customer> customers = customerRepository.findAll();
+    // --- 6. Fälligkeitspläne ---
+    private void initDueSchedules() {
+        if (dueScheduleRepository.count() > 0) return;
+
+        List<Subscription> activeSubscriptions = subscriptionRepository.findBySubscriptionStatus(SubscriptionStatus.ACTIVE);
         Random random = new Random();
-        int invoiceCounter = 1;
 
-        for (int i = 0; i < 40; i++) {
-            Customer customer = customers.get(random.nextInt(customers.size()));
-            Invoice invoice = new Invoice();
-            invoice.setCustomer(customer);
-            invoice.setBillingAddress(customer.getBillingAddress());
-            invoice.setInvoiceNumber("INV-" + String.format("%04d", invoiceCounter++));
-            invoice.setInvoiceDate(LocalDate.now().minusDays(random.nextInt(30)));
-            invoice.setDueDate(invoice.getInvoiceDate().plusDays(30));
+        for (Subscription subscription : activeSubscriptions) {
+            LocalDate currentDate = subscription.getStartDate();
+            LocalDate endDate = subscription.getEndDate() != null
+                    ? subscription.getEndDate()
+                    : LocalDate.now().plusMonths(12); // 12 Monate in die Zukunft für unbefristete
 
-            // Alle Subscriptions des Kunden holen
-            List<Contract> contracts = contractRepository.findByCustomer(customer);
-            int positionCounter = 1;
+            int monthsToGenerate = random.nextInt(6) + 3; // 3-8 Monate generieren
 
-            for (Contract contract : contracts) {
-                for (Subscription sub : contract.getSubscriptions()) {
-                    if (random.nextBoolean()) {
-                        InvoiceItem item = new InvoiceItem(sub.getProductName(), sub.getMonthlyPrice(), "Stück", sub.getMonthlyPrice());
-                        item.setPosition(positionCounter++); // Position setzen
-                        invoice.addInvoiceItem(item);
-                    }
+            for (int i = 0; i < monthsToGenerate && currentDate.isBefore(endDate); i++) {
+                LocalDate periodStart = currentDate;
+                LocalDate periodEnd = calculatePeriodEnd(currentDate, subscription.getBillingCycle());
+                LocalDate dueDate = calculateDueDate(periodEnd, subscription.getBillingCycle());
+
+                // Nicht über das Abo-Enddatum hinaus generieren
+                if (dueDate.isAfter(endDate)) {
+                    break;
                 }
-            }
 
-            invoiceService.createInvoice(invoice);
+                DueSchedule dueSchedule = new DueSchedule();
+                dueSchedule.setDueNumber(numberGeneratorService.generateDueNumber());
+                dueSchedule.setDueDate(dueDate);
+                dueSchedule.setAmount(subscription.getMonthlyPrice());
+                dueSchedule.setPeriodStart(periodStart);
+                dueSchedule.setPeriodEnd(periodEnd);
+                dueSchedule.setSubscription(subscription);
+                dueSchedule.setReminderSent(false);
+                dueSchedule.setReminderCount(0);
+
+                // Status basierend auf Fälligkeitsdatum setzen
+                LocalDate now = LocalDate.now();
+                if (dueDate.isBefore(now.minusDays(30))) {
+                    // Alte Fälligkeiten als bezahlt markieren (80% bezahlt, 20% überfällig)
+                    if (random.nextDouble() < 0.8) {
+                        dueSchedule.setStatus(DueStatus.PAID);
+                        dueSchedule.setPaidDate(dueDate.plusDays(random.nextInt(14)));
+                        dueSchedule.setPaidAmount(subscription.getMonthlyPrice());
+                        dueSchedule.setPaymentMethod(getRandomPaymentMethod(random));
+                        dueSchedule.setPaymentReference("REF-" + System.currentTimeMillis() + "-" + random.nextInt(1000));
+                    } else {
+                        dueSchedule.setStatus(DueStatus.OVERDUE);
+                        // Mahnungen für überfällige
+                        if (random.nextBoolean()) {
+                            dueSchedule.setReminderSent(true);
+                            dueSchedule.setReminderCount(random.nextInt(3) + 1);
+                            dueSchedule.setLastReminderDate(now.minusDays(random.nextInt(10)));
+                        }
+                    }
+                } else if (dueDate.isBefore(now.plusDays(7))) {
+                    // Bald fällige als ausstehend
+                    dueSchedule.setStatus(DueStatus.PENDING);
+                } else {
+                    // Zukünftige als ausstehend
+                    dueSchedule.setStatus(DueStatus.PENDING);
+                }
+
+                // Gelegentliche Notizen hinzufügen
+                if (random.nextDouble() < 0.1) {
+                    String[] notes = {
+                            "Kunde hat um Aufschub gebeten",
+                            "Zahlungserinnerung versendet",
+                            "Automatische Zahlung fehlgeschlagen",
+                            "Kunde kontaktiert wegen Zahlungsproblemen",
+                            "Zahlung erfolgt nach Mahnung"
+                    };
+                    dueSchedule.setNotes(notes[random.nextInt(notes.length)]);
+                }
+
+                dueScheduleRepository.save(dueSchedule);
+
+                // Nächste Periode berechnen
+                currentDate = calculateNextPeriodStart(currentDate, subscription.getBillingCycle());
+            }
         }
+    }
+
+    // --- 7. Rechnungen (angepasst) ---
+    private void initInvoices() {
+        // Prüfen ob bereits Rechnungen existieren
+        try {
+            if (!invoiceService.getAllInvoices().isEmpty()) {
+                return;
+            }
+        } catch (Exception e) {
+            // Falls getAllInvoices() andere Signatur hat, alternative Prüfung
+            return;
+        }
+
+        // Rechnungen basierend auf bezahlten Fälligkeitsplänen generieren
+        List<DueSchedule> paidSchedules = dueScheduleRepository.findByStatus(DueStatus.PAID);
+        Random random = new Random();
+
+        for (DueSchedule dueSchedule : paidSchedules) {
+            // Nicht für jeden bezahlten Fälligkeitsplan eine Rechnung (60% Wahrscheinlichkeit)
+            if (random.nextDouble() < 0.6) {
+                Customer customer = dueSchedule.getSubscription().getContract().getCustomer();
+
+                Invoice invoice = new Invoice();
+                invoice.setCustomer(customer);
+                invoice.setBillingAddress(customer.getBillingAddress());
+                // Rechnungsnummer wird automatisch vom NumberGeneratorService generiert
+                invoice.setInvoiceDate(dueSchedule.getPeriodStart());
+                invoice.setDueDate(dueSchedule.getDueDate());
+
+                // Invoice Item für das Abonnement
+                InvoiceItem item = new InvoiceItem(
+                        dueSchedule.getSubscription().getProductName(),
+                        BigDecimal.ONE,
+                        "Monat",
+                        dueSchedule.getAmount()
+                );
+                item.setPosition(1);
+                item.setDescription("Abonnement für Periode " +
+                        dueSchedule.getPeriodStart() + " bis " + dueSchedule.getPeriodEnd());
+                invoice.addInvoiceItem(item);
+
+                invoiceService.createInvoice(invoice);
+            }
+        }
+    }
+
+    // --- Hilfsmethoden für Fälligkeitspläne ---
+
+    private LocalDate calculatePeriodEnd(LocalDate periodStart, BillingCycle billingCycle) {
+        return switch (billingCycle) {
+            case MONTHLY -> periodStart.plusMonths(1).minusDays(1);
+            case QUARTERLY -> periodStart.plusMonths(3).minusDays(1);
+            case SEMI_ANNUALLY -> periodStart.plusMonths(6).minusDays(1);
+            case ANNUALLY -> periodStart.plusYears(1).minusDays(1);
+        };
+    }
+
+    private LocalDate calculateDueDate(LocalDate periodEnd, BillingCycle billingCycle) {
+        // Fälligkeitsdatum ist meist am Ende der Periode oder kurz danach
+        Random random = new Random();
+        return periodEnd.plusDays(random.nextInt(7)); // 0-6 Tage nach Periodenende
+    }
+
+    private LocalDate calculateNextPeriodStart(LocalDate currentStart, BillingCycle billingCycle) {
+        return switch (billingCycle) {
+            case MONTHLY -> currentStart.plusMonths(1);
+            case QUARTERLY -> currentStart.plusMonths(3);
+            case SEMI_ANNUALLY -> currentStart.plusMonths(6);
+            case ANNUALLY -> currentStart.plusYears(1);
+        };
+    }
+
+    private String getRandomPaymentMethod(Random random) {
+        String[] methods = {"SEPA-Lastschrift", "Kreditkarte", "PayPal", "Überweisung", "Sofortüberweisung"};
+        return methods[random.nextInt(methods.length)];
     }
 }

@@ -51,6 +51,9 @@ public class ContractService {
                     randomCustomer
             );
 
+            // Eindeutige ID erzwingen (falls nicht automatisch generiert)
+            contract.setId(null);
+
             // Zufälliger Status
             ContractStatus status = ContractStatus.values()[random.nextInt(ContractStatus.values().length)];
             contract.setContractStatus(status);
@@ -60,9 +63,15 @@ public class ContractService {
                 contract.setEndDate(startDate.plusMonths(random.nextInt(12) + 1));
             }
 
+            // Eindeutige Vertragsnummer generieren
+            contract.setContractNumber(generateContractNumber());
+
             contractRepository.save(contract);
         }
+
+        logger.info("Testcontracts initialized: {}", contractRepository.count());
     }
+
 
     @Transactional(readOnly = true)
     public List<Contract> getAllContracts() {
