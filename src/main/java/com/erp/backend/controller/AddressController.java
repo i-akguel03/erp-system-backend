@@ -1,12 +1,14 @@
 package com.erp.backend.controller;
 
 import com.erp.backend.domain.Address;
+import com.erp.backend.dto.AddressDTO;
 import com.erp.backend.service.AddressService;
-import jakarta.annotation.PostConstruct;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/addresses")
@@ -19,15 +21,30 @@ public class AddressController {
         this.service = service;
     }
 
+    // --- Hilfsmethode für DTO Mapping ---
+    private AddressDTO toDTO(Address address) {
+        return new AddressDTO(address.getId(), address.getStreet(), address.getPostalCode(),
+                address.getCity(), address.getCountry());
+    }
+
+    private Address fromDTO(AddressDTO dto) {
+        Address addr = new Address();
+        addr.setStreet(dto.getStreet());
+        addr.setPostalCode(dto.getPostalCode());
+        addr.setCity(dto.getCity());
+        addr.setCountry(dto.getCountry());
+        return addr;
+    }
+
     @GetMapping
-    public List<Address> getAll() {
-        return service.findAll();
+    public List<AddressDTO> getAll() {
+        return service.findAll().stream().map(this::toDTO).collect(Collectors.toList());
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Address> getById(@PathVariable Long id) {
+    public ResponseEntity<AddressDTO> getById(@PathVariable Long id) {
         return service.findById(id)
-                .map(ResponseEntity::ok)
+                .map(addr -> ResponseEntity.ok(toDTO(addr)))
                 .orElse(ResponseEntity.notFound().build());
     }
 
@@ -38,10 +55,28 @@ public class AddressController {
     }
 
     @PostMapping
-    public ResponseEntity<Address> create(@RequestBody Address address) {
-        Address saved = service.save(address);
-        return ResponseEntity.ok(saved);
+    public ResponseEntity<AddressDTO> create(@RequestBody AddressDTO dto) {
+        Address saved = service.save(fromDTO(dto));
+        return ResponseEntity.ok(toDTO(saved));
     }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<Address> update(@PathVariable Long id, @RequestBody AddressDTO dto) {
+        Optional<Address> existing = service.findById(id);
+        if (existing.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        Address addr = existing.get();
+        addr.setStreet(dto.getStreet());
+        addr.setPostalCode(dto.getPostalCode());
+        addr.setCity(dto.getCity());
+        addr.setCountry(dto.getCountry());
+
+        Address updated = service.save(addr);
+        return ResponseEntity.ok(updated);
+    }
+
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
