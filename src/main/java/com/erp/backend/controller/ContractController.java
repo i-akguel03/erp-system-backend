@@ -2,6 +2,8 @@ package com.erp.backend.controller;
 
 import com.erp.backend.domain.Contract;
 import com.erp.backend.domain.ContractStatus;
+import com.erp.backend.dto.ContractDTO;
+import com.erp.backend.mapper.ContractMapper;
 import com.erp.backend.service.ContractService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,7 +41,7 @@ public class ContractController {
     }
 
     @GetMapping
-    public ResponseEntity<List<Contract>> getAllContracts(
+    public ResponseEntity<List<ContractDTO>> getAllContracts(
             @RequestParam(defaultValue = "false") boolean paginated,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size,
@@ -53,28 +55,31 @@ public class ContractController {
             Pageable pageable = PageRequest.of(page, size, sort);
             Page<Contract> contractPage = service.getAllContracts(pageable);
 
-            logger.debug("Found {} contracts on page {}/{}",
-                    contractPage.getNumberOfElements(), page + 1, contractPage.getTotalPages());
+            List<ContractDTO> dtoList = contractPage.getContent().stream()
+                    .map(ContractMapper::toDTO)
+                    .toList();
 
             return ResponseEntity.ok()
                     .header("X-Total-Count", String.valueOf(contractPage.getTotalElements()))
                     .header("X-Total-Pages", String.valueOf(contractPage.getTotalPages()))
                     .header("X-Current-Page", String.valueOf(page))
-                    .body(contractPage.getContent());
+                    .body(dtoList);
         } else {
-            List<Contract> contracts = service.getAllContracts();
-            logger.debug("Found {} contracts", contracts.size());
-            return ResponseEntity.ok(contracts);
+            List<ContractDTO> dtoList = service.getAllContracts().stream()
+                    .map(ContractMapper::toDTO)
+                    .toList();
+
+            return ResponseEntity.ok(dtoList);
         }
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Contract> getContractById(@PathVariable UUID id) {
+    public ResponseEntity<ContractDTO> getContractById(@PathVariable UUID id) {
         logger.info("GET /api/contracts/{} - Fetching contract by ID", id);
         return service.getContractById(id)
                 .map(contract -> {
                     logger.debug("Contract found: {}", contract.getContractNumber());
-                    return ResponseEntity.ok(contract);
+                    return ResponseEntity.ok(ContractMapper.toDTO(contract));
                 })
                 .orElseGet(() -> {
                     logger.warn("Contract with ID {} not found", id);
@@ -83,203 +88,115 @@ public class ContractController {
     }
 
     @GetMapping("/by-number/{contractNumber}")
-    public ResponseEntity<Contract> getContractByNumber(@PathVariable String contractNumber) {
+    public ResponseEntity<ContractDTO> getContractByNumber(@PathVariable String contractNumber) {
         logger.info("GET /api/contracts/by-number/{} - Fetching contract by number", contractNumber);
         return service.getContractByNumber(contractNumber)
-                .map(contract -> {
-                    logger.debug("Contract found with number: {}", contractNumber);
-                    return ResponseEntity.ok(contract);
-                })
-                .orElseGet(() -> {
-                    logger.warn("Contract with number {} not found", contractNumber);
-                    return ResponseEntity.notFound().build();
-                });
+                .map(contract -> ResponseEntity.ok(ContractMapper.toDTO(contract)))
+                .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     @GetMapping("/customer/{customerId}")
-    public ResponseEntity<List<Contract>> getContractsByCustomer(
+    public ResponseEntity<List<ContractDTO>> getContractsByCustomer(
             @PathVariable UUID customerId,
             @RequestParam(defaultValue = "false") boolean activeOnly) {
 
-        logger.info("GET /api/contracts/customer/{} - Fetching contracts by customer (activeOnly: {})",
-                customerId, activeOnly);
+        List<Contract> contracts = activeOnly ?
+                service.getActiveContractsByCustomer(customerId) :
+                service.getContractsByCustomer(customerId);
 
-        try {
-            List<Contract> contracts = activeOnly ?
-                    service.getActiveContractsByCustomer(customerId) :
-                    service.getContractsByCustomer(customerId);
-
-            logger.debug("Found {} contracts for customer {}", contracts.size(), customerId);
-            return ResponseEntity.ok(contracts);
-        } catch (IllegalArgumentException e) {
-            logger.error("Customer not found: {}", e.getMessage());
-            return ResponseEntity.notFound().build();
-        }
+        return ResponseEntity.ok(
+                contracts.stream().map(ContractMapper::toDTO).toList()
+        );
     }
 
     @GetMapping("/status/{status}")
-    public ResponseEntity<List<Contract>> getContractsByStatus(@PathVariable ContractStatus status) {
-        logger.info("GET /api/contracts/status/{} - Fetching contracts by status", status);
+    public ResponseEntity<List<ContractDTO>> getContractsByStatus(@PathVariable ContractStatus status) {
         List<Contract> contracts = service.getContractsByStatus(status);
-        logger.debug("Found {} contracts with status {}", contracts.size(), status);
-        return ResponseEntity.ok(contracts);
+        return ResponseEntity.ok(
+                contracts.stream().map(ContractMapper::toDTO).toList()
+        );
     }
 
     @GetMapping("/expiring")
-    public ResponseEntity<List<Contract>> getContractsExpiringInDays(
+    public ResponseEntity<List<ContractDTO>> getContractsExpiringInDays(
             @RequestParam(defaultValue = "30") int days) {
-        logger.info("GET /api/contracts/expiring?days={} - Fetching contracts expiring in {} days", days, days);
         List<Contract> contracts = service.getContractsExpiringInDays(days);
-        logger.debug("Found {} contracts expiring in next {} days", contracts.size(), days);
-        return ResponseEntity.ok(contracts);
+        return ResponseEntity.ok(
+                contracts.stream().map(ContractMapper::toDTO).toList()
+        );
     }
 
     @GetMapping("/expired")
-    public ResponseEntity<List<Contract>> getExpiredContracts() {
-        logger.info("GET /api/contracts/expired - Fetching expired contracts");
+    public ResponseEntity<List<ContractDTO>> getExpiredContracts() {
         List<Contract> contracts = service.getExpiredContracts();
-        logger.debug("Found {} expired contracts", contracts.size());
-        return ResponseEntity.ok(contracts);
+        return ResponseEntity.ok(
+                contracts.stream().map(ContractMapper::toDTO).toList()
+        );
     }
 
     @GetMapping("/search")
-    public ResponseEntity<List<Contract>> searchContracts(@RequestParam String q) {
-        logger.info("GET /api/contracts/search?q={} - Searching contracts by title", q);
+    public ResponseEntity<List<ContractDTO>> searchContracts(@RequestParam String q) {
         List<Contract> contracts = service.searchContractsByTitle(q);
-        logger.debug("Found {} contracts matching search term: '{}'", contracts.size(), q);
-        return ResponseEntity.ok(contracts);
+        return ResponseEntity.ok(
+                contracts.stream().map(ContractMapper::toDTO).toList()
+        );
     }
 
     @GetMapping("/with-active-subscriptions")
-    public ResponseEntity<List<Contract>> getContractsWithActiveSubscriptions() {
-        logger.info("GET /api/contracts/with-active-subscriptions - Fetching contracts with active subscriptions");
+    public ResponseEntity<List<ContractDTO>> getContractsWithActiveSubscriptions() {
         List<Contract> contracts = service.getContractsWithActiveSubscriptions();
-        logger.debug("Found {} contracts with active subscriptions", contracts.size());
-        return ResponseEntity.ok(contracts);
+        return ResponseEntity.ok(
+                contracts.stream().map(ContractMapper::toDTO).toList()
+        );
     }
 
     @GetMapping("/count")
     public ResponseEntity<Long> getContractCount() {
-        logger.info("GET /api/contracts/count - Fetching contract count");
-        long count = service.getTotalContractCount();
-        logger.debug("Total contract count: {}", count);
-        return ResponseEntity.ok(count);
+        return ResponseEntity.ok(service.getTotalContractCount());
     }
 
     @GetMapping("/customer/{customerId}/active-count")
     public ResponseEntity<Long> getActiveContractCountByCustomer(@PathVariable UUID customerId) {
-        logger.info("GET /api/contracts/customer/{}/active-count - Fetching active contract count", customerId);
-        try {
-            Long count = service.getActiveContractCountByCustomer(customerId);
-            logger.debug("Active contract count for customer {}: {}", customerId, count);
-            return ResponseEntity.ok(count);
-        } catch (IllegalArgumentException e) {
-            logger.error("Customer not found: {}", e.getMessage());
-            return ResponseEntity.notFound().build();
-        }
+        return ResponseEntity.ok(service.getActiveContractCountByCustomer(customerId));
     }
 
     @PostMapping
-    public ResponseEntity<Contract> createContract(@RequestBody Contract contract) {
-        logger.info("POST /api/contracts - Creating new contract for customer {}",
-                contract.getCustomer() != null ? contract.getCustomer().getId() : "null");
-        logger.debug("RequestBody {}", contract.toString());
-
-        try {
-            Contract created = service.createContract(contract);
-            logger.info("Created contract with ID {} and number {}", created.getId(), created.getContractNumber());
-            return ResponseEntity.status(HttpStatus.CREATED).body(created);
-        } catch (IllegalArgumentException e) {
-            logger.error("Validation error creating contract: {}", e.getMessage());
-            return ResponseEntity.badRequest().build();
-        } catch (Exception e) {
-            logger.error("Error creating contract: {}", e.getMessage(), e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-        }
+    public ResponseEntity<ContractDTO> createContract(@RequestBody ContractDTO dto) {
+        Contract created = service.createContract(ContractMapper.toEntity(dto));
+        return ResponseEntity.status(HttpStatus.CREATED).body(ContractMapper.toDTO(created));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Contract> updateContract(@PathVariable UUID id, @RequestBody Contract updated) {
-        logger.info("PUT /api/contracts/{} - Updating contract", id);
-
-        try {
-            updated.setId(id); // Ensure ID is set
-            Contract saved = service.updateContract(updated);
-            logger.info("Updated contract with ID {}", saved.getId());
-            return ResponseEntity.ok(saved);
-        } catch (IllegalArgumentException e) {
-            logger.error("Contract not found or validation error: {}", e.getMessage());
-            return ResponseEntity.notFound().build();
-        } catch (Exception e) {
-            logger.error("Error updating contract: {}", e.getMessage(), e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-        }
+    public ResponseEntity<ContractDTO> updateContract(@PathVariable UUID id, @RequestBody ContractDTO dto) {
+        Contract entity = ContractMapper.toEntity(dto);
+        entity.setId(id);
+        Contract updated = service.updateContract(entity);
+        return ResponseEntity.ok(ContractMapper.toDTO(updated));
     }
 
     @PatchMapping("/{id}/activate")
-    public ResponseEntity<Contract> activateContract(@PathVariable UUID id) {
-        logger.info("PATCH /api/contracts/{}/activate - Activating contract", id);
-        try {
-            Contract activated = service.activateContract(id);
-            logger.info("Activated contract with ID {}", activated.getId());
-            return ResponseEntity.ok(activated);
-        } catch (IllegalArgumentException e) {
-            logger.error("Contract not found: {}", e.getMessage());
-            return ResponseEntity.notFound().build();
-        } catch (Exception e) {
-            logger.error("Error activating contract: {}", e.getMessage(), e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-        }
+    public ResponseEntity<ContractDTO> activateContract(@PathVariable UUID id) {
+        Contract activated = service.activateContract(id);
+        return ResponseEntity.ok(ContractMapper.toDTO(activated));
     }
 
     @PatchMapping("/{id}/terminate")
-    public ResponseEntity<Contract> terminateContract(
+    public ResponseEntity<ContractDTO> terminateContract(
             @PathVariable UUID id,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate terminationDate) {
-
-        logger.info("PATCH /api/contracts/{}/terminate - Terminating contract (date: {})", id, terminationDate);
-        try {
-            Contract terminated = service.terminateContract(id, terminationDate);
-            logger.info("Terminated contract with ID {} on {}", terminated.getId(), terminated.getEndDate());
-            return ResponseEntity.ok(terminated);
-        } catch (IllegalArgumentException e) {
-            logger.error("Contract not found: {}", e.getMessage());
-            return ResponseEntity.notFound().build();
-        } catch (Exception e) {
-            logger.error("Error terminating contract: {}", e.getMessage(), e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-        }
+        Contract terminated = service.terminateContract(id, terminationDate);
+        return ResponseEntity.ok(ContractMapper.toDTO(terminated));
     }
 
     @PatchMapping("/{id}/suspend")
-    public ResponseEntity<Contract> suspendContract(@PathVariable UUID id) {
-        logger.info("PATCH /api/contracts/{}/suspend - Suspending contract", id);
-        try {
-            Contract suspended = service.suspendContract(id);
-            logger.info("Suspended contract with ID {}", suspended.getId());
-            return ResponseEntity.ok(suspended);
-        } catch (IllegalArgumentException e) {
-            logger.error("Contract not found: {}", e.getMessage());
-            return ResponseEntity.notFound().build();
-        } catch (Exception e) {
-            logger.error("Error suspending contract: {}", e.getMessage(), e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-        }
+    public ResponseEntity<ContractDTO> suspendContract(@PathVariable UUID id) {
+        Contract suspended = service.suspendContract(id);
+        return ResponseEntity.ok(ContractMapper.toDTO(suspended));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteContract(@PathVariable UUID id) {
-        logger.info("DELETE /api/contracts/{} - Deleting contract", id);
-        try {
-            service.deleteContract(id);
-            logger.info("Deleted contract with ID {}", id);
-            return ResponseEntity.noContent().build();
-        } catch (IllegalArgumentException e) {
-            logger.error("Contract not found for deletion: {}", e.getMessage());
-            return ResponseEntity.notFound().build();
-        } catch (Exception e) {
-            logger.error("Error deleting contract: {}", e.getMessage(), e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-        }
+        service.deleteContract(id);
+        return ResponseEntity.noContent().build();
     }
 }

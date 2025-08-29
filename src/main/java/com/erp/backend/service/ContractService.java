@@ -33,261 +33,181 @@ public class ContractService {
         this.customerRepository = customerRepository;
     }
 
+    // --- Testdaten initialisieren ---
     public void initTestContracts() {
-        if(contractRepository.count() > 0) return; // nur einmal
+        if(contractRepository.count() > 0) return;
 
         List<Customer> customers = customerRepository.findAll();
-        if(customers.isEmpty()) return; // Keine Kunden, nichts zu erstellen
+        if(customers.isEmpty()) return;
 
         Random random = new Random();
 
         for(int i = 1; i <= 15; i++) {
             Customer randomCustomer = customers.get(random.nextInt(customers.size()));
-
-            LocalDate startDate = LocalDate.now().minusDays(random.nextInt(365)); // innerhalb letzten Jahres
+            LocalDate startDate = LocalDate.now().minusDays(random.nextInt(365));
             Contract contract = new Contract(
                     "Testvertrag " + i,
                     startDate,
                     randomCustomer
             );
-
-            // Eindeutige ID erzwingen (falls nicht automatisch generiert)
-            contract.setId(null);
-
-            // Zufälliger Status
-            ContractStatus status = ContractStatus.values()[random.nextInt(ContractStatus.values().length)];
-            contract.setContractStatus(status);
-
-            // Optional: Enddatum bei TERMINATED setzen
-            if(status == ContractStatus.TERMINATED) {
+            contract.setId(null); // ID von DB generieren lassen
+            contract.setContractStatus(ContractStatus.values()[random.nextInt(ContractStatus.values().length)]);
+            if(contract.getContractStatus() == ContractStatus.TERMINATED) {
                 contract.setEndDate(startDate.plusMonths(random.nextInt(12) + 1));
             }
-
-            // Eindeutige Vertragsnummer generieren
             contract.setContractNumber(generateContractNumber());
-
             contractRepository.save(contract);
         }
 
         logger.info("Testcontracts initialized: {}", contractRepository.count());
     }
 
-
+    // --- CRUD & Read ---
     @Transactional(readOnly = true)
     public List<Contract> getAllContracts() {
         List<Contract> contracts = contractRepository.findAll();
-        logger.info("Fetched {} contracts", contracts.size());
+        contracts.forEach(c -> {
+            c.getCustomer().getId(); // Customer initialisieren
+            c.getSubscriptions().size(); // Subscriptions initialisieren
+        });
         return contracts;
     }
 
     @Transactional(readOnly = true)
     public Page<Contract> getAllContracts(Pageable pageable) {
-        Page<Contract> contracts = contractRepository.findAll(pageable);
-        logger.info("Fetched {} contracts (page {}/{})",
-                contracts.getNumberOfElements(), contracts.getNumber() + 1, contracts.getTotalPages());
-        return contracts;
+        return contractRepository.findAll(pageable);
     }
 
     @Transactional(readOnly = true)
     public Optional<Contract> getContractById(UUID id) {
-        Optional<Contract> contract = contractRepository.findById(id);
-        if (contract.isPresent()) {
-            logger.info("Found contract with id={}", id);
-        } else {
-            logger.warn("No contract found with id={}", id);
-        }
-        return contract;
+        return contractRepository.findById(id);
     }
 
     @Transactional(readOnly = true)
     public Optional<Contract> getContractByNumber(String contractNumber) {
-        Optional<Contract> contract = contractRepository.findByContractNumber(contractNumber);
-        logger.info("Search for contract with number={}: {}", contractNumber, contract.isPresent() ? "found" : "not found");
-        return contract;
+        return contractRepository.findByContractNumber(contractNumber);
     }
 
     @Transactional(readOnly = true)
     public List<Contract> getContractsByCustomer(UUID customerId) {
         Customer customer = customerRepository.findById(customerId)
                 .orElseThrow(() -> new IllegalArgumentException("Customer not found with ID: " + customerId));
-        List<Contract> contracts = contractRepository.findByCustomer(customer);
-        logger.info("Found {} contracts for customer {}", contracts.size(), customerId);
-        return contracts;
+        return contractRepository.findByCustomer(customer);
     }
 
     @Transactional(readOnly = true)
     public List<Contract> getActiveContractsByCustomer(UUID customerId) {
         Customer customer = customerRepository.findById(customerId)
                 .orElseThrow(() -> new IllegalArgumentException("Customer not found with ID: " + customerId));
-        List<Contract> contracts = contractRepository.findByCustomerAndContractStatus(customer, ContractStatus.ACTIVE);
-        logger.info("Found {} active contracts for customer {}", contracts.size(), customerId);
-        return contracts;
+        return contractRepository.findByCustomerAndContractStatus(customer, ContractStatus.ACTIVE);
     }
 
     @Transactional(readOnly = true)
     public List<Contract> getContractsByStatus(ContractStatus status) {
-        List<Contract> contracts = contractRepository.findByContractStatus(status);
-        logger.info("Found {} contracts with status {}", contracts.size(), status);
-        return contracts;
+        return contractRepository.findByContractStatus(status);
     }
 
     @Transactional(readOnly = true)
     public List<Contract> getContractsExpiringInDays(int days) {
         LocalDate startDate = LocalDate.now();
         LocalDate endDate = startDate.plusDays(days);
-        List<Contract> contracts = contractRepository.findContractsExpiringBetween(startDate, endDate);
-        logger.info("Found {} contracts expiring in next {} days", contracts.size(), days);
-        return contracts;
+        return contractRepository.findContractsExpiringBetween(startDate, endDate);
     }
 
     @Transactional(readOnly = true)
     public List<Contract> getExpiredContracts() {
-        List<Contract> contracts = contractRepository.findExpiredContracts(LocalDate.now());
-        logger.info("Found {} expired contracts", contracts.size());
-        return contracts;
+        return contractRepository.findExpiredContracts(LocalDate.now());
     }
 
     @Transactional(readOnly = true)
     public List<Contract> searchContractsByTitle(String title) {
-        List<Contract> contracts = contractRepository.findByContractTitleContainingIgnoreCase(title);
-        logger.info("Found {} contracts matching title search: '{}'", contracts.size(), title);
-        return contracts;
-    }
-
-    public Contract createContract(Contract contract) {
-        validateContractForCreation(contract);
-
-        // Keine ID setzen, wird von DB generiert
-        contract.setId(null);
-
-        // Vertragsnummer generieren
-        contract.setContractNumber(generateContractNumber());
-
-        // Status setzen falls nicht vorhanden
-        if (contract.getContractStatus() == null) {
-            contract.setContractStatus(ContractStatus.ACTIVE);
-        }
-
-        Contract saved = contractRepository.save(contract);
-        logger.info("Created new contract: id={}, contractNumber={}, customer={}",
-                saved.getId(), saved.getContractNumber(), saved.getCustomer().getId());
-        return saved;
-    }
-
-    public Contract updateContract(Contract contract) {
-        if (contract.getId() == null) {
-            throw new IllegalArgumentException("Contract ID cannot be null for update");
-        }
-
-        if (!contractRepository.existsById(contract.getId())) {
-            throw new IllegalArgumentException("Contract not found with ID: " + contract.getId());
-        }
-
-        Contract saved = contractRepository.save(contract);
-        logger.info("Updated contract: id={}, contractNumber={}", saved.getId(), saved.getContractNumber());
-        return saved;
-    }
-
-    public Contract activateContract(UUID contractId) {
-        Contract contract = contractRepository.findById(contractId)
-                .orElseThrow(() -> new IllegalArgumentException("Contract not found with ID: " + contractId));
-
-        contract.setContractStatus(ContractStatus.ACTIVE);
-        if (contract.getStartDate() == null) {
-            contract.setStartDate(LocalDate.now());
-        }
-
-        Contract saved = contractRepository.save(contract);
-        logger.info("Activated contract: id={}, contractNumber={}", saved.getId(), saved.getContractNumber());
-        return saved;
-    }
-
-    public Contract terminateContract(UUID contractId, LocalDate terminationDate) {
-        Contract contract = contractRepository.findById(contractId)
-                .orElseThrow(() -> new IllegalArgumentException("Contract not found with ID: " + contractId));
-
-        contract.setContractStatus(ContractStatus.TERMINATED);
-        contract.setEndDate(terminationDate != null ? terminationDate : LocalDate.now());
-
-        Contract saved = contractRepository.save(contract);
-        logger.info("Terminated contract: id={}, contractNumber={}, endDate={}",
-                saved.getId(), saved.getContractNumber(), saved.getEndDate());
-        return saved;
-    }
-
-    public Contract suspendContract(UUID contractId) {
-        Contract contract = contractRepository.findById(contractId)
-                .orElseThrow(() -> new IllegalArgumentException("Contract not found with ID: " + contractId));
-
-        contract.setContractStatus(ContractStatus.SUSPENDED);
-
-        Contract saved = contractRepository.save(contract);
-        logger.info("Suspended contract: id={}, contractNumber={}", saved.getId(), saved.getContractNumber());
-        return saved;
-    }
-
-    public void deleteContract(UUID id) {
-        if (!contractRepository.existsById(id)) {
-            throw new IllegalArgumentException("Contract not found with ID: " + id);
-        }
-        contractRepository.deleteById(id);
-        logger.info("Deleted contract with id={}", id);
+        return contractRepository.findByContractTitleContainingIgnoreCase(title);
     }
 
     @Transactional(readOnly = true)
     public long getTotalContractCount() {
-        long count = contractRepository.count();
-        logger.info("Total contract count: {}", count);
-        return count;
+        return contractRepository.count();
     }
 
     @Transactional(readOnly = true)
     public Long getActiveContractCountByCustomer(UUID customerId) {
         Customer customer = customerRepository.findById(customerId)
                 .orElseThrow(() -> new IllegalArgumentException("Customer not found with ID: " + customerId));
-        Long count = contractRepository.countActiveContractsByCustomer(customer);
-        logger.info("Active contract count for customer {}: {}", customerId, count);
-        return count;
+        return contractRepository.countActiveContractsByCustomer(customer);
     }
 
     @Transactional(readOnly = true)
     public List<Contract> getContractsWithActiveSubscriptions() {
-        List<Contract> contracts = contractRepository.findContractsWithActiveSubscriptions();
-        logger.info("Found {} contracts with active subscriptions", contracts.size());
-        return contracts;
+        return contractRepository.findContractsWithActiveSubscriptions();
     }
 
-    // Private Hilfsmethoden
+    // --- Create / Update ---
+    public Contract createContract(Contract contract) {
+        validateContractForCreation(contract);
+        contract.setId(null);
+        if(contract.getContractStatus() == null) contract.setContractStatus(ContractStatus.ACTIVE);
+        contract.setContractNumber(generateContractNumber());
+        return contractRepository.save(contract);
+    }
+
+    public Contract updateContract(Contract contract) {
+        if(contract.getId() == null) throw new IllegalArgumentException("Contract ID cannot be null for update");
+        if(!contractRepository.existsById(contract.getId())) throw new IllegalArgumentException("Contract not found with ID: " + contract.getId());
+        // Customer darf nicht null sein
+        Contract existing = contractRepository.findById(contract.getId()).get();
+        if(contract.getCustomer() == null) {
+            contract.setCustomer(existing.getCustomer());
+        }
+        return contractRepository.save(contract);
+    }
+
+    public void deleteContract(UUID id) {
+        if(!contractRepository.existsById(id)) throw new IllegalArgumentException("Contract not found with ID: " + id);
+        contractRepository.deleteById(id);
+    }
+
+    // --- Statusänderungen nur mit contractId ---
+    public Contract activateContract(UUID contractId) {
+        Contract contract = getContractForStatusUpdate(contractId);
+        contract.setContractStatus(ContractStatus.ACTIVE);
+        if(contract.getStartDate() == null) contract.setStartDate(LocalDate.now());
+        return contractRepository.save(contract);
+    }
+
+    public Contract suspendContract(UUID contractId) {
+        Contract contract = getContractForStatusUpdate(contractId);
+        contract.setContractStatus(ContractStatus.SUSPENDED);
+        return contractRepository.save(contract);
+    }
+
+    public Contract terminateContract(UUID contractId, LocalDate terminationDate) {
+        Contract contract = getContractForStatusUpdate(contractId);
+        contract.setContractStatus(ContractStatus.TERMINATED);
+        contract.setEndDate(terminationDate != null ? terminationDate : LocalDate.now());
+        return contractRepository.save(contract);
+    }
+
+    // --- Private Hilfsmethoden ---
+    private Contract getContractForStatusUpdate(UUID contractId) {
+        return contractRepository.findById(contractId)
+                .orElseThrow(() -> new IllegalArgumentException("Contract not found with ID: " + contractId));
+    }
 
     private void validateContractForCreation(Contract contract) {
-        if (contract.getContractTitle() == null || contract.getContractTitle().trim().isEmpty()) {
-            throw new IllegalArgumentException("Contract title is required");
-        }
-        if (contract.getStartDate() == null) {
-            throw new IllegalArgumentException("Start date is required");
-        }
-        if (contract.getCustomer() == null || contract.getCustomer().getId() == null) {
-            throw new IllegalArgumentException("Customer is required");
-        }
-
-        // Kunde muss existieren
-        if (!customerRepository.existsById(contract.getCustomer().getId())) {
-            throw new IllegalArgumentException("Customer not found with ID: " + contract.getCustomer().getId());
-        }
+        if(contract.getContractTitle() == null || contract.getContractTitle().trim().isEmpty()) throw new IllegalArgumentException("Contract title is required");
+        if(contract.getStartDate() == null) throw new IllegalArgumentException("Start date is required");
+        if(contract.getCustomer() == null || contract.getCustomer().getId() == null) throw new IllegalArgumentException("Customer is required");
+        if(!customerRepository.existsById(contract.getCustomer().getId())) throw new IllegalArgumentException("Customer not found with ID: " + contract.getCustomer().getId());
     }
 
     private String generateContractNumber() {
         String prefix = "CT";
         String year = String.valueOf(LocalDate.now().getYear());
-        String randomPart;
         String contractNumber;
-
         do {
             int number = (int) (Math.random() * 999999) + 1;
-            randomPart = String.format("%06d", number);
-            contractNumber = prefix + year + randomPart;
-        } while (contractRepository.findByContractNumber(contractNumber).isPresent());
-
+            contractNumber = prefix + year + String.format("%06d", number);
+        } while(contractRepository.findByContractNumber(contractNumber).isPresent());
         return contractNumber;
     }
 }
