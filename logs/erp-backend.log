@@ -6381,3 +6381,49 @@ io.jsonwebtoken.security.SignatureException: JWT signature does not match locall
 2025-08-29T12:05:01.100+02:00  INFO 13668 --- [erp-system-backend] [http-nio-8080-exec-10] c.e.b.controller.ProductController       : DELETE /api/products/1fd26497-51e5-4bbd-897f-20ab038d8ec7 - Deleting product
 2025-08-29T12:05:01.922+02:00  INFO 13668 --- [erp-system-backend] [http-nio-8080-exec-10] com.erp.backend.service.ProductService   : Deleted product with id=1fd26497-51e5-4bbd-897f-20ab038d8ec7
 2025-08-29T12:05:01.922+02:00  INFO 13668 --- [erp-system-backend] [http-nio-8080-exec-10] c.e.b.controller.ProductController       : Deleted product with ID 1fd26497-51e5-4bbd-897f-20ab038d8ec7
+2025-08-29T12:10:21.008+02:00  INFO 13668 --- [erp-system-backend] [SpringApplicationShutdownHook] o.s.b.w.e.tomcat.GracefulShutdown        : Commencing graceful shutdown. Waiting for active requests to complete
+2025-08-29T12:10:21.018+02:00  INFO 13668 --- [erp-system-backend] [tomcat-shutdown] o.s.b.w.e.tomcat.GracefulShutdown        : Graceful shutdown complete
+2025-08-29T12:10:21.031+02:00  INFO 13668 --- [erp-system-backend] [SpringApplicationShutdownHook] j.LocalContainerEntityManagerFactoryBean : Closing JPA EntityManagerFactory for persistence unit 'default'
+2025-08-29T12:10:21.044+02:00  INFO 13668 --- [erp-system-backend] [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown initiated...
+2025-08-29T12:10:22.664+02:00  INFO 13668 --- [erp-system-backend] [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown completed.
+2025-08-29T12:25:15.468+02:00  INFO 14396 --- [erp-system-backend] [restartedMain] c.e.backend.ErpSystemBackendApplication  : Starting ErpSystemBackendApplication using Java 24.0.1 with PID 14396 (C:\Users\ibrah\Desktop\ERP-Backend\erp-system-backend\target\classes started by ibrah in C:\Users\ibrah\Desktop\ERP-Backend\erp-system-backend)
+2025-08-29T12:25:15.470+02:00 DEBUG 14396 --- [erp-system-backend] [restartedMain] c.e.backend.ErpSystemBackendApplication  : Running with Spring Boot v3.5.3, Spring v6.2.8
+2025-08-29T12:25:15.471+02:00  INFO 14396 --- [erp-system-backend] [restartedMain] c.e.backend.ErpSystemBackendApplication  : No active profile set, falling back to 1 default profile: "default"
+2025-08-29T12:25:15.539+02:00  INFO 14396 --- [erp-system-backend] [restartedMain] .e.DevToolsPropertyDefaultsPostProcessor : Devtools property defaults active! Set 'spring.devtools.add-properties' to 'false' to disable
+2025-08-29T12:25:15.540+02:00  INFO 14396 --- [erp-system-backend] [restartedMain] .e.DevToolsPropertyDefaultsPostProcessor : For additional web related logging consider setting the 'logging.level.web' property to 'DEBUG'
+2025-08-29T12:25:16.918+02:00  INFO 14396 --- [erp-system-backend] [restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2025-08-29T12:25:17.020+02:00  INFO 14396 --- [erp-system-backend] [restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 90 ms. Found 11 JPA repository interfaces.
+2025-08-29T12:25:18.011+02:00  INFO 14396 --- [erp-system-backend] [restartedMain] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port 8080 (http)
+2025-08-29T12:25:18.043+02:00  INFO 14396 --- [erp-system-backend] [restartedMain] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2025-08-29T12:25:18.044+02:00  INFO 14396 --- [erp-system-backend] [restartedMain] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.42]
+2025-08-29T12:25:18.203+02:00  INFO 14396 --- [erp-system-backend] [restartedMain] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
+2025-08-29T12:25:18.203+02:00  INFO 14396 --- [erp-system-backend] [restartedMain] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 2663 ms
+2025-08-29T12:25:18.548+02:00  INFO 14396 --- [erp-system-backend] [restartedMain] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: default]
+2025-08-29T12:25:18.638+02:00  INFO 14396 --- [erp-system-backend] [restartedMain] org.hibernate.Version                    : HHH000412: Hibernate ORM core version 6.6.18.Final
+2025-08-29T12:25:18.704+02:00  INFO 14396 --- [erp-system-backend] [restartedMain] o.h.c.internal.RegionFactoryInitiator    : HHH000026: Second-level cache disabled
+2025-08-29T12:25:19.036+02:00  INFO 14396 --- [erp-system-backend] [restartedMain] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2025-08-29T12:25:19.067+02:00  INFO 14396 --- [erp-system-backend] [restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2025-08-29T12:25:20.833+02:00  INFO 14396 --- [erp-system-backend] [restartedMain] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection org.postgresql.jdbc.PgConnection@2e9d7ce2
+2025-08-29T12:25:20.835+02:00  INFO 14396 --- [erp-system-backend] [restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2025-08-29T12:25:21.028+02:00  WARN 14396 --- [erp-system-backend] [restartedMain] org.hibernate.orm.deprecation            : HHH90000025: PostgreSQLDialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2025-08-29T12:25:21.531+02:00  INFO 14396 --- [erp-system-backend] [restartedMain] org.hibernate.orm.connections.pooling    : HHH10001005: Database info:
+	Database JDBC URL [Connecting through datasource 'HikariDataSource (HikariPool-1)']
+	Database driver: undefined/unknown
+	Database version: 17.6
+	Autocommit mode: undefined/unknown
+	Isolation level: undefined/unknown
+	Minimum pool size: undefined/unknown
+	Maximum pool size: undefined/unknown
+2025-08-29T12:25:22.590+02:00  INFO 14396 --- [erp-system-backend] [restartedMain] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2025-08-29T12:25:44.063+02:00  INFO 14396 --- [erp-system-backend] [restartedMain] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2025-08-29T12:25:44.416+02:00 DEBUG 14396 --- [erp-system-backend] [restartedMain] com.erp.backend.config.JwtAuthFilter     : Filter 'jwtAuthFilter' configured for use
+2025-08-29T12:25:44.545+02:00  INFO 14396 --- [erp-system-backend] [restartedMain] o.s.d.j.r.query.QueryEnhancerFactory     : Hibernate is in classpath; If applicable, HQL parser will be used.
+2025-08-29T12:25:45.943+02:00  WARN 14396 --- [erp-system-backend] [restartedMain] JpaBaseConfiguration$JpaWebConfiguration : spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2025-08-29T12:25:45.979+02:00  INFO 14396 --- [erp-system-backend] [restartedMain] r$InitializeUserDetailsManagerConfigurer : Global AuthenticationManager configured with UserDetailsService bean with name userDetailsService
+2025-08-29T12:25:46.377+02:00  INFO 14396 --- [erp-system-backend] [restartedMain] o.s.b.a.e.web.EndpointLinksResolver      : Exposing 4 endpoints beneath base path '/actuator'
+2025-08-29T12:25:46.764+02:00  INFO 14396 --- [erp-system-backend] [restartedMain] o.s.b.d.a.OptionalLiveReloadServer       : LiveReload server is running on port 35729
+2025-08-29T12:25:46.837+02:00  INFO 14396 --- [erp-system-backend] [restartedMain] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port 8080 (http) with context path '/'
+2025-08-29T12:25:46.851+02:00  INFO 14396 --- [erp-system-backend] [restartedMain] c.e.backend.ErpSystemBackendApplication  : Started ErpSystemBackendApplication in 31.979 seconds (process running for 32.744)
+2025-08-29T12:25:46.970+02:00  INFO 14396 --- [erp-system-backend] [http-nio-8080-exec-1] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring DispatcherServlet 'dispatcherServlet'
+2025-08-29T12:25:46.971+02:00  INFO 14396 --- [erp-system-backend] [http-nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
+2025-08-29T12:25:46.971+02:00  INFO 14396 --- [erp-system-backend] [http-nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Completed initialization in 0 ms
