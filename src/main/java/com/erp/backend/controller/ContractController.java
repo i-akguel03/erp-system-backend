@@ -166,11 +166,29 @@ public class ContractController {
         return ResponseEntity.status(HttpStatus.CREATED).body(ContractMapper.toDTO(created));
     }
 
+
     @PutMapping("/{id}")
     public ResponseEntity<ContractDTO> updateContract(@PathVariable UUID id, @RequestBody ContractDTO dto) {
+        logger.info("=== CONTROLLER UPDATE DEBUG ===");
+        logger.info("PUT /api/contracts/{} - Updating contract", id);
+        logger.info("DTO Customer ID: {}", dto.getCustomerId());
+        logger.info("DTO Contract Title: {}", dto.getContractTitle());
+        logger.info("DTO Status: {}", dto.getContractStatus());
+
+        // DTO zu Entity konvertieren
         Contract entity = ContractMapper.toEntity(dto);
         entity.setId(id);
+
+        logger.info("Entity nach Mapping - Customer: {}", entity.getCustomer());
+        if (entity.getCustomer() != null) {
+            logger.info("Entity Customer ID: {}", entity.getCustomer().getId());
+        }
+
         Contract updated = service.updateContract(entity);
+
+        logger.info("Update abgeschlossen - Customer ID: {}", updated.getCustomer().getId());
+        logger.info("=== CONTROLLER UPDATE DEBUG END ===");
+
         return ResponseEntity.ok(ContractMapper.toDTO(updated));
     }
 

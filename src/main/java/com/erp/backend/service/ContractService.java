@@ -151,14 +151,58 @@ public class ContractService {
     }
 
     public Contract updateContract(Contract contract) {
+        logger.info("=== CONTRACT UPDATE DEBUG START ===");
+        logger.info("Contract ID: {}", contract.getId());
+        logger.info("Contract Title: {}", contract.getContractTitle());
+
         if(contract.getId() == null) throw new IllegalArgumentException("Contract ID cannot be null for update");
         if(!contractRepository.existsById(contract.getId())) throw new IllegalArgumentException("Contract not found with ID: " + contract.getId());
-        // Customer darf nicht null sein
+
+        // Existierenden Vertrag laden
         Contract existing = contractRepository.findById(contract.getId()).get();
-        if(contract.getCustomer() == null) {
-            contract.setCustomer(existing.getCustomer());
+        logger.info("Existing Customer ID: {}", existing.getCustomer().getId());
+        logger.info("Existing Customer Name: {} {}", existing.getCustomer().getFirstName(), existing.getCustomer().getLastName());
+
+        // Customer aus dem übergebenen Contract prüfen
+        logger.info("New Contract Customer: {}", contract.getCustomer());
+        if (contract.getCustomer() != null) {
+            logger.info("New Customer ID: {}", contract.getCustomer().getId());
+        } else {
+            logger.warn("New Contract Customer ist NULL!");
         }
-        return contractRepository.save(contract);
+
+        // KORRIGIERTE Customer-Logik
+        if(contract.getCustomer() == null || contract.getCustomer().getId() == null) {
+            logger.info("Behalte existierenden Customer");
+            contract.setCustomer(existing.getCustomer());
+        } else {
+            // Neuen Customer aus der Datenbank laden
+            UUID newCustomerId = contract.getCustomer().getId();
+            logger.info("Lade neuen Customer mit ID: {}", newCustomerId);
+
+            Customer newCustomer = customerRepository.findById(newCustomerId)
+                    .orElseThrow(() -> new IllegalArgumentException("Customer not found with ID: " + newCustomerId));
+
+            logger.info("Neuer Customer geladen: {} {}", newCustomer.getFirstName(), newCustomer.getLastName());
+            contract.setCustomer(newCustomer);
+
+            // Vergleich für Log
+            if (!existing.getCustomer().getId().equals(newCustomer.getId())) {
+                logger.info("Customer geändert von {} {} zu {} {}",
+                        existing.getCustomer().getFirstName(),
+                        existing.getCustomer().getLastName(),
+                        newCustomer.getFirstName(),
+                        newCustomer.getLastName());
+            } else {
+                logger.info("Customer bleibt unverändert");
+            }
+        }
+
+        Contract updated = contractRepository.save(contract);
+        logger.info("Contract gespeichert mit Customer ID: {}", updated.getCustomer().getId());
+        logger.info("=== CONTRACT UPDATE DEBUG END ===");
+
+        return updated;
     }
 
     public void deleteContract(UUID id) {

@@ -34,6 +34,7 @@ public class ContractMapper {
         return dto;
     }
 
+    // KORRIGIERT: toEntity mit Customer-Parameter
     public static Contract toEntity(ContractDTO dto, Customer customer) {
         Contract contract = new Contract();
         contract.setId(dto.getId());
@@ -43,11 +44,12 @@ public class ContractMapper {
         contract.setEndDate(dto.getEndDate());
         contract.setContractStatus(dto.getContractStatus());
         contract.setNotes(dto.getNotes());
-        contract.setCustomer(customer); // Customer musst du separat laden
+        contract.setCustomer(customer);
 
         return contract;
     }
 
+    // KORRIGIERT: toEntity ohne Customer-Parameter erstellt Customer-Stub mit ID
     public static Contract toEntity(ContractDTO dto) {
         Contract contract = new Contract();
         contract.setId(dto.getId());
@@ -57,8 +59,14 @@ public class ContractMapper {
         contract.setEndDate(dto.getEndDate());
         contract.setContractStatus(dto.getContractStatus());
         contract.setNotes(dto.getNotes());
-        // Customer wird hier NICHT gesetzt!
+
+        // WICHTIG: Customer-Stub mit ID erstellen, wenn customerId vorhanden
+        if (dto.getCustomerId() != null) {
+            Customer customerStub = new Customer();
+            customerStub.setId(dto.getCustomerId());
+            contract.setCustomer(customerStub);
+        }
+
         return contract;
     }
-
 }
