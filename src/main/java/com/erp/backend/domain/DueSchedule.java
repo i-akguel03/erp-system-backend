@@ -272,4 +272,8 @@ public class DueSchedule {
                 ", subscription=" + (subscription != null ? subscription.getId() : null) +
                 '}';
     }
+
+    public Boolean isReminderSent() {
+        return false;
+    }
 }

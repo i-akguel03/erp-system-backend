@@ -3,8 +3,6 @@ package com.erp.backend.repository;
 import com.erp.backend.domain.DueSchedule;
 import com.erp.backend.domain.DueStatus;
 import com.erp.backend.domain.Subscription;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -19,103 +17,106 @@ import java.util.UUID;
 @Repository
 public interface DueScheduleRepository extends JpaRepository<DueSchedule, UUID> {
 
-    // Suche nach Fälligkeitsnummer
+    // Basis-Abfragen
     Optional<DueSchedule> findByDueNumber(String dueNumber);
 
-    // Alle Fälligkeiten eines Abonnements
     List<DueSchedule> findBySubscription(Subscription subscription);
 
-    // Fälligkeiten mit Pagination für ein Abonnement
-    Page<DueSchedule> findBySubscription(Subscription subscription, Pageable pageable);
-
-    // Fälligkeiten nach Status
-    List<DueSchedule> findByStatus(DueStatus status);
-
-    // Fällige Zahlungen an einem bestimmten Datum
-    List<DueSchedule> findByDueDate(LocalDate dueDate);
-
-    // Überfällige Zahlungen
-    @Query("SELECT d FROM DueSchedule d WHERE d.status = 'PENDING' AND d.dueDate < :currentDate")
-    List<DueSchedule> findOverdueSchedules(@Param("currentDate") LocalDate currentDate);
-
-    // Fälligkeiten in einem Zeitraum
-    List<DueSchedule> findByDueDateBetween(LocalDate startDate, LocalDate endDate);
-
-    // Alle ausstehenden Fälligkeiten eines Abonnements
-    List<DueSchedule> findBySubscriptionAndStatus(Subscription subscription, DueStatus status);
-
-    // Fälligkeiten eines Abonnements nach Fälligkeitsdatum sortiert
     List<DueSchedule> findBySubscriptionOrderByDueDateAsc(Subscription subscription);
 
-    // Bezahlte Fälligkeiten in einem Zeitraum
-    List<DueSchedule> findByStatusAndPaidDateBetween(DueStatus status, LocalDate startDate, LocalDate endDate);
+    List<DueSchedule> findBySubscriptionAndStatusOrderByDueDateAsc(Subscription subscription, DueStatus status);
 
-    // Fälligkeiten die heute fällig sind
-    @Query("SELECT d FROM DueSchedule d WHERE d.dueDate = :today AND d.status = 'PENDING'")
-    List<DueSchedule> findDueTodaySchedules(@Param("today") LocalDate today);
+    List<DueSchedule> findByStatus(DueStatus status);
 
-    // Fälligkeiten die in den nächsten X Tagen fällig werden
-    @Query("SELECT d FROM DueSchedule d WHERE d.dueDate BETWEEN :startDate AND :endDate AND d.status = 'PENDING'")
+    // Subscription ID basierte Abfragen
+    List<DueSchedule> findBySubscriptionId(UUID subscriptionId);
+
+    List<DueSchedule> findBySubscriptionIdOrderByPeriodStart(UUID subscriptionId);
+
+    List<DueSchedule> findBySubscriptionAndDueDateAfter(Subscription subscription, LocalDate date);
+
+    List<DueSchedule> findByStatusAndDueDateBefore(DueStatus status, LocalDate date);
+
+    List<DueSchedule> findBySubscriptionAndStatusAndDueDateAfterOrderByDueDateAsc(
+            Subscription subscription, DueStatus status, LocalDate date);
+
+    // Datum-basierte Abfragen
+    List<DueSchedule> findByDueDateBetween(LocalDate startDate, LocalDate endDate);
+
+    @Query("SELECT ds FROM DueSchedule ds WHERE ds.dueDate < :currentDate AND ds.status IN (:pendingStatus, :partialStatus)")
+    List<DueSchedule> findOverdueSchedules(@Param("currentDate") LocalDate currentDate,
+                                           @Param("pendingStatus") DueStatus pendingStatus,
+                                           @Param("partialStatus") DueStatus partialStatus);
+
+    // Alternative ohne Parameter (falls DueStatus als Konstanten definiert sind)
+    @Query("SELECT ds FROM DueSchedule ds WHERE ds.dueDate < :currentDate AND (ds.status = 'PENDING' OR ds.status = 'PARTIAL_PAID')")
+    List<DueSchedule> findOverdueSchedules(@Param("currentDate") LocalDate currentDate);
+
+    @Query("SELECT ds FROM DueSchedule ds WHERE ds.dueDate = :currentDate AND (ds.status = 'PENDING' OR ds.status = 'PARTIAL_PAID')")
+    List<DueSchedule> findDueTodaySchedules(@Param("currentDate") LocalDate currentDate);
+
+    @Query("SELECT ds FROM DueSchedule ds WHERE ds.dueDate BETWEEN :startDate AND :endDate AND (ds.status = 'PENDING' OR ds.status = 'PARTIAL_PAID')")
     List<DueSchedule> findUpcomingDueSchedules(@Param("startDate") LocalDate startDate,
                                                @Param("endDate") LocalDate endDate);
 
-    // Summe aller ausstehenden Beträge für ein Abonnement
-    @Query("SELECT COALESCE(SUM(d.amount - d.paidAmount), 0) FROM DueSchedule d WHERE d.subscription = :subscription AND d.status = 'PENDING'")
-    BigDecimal sumPendingAmountBySubscription(@Param("subscription") Subscription subscription);
+    // Mahnungs-bezogene Abfragen
+    @Query("SELECT ds FROM DueSchedule ds WHERE ds.dueDate < :currentDate AND " +
+            "(ds.reminderSent = false OR ds.lastReminderDate IS NULL OR ds.lastReminderDate < :reminderThreshold) AND " +
+            "(ds.status = 'PENDING' OR ds.status = 'PARTIAL_PAID')")
+    List<DueSchedule> findSchedulesNeedingReminder(@Param("currentDate") LocalDate currentDate,
+                                                   @Param("reminderThreshold") LocalDate reminderThreshold);
 
-    // Summe aller bezahlten Beträge für ein Abonnement
-    @Query("SELECT COALESCE(SUM(d.paidAmount), 0) FROM DueSchedule d WHERE d.subscription = :subscription AND d.status = 'PAID'")
-    BigDecimal sumPaidAmountBySubscription(@Param("subscription") Subscription subscription);
-
-    // Alle Fälligkeiten eines Kunden über alle seine Abonnements
-    @Query("SELECT d FROM DueSchedule d JOIN d.subscription s JOIN s.contract c WHERE c.customer.id = :customerId")
-    List<DueSchedule> findByCustomerId(@Param("customerId") UUID customerId);
-
-    // Mit Pagination
-    @Query("SELECT d FROM DueSchedule d JOIN d.subscription s JOIN s.contract c WHERE c.customer.id = :customerId")
-    Page<DueSchedule> findByCustomerId(@Param("customerId") UUID customerId, Pageable pageable);
-
-    // Summe aller offenen Beträge eines Kunden
-    @Query("SELECT COALESCE(SUM(d.amount - d.paidAmount), 0) FROM DueSchedule d JOIN d.subscription s JOIN s.contract c WHERE c.customer.id = :customerId AND d.status = 'PENDING'")
-    BigDecimal sumPendingAmountByCustomer(@Param("customerId") UUID customerId);
-
-    // Summe aller bezahlten Beträge eines Kunden
-    @Query("SELECT COALESCE(SUM(d.paidAmount), 0) FROM DueSchedule d JOIN d.subscription s JOIN s.contract c WHERE c.customer.id = :customerId AND d.status = 'PAID'")
-    BigDecimal sumPaidAmountByCustomer(@Param("customerId") UUID customerId);
-
-    // Fälligkeiten die eine Mahnung benötigen (überfällig und noch keine Mahnung gesendet)
-    @Query("SELECT d FROM DueSchedule d WHERE d.status = 'PENDING' AND d.dueDate < :currentDate AND d.reminderSent = false")
+    // Vereinfachte Version
+    @Query("SELECT ds FROM DueSchedule ds WHERE ds.dueDate < :currentDate AND ds.reminderSent = false AND (ds.status = 'PENDING' OR ds.status = 'PARTIAL_PAID')")
     List<DueSchedule> findSchedulesNeedingReminder(@Param("currentDate") LocalDate currentDate);
 
-    // Anzahl überfälliger Fälligkeiten pro Abonnement
-    @Query("SELECT COUNT(d) FROM DueSchedule d WHERE d.subscription = :subscription AND d.status = 'PENDING' AND d.dueDate < :currentDate")
-    Long countOverdueBySubscription(@Param("subscription") Subscription subscription, @Param("currentDate") LocalDate currentDate);
+    // Nächste Fälligkeit für Subscription
+    @Query("SELECT ds FROM DueSchedule ds WHERE ds.subscription = :subscription AND ds.status = 'PENDING' AND ds.dueDate >= :currentDate ORDER BY ds.dueDate ASC")
+    List<DueSchedule> findNextDueScheduleBySubscription(@Param("subscription") Subscription subscription,
+                                                        @Param("currentDate") LocalDate currentDate);
 
-    // Nächste fällige Zahlung für ein Abonnement (nur 1)
-    @Query("SELECT d FROM DueSchedule d WHERE d.subscription = :subscription AND d.status = 'PENDING' ORDER BY d.dueDate ASC")
-    Optional<DueSchedule> findNextDueScheduleBySubscription(@Param("subscription") Subscription subscription);
+    // Vereinfachte Version ohne Datum-Parameter
+    @Query("SELECT ds FROM DueSchedule ds WHERE ds.subscription = :subscription AND ds.status = 'PENDING' ORDER BY ds.dueDate ASC")
+    List<DueSchedule> findNextDueScheduleBySubscription(@Param("subscription") Subscription subscription);
 
-    // Anzahl Fälligkeiten nach Status
-    long countByStatus(DueStatus status);
+    // Kunden-bezogene Abfragen (über Subscription-Relation)
+    @Query("SELECT ds FROM DueSchedule ds JOIN ds.subscription s JOIN s.contract c WHERE c.customer.id = :customerId")
+    List<DueSchedule> findByCustomerId(@Param("customerId") UUID customerId);
 
-    // Anzahl überfälliger Fälligkeiten gesamt
-    @Query("SELECT COUNT(d) FROM DueSchedule d WHERE d.status = 'PENDING' AND d.dueDate < :currentDate")
-    long countOverdue(@Param("currentDate") LocalDate currentDate);
+    // Statistik-Abfragen
+    Long countByStatus(DueStatus status);
 
-    // Anzahl Fälligkeiten die eine Mahnung benötigen
-    @Query("SELECT COUNT(d) FROM DueSchedule d WHERE d.status = 'PENDING' AND d.dueDate < :currentDate AND d.reminderSent = false")
-    long countSchedulesNeedingReminder(@Param("currentDate") LocalDate currentDate);
+    @Query("SELECT COUNT(ds) FROM DueSchedule ds WHERE ds.dueDate < :currentDate AND (ds.status = 'PENDING' OR ds.status = 'PARTIAL_PAID')")
+    Long countOverdue(@Param("currentDate") LocalDate currentDate);
 
-    // Summe aller offenen Beträge nach Status
-    @Query("SELECT COALESCE(SUM(d.amount - d.paidAmount), 0) FROM DueSchedule d WHERE d.status = :status")
+    @Query("SELECT COUNT(ds) FROM DueSchedule ds WHERE ds.dueDate < :currentDate AND ds.reminderSent = false AND (ds.status = 'PENDING' OR ds.status = 'PARTIAL_PAID')")
+    Long countSchedulesNeedingReminder(@Param("currentDate") LocalDate currentDate);
+
+    // Summen-Abfragen
+    @Query("SELECT SUM(ds.amount) FROM DueSchedule ds WHERE ds.status = :status")
     Optional<BigDecimal> sumAmountByStatus(@Param("status") DueStatus status);
 
-    // Summe aller bezahlten Beträge gesamt
-    @Query("SELECT COALESCE(SUM(d.paidAmount), 0) FROM DueSchedule d WHERE d.status = 'PAID'")
+    @Query("SELECT SUM(ds.paidAmount) FROM DueSchedule ds WHERE ds.paidAmount IS NOT NULL")
     Optional<BigDecimal> sumPaidAmount();
 
-    // Summe aller überfälligen offenen Beträge
-    @Query("SELECT COALESCE(SUM(d.amount - d.paidAmount), 0) FROM DueSchedule d WHERE d.status = 'PENDING' AND d.dueDate < :currentDate")
+    @Query("SELECT SUM(ds.amount - COALESCE(ds.paidAmount, 0)) FROM DueSchedule ds WHERE ds.dueDate < :currentDate AND (ds.status = 'PENDING' OR ds.status = 'PARTIAL_PAID')")
     Optional<BigDecimal> sumOverdueAmount(@Param("currentDate") LocalDate currentDate);
 
+    // Subscription-spezifische Summen
+    @Query("SELECT SUM(ds.amount - COALESCE(ds.paidAmount, 0)) FROM DueSchedule ds WHERE ds.subscription = :subscription AND ds.status = 'PENDING'")
+    BigDecimal sumPendingAmountBySubscription(@Param("subscription") Subscription subscription);
+
+    @Query("SELECT SUM(ds.paidAmount) FROM DueSchedule ds WHERE ds.subscription = :subscription AND ds.paidAmount IS NOT NULL")
+    BigDecimal sumPaidAmountBySubscription(@Param("subscription") Subscription subscription);
+
+    // Bulk-Updates (optional, für Performance bei großen Datenmengen)
+    @Query("UPDATE DueSchedule ds SET ds.status = :newStatus WHERE ds.id IN :ids")
+    void bulkUpdateStatus(@Param("ids") List<UUID> ids, @Param("newStatus") DueStatus newStatus);
+
+    // Custom Delete-Abfragen für spezielle Fälle
+    void deleteBySubscriptionAndStatus(Subscription subscription, DueStatus status);
+
+    @Query("DELETE FROM DueSchedule ds WHERE ds.subscription = :subscription AND ds.dueDate > :cutoffDate AND ds.status = 'PENDING'")
+    void deleteFuturePendingBySubscription(@Param("subscription") Subscription subscription,
+                                           @Param("cutoffDate") LocalDate cutoffDate);
 }

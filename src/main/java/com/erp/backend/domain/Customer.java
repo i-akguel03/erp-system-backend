@@ -156,4 +156,8 @@ public class Customer {
                 ", residentialAddress=" + residentialAddress +
                 '}';
     }
+
+    public String getName() {
+        return this.getFirstName() + ' ' + this.getLastName();
+    }
 }

@@ -34,7 +34,7 @@ public class DueScheduleController {
     @GetMapping
     public ResponseEntity<Page<DueScheduleDto>> getAllDueSchedules(
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "100") int size,
             @RequestParam(defaultValue = "dueDate") String sortBy,
             @RequestParam(defaultValue = "asc") String sortDir) {
 

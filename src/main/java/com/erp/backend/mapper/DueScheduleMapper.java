@@ -4,77 +4,134 @@ import com.erp.backend.domain.DueSchedule;
 import com.erp.backend.dto.DueScheduleDto;
 import org.springframework.stereotype.Component;
 
+/**
+ * Mapper zwischen DueSchedule Entity und DTO
+ */
 @Component
 public class DueScheduleMapper {
 
-    public DueScheduleDto toDto(DueSchedule dueSchedule) {
-        if (dueSchedule == null) {
+    /**
+     * Konvertiert Entity zu DTO
+     */
+    public DueScheduleDto toDto(DueSchedule entity) {
+        if (entity == null) {
             return null;
         }
 
         DueScheduleDto dto = new DueScheduleDto();
-        dto.setId(dueSchedule.getId());
-        dto.setDueNumber(dueSchedule.getDueNumber());
-        dto.setDueDate(dueSchedule.getDueDate());
-        dto.setAmount(dueSchedule.getAmount());
-        dto.setPeriodStart(dueSchedule.getPeriodStart());
-        dto.setPeriodEnd(dueSchedule.getPeriodEnd());
-        dto.setStatus(dueSchedule.getStatus());
-        dto.setPaidDate(dueSchedule.getPaidDate());
-        dto.setPaidAmount(dueSchedule.getPaidAmount());
-        dto.setPaymentMethod(dueSchedule.getPaymentMethod());
-        dto.setPaymentReference(dueSchedule.getPaymentReference());
-        //dto.setCreatedDate(dueSchedule.getCreatedDate());
-        //dto.setUpdatedDate(dueSchedule.getUpdatedDate());
-        dto.setNotes(dueSchedule.getNotes());
-        dto.setReminderSent(dueSchedule.getReminderSent());
-        dto.setReminderCount(dueSchedule.getReminderCount());
-        dto.setLastReminderDate(dueSchedule.getLastReminderDate());
 
-        // Subscription-Informationen
-        if (dueSchedule.getSubscription() != null) {
-            dto.setSubscriptionId(dueSchedule.getSubscription().getId());
-            dto.setSubscriptionProductName(dueSchedule.getSubscription().getProductName());
+        dto.setId(entity.getId());
+        dto.setDueNumber(entity.getDueNumber());
+        dto.setAmount(entity.getAmount());
+        dto.setPaidAmount(entity.getPaidAmount());
+        dto.setDueDate(entity.getDueDate());
+        dto.setPeriodStart(entity.getPeriodStart());
+        dto.setPeriodEnd(entity.getPeriodEnd());
+        dto.setStatus(entity.getStatus());
+        dto.setPaidDate(entity.getPaidDate());
+        dto.setPaymentMethod(entity.getPaymentMethod());
+        dto.setPaymentReference(entity.getPaymentReference());
+        dto.setNotes(entity.getNotes());
+        dto.setReminderSent(entity.isReminderSent());
+        dto.setReminderCount(entity.getReminderCount());
+        dto.setLastReminderDate(entity.getLastReminderDate());
 
-            // Contract- und Customer-Informationen über Subscription
-            if (dueSchedule.getSubscription().getContract() != null) {
-                dto.setContractNumber(dueSchedule.getSubscription().getContract().getContractNumber());
+        // Subscription-bezogene Daten
+        if (entity.getSubscription() != null) {
+            dto.setSubscriptionId(entity.getSubscription().getId());
+            dto.setSubscriptionNumber(entity.getSubscription().getSubscriptionNumber());
+            dto.setProductName(entity.getSubscription().getProductName());
 
-                if (dueSchedule.getSubscription().getContract().getCustomer() != null) {
-                    String customerName = dueSchedule.getSubscription().getContract().getCustomer().getFirstName()
-                            + " " + dueSchedule.getSubscription().getContract().getCustomer().getLastName();
-                    dto.setCustomerName(customerName);
-                }
+            // Customer-Name über Contract-Relation
+            if (entity.getSubscription().getContract() != null &&
+                    entity.getSubscription().getContract().getCustomer() != null) {
+                dto.setCustomerName(entity.getSubscription().getContract().getCustomer().getName());
             }
         }
 
         return dto;
     }
 
+    /**
+     * Konvertiert DTO zu Entity
+     */
     public DueSchedule toEntity(DueScheduleDto dto) {
         if (dto == null) {
             return null;
         }
 
-        DueSchedule dueSchedule = new DueSchedule();
-        dueSchedule.setId(dto.getId());
-        dueSchedule.setDueNumber(dto.getDueNumber());
-        dueSchedule.setDueDate(dto.getDueDate());
-        dueSchedule.setAmount(dto.getAmount());
-        dueSchedule.setPeriodStart(dto.getPeriodStart());
-        dueSchedule.setPeriodEnd(dto.getPeriodEnd());
-        dueSchedule.setStatus(dto.getStatus() != null ? dto.getStatus() : com.erp.backend.domain.DueStatus.PENDING);
-        dueSchedule.setPaidDate(dto.getPaidDate());
-        dueSchedule.setPaidAmount(dto.getPaidAmount());
-        dueSchedule.setPaymentMethod(dto.getPaymentMethod());
-        dueSchedule.setPaymentReference(dto.getPaymentReference());
-        dueSchedule.setNotes(dto.getNotes());
-        dueSchedule.setReminderSent(dto.getReminderSent() != null ? dto.getReminderSent() : false);
-        dueSchedule.setReminderCount(dto.getReminderCount() != null ? dto.getReminderCount() : 0);
-        dueSchedule.setLastReminderDate(dto.getLastReminderDate());
+        DueSchedule entity = new DueSchedule();
 
-        // Subscription wird im Service gesetzt, da wir hier nur die ID haben
+        entity.setId(dto.getId());
+        entity.setDueNumber(dto.getDueNumber());
+        entity.setAmount(dto.getAmount());
+        entity.setPaidAmount(dto.getPaidAmount());
+        entity.setDueDate(dto.getDueDate());
+        entity.setPeriodStart(dto.getPeriodStart());
+        entity.setPeriodEnd(dto.getPeriodEnd());
+        entity.setStatus(dto.getStatus());
+        entity.setPaidDate(dto.getPaidDate());
+        entity.setPaymentMethod(dto.getPaymentMethod());
+        entity.setPaymentReference(dto.getPaymentReference());
+        entity.setNotes(dto.getNotes());
+        entity.setReminderSent(dto.isReminderSent());
+        entity.setReminderCount(dto.getReminderCount());
+        entity.setLastReminderDate(dto.getLastReminderDate());
 
-        return dueSchedule;
+        // Subscription wird separat gesetzt (im Service)
+
+        return entity;
+    }
+
+    /**
+     * Aktualisiert eine bestehende Entity mit DTO-Daten
+     */
+    public void updateEntityFromDto(DueSchedule entity, DueScheduleDto dto) {
+        if (entity == null || dto == null) {
+            return;
+        }
+
+        // ID und DueNumber normalerweise nicht ändern
+        entity.setAmount(dto.getAmount());
+        entity.setPaidAmount(dto.getPaidAmount());
+        entity.setDueDate(dto.getDueDate());
+        entity.setPeriodStart(dto.getPeriodStart());
+        entity.setPeriodEnd(dto.getPeriodEnd());
+        entity.setStatus(dto.getStatus());
+        entity.setPaidDate(dto.getPaidDate());
+        entity.setPaymentMethod(dto.getPaymentMethod());
+        entity.setPaymentReference(dto.getPaymentReference());
+        entity.setNotes(dto.getNotes());
+        entity.setReminderSent(dto.isReminderSent());
+        entity.setReminderCount(dto.getReminderCount());
+        entity.setLastReminderDate(dto.getLastReminderDate());
+    }
+
+    /**
+     * Erstellt eine Kopie einer Entity
+     */
+    public DueSchedule copyEntity(DueSchedule source) {
+        if (source == null) {
+            return null;
+        }
+
+        DueSchedule copy = new DueSchedule();
+        copy.setDueNumber(source.getDueNumber());
+        copy.setAmount(source.getAmount());
+        copy.setPaidAmount(source.getPaidAmount());
+        copy.setDueDate(source.getDueDate());
+        copy.setPeriodStart(source.getPeriodStart());
+        copy.setPeriodEnd(source.getPeriodEnd());
+        copy.setStatus(source.getStatus());
+        copy.setPaidDate(source.getPaidDate());
+        copy.setPaymentMethod(source.getPaymentMethod());
+        copy.setPaymentReference(source.getPaymentReference());
+        copy.setNotes(source.getNotes());
+        copy.setReminderSent(source.isReminderSent());
+        copy.setReminderCount(source.getReminderCount());
+        copy.setLastReminderDate(source.getLastReminderDate());
+        copy.setSubscription(source.getSubscription());
+
+        return copy;
     }
 }

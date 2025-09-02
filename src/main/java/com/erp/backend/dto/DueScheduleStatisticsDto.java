@@ -2,6 +2,9 @@ package com.erp.backend.dto;
 
 import java.math.BigDecimal;
 
+/**
+ * DTO für Fälligkeitsplan-Statistiken
+ */
 public class DueScheduleStatisticsDto {
 
     private long totalCount;
@@ -15,54 +18,49 @@ public class DueScheduleStatisticsDto {
     private BigDecimal totalPendingAmount;
     private BigDecimal totalOverdueAmount;
     private BigDecimal totalPaidAmount;
-    private BigDecimal totalPartialPaidAmount;
 
-    // Zusätzliche Statistiken
-    private double paymentRate; // Prozentsatz bezahlter Fälligkeiten
-    private double overdueRate;  // Prozentsatz überfälliger Fälligkeiten
-
-    // Konstruktoren
-    public DueScheduleStatisticsDto() {}
-
-    public DueScheduleStatisticsDto(long totalCount, long pendingCount, long overdueCount, long paidCount,
+    // Konstruktor mit allen Parametern
+    public DueScheduleStatisticsDto(long totalCount, long pendingCount, long overdueCount,
+                                    long paidCount, long partialPaidCount, long cancelledCount,
                                     BigDecimal totalPendingAmount, BigDecimal totalOverdueAmount,
                                     BigDecimal totalPaidAmount, long needingReminderCount) {
         this.totalCount = totalCount;
         this.pendingCount = pendingCount;
         this.overdueCount = overdueCount;
         this.paidCount = paidCount;
+        this.partialPaidCount = partialPaidCount;
+        this.cancelledCount = cancelledCount;
+        this.needingReminderCount = needingReminderCount;
         this.totalPendingAmount = totalPendingAmount;
         this.totalOverdueAmount = totalOverdueAmount;
         this.totalPaidAmount = totalPaidAmount;
+    }
+
+    // Alternative Konstruktor für Kompatibilität mit alter Version
+    public DueScheduleStatisticsDto(long totalCount, long pendingCount, long overdueCount,
+                                    long paidCount, BigDecimal totalPendingAmount,
+                                    BigDecimal totalOverdueAmount, BigDecimal totalPaidAmount,
+                                    long needingReminderCount) {
+        this.totalCount = totalCount;
+        this.pendingCount = pendingCount;
+        this.overdueCount = overdueCount;
+        this.paidCount = paidCount;
+        this.partialPaidCount = 0L; // Default-Wert
+        this.cancelledCount = 0L; // Default-Wert
         this.needingReminderCount = needingReminderCount;
-
-        // Berechnungen
-        this.paymentRate = totalCount > 0 ? (double) paidCount / totalCount * 100 : 0.0;
-        this.overdueRate = totalCount > 0 ? (double) overdueCount / totalCount * 100 : 0.0;
+        this.totalPendingAmount = totalPendingAmount;
+        this.totalOverdueAmount = totalOverdueAmount;
+        this.totalPaidAmount = totalPaidAmount;
     }
 
-    // Berechnete Felder
-    public BigDecimal getTotalOpenAmount() {
-        return totalPendingAmount.add(totalOverdueAmount).add(totalPartialPaidAmount != null ?
-                totalPartialPaidAmount : BigDecimal.ZERO);
+    // Standard-Konstruktor
+    public DueScheduleStatisticsDto() {
+        this.totalPendingAmount = BigDecimal.ZERO;
+        this.totalOverdueAmount = BigDecimal.ZERO;
+        this.totalPaidAmount = BigDecimal.ZERO;
     }
 
-    public BigDecimal getTotalAmount() {
-        return getTotalOpenAmount().add(totalPaidAmount);
-    }
-
-    public long getActiveCount() {
-        return pendingCount + overdueCount + partialPaidCount;
-    }
-
-    public double getCollectionRate() {
-        BigDecimal totalAmount = getTotalAmount();
-        if (totalAmount.compareTo(BigDecimal.ZERO) == 0) return 0.0;
-        return totalPaidAmount.divide(totalAmount, 4, java.math.RoundingMode.HALF_UP)
-                .multiply(BigDecimal.valueOf(100)).doubleValue();
-    }
-
-    // Getter und Setter
+    // Getters und Setters
     public long getTotalCount() {
         return totalCount;
     }
@@ -143,28 +141,25 @@ public class DueScheduleStatisticsDto {
         this.totalPaidAmount = totalPaidAmount;
     }
 
-    public BigDecimal getTotalPartialPaidAmount() {
-        return totalPartialPaidAmount;
-    }
-
-    public void setTotalPartialPaidAmount(BigDecimal totalPartialPaidAmount) {
-        this.totalPartialPaidAmount = totalPartialPaidAmount;
+    // Berechnete Eigenschaften
+    public BigDecimal getTotalOpenAmount() {
+        return totalPendingAmount.add(totalOverdueAmount);
     }
 
     public double getPaymentRate() {
-        return paymentRate;
-    }
-
-    public void setPaymentRate(double paymentRate) {
-        this.paymentRate = paymentRate;
+        if (totalCount == 0) return 0.0;
+        return (double) paidCount / totalCount * 100;
     }
 
     public double getOverdueRate() {
-        return overdueRate;
+        if (totalCount == 0) return 0.0;
+        return (double) overdueCount / totalCount * 100;
     }
 
-    public void setOverdueRate(double overdueRate) {
-        this.overdueRate = overdueRate;
+    public BigDecimal getAverageAmount() {
+        if (totalCount == 0) return BigDecimal.ZERO;
+        BigDecimal total = totalPendingAmount.add(totalOverdueAmount).add(totalPaidAmount);
+        return total.divide(BigDecimal.valueOf(totalCount), 2, BigDecimal.ROUND_HALF_UP);
     }
 
     @Override
@@ -174,7 +169,11 @@ public class DueScheduleStatisticsDto {
                 ", pendingCount=" + pendingCount +
                 ", overdueCount=" + overdueCount +
                 ", paidCount=" + paidCount +
-                ", paymentRate=" + String.format("%.2f", paymentRate) + "%" +
+                ", partialPaidCount=" + partialPaidCount +
+                ", cancelledCount=" + cancelledCount +
+                ", needingReminderCount=" + needingReminderCount +
+                ", totalPendingAmount=" + totalPendingAmount +
+                ", totalOverdueAmount=" + totalOverdueAmount +
                 ", totalPaidAmount=" + totalPaidAmount +
                 '}';
     }

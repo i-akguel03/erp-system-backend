@@ -1,455 +1,398 @@
-2025-08-30T11:05:15.332+02:00  INFO 5328 --- [erp-system-backend] [restartedMain] c.e.backend.ErpSystemBackendApplication  : Starting ErpSystemBackendApplication using Java 24.0.1 with PID 5328 (C:\Users\ibrah\Desktop\ERP-Backend\erp-system-backend\target\classes started by ibrah in C:\Users\ibrah\Desktop\ERP-Backend\erp-system-backend)
-2025-08-30T11:05:15.341+02:00 DEBUG 5328 --- [erp-system-backend] [restartedMain] c.e.backend.ErpSystemBackendApplication  : Running with Spring Boot v3.5.3, Spring v6.2.8
-2025-08-30T11:05:15.342+02:00  INFO 5328 --- [erp-system-backend] [restartedMain] c.e.backend.ErpSystemBackendApplication  : No active profile set, falling back to 1 default profile: "default"
-2025-08-30T11:05:15.428+02:00  INFO 5328 --- [erp-system-backend] [restartedMain] .e.DevToolsPropertyDefaultsPostProcessor : Devtools property defaults active! Set 'spring.devtools.add-properties' to 'false' to disable
-2025-08-30T11:05:15.428+02:00  INFO 5328 --- [erp-system-backend] [restartedMain] .e.DevToolsPropertyDefaultsPostProcessor : For additional web related logging consider setting the 'logging.level.web' property to 'DEBUG'
-2025-08-30T11:05:16.982+02:00  INFO 5328 --- [erp-system-backend] [restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
-2025-08-30T11:05:17.121+02:00  INFO 5328 --- [erp-system-backend] [restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 110 ms. Found 11 JPA repository interfaces.
-2025-08-30T11:05:17.895+02:00  INFO 5328 --- [erp-system-backend] [restartedMain] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port 8080 (http)
-2025-08-30T11:05:17.917+02:00  INFO 5328 --- [erp-system-backend] [restartedMain] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
-2025-08-30T11:05:17.918+02:00  INFO 5328 --- [erp-system-backend] [restartedMain] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.42]
-2025-08-30T11:05:17.973+02:00  INFO 5328 --- [erp-system-backend] [restartedMain] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
-2025-08-30T11:05:17.974+02:00  INFO 5328 --- [erp-system-backend] [restartedMain] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 2546 ms
-2025-08-30T11:05:18.277+02:00  INFO 5328 --- [erp-system-backend] [restartedMain] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: default]
-2025-08-30T11:05:18.357+02:00  INFO 5328 --- [erp-system-backend] [restartedMain] org.hibernate.Version                    : HHH000412: Hibernate ORM core version 6.6.18.Final
-2025-08-30T11:05:18.411+02:00  INFO 5328 --- [erp-system-backend] [restartedMain] o.h.c.internal.RegionFactoryInitiator    : HHH000026: Second-level cache disabled
-2025-08-30T11:05:18.839+02:00  INFO 5328 --- [erp-system-backend] [restartedMain] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
-2025-08-30T11:05:18.878+02:00  INFO 5328 --- [erp-system-backend] [restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
-2025-08-30T11:05:20.906+02:00  INFO 5328 --- [erp-system-backend] [restartedMain] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection org.postgresql.jdbc.PgConnection@4bcf748a
-2025-08-30T11:05:20.909+02:00  INFO 5328 --- [erp-system-backend] [restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
-2025-08-30T11:05:21.104+02:00  WARN 5328 --- [erp-system-backend] [restartedMain] org.hibernate.orm.deprecation            : HHH90000025: PostgreSQLDialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
-2025-08-30T11:05:21.709+02:00  INFO 5328 --- [erp-system-backend] [restartedMain] org.hibernate.orm.connections.pooling    : HHH10001005: Database info:
+2025-09-02T21:54:39.560+02:00  INFO 11592 --- [erp-system-backend] [restartedMain] c.e.backend.ErpSystemBackendApplication  : Starting ErpSystemBackendApplication using Java 24.0.1 with PID 11592 (C:\Users\ibrah\Desktop\ERP-Backend\erp-system-backend\target\classes started by ibrah in C:\Users\ibrah\Desktop\ERP-Backend\erp-system-backend)
+2025-09-02T21:54:39.566+02:00 DEBUG 11592 --- [erp-system-backend] [restartedMain] c.e.backend.ErpSystemBackendApplication  : Running with Spring Boot v3.5.3, Spring v6.2.8
+2025-09-02T21:54:39.567+02:00  INFO 11592 --- [erp-system-backend] [restartedMain] c.e.backend.ErpSystemBackendApplication  : No active profile set, falling back to 1 default profile: "default"
+2025-09-02T21:54:39.627+02:00  INFO 11592 --- [erp-system-backend] [restartedMain] .e.DevToolsPropertyDefaultsPostProcessor : Devtools property defaults active! Set 'spring.devtools.add-properties' to 'false' to disable
+2025-09-02T21:54:39.627+02:00  INFO 11592 --- [erp-system-backend] [restartedMain] .e.DevToolsPropertyDefaultsPostProcessor : For additional web related logging consider setting the 'logging.level.web' property to 'DEBUG'
+2025-09-02T21:54:41.190+02:00  INFO 11592 --- [erp-system-backend] [restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2025-09-02T21:54:41.273+02:00  INFO 11592 --- [erp-system-backend] [restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 72 ms. Found 11 JPA repository interfaces.
+2025-09-02T21:54:41.874+02:00  INFO 11592 --- [erp-system-backend] [restartedMain] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port 8080 (http)
+2025-09-02T21:54:41.888+02:00  INFO 11592 --- [erp-system-backend] [restartedMain] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2025-09-02T21:54:41.888+02:00  INFO 11592 --- [erp-system-backend] [restartedMain] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.42]
+2025-09-02T21:54:41.930+02:00  INFO 11592 --- [erp-system-backend] [restartedMain] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
+2025-09-02T21:54:41.930+02:00  INFO 11592 --- [erp-system-backend] [restartedMain] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 2303 ms
+2025-09-02T21:54:42.146+02:00  INFO 11592 --- [erp-system-backend] [restartedMain] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: default]
+2025-09-02T21:54:42.191+02:00  INFO 11592 --- [erp-system-backend] [restartedMain] org.hibernate.Version                    : HHH000412: Hibernate ORM core version 6.6.18.Final
+2025-09-02T21:54:42.220+02:00  INFO 11592 --- [erp-system-backend] [restartedMain] o.h.c.internal.RegionFactoryInitiator    : HHH000026: Second-level cache disabled
+2025-09-02T21:54:42.472+02:00  INFO 11592 --- [erp-system-backend] [restartedMain] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2025-09-02T21:54:42.499+02:00  INFO 11592 --- [erp-system-backend] [restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2025-09-02T21:54:43.761+02:00  INFO 11592 --- [erp-system-backend] [restartedMain] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection org.postgresql.jdbc.PgConnection@487d075
+2025-09-02T21:54:43.762+02:00  INFO 11592 --- [erp-system-backend] [restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2025-09-02T21:54:43.928+02:00  WARN 11592 --- [erp-system-backend] [restartedMain] org.hibernate.orm.deprecation            : HHH90000025: PostgreSQLDialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2025-09-02T21:54:44.332+02:00  INFO 11592 --- [erp-system-backend] [restartedMain] org.hibernate.orm.connections.pooling    : HHH10001005: Database info:
 	Database JDBC URL [Connecting through datasource 'HikariDataSource (HikariPool-1)']
 	Database driver: undefined/unknown
-	Database version: 17.6
+	Database version: 17.5
 	Autocommit mode: undefined/unknown
 	Isolation level: undefined/unknown
 	Minimum pool size: undefined/unknown
 	Maximum pool size: undefined/unknown
-2025-08-30T11:05:23.002+02:00  INFO 5328 --- [erp-system-backend] [restartedMain] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
-2025-08-30T11:05:44.464+02:00  INFO 5328 --- [erp-system-backend] [restartedMain] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
-2025-08-30T11:05:44.860+02:00 DEBUG 5328 --- [erp-system-backend] [restartedMain] com.erp.backend.config.JwtAuthFilter     : Filter 'jwtAuthFilter' configured for use
-2025-08-30T11:05:44.957+02:00  INFO 5328 --- [erp-system-backend] [restartedMain] o.s.d.j.r.query.QueryEnhancerFactory     : Hibernate is in classpath; If applicable, HQL parser will be used.
-2025-08-30T11:05:46.329+02:00  WARN 5328 --- [erp-system-backend] [restartedMain] JpaBaseConfiguration$JpaWebConfiguration : spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
-2025-08-30T11:05:46.357+02:00  INFO 5328 --- [erp-system-backend] [restartedMain] r$InitializeUserDetailsManagerConfigurer : Global AuthenticationManager configured with UserDetailsService bean with name userDetailsService
-2025-08-30T11:05:46.739+02:00  INFO 5328 --- [erp-system-backend] [restartedMain] o.s.b.a.e.web.EndpointLinksResolver      : Exposing 4 endpoints beneath base path '/actuator'
-2025-08-30T11:05:47.148+02:00  INFO 5328 --- [erp-system-backend] [restartedMain] o.s.b.d.a.OptionalLiveReloadServer       : LiveReload server is running on port 35729
-2025-08-30T11:05:47.235+02:00  INFO 5328 --- [erp-system-backend] [restartedMain] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port 8080 (http) with context path '/'
-2025-08-30T11:05:47.249+02:00  INFO 5328 --- [erp-system-backend] [restartedMain] c.e.backend.ErpSystemBackendApplication  : Started ErpSystemBackendApplication in 32.912 seconds (process running for 33.548)
-2025-08-30T11:05:47.479+02:00  INFO 5328 --- [erp-system-backend] [http-nio-8080-exec-1] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring DispatcherServlet 'dispatcherServlet'
-2025-08-30T11:05:47.479+02:00  INFO 5328 --- [erp-system-backend] [http-nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
-2025-08-30T11:05:47.479+02:00  INFO 5328 --- [erp-system-backend] [http-nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Completed initialization in 0 ms
-2025-08-30T11:07:01.025+02:00  INFO 5328 --- [erp-system-backend] [SpringApplicationShutdownHook] o.s.b.w.e.tomcat.GracefulShutdown        : Commencing graceful shutdown. Waiting for active requests to complete
-2025-08-30T11:07:01.029+02:00  INFO 5328 --- [erp-system-backend] [tomcat-shutdown] o.s.b.w.e.tomcat.GracefulShutdown        : Graceful shutdown complete
-2025-08-30T11:07:01.036+02:00  INFO 5328 --- [erp-system-backend] [SpringApplicationShutdownHook] j.LocalContainerEntityManagerFactoryBean : Closing JPA EntityManagerFactory for persistence unit 'default'
-2025-08-30T11:07:01.040+02:00  INFO 5328 --- [erp-system-backend] [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown initiated...
-2025-08-30T11:07:02.515+02:00  INFO 5328 --- [erp-system-backend] [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown completed.
-2025-08-30T11:11:02.222+02:00  INFO 17184 --- [erp-system-backend] [restartedMain] c.e.backend.ErpSystemBackendApplication  : Starting ErpSystemBackendApplication using Java 24.0.1 with PID 17184 (C:\Users\ibrah\Desktop\ERP-Backend\erp-system-backend\target\classes started by ibrah in C:\Users\ibrah\Desktop\ERP-Backend\erp-system-backend)
-2025-08-30T11:11:02.224+02:00 DEBUG 17184 --- [erp-system-backend] [restartedMain] c.e.backend.ErpSystemBackendApplication  : Running with Spring Boot v3.5.3, Spring v6.2.8
-2025-08-30T11:11:02.226+02:00  INFO 17184 --- [erp-system-backend] [restartedMain] c.e.backend.ErpSystemBackendApplication  : No active profile set, falling back to 1 default profile: "default"
-2025-08-30T11:11:02.297+02:00  INFO 17184 --- [erp-system-backend] [restartedMain] .e.DevToolsPropertyDefaultsPostProcessor : Devtools property defaults active! Set 'spring.devtools.add-properties' to 'false' to disable
-2025-08-30T11:11:02.297+02:00  INFO 17184 --- [erp-system-backend] [restartedMain] .e.DevToolsPropertyDefaultsPostProcessor : For additional web related logging consider setting the 'logging.level.web' property to 'DEBUG'
-2025-08-30T11:11:03.498+02:00  INFO 17184 --- [erp-system-backend] [restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
-2025-08-30T11:11:03.598+02:00  INFO 17184 --- [erp-system-backend] [restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 91 ms. Found 11 JPA repository interfaces.
-2025-08-30T11:11:04.270+02:00  INFO 17184 --- [erp-system-backend] [restartedMain] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port 8080 (http)
-2025-08-30T11:11:04.288+02:00  INFO 17184 --- [erp-system-backend] [restartedMain] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
-2025-08-30T11:11:04.288+02:00  INFO 17184 --- [erp-system-backend] [restartedMain] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.42]
-2025-08-30T11:11:04.336+02:00  INFO 17184 --- [erp-system-backend] [restartedMain] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
-2025-08-30T11:11:04.337+02:00  INFO 17184 --- [erp-system-backend] [restartedMain] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 2038 ms
-2025-08-30T11:11:04.591+02:00  INFO 17184 --- [erp-system-backend] [restartedMain] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: default]
-2025-08-30T11:11:04.659+02:00  INFO 17184 --- [erp-system-backend] [restartedMain] org.hibernate.Version                    : HHH000412: Hibernate ORM core version 6.6.18.Final
-2025-08-30T11:11:04.700+02:00  INFO 17184 --- [erp-system-backend] [restartedMain] o.h.c.internal.RegionFactoryInitiator    : HHH000026: Second-level cache disabled
-2025-08-30T11:11:04.984+02:00  INFO 17184 --- [erp-system-backend] [restartedMain] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
-2025-08-30T11:11:05.020+02:00  INFO 17184 --- [erp-system-backend] [restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
-2025-08-30T11:11:06.766+02:00  INFO 17184 --- [erp-system-backend] [restartedMain] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection org.postgresql.jdbc.PgConnection@645ea3b
-2025-08-30T11:11:06.768+02:00  INFO 17184 --- [erp-system-backend] [restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
-2025-08-30T11:11:06.959+02:00  WARN 17184 --- [erp-system-backend] [restartedMain] org.hibernate.orm.deprecation            : HHH90000025: PostgreSQLDialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
-2025-08-30T11:11:07.466+02:00  INFO 17184 --- [erp-system-backend] [restartedMain] org.hibernate.orm.connections.pooling    : HHH10001005: Database info:
+2025-09-02T21:54:45.235+02:00  INFO 11592 --- [erp-system-backend] [restartedMain] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2025-09-02T21:54:47.390+02:00  WARN 11592 --- [erp-system-backend] [restartedMain] o.h.engine.jdbc.spi.SqlExceptionHelper   : SQL Warning Code: 0, SQLState: 00000
+2025-09-02T21:54:47.390+02:00  WARN 11592 --- [erp-system-backend] [restartedMain] o.h.engine.jdbc.spi.SqlExceptionHelper   : constraint "ukbx9jyu2cccdntb3ehrf0ojpfd" of relation "contracts" does not exist, skipping
+2025-09-02T21:54:47.609+02:00  WARN 11592 --- [erp-system-backend] [restartedMain] o.h.engine.jdbc.spi.SqlExceptionHelper   : SQL Warning Code: 0, SQLState: 00000
+2025-09-02T21:54:47.609+02:00  WARN 11592 --- [erp-system-backend] [restartedMain] o.h.engine.jdbc.spi.SqlExceptionHelper   : constraint "ukt74y58jagthxqxysuw9l0jx6y" of relation "customers" does not exist, skipping
+2025-09-02T21:54:47.833+02:00  WARN 11592 --- [erp-system-backend] [restartedMain] o.h.engine.jdbc.spi.SqlExceptionHelper   : SQL Warning Code: 0, SQLState: 00000
+2025-09-02T21:54:47.833+02:00  WARN 11592 --- [erp-system-backend] [restartedMain] o.h.engine.jdbc.spi.SqlExceptionHelper   : constraint "ukrfbvkrffamfql7cjmen8v976v" of relation "customers" does not exist, skipping
+2025-09-02T21:54:48.095+02:00  WARN 11592 --- [erp-system-backend] [restartedMain] o.h.engine.jdbc.spi.SqlExceptionHelper   : SQL Warning Code: 0, SQLState: 00000
+2025-09-02T21:54:48.096+02:00  WARN 11592 --- [erp-system-backend] [restartedMain] o.h.engine.jdbc.spi.SqlExceptionHelper   : constraint "uk26t168ruspsissdut3v1slwtb" of relation "due_schedules" does not exist, skipping
+2025-09-02T21:54:48.306+02:00  WARN 11592 --- [erp-system-backend] [restartedMain] o.h.engine.jdbc.spi.SqlExceptionHelper   : SQL Warning Code: 0, SQLState: 00000
+2025-09-02T21:54:48.306+02:00  WARN 11592 --- [erp-system-backend] [restartedMain] o.h.engine.jdbc.spi.SqlExceptionHelper   : constraint "ukl1x55mfsay7co0r3m9ynvipd5" of relation "invoices" does not exist, skipping
+2025-09-02T21:54:48.517+02:00  WARN 11592 --- [erp-system-backend] [restartedMain] o.h.engine.jdbc.spi.SqlExceptionHelper   : SQL Warning Code: 0, SQLState: 00000
+2025-09-02T21:54:48.518+02:00  WARN 11592 --- [erp-system-backend] [restartedMain] o.h.engine.jdbc.spi.SqlExceptionHelper   : constraint "uklqi8h5lsinp980wucgpo1ubxe" of relation "products" does not exist, skipping
+2025-09-02T21:54:48.728+02:00  WARN 11592 --- [erp-system-backend] [restartedMain] o.h.engine.jdbc.spi.SqlExceptionHelper   : SQL Warning Code: 0, SQLState: 00000
+2025-09-02T21:54:48.728+02:00  WARN 11592 --- [erp-system-backend] [restartedMain] o.h.engine.jdbc.spi.SqlExceptionHelper   : constraint "ukk78exwkwlec6jiq40hfkw82xq" of relation "subscriptions" does not exist, skipping
+2025-09-02T21:54:48.940+02:00  WARN 11592 --- [erp-system-backend] [restartedMain] o.h.engine.jdbc.spi.SqlExceptionHelper   : SQL Warning Code: 0, SQLState: 00000
+2025-09-02T21:54:48.940+02:00  WARN 11592 --- [erp-system-backend] [restartedMain] o.h.engine.jdbc.spi.SqlExceptionHelper   : constraint "ukr43af9ap4edm43mmtq01oddj6" of relation "users" does not exist, skipping
+2025-09-02T21:54:50.872+02:00  INFO 11592 --- [erp-system-backend] [restartedMain] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2025-09-02T21:54:51.154+02:00 DEBUG 11592 --- [erp-system-backend] [restartedMain] com.erp.backend.config.JwtAuthFilter     : Filter 'jwtAuthFilter' configured for use
+2025-09-02T21:54:51.238+02:00  INFO 11592 --- [erp-system-backend] [restartedMain] o.s.d.j.r.query.QueryEnhancerFactory     : Hibernate is in classpath; If applicable, HQL parser will be used.
+2025-09-02T21:54:52.420+02:00  WARN 11592 --- [erp-system-backend] [restartedMain] JpaBaseConfiguration$JpaWebConfiguration : spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2025-09-02T21:54:52.444+02:00  INFO 11592 --- [erp-system-backend] [restartedMain] r$InitializeUserDetailsManagerConfigurer : Global AuthenticationManager configured with UserDetailsService bean with name userDetailsService
+2025-09-02T21:54:52.764+02:00  INFO 11592 --- [erp-system-backend] [restartedMain] o.s.b.a.e.web.EndpointLinksResolver      : Exposing 4 endpoints beneath base path '/actuator'
+2025-09-02T21:54:53.070+02:00  INFO 11592 --- [erp-system-backend] [restartedMain] o.s.b.d.a.OptionalLiveReloadServer       : LiveReload server is running on port 35729
+2025-09-02T21:54:53.141+02:00  INFO 11592 --- [erp-system-backend] [restartedMain] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port 8080 (http) with context path '/'
+2025-09-02T21:54:53.154+02:00  INFO 11592 --- [erp-system-backend] [restartedMain] c.e.backend.ErpSystemBackendApplication  : Started ErpSystemBackendApplication in 14.018 seconds (process running for 17.263)
+2025-09-02T22:17:56.056+02:00  INFO 11592 --- [erp-system-backend] [SpringApplicationShutdownHook] o.s.b.w.e.tomcat.GracefulShutdown        : Commencing graceful shutdown. Waiting for active requests to complete
+2025-09-02T22:17:56.060+02:00  INFO 11592 --- [erp-system-backend] [tomcat-shutdown] o.s.b.w.e.tomcat.GracefulShutdown        : Graceful shutdown complete
+2025-09-02T22:17:56.066+02:00  INFO 11592 --- [erp-system-backend] [SpringApplicationShutdownHook] j.LocalContainerEntityManagerFactoryBean : Closing JPA EntityManagerFactory for persistence unit 'default'
+2025-09-02T22:17:56.069+02:00  INFO 11592 --- [erp-system-backend] [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown initiated...
+2025-09-02T22:17:57.112+02:00  INFO 11592 --- [erp-system-backend] [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown completed.
+2025-09-02T22:25:39.856+02:00  INFO 14644 --- [erp-system-backend] [restartedMain] c.e.backend.ErpSystemBackendApplication  : Starting ErpSystemBackendApplication using Java 24.0.1 with PID 14644 (C:\Users\ibrah\Desktop\ERP-Backend\erp-system-backend\target\classes started by ibrah in C:\Users\ibrah\Desktop\ERP-Backend\erp-system-backend)
+2025-09-02T22:25:39.858+02:00 DEBUG 14644 --- [erp-system-backend] [restartedMain] c.e.backend.ErpSystemBackendApplication  : Running with Spring Boot v3.5.3, Spring v6.2.8
+2025-09-02T22:25:39.859+02:00  INFO 14644 --- [erp-system-backend] [restartedMain] c.e.backend.ErpSystemBackendApplication  : No active profile set, falling back to 1 default profile: "default"
+2025-09-02T22:25:39.917+02:00  INFO 14644 --- [erp-system-backend] [restartedMain] .e.DevToolsPropertyDefaultsPostProcessor : Devtools property defaults active! Set 'spring.devtools.add-properties' to 'false' to disable
+2025-09-02T22:25:39.917+02:00  INFO 14644 --- [erp-system-backend] [restartedMain] .e.DevToolsPropertyDefaultsPostProcessor : For additional web related logging consider setting the 'logging.level.web' property to 'DEBUG'
+2025-09-02T22:25:41.509+02:00  INFO 14644 --- [erp-system-backend] [restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2025-09-02T22:25:41.594+02:00  INFO 14644 --- [erp-system-backend] [restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 76 ms. Found 11 JPA repository interfaces.
+2025-09-02T22:25:42.212+02:00  INFO 14644 --- [erp-system-backend] [restartedMain] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port 8080 (http)
+2025-09-02T22:25:42.227+02:00  INFO 14644 --- [erp-system-backend] [restartedMain] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2025-09-02T22:25:42.227+02:00  INFO 14644 --- [erp-system-backend] [restartedMain] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.42]
+2025-09-02T22:25:42.279+02:00  INFO 14644 --- [erp-system-backend] [restartedMain] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
+2025-09-02T22:25:42.279+02:00  INFO 14644 --- [erp-system-backend] [restartedMain] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 2361 ms
+2025-09-02T22:25:42.513+02:00  INFO 14644 --- [erp-system-backend] [restartedMain] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: default]
+2025-09-02T22:25:42.566+02:00  INFO 14644 --- [erp-system-backend] [restartedMain] org.hibernate.Version                    : HHH000412: Hibernate ORM core version 6.6.18.Final
+2025-09-02T22:25:42.600+02:00  INFO 14644 --- [erp-system-backend] [restartedMain] o.h.c.internal.RegionFactoryInitiator    : HHH000026: Second-level cache disabled
+2025-09-02T22:25:42.865+02:00  INFO 14644 --- [erp-system-backend] [restartedMain] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2025-09-02T22:25:42.897+02:00  INFO 14644 --- [erp-system-backend] [restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2025-09-02T22:25:44.526+02:00  INFO 14644 --- [erp-system-backend] [restartedMain] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection org.postgresql.jdbc.PgConnection@221e63e1
+2025-09-02T22:25:44.528+02:00  INFO 14644 --- [erp-system-backend] [restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2025-09-02T22:25:44.682+02:00  WARN 14644 --- [erp-system-backend] [restartedMain] org.hibernate.orm.deprecation            : HHH90000025: PostgreSQLDialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2025-09-02T22:25:45.004+02:00  INFO 14644 --- [erp-system-backend] [restartedMain] org.hibernate.orm.connections.pooling    : HHH10001005: Database info:
 	Database JDBC URL [Connecting through datasource 'HikariDataSource (HikariPool-1)']
 	Database driver: undefined/unknown
-	Database version: 17.6
+	Database version: 17.5
 	Autocommit mode: undefined/unknown
 	Isolation level: undefined/unknown
 	Minimum pool size: undefined/unknown
 	Maximum pool size: undefined/unknown
-2025-08-30T11:11:08.654+02:00  INFO 17184 --- [erp-system-backend] [restartedMain] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
-2025-08-30T11:11:28.768+02:00  INFO 17184 --- [erp-system-backend] [restartedMain] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
-2025-08-30T11:11:29.073+02:00 DEBUG 17184 --- [erp-system-backend] [restartedMain] com.erp.backend.config.JwtAuthFilter     : Filter 'jwtAuthFilter' configured for use
-2025-08-30T11:11:29.182+02:00  INFO 17184 --- [erp-system-backend] [restartedMain] o.s.d.j.r.query.QueryEnhancerFactory     : Hibernate is in classpath; If applicable, HQL parser will be used.
-2025-08-30T11:11:30.466+02:00  WARN 17184 --- [erp-system-backend] [restartedMain] JpaBaseConfiguration$JpaWebConfiguration : spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
-2025-08-30T11:11:30.495+02:00  INFO 17184 --- [erp-system-backend] [restartedMain] r$InitializeUserDetailsManagerConfigurer : Global AuthenticationManager configured with UserDetailsService bean with name userDetailsService
-2025-08-30T11:11:30.885+02:00  INFO 17184 --- [erp-system-backend] [restartedMain] o.s.b.a.e.web.EndpointLinksResolver      : Exposing 4 endpoints beneath base path '/actuator'
-2025-08-30T11:11:31.206+02:00  INFO 17184 --- [erp-system-backend] [restartedMain] o.s.b.d.a.OptionalLiveReloadServer       : LiveReload server is running on port 35729
-2025-08-30T11:11:31.266+02:00  INFO 17184 --- [erp-system-backend] [restartedMain] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port 8080 (http) with context path '/'
-2025-08-30T11:11:31.280+02:00  INFO 17184 --- [erp-system-backend] [restartedMain] c.e.backend.ErpSystemBackendApplication  : Started ErpSystemBackendApplication in 29.595 seconds (process running for 30.085)
-2025-08-30T11:11:31.366+02:00  INFO 17184 --- [erp-system-backend] [http-nio-8080-exec-1] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring DispatcherServlet 'dispatcherServlet'
-2025-08-30T11:11:31.367+02:00  INFO 17184 --- [erp-system-backend] [http-nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
-2025-08-30T11:11:31.368+02:00  INFO 17184 --- [erp-system-backend] [http-nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Completed initialization in 1 ms
-2025-08-30T11:11:39.178+02:00  INFO 17184 --- [erp-system-backend] [http-nio-8080-exec-3] c.e.b.controller.ProductController       : GET /api/products - Fetching products (paginated: false)
-2025-08-30T11:11:39.512+02:00  INFO 17184 --- [erp-system-backend] [http-nio-8080-exec-3] com.erp.backend.service.ProductService   : Fetched 20 products
-2025-08-30T11:11:39.513+02:00 DEBUG 17184 --- [erp-system-backend] [http-nio-8080-exec-3] c.e.b.controller.ProductController       : Found 20 products
-2025-08-30T11:11:57.826+02:00  INFO 17184 --- [erp-system-backend] [http-nio-8080-exec-7] c.e.b.controller.ProductController       : PUT /api/products/7bb60add-e777-473f-b4b3-b50c29f837bf - Updating product
-2025-08-30T11:11:58.155+02:00  INFO 17184 --- [erp-system-backend] [http-nio-8080-exec-7] com.erp.backend.service.ProductService   : Found product with id=7bb60add-e777-473f-b4b3-b50c29f837bf
-2025-08-30T11:11:58.155+02:00 DEBUG 17184 --- [erp-system-backend] [http-nio-8080-exec-7] c.e.b.controller.ProductController       : Updating fields for product ID 7bb60add-e777-473f-b4b3-b50c29f837bf
-2025-08-30T11:11:58.834+02:00  INFO 17184 --- [erp-system-backend] [http-nio-8080-exec-7] com.erp.backend.service.ProductService   : Updated product: id=7bb60add-e777-473f-b4b3-b50c29f837bf, productNumber=PROD-001, name=Laptop Dell XPS 13, price=1200
-2025-08-30T11:11:58.834+02:00  INFO 17184 --- [erp-system-backend] [http-nio-8080-exec-7] c.e.b.controller.ProductController       : Updated product with ID 7bb60add-e777-473f-b4b3-b50c29f837bf
-2025-08-30T11:13:01.284+02:00  INFO 17184 --- [erp-system-backend] [http-nio-8080-exec-2] c.erp.backend.service.CustomerService    : Fetched 25 customers
-2025-08-30T11:13:08.265+02:00  INFO 17184 --- [erp-system-backend] [http-nio-8080-exec-6] c.e.b.controller.ContractController      : GET /api/contracts - Fetching contracts (paginated: false)
-2025-08-30T11:13:12.874+02:00  INFO 17184 --- [erp-system-backend] [http-nio-8080-exec-3] c.erp.backend.service.CustomerService    : Fetched 25 customers
-2025-08-30T11:14:30.681+02:00  INFO 17184 --- [erp-system-backend] [http-nio-8080-exec-7] c.e.b.controller.ContractController      : GET /api/contracts - Fetching contracts (paginated: false)
-2025-08-30T11:14:35.323+02:00  INFO 17184 --- [erp-system-backend] [http-nio-8080-exec-6] c.erp.backend.service.CustomerService    : Fetched 25 customers
-2025-08-30T11:18:06.870+02:00  INFO 17184 --- [erp-system-backend] [http-nio-8080-exec-5] c.e.b.controller.ContractController      : GET /api/contracts - Fetching contracts (paginated: false)
-2025-08-30T11:18:11.511+02:00  INFO 17184 --- [erp-system-backend] [http-nio-8080-exec-4] c.erp.backend.service.CustomerService    : Fetched 25 customers
-2025-08-30T11:18:22.874+02:00  INFO 17184 --- [erp-system-backend] [http-nio-8080-exec-9] c.e.b.controller.ContractController      : GET /api/contracts - Fetching contracts (paginated: false)
-2025-08-30T11:18:27.196+02:00  INFO 17184 --- [erp-system-backend] [http-nio-8080-exec-8] c.erp.backend.service.CustomerService    : Fetched 25 customers
-2025-08-30T11:18:51.356+02:00  INFO 17184 --- [erp-system-backend] [http-nio-8080-exec-6] c.e.b.controller.ContractController      : GET /api/contracts - Fetching contracts (paginated: false)
-2025-08-30T11:18:55.646+02:00  INFO 17184 --- [erp-system-backend] [http-nio-8080-exec-3] c.erp.backend.service.CustomerService    : Fetched 25 customers
-2025-08-30T11:22:00.336+02:00  INFO 17184 --- [erp-system-backend] [SpringApplicationShutdownHook] o.s.b.w.e.tomcat.GracefulShutdown        : Commencing graceful shutdown. Waiting for active requests to complete
-2025-08-30T11:22:00.343+02:00  INFO 17184 --- [erp-system-backend] [tomcat-shutdown] o.s.b.w.e.tomcat.GracefulShutdown        : Graceful shutdown complete
-2025-08-30T11:22:00.355+02:00  INFO 17184 --- [erp-system-backend] [SpringApplicationShutdownHook] j.LocalContainerEntityManagerFactoryBean : Closing JPA EntityManagerFactory for persistence unit 'default'
-2025-08-30T11:22:00.364+02:00  INFO 17184 --- [erp-system-backend] [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown initiated...
-2025-08-30T11:22:01.847+02:00  INFO 17184 --- [erp-system-backend] [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown completed.
-2025-08-30T11:22:09.480+02:00  INFO 16380 --- [erp-system-backend] [restartedMain] c.e.backend.ErpSystemBackendApplication  : Starting ErpSystemBackendApplication using Java 24.0.1 with PID 16380 (C:\Users\ibrah\Desktop\ERP-Backend\erp-system-backend\target\classes started by ibrah in C:\Users\ibrah\Desktop\ERP-Backend\erp-system-backend)
-2025-08-30T11:22:09.482+02:00 DEBUG 16380 --- [erp-system-backend] [restartedMain] c.e.backend.ErpSystemBackendApplication  : Running with Spring Boot v3.5.3, Spring v6.2.8
-2025-08-30T11:22:09.482+02:00  INFO 16380 --- [erp-system-backend] [restartedMain] c.e.backend.ErpSystemBackendApplication  : No active profile set, falling back to 1 default profile: "default"
-2025-08-30T11:22:09.550+02:00  INFO 16380 --- [erp-system-backend] [restartedMain] .e.DevToolsPropertyDefaultsPostProcessor : Devtools property defaults active! Set 'spring.devtools.add-properties' to 'false' to disable
-2025-08-30T11:22:09.551+02:00  INFO 16380 --- [erp-system-backend] [restartedMain] .e.DevToolsPropertyDefaultsPostProcessor : For additional web related logging consider setting the 'logging.level.web' property to 'DEBUG'
-2025-08-30T11:22:11.547+02:00  INFO 16380 --- [erp-system-backend] [restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
-2025-08-30T11:22:11.635+02:00  INFO 16380 --- [erp-system-backend] [restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 78 ms. Found 11 JPA repository interfaces.
-2025-08-30T11:22:12.289+02:00  INFO 16380 --- [erp-system-backend] [restartedMain] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port 8080 (http)
-2025-08-30T11:22:12.311+02:00  INFO 16380 --- [erp-system-backend] [restartedMain] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
-2025-08-30T11:22:12.311+02:00  INFO 16380 --- [erp-system-backend] [restartedMain] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.42]
-2025-08-30T11:22:12.362+02:00  INFO 16380 --- [erp-system-backend] [restartedMain] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
-2025-08-30T11:22:12.362+02:00  INFO 16380 --- [erp-system-backend] [restartedMain] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 2811 ms
-2025-08-30T11:22:12.641+02:00  INFO 16380 --- [erp-system-backend] [restartedMain] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: default]
-2025-08-30T11:22:12.718+02:00  INFO 16380 --- [erp-system-backend] [restartedMain] org.hibernate.Version                    : HHH000412: Hibernate ORM core version 6.6.18.Final
-2025-08-30T11:22:12.757+02:00  INFO 16380 --- [erp-system-backend] [restartedMain] o.h.c.internal.RegionFactoryInitiator    : HHH000026: Second-level cache disabled
-2025-08-30T11:22:13.109+02:00  INFO 16380 --- [erp-system-backend] [restartedMain] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
-2025-08-30T11:22:13.148+02:00  INFO 16380 --- [erp-system-backend] [restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
-2025-08-30T11:22:14.846+02:00  INFO 16380 --- [erp-system-backend] [restartedMain] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection org.postgresql.jdbc.PgConnection@324fc123
-2025-08-30T11:22:14.847+02:00  INFO 16380 --- [erp-system-backend] [restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
-2025-08-30T11:22:15.040+02:00  WARN 16380 --- [erp-system-backend] [restartedMain] org.hibernate.orm.deprecation            : HHH90000025: PostgreSQLDialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
-2025-08-30T11:22:15.548+02:00  INFO 16380 --- [erp-system-backend] [restartedMain] org.hibernate.orm.connections.pooling    : HHH10001005: Database info:
+2025-09-02T22:25:45.956+02:00  INFO 14644 --- [erp-system-backend] [restartedMain] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2025-09-02T22:25:52.600+02:00  INFO 14644 --- [erp-system-backend] [restartedMain] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2025-09-02T22:25:52.887+02:00 DEBUG 14644 --- [erp-system-backend] [restartedMain] com.erp.backend.config.JwtAuthFilter     : Filter 'jwtAuthFilter' configured for use
+2025-09-02T22:25:52.980+02:00  INFO 14644 --- [erp-system-backend] [restartedMain] o.s.d.j.r.query.QueryEnhancerFactory     : Hibernate is in classpath; If applicable, HQL parser will be used.
+2025-09-02T22:25:54.493+02:00  WARN 14644 --- [erp-system-backend] [restartedMain] JpaBaseConfiguration$JpaWebConfiguration : spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2025-09-02T22:25:54.523+02:00  INFO 14644 --- [erp-system-backend] [restartedMain] r$InitializeUserDetailsManagerConfigurer : Global AuthenticationManager configured with UserDetailsService bean with name userDetailsService
+2025-09-02T22:25:54.947+02:00  INFO 14644 --- [erp-system-backend] [restartedMain] o.s.b.a.e.web.EndpointLinksResolver      : Exposing 4 endpoints beneath base path '/actuator'
+2025-09-02T22:25:55.301+02:00  INFO 14644 --- [erp-system-backend] [restartedMain] o.s.b.d.a.OptionalLiveReloadServer       : LiveReload server is running on port 35729
+2025-09-02T22:25:55.392+02:00  INFO 14644 --- [erp-system-backend] [restartedMain] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port 8080 (http) with context path '/'
+2025-09-02T22:25:55.405+02:00  INFO 14644 --- [erp-system-backend] [restartedMain] c.e.backend.ErpSystemBackendApplication  : Started ErpSystemBackendApplication in 15.979 seconds (process running for 17.033)
+2025-09-02T22:26:13.618+02:00  INFO 14644 --- [erp-system-backend] [http-nio-8080-exec-1] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring DispatcherServlet 'dispatcherServlet'
+2025-09-02T22:26:13.618+02:00  INFO 14644 --- [erp-system-backend] [http-nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
+2025-09-02T22:26:13.619+02:00  INFO 14644 --- [erp-system-backend] [http-nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Completed initialization in 1 ms
+2025-09-02T22:26:13.881+02:00  WARN 14644 --- [erp-system-backend] [http-nio-8080-exec-8] o.springdoc.core.service.OpenAPIService  : found more than one OpenAPIDefinition class. springdoc-openapi will be using the first one found.
+2025-09-02T22:26:15.413+02:00  INFO 14644 --- [erp-system-backend] [http-nio-8080-exec-8] o.springdoc.api.AbstractOpenApiResource  : Init duration for springdoc-openapi is: 1536 ms
+2025-09-02T22:27:38.180+02:00  INFO 14644 --- [erp-system-backend] [http-nio-8080-exec-1] com.erp.backend.service.InvoiceService   : Fetched 0 invoices
+2025-09-02T22:27:38.530+02:00  INFO 14644 --- [erp-system-backend] [http-nio-8080-exec-1] com.erp.backend.service.InvoiceService   : Created invoice: id=fc3de499-1944-4539-8ca1-5e61c4a5afcd, invoiceNumber=INV-2025-0001
+2025-09-02T22:27:38.641+02:00  INFO 14644 --- [erp-system-backend] [http-nio-8080-exec-1] com.erp.backend.service.InvoiceService   : Created invoice: id=c85d137d-5fca-46b9-b1d2-78ede53a004c, invoiceNumber=INV-2025-0002
+2025-09-02T22:27:38.740+02:00  INFO 14644 --- [erp-system-backend] [http-nio-8080-exec-1] com.erp.backend.service.InvoiceService   : Created invoice: id=d1525b9a-2b3e-4539-92f7-eeb1e358ee27, invoiceNumber=INV-2025-0003
+2025-09-02T22:27:38.839+02:00  INFO 14644 --- [erp-system-backend] [http-nio-8080-exec-1] com.erp.backend.service.InvoiceService   : Created invoice: id=3b44ff16-e3ff-4b91-b5ea-b753080fe5c4, invoiceNumber=INV-2025-0004
+2025-09-02T22:27:38.942+02:00  INFO 14644 --- [erp-system-backend] [http-nio-8080-exec-1] com.erp.backend.service.InvoiceService   : Created invoice: id=35043795-9098-4321-ac65-3b96630b4dfe, invoiceNumber=INV-2025-0005
+2025-09-02T22:27:39.047+02:00  INFO 14644 --- [erp-system-backend] [http-nio-8080-exec-1] com.erp.backend.service.InvoiceService   : Created invoice: id=3325e70f-ec68-4feb-a52f-ff1fe15e0bbc, invoiceNumber=INV-2025-0006
+2025-09-02T22:27:39.151+02:00  INFO 14644 --- [erp-system-backend] [http-nio-8080-exec-1] com.erp.backend.service.InvoiceService   : Created invoice: id=0e29f196-b375-4e74-bafd-f86e705da105, invoiceNumber=INV-2025-0007
+2025-09-02T22:27:39.251+02:00  INFO 14644 --- [erp-system-backend] [http-nio-8080-exec-1] com.erp.backend.service.InvoiceService   : Created invoice: id=27c876dc-fc5e-452e-b8c7-1a7af2c7c0c3, invoiceNumber=INV-2025-0008
+2025-09-02T22:27:39.351+02:00  INFO 14644 --- [erp-system-backend] [http-nio-8080-exec-1] com.erp.backend.service.InvoiceService   : Created invoice: id=fe381a3f-32ce-442a-a2e8-54f4b58c63c5, invoiceNumber=INV-2025-0009
+2025-09-02T22:27:39.453+02:00  INFO 14644 --- [erp-system-backend] [http-nio-8080-exec-1] com.erp.backend.service.InvoiceService   : Created invoice: id=286f6bf4-7549-43ed-8a60-057a6656f3e6, invoiceNumber=INV-2025-0010
+2025-09-02T22:27:39.556+02:00  INFO 14644 --- [erp-system-backend] [http-nio-8080-exec-1] com.erp.backend.service.InvoiceService   : Created invoice: id=843ca066-d885-487c-8f2e-cb5084a02571, invoiceNumber=INV-2025-0011
+2025-09-02T22:27:39.659+02:00  INFO 14644 --- [erp-system-backend] [http-nio-8080-exec-1] com.erp.backend.service.InvoiceService   : Created invoice: id=3665f814-bc4b-42cf-9d0b-d1acc377fbff, invoiceNumber=INV-2025-0012
+2025-09-02T22:27:39.761+02:00  INFO 14644 --- [erp-system-backend] [http-nio-8080-exec-1] com.erp.backend.service.InvoiceService   : Created invoice: id=67fcc03d-55a7-450d-8ba9-a784ed0b5a53, invoiceNumber=INV-2025-0013
+2025-09-02T22:27:39.859+02:00  INFO 14644 --- [erp-system-backend] [http-nio-8080-exec-1] com.erp.backend.service.InvoiceService   : Created invoice: id=0fd842de-0853-4577-aa42-f6f7202c79a3, invoiceNumber=INV-2025-0014
+2025-09-02T22:27:39.965+02:00  INFO 14644 --- [erp-system-backend] [http-nio-8080-exec-1] com.erp.backend.service.InvoiceService   : Created invoice: id=d748594b-99f4-4b10-bc9b-afc3ca8d17a6, invoiceNumber=INV-2025-0015
+2025-09-02T22:27:40.068+02:00  INFO 14644 --- [erp-system-backend] [http-nio-8080-exec-1] com.erp.backend.service.InvoiceService   : Created invoice: id=3d5f9c3d-dc39-4371-8613-ce47ca938b5a, invoiceNumber=INV-2025-0016
+2025-09-02T22:27:40.206+02:00  INFO 14644 --- [erp-system-backend] [http-nio-8080-exec-1] com.erp.backend.service.InvoiceService   : Created invoice: id=f03c4a06-92af-4ede-95b9-5228f69ea124, invoiceNumber=INV-2025-0017
+2025-09-02T22:27:40.341+02:00  INFO 14644 --- [erp-system-backend] [http-nio-8080-exec-1] com.erp.backend.service.InvoiceService   : Created invoice: id=d52f6376-c198-4002-8f1e-5824e97d5f7f, invoiceNumber=INV-2025-0018
+2025-09-02T22:27:40.445+02:00  INFO 14644 --- [erp-system-backend] [http-nio-8080-exec-1] com.erp.backend.service.InvoiceService   : Created invoice: id=7b936300-7fc9-467c-952a-65c0c5791831, invoiceNumber=INV-2025-0019
+2025-09-02T22:42:53.111+02:00  WARN 14644 --- [erp-system-backend] [http-nio-8080-exec-1] ration$PageModule$WarningLoggingModifier : Serializing PageImpl instances as-is is not supported, meaning that there is no guarantee about the stability of the resulting JSON structure!
+	For a stable JSON structure, please use Spring Data's PagedModel (globally via @EnableSpringDataWebSupport(pageSerializationMode = VIA_DTO))
+	or Spring HATEOAS and Spring Data's PagedResourcesAssembler as documented in https://docs.spring.io/spring-data/commons/reference/repositories/core-extensions.html#core.web.pageables.
+
+2025-09-02T22:43:06.271+02:00  INFO 14644 --- [erp-system-backend] [http-nio-8080-exec-8] c.e.b.controller.ContractController      : GET /api/contracts - Fetching contracts (paginated: false)
+2025-09-02T22:43:06.307+02:00  INFO 14644 --- [erp-system-backend] [http-nio-8080-exec-9] c.e.b.controller.SubscriptionController  : GET /api/subscriptions - Fetching subscriptions (paginated: false)
+2025-09-02T22:43:06.538+02:00  INFO 14644 --- [erp-system-backend] [http-nio-8080-exec-9] c.e.backend.service.SubscriptionService  : Fetched 40 subscriptions
+2025-09-02T22:43:22.451+02:00  INFO 14644 --- [erp-system-backend] [http-nio-8080-exec-4] c.e.backend.service.SubscriptionService  : Updated subscription: id=1cfdb781-1a97-4240-bbf6-0869b94062bc, subscriptionNumber=SUB-20250902-1000
+2025-09-02T22:43:22.567+02:00  WARN 14644 --- [erp-system-backend] [http-nio-8080-exec-4] o.h.engine.jdbc.spi.SqlExceptionHelper   : SQL Error: 0, SQLState: 23502
+2025-09-02T22:43:22.567+02:00 ERROR 14644 --- [erp-system-backend] [http-nio-8080-exec-4] o.h.engine.jdbc.spi.SqlExceptionHelper   : ERROR: null value in column "contract_id" of relation "subscriptions" violates not-null constraint
+  Detail: Failing row contains (1cfdb781-1a97-4240-bbf6-0869b94062bc, f, ANNUALLY, null, 2025-05-11, 19.99, null, Netflix Business, 2024-12-23, SUB-20250902-1000, ACTIVE, null).
+2025-09-02T22:43:26.318+02:00  INFO 14644 --- [erp-system-backend] [http-nio-8080-exec-1] c.e.b.controller.ContractController      : GET /api/contracts - Fetching contracts (paginated: false)
+2025-09-02T22:43:29.201+02:00  INFO 14644 --- [erp-system-backend] [http-nio-8080-exec-3] c.erp.backend.service.CustomerService    : Fetched 25 customers
+2025-09-02T22:43:39.213+02:00  INFO 14644 --- [erp-system-backend] [http-nio-8080-exec-7] c.e.b.controller.ContractController      : === CONTROLLER UPDATE DEBUG ===
+2025-09-02T22:43:39.213+02:00  INFO 14644 --- [erp-system-backend] [http-nio-8080-exec-7] c.e.b.controller.ContractController      : PUT /api/contracts/480e2d7f-05f8-4e29-82cf-b8ad65a4e0a6 - Updating contract
+2025-09-02T22:43:39.213+02:00  INFO 14644 --- [erp-system-backend] [http-nio-8080-exec-7] c.e.b.controller.ContractController      : DTO Customer ID: 9502a846-e890-4952-bd0b-31b65cc5bfec
+2025-09-02T22:43:39.213+02:00  INFO 14644 --- [erp-system-backend] [http-nio-8080-exec-7] c.e.b.controller.ContractController      : DTO Contract Title: Contract 1
+2025-09-02T22:43:39.213+02:00  INFO 14644 --- [erp-system-backend] [http-nio-8080-exec-7] c.e.b.controller.ContractController      : DTO Status: ACTIVE
+2025-09-02T22:43:39.213+02:00  INFO 14644 --- [erp-system-backend] [http-nio-8080-exec-7] c.e.b.controller.ContractController      : Entity nach Mapping - Customer: Customer{id=9502a846-e890-4952-bd0b-31b65cc5bfec, customerNumber='null', firstName='null', lastName='null', email='null', tel='null', billingAddress=null, shippingAddress=null, residentialAddress=null}
+2025-09-02T22:43:39.214+02:00  INFO 14644 --- [erp-system-backend] [http-nio-8080-exec-7] c.e.b.controller.ContractController      : Entity Customer ID: 9502a846-e890-4952-bd0b-31b65cc5bfec
+2025-09-02T22:43:39.214+02:00  INFO 14644 --- [erp-system-backend] [http-nio-8080-exec-7] c.erp.backend.service.ContractService    : === CONTRACT UPDATE DEBUG START ===
+2025-09-02T22:43:39.214+02:00  INFO 14644 --- [erp-system-backend] [http-nio-8080-exec-7] c.erp.backend.service.ContractService    : Contract ID: 480e2d7f-05f8-4e29-82cf-b8ad65a4e0a6
+2025-09-02T22:43:39.214+02:00  INFO 14644 --- [erp-system-backend] [http-nio-8080-exec-7] c.erp.backend.service.ContractService    : Contract Title: Contract 1
+2025-09-02T22:43:39.417+02:00  INFO 14644 --- [erp-system-backend] [http-nio-8080-exec-7] c.erp.backend.service.ContractService    : Existing Customer ID: a60aee09-f8ae-41af-a23d-102740c46e52
+2025-09-02T22:43:39.517+02:00  INFO 14644 --- [erp-system-backend] [http-nio-8080-exec-7] c.erp.backend.service.ContractService    : Existing Customer Name: Julia Schmidt
+2025-09-02T22:43:39.517+02:00  INFO 14644 --- [erp-system-backend] [http-nio-8080-exec-7] c.erp.backend.service.ContractService    : New Contract Customer: Customer{id=9502a846-e890-4952-bd0b-31b65cc5bfec, customerNumber='null', firstName='null', lastName='null', email='null', tel='null', billingAddress=null, shippingAddress=null, residentialAddress=null}
+2025-09-02T22:43:39.517+02:00  INFO 14644 --- [erp-system-backend] [http-nio-8080-exec-7] c.erp.backend.service.ContractService    : New Customer ID: 9502a846-e890-4952-bd0b-31b65cc5bfec
+2025-09-02T22:43:39.517+02:00  INFO 14644 --- [erp-system-backend] [http-nio-8080-exec-7] c.erp.backend.service.ContractService    : Lade neuen Customer mit ID: 9502a846-e890-4952-bd0b-31b65cc5bfec
+2025-09-02T22:43:39.617+02:00  INFO 14644 --- [erp-system-backend] [http-nio-8080-exec-7] c.erp.backend.service.ContractService    : Neuer Customer geladen: Laura Müller
+2025-09-02T22:43:39.617+02:00  INFO 14644 --- [erp-system-backend] [http-nio-8080-exec-7] c.erp.backend.service.ContractService    : Customer geändert von Julia Schmidt zu Laura Müller
+2025-09-02T22:43:39.618+02:00  INFO 14644 --- [erp-system-backend] [http-nio-8080-exec-7] c.erp.backend.service.ContractService    : Contract gespeichert mit Customer ID: 9502a846-e890-4952-bd0b-31b65cc5bfec
+2025-09-02T22:43:39.618+02:00  INFO 14644 --- [erp-system-backend] [http-nio-8080-exec-7] c.erp.backend.service.ContractService    : === CONTRACT UPDATE DEBUG END ===
+2025-09-02T22:43:39.815+02:00  INFO 14644 --- [erp-system-backend] [http-nio-8080-exec-7] c.e.b.controller.ContractController      : Update abgeschlossen - Customer ID: 9502a846-e890-4952-bd0b-31b65cc5bfec
+2025-09-02T22:43:39.815+02:00  INFO 14644 --- [erp-system-backend] [http-nio-8080-exec-7] c.e.b.controller.ContractController      : === CONTROLLER UPDATE DEBUG END ===
+2025-09-02T22:44:04.073+02:00  INFO 14644 --- [erp-system-backend] [http-nio-8080-exec-8] c.e.b.controller.ContractController      : GET /api/contracts - Fetching contracts (paginated: false)
+2025-09-02T22:45:07.743+02:00  WARN 14644 --- [erp-system-backend] [http-nio-8080-exec-7] .w.s.m.a.ResponseStatusExceptionResolver : Resolved [com.erp.backend.exception.BusinessLogicException: Fälligkeitsplan ist bereits als bezahlt markiert]
+2025-09-02T22:45:17.712+02:00  INFO 14644 --- [erp-system-backend] [http-nio-8080-exec-10] c.e.backend.service.DueScheduleService   : Marked due schedule as paid: id=63543072-f31d-4362-b3b5-201c43a74773, amount=15.00
+2025-09-02T22:45:21.843+02:00  WARN 14644 --- [erp-system-backend] [http-nio-8080-exec-8] .w.s.m.a.ResponseStatusExceptionResolver : Resolved [com.erp.backend.exception.BusinessLogicException: Fälligkeitsplan ist bereits als bezahlt markiert]
+2025-09-02T22:45:25.532+02:00 ERROR 14644 --- [erp-system-backend] [http-nio-8080-exec-2] o.a.c.c.C.[.[.[/].[dispatcherServlet]    : Servlet.service() for servlet [dispatcherServlet] in context with path [] threw exception [Request processing failed: java.lang.NullPointerException: Cannot invoke "java.math.BigDecimal.compareTo(java.math.BigDecimal)" because the return value of "com.erp.backend.dto.PaymentDto.getPaidAmount()" is null] with root cause
+
+java.lang.NullPointerException: Cannot invoke "java.math.BigDecimal.compareTo(java.math.BigDecimal)" because the return value of "com.erp.backend.dto.PaymentDto.getPaidAmount()" is null
+	at com.erp.backend.service.DueScheduleService.recordPayment(DueScheduleService.java:222) ~[classes/:na]
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:104) ~[na:na]
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565) ~[na:na]
+	at org.springframework.aop.support.AopUtils.invokeJoinpointUsingReflection(AopUtils.java:359) ~[spring-aop-6.2.8.jar:6.2.8]
+	at org.springframework.aop.framework.ReflectiveMethodInvocation.invokeJoinpoint(ReflectiveMethodInvocation.java:196) ~[spring-aop-6.2.8.jar:6.2.8]
+	at org.springframework.aop.framework.ReflectiveMethodInvocation.proceed(ReflectiveMethodInvocation.java:163) ~[spring-aop-6.2.8.jar:6.2.8]
+	at org.springframework.transaction.interceptor.TransactionAspectSupport.invokeWithinTransaction(TransactionAspectSupport.java:380) ~[spring-tx-6.2.8.jar:6.2.8]
+	at org.springframework.transaction.interceptor.TransactionInterceptor.invoke(TransactionInterceptor.java:119) ~[spring-tx-6.2.8.jar:6.2.8]
+	at org.springframework.aop.framework.ReflectiveMethodInvocation.proceed(ReflectiveMethodInvocation.java:184) ~[spring-aop-6.2.8.jar:6.2.8]
+	at org.springframework.aop.framework.CglibAopProxy$DynamicAdvisedInterceptor.intercept(CglibAopProxy.java:728) ~[spring-aop-6.2.8.jar:6.2.8]
+	at com.erp.backend.service.DueScheduleService$$SpringCGLIB$$0.recordPayment(<generated>) ~[classes/:na]
+	at com.erp.backend.controller.DueScheduleController.recordPayment(DueScheduleController.java:138) ~[classes/:na]
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:104) ~[na:na]
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565) ~[na:na]
+	at org.springframework.web.method.support.InvocableHandlerMethod.doInvoke(InvocableHandlerMethod.java:258) ~[spring-web-6.2.8.jar:6.2.8]
+	at org.springframework.web.method.support.InvocableHandlerMethod.invokeForRequest(InvocableHandlerMethod.java:191) ~[spring-web-6.2.8.jar:6.2.8]
+	at org.springframework.web.servlet.mvc.method.annotation.ServletInvocableHandlerMethod.invokeAndHandle(ServletInvocableHandlerMethod.java:118) ~[spring-webmvc-6.2.8.jar:6.2.8]
+	at org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter.invokeHandlerMethod(RequestMappingHandlerAdapter.java:986) ~[spring-webmvc-6.2.8.jar:6.2.8]
+	at org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter.handleInternal(RequestMappingHandlerAdapter.java:891) ~[spring-webmvc-6.2.8.jar:6.2.8]
+	at org.springframework.web.servlet.mvc.method.AbstractHandlerMethodAdapter.handle(AbstractHandlerMethodAdapter.java:87) ~[spring-webmvc-6.2.8.jar:6.2.8]
+	at org.springframework.web.servlet.DispatcherServlet.doDispatch(DispatcherServlet.java:1089) ~[spring-webmvc-6.2.8.jar:6.2.8]
+	at org.springframework.web.servlet.DispatcherServlet.doService(DispatcherServlet.java:979) ~[spring-webmvc-6.2.8.jar:6.2.8]
+	at org.springframework.web.servlet.FrameworkServlet.processRequest(FrameworkServlet.java:1014) ~[spring-webmvc-6.2.8.jar:6.2.8]
+	at org.springframework.web.servlet.FrameworkServlet.doPost(FrameworkServlet.java:914) ~[spring-webmvc-6.2.8.jar:6.2.8]
+	at jakarta.servlet.http.HttpServlet.service(HttpServlet.java:590) ~[tomcat-embed-core-10.1.42.jar:6.0]
+	at org.springframework.web.servlet.FrameworkServlet.service(FrameworkServlet.java:885) ~[spring-webmvc-6.2.8.jar:6.2.8]
+	at jakarta.servlet.http.HttpServlet.service(HttpServlet.java:658) ~[tomcat-embed-core-10.1.42.jar:6.0]
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:195) ~[tomcat-embed-core-10.1.42.jar:10.1.42]
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140) ~[tomcat-embed-core-10.1.42.jar:10.1.42]
+	at org.apache.tomcat.websocket.server.WsFilter.doFilter(WsFilter.java:51) ~[tomcat-embed-websocket-10.1.42.jar:10.1.42]
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164) ~[tomcat-embed-core-10.1.42.jar:10.1.42]
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140) ~[tomcat-embed-core-10.1.42.jar:10.1.42]
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:110) ~[spring-web-6.2.8.jar:6.2.8]
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164) ~[tomcat-embed-core-10.1.42.jar:10.1.42]
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140) ~[tomcat-embed-core-10.1.42.jar:10.1.42]
+	at org.springframework.web.filter.CompositeFilter$VirtualFilterChain.doFilter(CompositeFilter.java:108) ~[spring-web-6.2.8.jar:6.2.8]
+	at org.springframework.web.filter.CompositeFilter$VirtualFilterChain.doFilter(CompositeFilter.java:108) ~[spring-web-6.2.8.jar:6.2.8]
+	at org.springframework.security.web.FilterChainProxy.lambda$doFilterInternal$3(FilterChainProxy.java:231) ~[spring-security-web-6.5.1.jar:6.5.1]
+	at org.springframework.security.web.ObservationFilterChainDecorator$FilterObservation$SimpleFilterObservation.lambda$wrap$1(ObservationFilterChainDecorator.java:479) ~[spring-security-web-6.5.1.jar:6.5.1]
+	at org.springframework.security.web.ObservationFilterChainDecorator$AroundFilterObservation$SimpleAroundFilterObservation.lambda$wrap$1(ObservationFilterChainDecorator.java:340) ~[spring-security-web-6.5.1.jar:6.5.1]
+	at org.springframework.security.web.ObservationFilterChainDecorator.lambda$wrapSecured$0(ObservationFilterChainDecorator.java:82) ~[spring-security-web-6.5.1.jar:6.5.1]
+	at org.springframework.security.web.ObservationFilterChainDecorator$VirtualFilterChain.doFilter(ObservationFilterChainDecorator.java:128) ~[spring-security-web-6.5.1.jar:6.5.1]
+	at org.springframework.security.web.access.intercept.AuthorizationFilter.doFilter(AuthorizationFilter.java:101) ~[spring-security-web-6.5.1.jar:6.5.1]
+	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.wrapFilter(ObservationFilterChainDecorator.java:240) ~[spring-security-web-6.5.1.jar:6.5.1]
+	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.doFilter(ObservationFilterChainDecorator.java:227) ~[spring-security-web-6.5.1.jar:6.5.1]
+	at org.springframework.security.web.ObservationFilterChainDecorator$VirtualFilterChain.doFilter(ObservationFilterChainDecorator.java:137) ~[spring-security-web-6.5.1.jar:6.5.1]
+	at org.springframework.security.web.access.ExceptionTranslationFilter.doFilter(ExceptionTranslationFilter.java:125) ~[spring-security-web-6.5.1.jar:6.5.1]
+	at org.springframework.security.web.access.ExceptionTranslationFilter.doFilter(ExceptionTranslationFilter.java:119) ~[spring-security-web-6.5.1.jar:6.5.1]
+	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.wrapFilter(ObservationFilterChainDecorator.java:240) ~[spring-security-web-6.5.1.jar:6.5.1]
+	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.doFilter(ObservationFilterChainDecorator.java:227) ~[spring-security-web-6.5.1.jar:6.5.1]
+	at org.springframework.security.web.ObservationFilterChainDecorator$VirtualFilterChain.doFilter(ObservationFilterChainDecorator.java:137) ~[spring-security-web-6.5.1.jar:6.5.1]
+	at org.springframework.security.web.session.SessionManagementFilter.doFilter(SessionManagementFilter.java:131) ~[spring-security-web-6.5.1.jar:6.5.1]
+	at org.springframework.security.web.session.SessionManagementFilter.doFilter(SessionManagementFilter.java:85) ~[spring-security-web-6.5.1.jar:6.5.1]
+	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.wrapFilter(ObservationFilterChainDecorator.java:240) ~[spring-security-web-6.5.1.jar:6.5.1]
+	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.doFilter(ObservationFilterChainDecorator.java:227) ~[spring-security-web-6.5.1.jar:6.5.1]
+	at org.springframework.security.web.ObservationFilterChainDecorator$VirtualFilterChain.doFilter(ObservationFilterChainDecorator.java:137) ~[spring-security-web-6.5.1.jar:6.5.1]
+	at org.springframework.security.web.authentication.AnonymousAuthenticationFilter.doFilter(AnonymousAuthenticationFilter.java:100) ~[spring-security-web-6.5.1.jar:6.5.1]
+	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.wrapFilter(ObservationFilterChainDecorator.java:240) ~[spring-security-web-6.5.1.jar:6.5.1]
+	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.doFilter(ObservationFilterChainDecorator.java:227) ~[spring-security-web-6.5.1.jar:6.5.1]
+	at org.springframework.security.web.ObservationFilterChainDecorator$VirtualFilterChain.doFilter(ObservationFilterChainDecorator.java:137) ~[spring-security-web-6.5.1.jar:6.5.1]
+	at org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestFilter.doFilter(SecurityContextHolderAwareRequestFilter.java:179) ~[spring-security-web-6.5.1.jar:6.5.1]
+	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.wrapFilter(ObservationFilterChainDecorator.java:240) ~[spring-security-web-6.5.1.jar:6.5.1]
+	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.doFilter(ObservationFilterChainDecorator.java:227) ~[spring-security-web-6.5.1.jar:6.5.1]
+	at org.springframework.security.web.ObservationFilterChainDecorator$VirtualFilterChain.doFilter(ObservationFilterChainDecorator.java:137) ~[spring-security-web-6.5.1.jar:6.5.1]
+	at org.springframework.security.web.savedrequest.RequestCacheAwareFilter.doFilter(RequestCacheAwareFilter.java:63) ~[spring-security-web-6.5.1.jar:6.5.1]
+	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.wrapFilter(ObservationFilterChainDecorator.java:240) ~[spring-security-web-6.5.1.jar:6.5.1]
+	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.doFilter(ObservationFilterChainDecorator.java:227) ~[spring-security-web-6.5.1.jar:6.5.1]
+	at org.springframework.security.web.ObservationFilterChainDecorator$VirtualFilterChain.doFilter(ObservationFilterChainDecorator.java:137) ~[spring-security-web-6.5.1.jar:6.5.1]
+	at com.erp.backend.config.JwtAuthFilter.doFilterInternal(JwtAuthFilter.java:51) ~[classes/:na]
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116) ~[spring-web-6.2.8.jar:6.2.8]
+	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.wrapFilter(ObservationFilterChainDecorator.java:240) ~[spring-security-web-6.5.1.jar:6.5.1]
+	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.doFilter(ObservationFilterChainDecorator.java:227) ~[spring-security-web-6.5.1.jar:6.5.1]
+	at org.springframework.security.web.ObservationFilterChainDecorator$VirtualFilterChain.doFilter(ObservationFilterChainDecorator.java:137) ~[spring-security-web-6.5.1.jar:6.5.1]
+	at org.springframework.security.web.authentication.logout.LogoutFilter.doFilter(LogoutFilter.java:107) ~[spring-security-web-6.5.1.jar:6.5.1]
+	at org.springframework.security.web.authentication.logout.LogoutFilter.doFilter(LogoutFilter.java:93) ~[spring-security-web-6.5.1.jar:6.5.1]
+	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.wrapFilter(ObservationFilterChainDecorator.java:240) ~[spring-security-web-6.5.1.jar:6.5.1]
+	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.doFilter(ObservationFilterChainDecorator.java:227) ~[spring-security-web-6.5.1.jar:6.5.1]
+	at org.springframework.security.web.ObservationFilterChainDecorator$VirtualFilterChain.doFilter(ObservationFilterChainDecorator.java:137) ~[spring-security-web-6.5.1.jar:6.5.1]
+	at org.springframework.web.filter.CorsFilter.doFilterInternal(CorsFilter.java:91) ~[spring-web-6.2.8.jar:6.2.8]
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116) ~[spring-web-6.2.8.jar:6.2.8]
+	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.wrapFilter(ObservationFilterChainDecorator.java:240) ~[spring-security-web-6.5.1.jar:6.5.1]
+	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.doFilter(ObservationFilterChainDecorator.java:227) ~[spring-security-web-6.5.1.jar:6.5.1]
+	at org.springframework.security.web.ObservationFilterChainDecorator$VirtualFilterChain.doFilter(ObservationFilterChainDecorator.java:137) ~[spring-security-web-6.5.1.jar:6.5.1]
+	at org.springframework.security.web.header.HeaderWriterFilter.doHeadersAfter(HeaderWriterFilter.java:90) ~[spring-security-web-6.5.1.jar:6.5.1]
+	at org.springframework.security.web.header.HeaderWriterFilter.doFilterInternal(HeaderWriterFilter.java:75) ~[spring-security-web-6.5.1.jar:6.5.1]
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116) ~[spring-web-6.2.8.jar:6.2.8]
+	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.wrapFilter(ObservationFilterChainDecorator.java:240) ~[spring-security-web-6.5.1.jar:6.5.1]
+	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.doFilter(ObservationFilterChainDecorator.java:227) ~[spring-security-web-6.5.1.jar:6.5.1]
+	at org.springframework.security.web.ObservationFilterChainDecorator$VirtualFilterChain.doFilter(ObservationFilterChainDecorator.java:137) ~[spring-security-web-6.5.1.jar:6.5.1]
+	at org.springframework.security.web.context.SecurityContextHolderFilter.doFilter(SecurityContextHolderFilter.java:82) ~[spring-security-web-6.5.1.jar:6.5.1]
+	at org.springframework.security.web.context.SecurityContextHolderFilter.doFilter(SecurityContextHolderFilter.java:69) ~[spring-security-web-6.5.1.jar:6.5.1]
+	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.wrapFilter(ObservationFilterChainDecorator.java:240) ~[spring-security-web-6.5.1.jar:6.5.1]
+	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.doFilter(ObservationFilterChainDecorator.java:227) ~[spring-security-web-6.5.1.jar:6.5.1]
+	at org.springframework.security.web.ObservationFilterChainDecorator$VirtualFilterChain.doFilter(ObservationFilterChainDecorator.java:137) ~[spring-security-web-6.5.1.jar:6.5.1]
+	at org.springframework.security.web.context.request.async.WebAsyncManagerIntegrationFilter.doFilterInternal(WebAsyncManagerIntegrationFilter.java:62) ~[spring-security-web-6.5.1.jar:6.5.1]
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116) ~[spring-web-6.2.8.jar:6.2.8]
+	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.wrapFilter(ObservationFilterChainDecorator.java:240) ~[spring-security-web-6.5.1.jar:6.5.1]
+	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.doFilter(ObservationFilterChainDecorator.java:227) ~[spring-security-web-6.5.1.jar:6.5.1]
+	at org.springframework.security.web.ObservationFilterChainDecorator$VirtualFilterChain.doFilter(ObservationFilterChainDecorator.java:137) ~[spring-security-web-6.5.1.jar:6.5.1]
+	at org.springframework.security.web.session.DisableEncodeUrlFilter.doFilterInternal(DisableEncodeUrlFilter.java:42) ~[spring-security-web-6.5.1.jar:6.5.1]
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116) ~[spring-web-6.2.8.jar:6.2.8]
+	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.wrapFilter(ObservationFilterChainDecorator.java:240) ~[spring-security-web-6.5.1.jar:6.5.1]
+	at org.springframework.security.web.ObservationFilterChainDecorator$AroundFilterObservation$SimpleAroundFilterObservation.lambda$wrap$0(ObservationFilterChainDecorator.java:323) ~[spring-security-web-6.5.1.jar:6.5.1]
+	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.doFilter(ObservationFilterChainDecorator.java:224) ~[spring-security-web-6.5.1.jar:6.5.1]
+	at org.springframework.security.web.ObservationFilterChainDecorator$VirtualFilterChain.doFilter(ObservationFilterChainDecorator.java:137) ~[spring-security-web-6.5.1.jar:6.5.1]
+	at org.springframework.security.web.FilterChainProxy.doFilterInternal(FilterChainProxy.java:233) ~[spring-security-web-6.5.1.jar:6.5.1]
+	at org.springframework.security.web.FilterChainProxy.doFilter(FilterChainProxy.java:191) ~[spring-security-web-6.5.1.jar:6.5.1]
+	at org.springframework.web.filter.CompositeFilter$VirtualFilterChain.doFilter(CompositeFilter.java:113) ~[spring-web-6.2.8.jar:6.2.8]
+	at org.springframework.web.filter.ServletRequestPathFilter.doFilter(ServletRequestPathFilter.java:52) ~[spring-web-6.2.8.jar:6.2.8]
+	at org.springframework.web.filter.CompositeFilter$VirtualFilterChain.doFilter(CompositeFilter.java:113) ~[spring-web-6.2.8.jar:6.2.8]
+	at org.springframework.web.filter.CompositeFilter.doFilter(CompositeFilter.java:74) ~[spring-web-6.2.8.jar:6.2.8]
+	at org.springframework.security.config.annotation.web.configuration.WebSecurityConfiguration$CompositeFilterChainProxy.doFilter(WebSecurityConfiguration.java:319) ~[spring-security-config-6.5.1.jar:6.5.1]
+	at org.springframework.web.filter.CompositeFilter$VirtualFilterChain.doFilter(CompositeFilter.java:113) ~[spring-web-6.2.8.jar:6.2.8]
+	at org.springframework.web.servlet.handler.HandlerMappingIntrospector.lambda$createCacheFilter$4(HandlerMappingIntrospector.java:267) ~[spring-webmvc-6.2.8.jar:6.2.8]
+	at org.springframework.web.filter.CompositeFilter$VirtualFilterChain.doFilter(CompositeFilter.java:113) ~[spring-web-6.2.8.jar:6.2.8]
+	at org.springframework.web.filter.CompositeFilter.doFilter(CompositeFilter.java:74) ~[spring-web-6.2.8.jar:6.2.8]
+	at org.springframework.security.config.annotation.web.configuration.WebMvcSecurityConfiguration$CompositeFilterChainProxy.doFilter(WebMvcSecurityConfiguration.java:240) ~[spring-security-config-6.5.1.jar:6.5.1]
+	at org.springframework.web.filter.DelegatingFilterProxy.invokeDelegate(DelegatingFilterProxy.java:362) ~[spring-web-6.2.8.jar:6.2.8]
+	at org.springframework.web.filter.DelegatingFilterProxy.doFilter(DelegatingFilterProxy.java:278) ~[spring-web-6.2.8.jar:6.2.8]
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164) ~[tomcat-embed-core-10.1.42.jar:10.1.42]
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140) ~[tomcat-embed-core-10.1.42.jar:10.1.42]
+	at org.springframework.web.filter.RequestContextFilter.doFilterInternal(RequestContextFilter.java:100) ~[spring-web-6.2.8.jar:6.2.8]
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116) ~[spring-web-6.2.8.jar:6.2.8]
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164) ~[tomcat-embed-core-10.1.42.jar:10.1.42]
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140) ~[tomcat-embed-core-10.1.42.jar:10.1.42]
+	at org.springframework.web.filter.FormContentFilter.doFilterInternal(FormContentFilter.java:93) ~[spring-web-6.2.8.jar:6.2.8]
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116) ~[spring-web-6.2.8.jar:6.2.8]
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164) ~[tomcat-embed-core-10.1.42.jar:10.1.42]
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140) ~[tomcat-embed-core-10.1.42.jar:10.1.42]
+	at org.springframework.web.filter.ServerHttpObservationFilter.doFilterInternal(ServerHttpObservationFilter.java:114) ~[spring-web-6.2.8.jar:6.2.8]
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116) ~[spring-web-6.2.8.jar:6.2.8]
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164) ~[tomcat-embed-core-10.1.42.jar:10.1.42]
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140) ~[tomcat-embed-core-10.1.42.jar:10.1.42]
+	at org.springframework.web.filter.CharacterEncodingFilter.doFilterInternal(CharacterEncodingFilter.java:201) ~[spring-web-6.2.8.jar:6.2.8]
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116) ~[spring-web-6.2.8.jar:6.2.8]
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164) ~[tomcat-embed-core-10.1.42.jar:10.1.42]
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140) ~[tomcat-embed-core-10.1.42.jar:10.1.42]
+	at org.apache.catalina.core.StandardWrapperValve.invoke(StandardWrapperValve.java:167) ~[tomcat-embed-core-10.1.42.jar:10.1.42]
+	at org.apache.catalina.core.StandardContextValve.invoke(StandardContextValve.java:90) ~[tomcat-embed-core-10.1.42.jar:10.1.42]
+	at org.apache.catalina.authenticator.AuthenticatorBase.invoke(AuthenticatorBase.java:483) ~[tomcat-embed-core-10.1.42.jar:10.1.42]
+	at org.apache.catalina.core.StandardHostValve.invoke(StandardHostValve.java:116) ~[tomcat-embed-core-10.1.42.jar:10.1.42]
+	at org.apache.catalina.valves.ErrorReportValve.invoke(ErrorReportValve.java:93) ~[tomcat-embed-core-10.1.42.jar:10.1.42]
+	at org.apache.catalina.core.StandardEngineValve.invoke(StandardEngineValve.java:74) ~[tomcat-embed-core-10.1.42.jar:10.1.42]
+	at org.apache.catalina.connector.CoyoteAdapter.service(CoyoteAdapter.java:344) ~[tomcat-embed-core-10.1.42.jar:10.1.42]
+	at org.apache.coyote.http11.Http11Processor.service(Http11Processor.java:398) ~[tomcat-embed-core-10.1.42.jar:10.1.42]
+	at org.apache.coyote.AbstractProcessorLight.process(AbstractProcessorLight.java:63) ~[tomcat-embed-core-10.1.42.jar:10.1.42]
+	at org.apache.coyote.AbstractProtocol$ConnectionHandler.process(AbstractProtocol.java:903) ~[tomcat-embed-core-10.1.42.jar:10.1.42]
+	at org.apache.tomcat.util.net.NioEndpoint$SocketProcessor.doRun(NioEndpoint.java:1769) ~[tomcat-embed-core-10.1.42.jar:10.1.42]
+	at org.apache.tomcat.util.net.SocketProcessorBase.run(SocketProcessorBase.java:52) ~[tomcat-embed-core-10.1.42.jar:10.1.42]
+	at org.apache.tomcat.util.threads.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1189) ~[tomcat-embed-core-10.1.42.jar:10.1.42]
+	at org.apache.tomcat.util.threads.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:658) ~[tomcat-embed-core-10.1.42.jar:10.1.42]
+	at org.apache.tomcat.util.threads.TaskThread$WrappingRunnable.run(TaskThread.java:63) ~[tomcat-embed-core-10.1.42.jar:10.1.42]
+	at java.base/java.lang.Thread.run(Thread.java:1447) ~[na:na]
+
+2025-09-02T22:45:35.585+02:00  INFO 14644 --- [erp-system-backend] [http-nio-8080-exec-6] c.e.b.controller.ContractController      : GET /api/contracts - Fetching contracts (paginated: false)
+2025-09-02T22:45:35.602+02:00  INFO 14644 --- [erp-system-backend] [http-nio-8080-exec-7] c.e.b.controller.SubscriptionController  : GET /api/subscriptions - Fetching subscriptions (paginated: false)
+2025-09-02T22:45:35.833+02:00  INFO 14644 --- [erp-system-backend] [http-nio-8080-exec-7] c.e.backend.service.SubscriptionService  : Fetched 40 subscriptions
+2025-09-02T22:45:53.824+02:00  INFO 14644 --- [erp-system-backend] [http-nio-8080-exec-8] c.e.b.controller.ContractController      : GET /api/contracts - Fetching contracts (paginated: false)
+2025-09-02T22:45:59.747+02:00  INFO 14644 --- [erp-system-backend] [http-nio-8080-exec-2] c.e.b.controller.SubscriptionController  : GET /api/subscriptions/contract/842aa5ed-8ab0-4a2b-b024-f500c9dddba8 - Fetching subscriptions by contract (activeOnly: false)
+2025-09-02T22:45:59.955+02:00  INFO 14644 --- [erp-system-backend] [http-nio-8080-exec-2] c.e.backend.service.SubscriptionService  : Found 0 subscriptions for contract 842aa5ed-8ab0-4a2b-b024-f500c9dddba8
+2025-09-02T22:46:05.943+02:00  INFO 14644 --- [erp-system-backend] [http-nio-8080-exec-1] c.e.b.controller.SubscriptionController  : GET /api/subscriptions/contract/842aa5ed-8ab0-4a2b-b024-f500c9dddba8 - Fetching subscriptions by contract (activeOnly: false)
+2025-09-02T22:46:06.188+02:00  INFO 14644 --- [erp-system-backend] [http-nio-8080-exec-1] c.e.backend.service.SubscriptionService  : Found 0 subscriptions for contract 842aa5ed-8ab0-4a2b-b024-f500c9dddba8
+2025-09-02T22:46:06.927+02:00  INFO 14644 --- [erp-system-backend] [http-nio-8080-exec-9] c.e.b.controller.SubscriptionController  : GET /api/subscriptions/contract/95324cd6-0e5d-47c3-8bf5-8cddfe67becd - Fetching subscriptions by contract (activeOnly: false)
+2025-09-02T22:46:07.141+02:00  INFO 14644 --- [erp-system-backend] [http-nio-8080-exec-9] c.e.backend.service.SubscriptionService  : Found 1 subscriptions for contract 95324cd6-0e5d-47c3-8bf5-8cddfe67becd
+2025-09-02T22:46:08.114+02:00  INFO 14644 --- [erp-system-backend] [http-nio-8080-exec-6] c.e.b.controller.SubscriptionController  : GET /api/subscriptions/contract/6cfa7986-4517-441e-9a14-5654756bca9c - Fetching subscriptions by contract (activeOnly: false)
+2025-09-02T22:46:08.309+02:00  INFO 14644 --- [erp-system-backend] [http-nio-8080-exec-6] c.e.backend.service.SubscriptionService  : Found 1 subscriptions for contract 6cfa7986-4517-441e-9a14-5654756bca9c
+2025-09-02T22:47:01.023+02:00  INFO 14644 --- [erp-system-backend] [http-nio-8080-exec-6] c.e.b.controller.SubscriptionController  : GET /api/subscriptions - Fetching subscriptions (paginated: false)
+2025-09-02T22:47:01.043+02:00  INFO 14644 --- [erp-system-backend] [http-nio-8080-exec-10] c.e.b.controller.ContractController      : GET /api/contracts - Fetching contracts (paginated: false)
+2025-09-02T22:47:01.222+02:00  INFO 14644 --- [erp-system-backend] [http-nio-8080-exec-6] c.e.backend.service.SubscriptionService  : Fetched 40 subscriptions
+2025-09-02T22:48:29.958+02:00  INFO 14644 --- [erp-system-backend] [SpringApplicationShutdownHook] o.s.b.w.e.tomcat.GracefulShutdown        : Commencing graceful shutdown. Waiting for active requests to complete
+2025-09-02T22:48:29.962+02:00  INFO 14644 --- [erp-system-backend] [tomcat-shutdown] o.s.b.w.e.tomcat.GracefulShutdown        : Graceful shutdown complete
+2025-09-02T22:48:29.969+02:00  INFO 14644 --- [erp-system-backend] [SpringApplicationShutdownHook] j.LocalContainerEntityManagerFactoryBean : Closing JPA EntityManagerFactory for persistence unit 'default'
+2025-09-02T22:48:29.972+02:00  INFO 14644 --- [erp-system-backend] [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown initiated...
+2025-09-02T22:48:31.064+02:00  INFO 14644 --- [erp-system-backend] [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown completed.
+2025-09-02T22:48:34.590+02:00  INFO 13056 --- [erp-system-backend] [restartedMain] c.e.backend.ErpSystemBackendApplication  : Starting ErpSystemBackendApplication using Java 24.0.1 with PID 13056 (C:\Users\ibrah\Desktop\ERP-Backend\erp-system-backend\target\classes started by ibrah in C:\Users\ibrah\Desktop\ERP-Backend\erp-system-backend)
+2025-09-02T22:48:34.592+02:00 DEBUG 13056 --- [erp-system-backend] [restartedMain] c.e.backend.ErpSystemBackendApplication  : Running with Spring Boot v3.5.3, Spring v6.2.8
+2025-09-02T22:48:34.593+02:00  INFO 13056 --- [erp-system-backend] [restartedMain] c.e.backend.ErpSystemBackendApplication  : No active profile set, falling back to 1 default profile: "default"
+2025-09-02T22:48:34.657+02:00  INFO 13056 --- [erp-system-backend] [restartedMain] .e.DevToolsPropertyDefaultsPostProcessor : Devtools property defaults active! Set 'spring.devtools.add-properties' to 'false' to disable
+2025-09-02T22:48:34.658+02:00  INFO 13056 --- [erp-system-backend] [restartedMain] .e.DevToolsPropertyDefaultsPostProcessor : For additional web related logging consider setting the 'logging.level.web' property to 'DEBUG'
+2025-09-02T22:48:35.801+02:00  INFO 13056 --- [erp-system-backend] [restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2025-09-02T22:48:35.892+02:00  INFO 13056 --- [erp-system-backend] [restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 73 ms. Found 11 JPA repository interfaces.
+2025-09-02T22:48:36.527+02:00  INFO 13056 --- [erp-system-backend] [restartedMain] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port 8080 (http)
+2025-09-02T22:48:36.541+02:00  INFO 13056 --- [erp-system-backend] [restartedMain] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2025-09-02T22:48:36.541+02:00  INFO 13056 --- [erp-system-backend] [restartedMain] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.42]
+2025-09-02T22:48:36.595+02:00  INFO 13056 --- [erp-system-backend] [restartedMain] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
+2025-09-02T22:48:36.596+02:00  INFO 13056 --- [erp-system-backend] [restartedMain] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 1938 ms
+2025-09-02T22:48:36.840+02:00  INFO 13056 --- [erp-system-backend] [restartedMain] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: default]
+2025-09-02T22:48:36.894+02:00  INFO 13056 --- [erp-system-backend] [restartedMain] org.hibernate.Version                    : HHH000412: Hibernate ORM core version 6.6.18.Final
+2025-09-02T22:48:36.935+02:00  INFO 13056 --- [erp-system-backend] [restartedMain] o.h.c.internal.RegionFactoryInitiator    : HHH000026: Second-level cache disabled
+2025-09-02T22:48:37.278+02:00  INFO 13056 --- [erp-system-backend] [restartedMain] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2025-09-02T22:48:37.322+02:00  INFO 13056 --- [erp-system-backend] [restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2025-09-02T22:48:38.626+02:00  INFO 13056 --- [erp-system-backend] [restartedMain] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection org.postgresql.jdbc.PgConnection@72f22ba4
+2025-09-02T22:48:38.628+02:00  INFO 13056 --- [erp-system-backend] [restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2025-09-02T22:48:38.758+02:00  WARN 13056 --- [erp-system-backend] [restartedMain] org.hibernate.orm.deprecation            : HHH90000025: PostgreSQLDialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2025-09-02T22:48:39.092+02:00  INFO 13056 --- [erp-system-backend] [restartedMain] org.hibernate.orm.connections.pooling    : HHH10001005: Database info:
 	Database JDBC URL [Connecting through datasource 'HikariDataSource (HikariPool-1)']
 	Database driver: undefined/unknown
-	Database version: 17.6
+	Database version: 17.5
 	Autocommit mode: undefined/unknown
 	Isolation level: undefined/unknown
 	Minimum pool size: undefined/unknown
 	Maximum pool size: undefined/unknown
-2025-08-30T11:22:16.679+02:00  INFO 16380 --- [erp-system-backend] [restartedMain] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
-2025-08-30T11:22:35.968+02:00  INFO 16380 --- [erp-system-backend] [restartedMain] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
-2025-08-30T11:22:36.397+02:00 DEBUG 16380 --- [erp-system-backend] [restartedMain] com.erp.backend.config.JwtAuthFilter     : Filter 'jwtAuthFilter' configured for use
-2025-08-30T11:22:36.535+02:00  INFO 16380 --- [erp-system-backend] [restartedMain] o.s.d.j.r.query.QueryEnhancerFactory     : Hibernate is in classpath; If applicable, HQL parser will be used.
-2025-08-30T11:22:38.138+02:00  WARN 16380 --- [erp-system-backend] [restartedMain] JpaBaseConfiguration$JpaWebConfiguration : spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
-2025-08-30T11:22:38.176+02:00  INFO 16380 --- [erp-system-backend] [restartedMain] r$InitializeUserDetailsManagerConfigurer : Global AuthenticationManager configured with UserDetailsService bean with name userDetailsService
-2025-08-30T11:22:38.680+02:00  INFO 16380 --- [erp-system-backend] [restartedMain] o.s.b.a.e.web.EndpointLinksResolver      : Exposing 4 endpoints beneath base path '/actuator'
-2025-08-30T11:22:39.117+02:00  INFO 16380 --- [erp-system-backend] [restartedMain] o.s.b.d.a.OptionalLiveReloadServer       : LiveReload server is running on port 35729
-2025-08-30T11:22:39.207+02:00  INFO 16380 --- [erp-system-backend] [restartedMain] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port 8080 (http) with context path '/'
-2025-08-30T11:22:39.226+02:00  INFO 16380 --- [erp-system-backend] [restartedMain] c.e.backend.ErpSystemBackendApplication  : Started ErpSystemBackendApplication in 30.258 seconds (process running for 31.427)
-2025-08-30T11:23:32.186+02:00  INFO 16380 --- [erp-system-backend] [SpringApplicationShutdownHook] o.s.b.w.e.tomcat.GracefulShutdown        : Commencing graceful shutdown. Waiting for active requests to complete
-2025-08-30T11:23:32.190+02:00  INFO 16380 --- [erp-system-backend] [tomcat-shutdown] o.s.b.w.e.tomcat.GracefulShutdown        : Graceful shutdown complete
-2025-08-30T11:23:32.198+02:00  INFO 16380 --- [erp-system-backend] [SpringApplicationShutdownHook] j.LocalContainerEntityManagerFactoryBean : Closing JPA EntityManagerFactory for persistence unit 'default'
-2025-08-30T11:23:32.202+02:00  INFO 16380 --- [erp-system-backend] [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown initiated...
-2025-08-30T11:23:33.738+02:00  INFO 16380 --- [erp-system-backend] [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown completed.
-2025-08-30T11:31:35.212+02:00  INFO 14048 --- [erp-system-backend] [restartedMain] c.e.backend.ErpSystemBackendApplication  : Starting ErpSystemBackendApplication using Java 24.0.1 with PID 14048 (C:\Users\ibrah\Desktop\ERP-Backend\erp-system-backend\target\classes started by ibrah in C:\Users\ibrah\Desktop\ERP-Backend\erp-system-backend)
-2025-08-30T11:31:35.214+02:00 DEBUG 14048 --- [erp-system-backend] [restartedMain] c.e.backend.ErpSystemBackendApplication  : Running with Spring Boot v3.5.3, Spring v6.2.8
-2025-08-30T11:31:35.215+02:00  INFO 14048 --- [erp-system-backend] [restartedMain] c.e.backend.ErpSystemBackendApplication  : No active profile set, falling back to 1 default profile: "default"
-2025-08-30T11:31:35.281+02:00  INFO 14048 --- [erp-system-backend] [restartedMain] .e.DevToolsPropertyDefaultsPostProcessor : Devtools property defaults active! Set 'spring.devtools.add-properties' to 'false' to disable
-2025-08-30T11:31:35.281+02:00  INFO 14048 --- [erp-system-backend] [restartedMain] .e.DevToolsPropertyDefaultsPostProcessor : For additional web related logging consider setting the 'logging.level.web' property to 'DEBUG'
-2025-08-30T11:31:37.027+02:00  INFO 14048 --- [erp-system-backend] [restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
-2025-08-30T11:31:37.129+02:00  INFO 14048 --- [erp-system-backend] [restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 87 ms. Found 11 JPA repository interfaces.
-2025-08-30T11:31:37.808+02:00  INFO 14048 --- [erp-system-backend] [restartedMain] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port 8080 (http)
-2025-08-30T11:31:37.826+02:00  INFO 14048 --- [erp-system-backend] [restartedMain] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
-2025-08-30T11:31:37.826+02:00  INFO 14048 --- [erp-system-backend] [restartedMain] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.42]
-2025-08-30T11:31:37.875+02:00  INFO 14048 --- [erp-system-backend] [restartedMain] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
-2025-08-30T11:31:37.876+02:00  INFO 14048 --- [erp-system-backend] [restartedMain] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 2595 ms
-2025-08-30T11:31:38.116+02:00  INFO 14048 --- [erp-system-backend] [restartedMain] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: default]
-2025-08-30T11:31:38.171+02:00  INFO 14048 --- [erp-system-backend] [restartedMain] org.hibernate.Version                    : HHH000412: Hibernate ORM core version 6.6.18.Final
-2025-08-30T11:31:38.209+02:00  INFO 14048 --- [erp-system-backend] [restartedMain] o.h.c.internal.RegionFactoryInitiator    : HHH000026: Second-level cache disabled
-2025-08-30T11:31:38.480+02:00  INFO 14048 --- [erp-system-backend] [restartedMain] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
-2025-08-30T11:31:38.511+02:00  INFO 14048 --- [erp-system-backend] [restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
-2025-08-30T11:31:40.246+02:00  INFO 14048 --- [erp-system-backend] [restartedMain] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection org.postgresql.jdbc.PgConnection@6d00a84a
-2025-08-30T11:31:40.248+02:00  INFO 14048 --- [erp-system-backend] [restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
-2025-08-30T11:31:40.625+02:00  WARN 14048 --- [erp-system-backend] [restartedMain] org.hibernate.orm.deprecation            : HHH90000025: PostgreSQLDialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
-2025-08-30T11:31:41.125+02:00  INFO 14048 --- [erp-system-backend] [restartedMain] org.hibernate.orm.connections.pooling    : HHH10001005: Database info:
-	Database JDBC URL [Connecting through datasource 'HikariDataSource (HikariPool-1)']
-	Database driver: undefined/unknown
-	Database version: 17.6
-	Autocommit mode: undefined/unknown
-	Isolation level: undefined/unknown
-	Minimum pool size: undefined/unknown
-	Maximum pool size: undefined/unknown
-2025-08-30T11:31:42.147+02:00  INFO 14048 --- [erp-system-backend] [restartedMain] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
-2025-08-30T11:32:03.001+02:00  INFO 14048 --- [erp-system-backend] [restartedMain] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
-2025-08-30T11:32:03.335+02:00 DEBUG 14048 --- [erp-system-backend] [restartedMain] com.erp.backend.config.JwtAuthFilter     : Filter 'jwtAuthFilter' configured for use
-2025-08-30T11:32:03.440+02:00  INFO 14048 --- [erp-system-backend] [restartedMain] o.s.d.j.r.query.QueryEnhancerFactory     : Hibernate is in classpath; If applicable, HQL parser will be used.
-2025-08-30T11:32:04.897+02:00  WARN 14048 --- [erp-system-backend] [restartedMain] JpaBaseConfiguration$JpaWebConfiguration : spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
-2025-08-30T11:32:04.926+02:00  INFO 14048 --- [erp-system-backend] [restartedMain] r$InitializeUserDetailsManagerConfigurer : Global AuthenticationManager configured with UserDetailsService bean with name userDetailsService
-2025-08-30T11:32:05.336+02:00  INFO 14048 --- [erp-system-backend] [restartedMain] o.s.b.a.e.web.EndpointLinksResolver      : Exposing 4 endpoints beneath base path '/actuator'
-2025-08-30T11:32:05.715+02:00  INFO 14048 --- [erp-system-backend] [restartedMain] o.s.b.d.a.OptionalLiveReloadServer       : LiveReload server is running on port 35729
-2025-08-30T11:32:05.787+02:00  INFO 14048 --- [erp-system-backend] [restartedMain] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port 8080 (http) with context path '/'
-2025-08-30T11:32:05.801+02:00  INFO 14048 --- [erp-system-backend] [restartedMain] c.e.backend.ErpSystemBackendApplication  : Started ErpSystemBackendApplication in 31.13 seconds (process running for 32.293)
-2025-08-30T11:32:05.969+02:00  INFO 14048 --- [erp-system-backend] [http-nio-8080-exec-1] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring DispatcherServlet 'dispatcherServlet'
-2025-08-30T11:32:05.969+02:00  INFO 14048 --- [erp-system-backend] [http-nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
-2025-08-30T11:32:05.970+02:00  INFO 14048 --- [erp-system-backend] [http-nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Completed initialization in 0 ms
-2025-08-30T11:32:23.536+02:00  INFO 14048 --- [erp-system-backend] [http-nio-8080-exec-7] c.e.b.controller.ContractController      : GET /api/contracts - Fetching contracts (paginated: false)
-2025-08-30T11:32:28.114+02:00  INFO 14048 --- [erp-system-backend] [http-nio-8080-exec-6] c.erp.backend.service.CustomerService    : Fetched 25 customers
-2025-08-30T11:32:47.651+02:00  INFO 14048 --- [erp-system-backend] [http-nio-8080-exec-3] c.e.b.controller.ContractController      : GET /api/contracts - Fetching contracts (paginated: false)
-2025-08-30T11:32:52.290+02:00  INFO 14048 --- [erp-system-backend] [http-nio-8080-exec-10] c.erp.backend.service.CustomerService    : Fetched 25 customers
-2025-08-30T11:37:22.357+02:00  INFO 14048 --- [erp-system-backend] [SpringApplicationShutdownHook] o.s.b.w.e.tomcat.GracefulShutdown        : Commencing graceful shutdown. Waiting for active requests to complete
-2025-08-30T11:37:22.362+02:00  INFO 14048 --- [erp-system-backend] [tomcat-shutdown] o.s.b.w.e.tomcat.GracefulShutdown        : Graceful shutdown complete
-2025-08-30T11:37:22.370+02:00  INFO 14048 --- [erp-system-backend] [SpringApplicationShutdownHook] j.LocalContainerEntityManagerFactoryBean : Closing JPA EntityManagerFactory for persistence unit 'default'
-2025-08-30T11:37:22.373+02:00  INFO 14048 --- [erp-system-backend] [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown initiated...
-2025-08-30T11:37:23.854+02:00  INFO 14048 --- [erp-system-backend] [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown completed.
-2025-08-30T11:37:27.910+02:00  INFO 18552 --- [erp-system-backend] [restartedMain] c.e.backend.ErpSystemBackendApplication  : Starting ErpSystemBackendApplication using Java 24.0.1 with PID 18552 (C:\Users\ibrah\Desktop\ERP-Backend\erp-system-backend\target\classes started by ibrah in C:\Users\ibrah\Desktop\ERP-Backend\erp-system-backend)
-2025-08-30T11:37:27.912+02:00 DEBUG 18552 --- [erp-system-backend] [restartedMain] c.e.backend.ErpSystemBackendApplication  : Running with Spring Boot v3.5.3, Spring v6.2.8
-2025-08-30T11:37:27.913+02:00  INFO 18552 --- [erp-system-backend] [restartedMain] c.e.backend.ErpSystemBackendApplication  : No active profile set, falling back to 1 default profile: "default"
-2025-08-30T11:37:27.983+02:00  INFO 18552 --- [erp-system-backend] [restartedMain] .e.DevToolsPropertyDefaultsPostProcessor : Devtools property defaults active! Set 'spring.devtools.add-properties' to 'false' to disable
-2025-08-30T11:37:27.983+02:00  INFO 18552 --- [erp-system-backend] [restartedMain] .e.DevToolsPropertyDefaultsPostProcessor : For additional web related logging consider setting the 'logging.level.web' property to 'DEBUG'
-2025-08-30T11:37:29.155+02:00  INFO 18552 --- [erp-system-backend] [restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
-2025-08-30T11:37:29.263+02:00  INFO 18552 --- [erp-system-backend] [restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 94 ms. Found 11 JPA repository interfaces.
-2025-08-30T11:37:29.963+02:00  INFO 18552 --- [erp-system-backend] [restartedMain] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port 8080 (http)
-2025-08-30T11:37:29.977+02:00  INFO 18552 --- [erp-system-backend] [restartedMain] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
-2025-08-30T11:37:29.978+02:00  INFO 18552 --- [erp-system-backend] [restartedMain] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.42]
-2025-08-30T11:37:30.025+02:00  INFO 18552 --- [erp-system-backend] [restartedMain] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
-2025-08-30T11:37:30.026+02:00  INFO 18552 --- [erp-system-backend] [restartedMain] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 2042 ms
-2025-08-30T11:37:30.274+02:00  INFO 18552 --- [erp-system-backend] [restartedMain] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: default]
-2025-08-30T11:37:30.319+02:00  INFO 18552 --- [erp-system-backend] [restartedMain] org.hibernate.Version                    : HHH000412: Hibernate ORM core version 6.6.18.Final
-2025-08-30T11:37:30.359+02:00  INFO 18552 --- [erp-system-backend] [restartedMain] o.h.c.internal.RegionFactoryInitiator    : HHH000026: Second-level cache disabled
-2025-08-30T11:37:30.639+02:00  INFO 18552 --- [erp-system-backend] [restartedMain] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
-2025-08-30T11:37:30.671+02:00  INFO 18552 --- [erp-system-backend] [restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
-2025-08-30T11:37:32.306+02:00  INFO 18552 --- [erp-system-backend] [restartedMain] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection org.postgresql.jdbc.PgConnection@3285bef
-2025-08-30T11:37:32.307+02:00  INFO 18552 --- [erp-system-backend] [restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
-2025-08-30T11:37:32.498+02:00  WARN 18552 --- [erp-system-backend] [restartedMain] org.hibernate.orm.deprecation            : HHH90000025: PostgreSQLDialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
-2025-08-30T11:37:32.999+02:00  INFO 18552 --- [erp-system-backend] [restartedMain] org.hibernate.orm.connections.pooling    : HHH10001005: Database info:
-	Database JDBC URL [Connecting through datasource 'HikariDataSource (HikariPool-1)']
-	Database driver: undefined/unknown
-	Database version: 17.6
-	Autocommit mode: undefined/unknown
-	Isolation level: undefined/unknown
-	Minimum pool size: undefined/unknown
-	Maximum pool size: undefined/unknown
-2025-08-30T11:37:33.984+02:00  INFO 18552 --- [erp-system-backend] [restartedMain] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
-2025-08-30T11:37:54.787+02:00  INFO 18552 --- [erp-system-backend] [restartedMain] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
-2025-08-30T11:37:55.135+02:00 DEBUG 18552 --- [erp-system-backend] [restartedMain] com.erp.backend.config.JwtAuthFilter     : Filter 'jwtAuthFilter' configured for use
-2025-08-30T11:37:55.240+02:00  INFO 18552 --- [erp-system-backend] [restartedMain] o.s.d.j.r.query.QueryEnhancerFactory     : Hibernate is in classpath; If applicable, HQL parser will be used.
-2025-08-30T11:37:56.943+02:00  WARN 18552 --- [erp-system-backend] [restartedMain] JpaBaseConfiguration$JpaWebConfiguration : spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
-2025-08-30T11:37:57.012+02:00  INFO 18552 --- [erp-system-backend] [restartedMain] r$InitializeUserDetailsManagerConfigurer : Global AuthenticationManager configured with UserDetailsService bean with name userDetailsService
-2025-08-30T11:37:57.441+02:00  INFO 18552 --- [erp-system-backend] [restartedMain] o.s.b.a.e.web.EndpointLinksResolver      : Exposing 4 endpoints beneath base path '/actuator'
-2025-08-30T11:37:57.822+02:00  INFO 18552 --- [erp-system-backend] [restartedMain] o.s.b.d.a.OptionalLiveReloadServer       : LiveReload server is running on port 35729
-2025-08-30T11:37:57.902+02:00  INFO 18552 --- [erp-system-backend] [restartedMain] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port 8080 (http) with context path '/'
-2025-08-30T11:37:57.918+02:00  INFO 18552 --- [erp-system-backend] [restartedMain] c.e.backend.ErpSystemBackendApplication  : Started ErpSystemBackendApplication in 30.558 seconds (process running for 31.024)
-2025-08-30T11:38:00.852+02:00  INFO 18552 --- [erp-system-backend] [SpringApplicationShutdownHook] o.s.b.w.e.tomcat.GracefulShutdown        : Commencing graceful shutdown. Waiting for active requests to complete
-2025-08-30T11:38:00.855+02:00  INFO 18552 --- [erp-system-backend] [tomcat-shutdown] o.s.b.w.e.tomcat.GracefulShutdown        : Graceful shutdown complete
-2025-08-30T11:38:00.864+02:00  INFO 18552 --- [erp-system-backend] [SpringApplicationShutdownHook] j.LocalContainerEntityManagerFactoryBean : Closing JPA EntityManagerFactory for persistence unit 'default'
-2025-08-30T11:38:00.867+02:00  INFO 18552 --- [erp-system-backend] [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown initiated...
-2025-08-30T11:38:02.337+02:00  INFO 18552 --- [erp-system-backend] [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown completed.
-2025-08-30T11:38:06.263+02:00  INFO 9164 --- [erp-system-backend] [restartedMain] c.e.backend.ErpSystemBackendApplication  : Starting ErpSystemBackendApplication using Java 24.0.1 with PID 9164 (C:\Users\ibrah\Desktop\ERP-Backend\erp-system-backend\target\classes started by ibrah in C:\Users\ibrah\Desktop\ERP-Backend\erp-system-backend)
-2025-08-30T11:38:06.265+02:00 DEBUG 9164 --- [erp-system-backend] [restartedMain] c.e.backend.ErpSystemBackendApplication  : Running with Spring Boot v3.5.3, Spring v6.2.8
-2025-08-30T11:38:06.266+02:00  INFO 9164 --- [erp-system-backend] [restartedMain] c.e.backend.ErpSystemBackendApplication  : No active profile set, falling back to 1 default profile: "default"
-2025-08-30T11:38:06.337+02:00  INFO 9164 --- [erp-system-backend] [restartedMain] .e.DevToolsPropertyDefaultsPostProcessor : Devtools property defaults active! Set 'spring.devtools.add-properties' to 'false' to disable
-2025-08-30T11:38:06.338+02:00  INFO 9164 --- [erp-system-backend] [restartedMain] .e.DevToolsPropertyDefaultsPostProcessor : For additional web related logging consider setting the 'logging.level.web' property to 'DEBUG'
-2025-08-30T11:38:07.767+02:00  INFO 9164 --- [erp-system-backend] [restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
-2025-08-30T11:38:07.852+02:00  INFO 9164 --- [erp-system-backend] [restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 74 ms. Found 11 JPA repository interfaces.
-2025-08-30T11:38:08.554+02:00  INFO 9164 --- [erp-system-backend] [restartedMain] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port 8080 (http)
-2025-08-30T11:38:08.569+02:00  INFO 9164 --- [erp-system-backend] [restartedMain] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
-2025-08-30T11:38:08.570+02:00  INFO 9164 --- [erp-system-backend] [restartedMain] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.42]
-2025-08-30T11:38:08.621+02:00  INFO 9164 --- [erp-system-backend] [restartedMain] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
-2025-08-30T11:38:08.622+02:00  INFO 9164 --- [erp-system-backend] [restartedMain] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 2284 ms
-2025-08-30T11:38:08.856+02:00  INFO 9164 --- [erp-system-backend] [restartedMain] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: default]
-2025-08-30T11:38:08.935+02:00  INFO 9164 --- [erp-system-backend] [restartedMain] org.hibernate.Version                    : HHH000412: Hibernate ORM core version 6.6.18.Final
-2025-08-30T11:38:08.968+02:00  INFO 9164 --- [erp-system-backend] [restartedMain] o.h.c.internal.RegionFactoryInitiator    : HHH000026: Second-level cache disabled
-2025-08-30T11:38:09.229+02:00  INFO 9164 --- [erp-system-backend] [restartedMain] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
-2025-08-30T11:38:09.261+02:00  INFO 9164 --- [erp-system-backend] [restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
-2025-08-30T11:38:10.855+02:00  INFO 9164 --- [erp-system-backend] [restartedMain] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection org.postgresql.jdbc.PgConnection@6c31e4df
-2025-08-30T11:38:10.856+02:00  INFO 9164 --- [erp-system-backend] [restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
-2025-08-30T11:38:11.045+02:00  WARN 9164 --- [erp-system-backend] [restartedMain] org.hibernate.orm.deprecation            : HHH90000025: PostgreSQLDialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
-2025-08-30T11:38:11.547+02:00  INFO 9164 --- [erp-system-backend] [restartedMain] org.hibernate.orm.connections.pooling    : HHH10001005: Database info:
-	Database JDBC URL [Connecting through datasource 'HikariDataSource (HikariPool-1)']
-	Database driver: undefined/unknown
-	Database version: 17.6
-	Autocommit mode: undefined/unknown
-	Isolation level: undefined/unknown
-	Minimum pool size: undefined/unknown
-	Maximum pool size: undefined/unknown
-2025-08-30T11:38:12.475+02:00  INFO 9164 --- [erp-system-backend] [restartedMain] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
-2025-08-30T11:38:32.972+02:00  INFO 9164 --- [erp-system-backend] [restartedMain] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
-2025-08-30T11:38:33.306+02:00 DEBUG 9164 --- [erp-system-backend] [restartedMain] com.erp.backend.config.JwtAuthFilter     : Filter 'jwtAuthFilter' configured for use
-2025-08-30T11:38:33.425+02:00  INFO 9164 --- [erp-system-backend] [restartedMain] o.s.d.j.r.query.QueryEnhancerFactory     : Hibernate is in classpath; If applicable, HQL parser will be used.
-2025-08-30T11:38:34.919+02:00  WARN 9164 --- [erp-system-backend] [restartedMain] JpaBaseConfiguration$JpaWebConfiguration : spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
-2025-08-30T11:38:34.959+02:00  INFO 9164 --- [erp-system-backend] [restartedMain] r$InitializeUserDetailsManagerConfigurer : Global AuthenticationManager configured with UserDetailsService bean with name userDetailsService
-2025-08-30T11:38:35.373+02:00  INFO 9164 --- [erp-system-backend] [restartedMain] o.s.b.a.e.web.EndpointLinksResolver      : Exposing 4 endpoints beneath base path '/actuator'
-2025-08-30T11:38:35.760+02:00  INFO 9164 --- [erp-system-backend] [restartedMain] o.s.b.d.a.OptionalLiveReloadServer       : LiveReload server is running on port 35729
-2025-08-30T11:38:35.840+02:00  INFO 9164 --- [erp-system-backend] [restartedMain] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port 8080 (http) with context path '/'
-2025-08-30T11:38:35.860+02:00  INFO 9164 --- [erp-system-backend] [restartedMain] c.e.backend.ErpSystemBackendApplication  : Started ErpSystemBackendApplication in 30.133 seconds (process running for 30.605)
-2025-08-30T11:38:36.002+02:00  INFO 9164 --- [erp-system-backend] [http-nio-8080-exec-2] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring DispatcherServlet 'dispatcherServlet'
-2025-08-30T11:38:36.002+02:00  INFO 9164 --- [erp-system-backend] [http-nio-8080-exec-2] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
-2025-08-30T11:38:36.005+02:00  INFO 9164 --- [erp-system-backend] [http-nio-8080-exec-2] o.s.web.servlet.DispatcherServlet        : Completed initialization in 3 ms
-2025-08-30T11:38:37.028+02:00  INFO 9164 --- [erp-system-backend] [http-nio-8080-exec-4] c.e.b.controller.ContractController      : GET /api/contracts - Fetching contracts (paginated: false)
-2025-08-30T11:38:41.667+02:00  INFO 9164 --- [erp-system-backend] [http-nio-8080-exec-5] c.erp.backend.service.CustomerService    : Fetched 25 customers
-2025-08-30T11:38:54.183+02:00  INFO 9164 --- [erp-system-backend] [http-nio-8080-exec-7] c.e.b.controller.ContractController      : === CONTROLLER UPDATE DEBUG ===
-2025-08-30T11:38:54.184+02:00  INFO 9164 --- [erp-system-backend] [http-nio-8080-exec-7] c.e.b.controller.ContractController      : PUT /api/contracts/75c01510-04b4-482f-9e8b-124b312a3e33 - Updating contract
-2025-08-30T11:38:54.184+02:00  INFO 9164 --- [erp-system-backend] [http-nio-8080-exec-7] c.e.b.controller.ContractController      : DTO Customer ID: 54fa8ffa-dc58-4b6a-82b2-f3985d9efce5
-2025-08-30T11:38:54.184+02:00  INFO 9164 --- [erp-system-backend] [http-nio-8080-exec-7] c.e.b.controller.ContractController      : DTO Contract Title: Contract 3
-2025-08-30T11:38:54.184+02:00  INFO 9164 --- [erp-system-backend] [http-nio-8080-exec-7] c.e.b.controller.ContractController      : DTO Status: ACTIVE
-2025-08-30T11:38:54.184+02:00  INFO 9164 --- [erp-system-backend] [http-nio-8080-exec-7] c.e.b.controller.ContractController      : Entity nach Mapping - Customer: Customer{id=54fa8ffa-dc58-4b6a-82b2-f3985d9efce5, customerNumber='null', firstName='null', lastName='null', email='null', tel='null', billingAddress=null, shippingAddress=null, residentialAddress=null}
-2025-08-30T11:38:54.185+02:00  INFO 9164 --- [erp-system-backend] [http-nio-8080-exec-7] c.e.b.controller.ContractController      : Entity Customer ID: 54fa8ffa-dc58-4b6a-82b2-f3985d9efce5
-2025-08-30T11:38:54.186+02:00  INFO 9164 --- [erp-system-backend] [http-nio-8080-exec-7] c.erp.backend.service.ContractService    : === CONTRACT UPDATE DEBUG START ===
-2025-08-30T11:38:54.186+02:00  INFO 9164 --- [erp-system-backend] [http-nio-8080-exec-7] c.erp.backend.service.ContractService    : Contract ID: 75c01510-04b4-482f-9e8b-124b312a3e33
-2025-08-30T11:38:54.186+02:00  INFO 9164 --- [erp-system-backend] [http-nio-8080-exec-7] c.erp.backend.service.ContractService    : Contract Title: Contract 3
-2025-08-30T11:38:54.517+02:00  INFO 9164 --- [erp-system-backend] [http-nio-8080-exec-7] c.erp.backend.service.ContractService    : Existing Customer ID: c3464b5d-f429-4e7b-8b80-8e486bd4a541
-2025-08-30T11:38:54.681+02:00  INFO 9164 --- [erp-system-backend] [http-nio-8080-exec-7] c.erp.backend.service.ContractService    : Existing Customer Name: Lena Müller
-2025-08-30T11:38:54.681+02:00  INFO 9164 --- [erp-system-backend] [http-nio-8080-exec-7] c.erp.backend.service.ContractService    : New Contract Customer: Customer{id=54fa8ffa-dc58-4b6a-82b2-f3985d9efce5, customerNumber='null', firstName='null', lastName='null', email='null', tel='null', billingAddress=null, shippingAddress=null, residentialAddress=null}
-2025-08-30T11:38:54.681+02:00  INFO 9164 --- [erp-system-backend] [http-nio-8080-exec-7] c.erp.backend.service.ContractService    : New Customer ID: 54fa8ffa-dc58-4b6a-82b2-f3985d9efce5
-2025-08-30T11:38:54.681+02:00  INFO 9164 --- [erp-system-backend] [http-nio-8080-exec-7] c.erp.backend.service.ContractService    : Lade neuen Customer mit ID: 54fa8ffa-dc58-4b6a-82b2-f3985d9efce5
-2025-08-30T11:38:54.845+02:00  INFO 9164 --- [erp-system-backend] [http-nio-8080-exec-7] c.erp.backend.service.ContractService    : Neuer Customer geladen: Jonas Braun
-2025-08-30T11:38:54.845+02:00  INFO 9164 --- [erp-system-backend] [http-nio-8080-exec-7] c.erp.backend.service.ContractService    : Customer geändert von Lena Müller zu Jonas Braun
-2025-08-30T11:38:54.852+02:00  INFO 9164 --- [erp-system-backend] [http-nio-8080-exec-7] c.erp.backend.service.ContractService    : Contract gespeichert mit Customer ID: 54fa8ffa-dc58-4b6a-82b2-f3985d9efce5
-2025-08-30T11:38:54.853+02:00  INFO 9164 --- [erp-system-backend] [http-nio-8080-exec-7] c.erp.backend.service.ContractService    : === CONTRACT UPDATE DEBUG END ===
-2025-08-30T11:38:55.195+02:00  INFO 9164 --- [erp-system-backend] [http-nio-8080-exec-7] c.e.b.controller.ContractController      : Update abgeschlossen - Customer ID: 54fa8ffa-dc58-4b6a-82b2-f3985d9efce5
-2025-08-30T11:38:55.195+02:00  INFO 9164 --- [erp-system-backend] [http-nio-8080-exec-7] c.e.b.controller.ContractController      : === CONTROLLER UPDATE DEBUG END ===
-2025-08-30T11:40:18.974+02:00  INFO 9164 --- [erp-system-backend] [http-nio-8080-exec-3] c.e.b.controller.ProductController       : GET /api/products - Fetching products (paginated: false)
-2025-08-30T11:40:19.299+02:00  INFO 9164 --- [erp-system-backend] [http-nio-8080-exec-3] com.erp.backend.service.ProductService   : Fetched 20 products
-2025-08-30T11:40:19.299+02:00 DEBUG 9164 --- [erp-system-backend] [http-nio-8080-exec-3] c.e.b.controller.ProductController       : Found 20 products
-2025-08-30T11:40:26.541+02:00  INFO 9164 --- [erp-system-backend] [http-nio-8080-exec-7] c.erp.backend.service.CustomerService    : Fetched 25 customers
-2025-08-30T11:40:30.284+02:00  INFO 9164 --- [erp-system-backend] [http-nio-8080-exec-9] c.e.b.controller.ProductController       : GET /api/products - Fetching products (paginated: false)
-2025-08-30T11:40:30.611+02:00  INFO 9164 --- [erp-system-backend] [http-nio-8080-exec-9] com.erp.backend.service.ProductService   : Fetched 20 products
-2025-08-30T11:40:30.611+02:00 DEBUG 9164 --- [erp-system-backend] [http-nio-8080-exec-9] c.e.b.controller.ProductController       : Found 20 products
-2025-08-30T11:40:52.497+02:00  INFO 9164 --- [erp-system-backend] [http-nio-8080-exec-3] c.erp.backend.service.CustomerService    : Fetched 25 customers
-2025-08-30T11:41:22.063+02:00  INFO 9164 --- [erp-system-backend] [http-nio-8080-exec-7] c.e.b.controller.ContractController      : GET /api/contracts - Fetching contracts (paginated: false)
-2025-08-30T11:41:26.525+02:00  INFO 9164 --- [erp-system-backend] [http-nio-8080-exec-6] c.erp.backend.service.CustomerService    : Fetched 25 customers
-2025-08-30T11:52:09.047+02:00  INFO 9164 --- [erp-system-backend] [http-nio-8080-exec-7] c.e.b.controller.ContractController      : GET /api/contracts - Fetching contracts (paginated: false)
-2025-08-30T11:52:13.361+02:00  INFO 9164 --- [erp-system-backend] [http-nio-8080-exec-6] c.erp.backend.service.CustomerService    : Fetched 25 customers
-2025-08-30T11:52:45.926+02:00  INFO 9164 --- [erp-system-backend] [http-nio-8080-exec-10] c.erp.backend.service.CustomerService    : Fetched 25 customers
-2025-08-30T11:52:58.128+02:00  INFO 9164 --- [erp-system-backend] [http-nio-8080-exec-4] c.e.b.controller.ContractController      : GET /api/contracts - Fetching contracts (paginated: false)
-2025-08-30T11:53:00.139+02:00  INFO 9164 --- [erp-system-backend] [http-nio-8080-exec-3] c.erp.backend.service.CustomerService    : Fetched 25 customers
-2025-08-30T11:53:05.196+02:00  INFO 9164 --- [erp-system-backend] [http-nio-8080-exec-6] c.erp.backend.service.CustomerService    : Fetched 25 customers
-2025-08-30T11:53:26.495+02:00  INFO 9164 --- [erp-system-backend] [http-nio-8080-exec-9] c.e.b.controller.ContractController      : GET /api/contracts - Fetching contracts (paginated: false)
-2025-08-30T11:53:30.970+02:00  INFO 9164 --- [erp-system-backend] [http-nio-8080-exec-10] c.erp.backend.service.CustomerService    : Fetched 25 customers
-2025-08-30T11:53:37.298+02:00  INFO 9164 --- [erp-system-backend] [http-nio-8080-exec-3] c.e.b.controller.ContractController      : GET /api/contracts - Fetching contracts (paginated: false)
-2025-08-30T11:53:41.895+02:00  INFO 9164 --- [erp-system-backend] [http-nio-8080-exec-4] c.erp.backend.service.CustomerService    : Fetched 25 customers
-2025-08-30T11:54:34.474+02:00  INFO 9164 --- [erp-system-backend] [http-nio-8080-exec-9] c.e.b.controller.ContractController      : GET /api/contracts - Fetching contracts (paginated: false)
-2025-08-30T11:54:38.910+02:00  INFO 9164 --- [erp-system-backend] [http-nio-8080-exec-2] c.erp.backend.service.CustomerService    : Fetched 25 customers
-2025-08-30T11:54:59.244+02:00  INFO 9164 --- [erp-system-backend] [http-nio-8080-exec-6] c.e.b.controller.ContractController      : GET /api/contracts - Fetching contracts (paginated: false)
-2025-08-30T11:55:03.843+02:00  INFO 9164 --- [erp-system-backend] [http-nio-8080-exec-3] c.erp.backend.service.CustomerService    : Fetched 25 customers
-2025-08-30T11:56:25.219+02:00  INFO 9164 --- [erp-system-backend] [http-nio-8080-exec-5] c.e.b.controller.ContractController      : GET /api/contracts - Fetching contracts (paginated: false)
-2025-08-30T11:56:29.848+02:00  INFO 9164 --- [erp-system-backend] [http-nio-8080-exec-1] c.erp.backend.service.CustomerService    : Fetched 25 customers
-2025-08-30T11:57:08.425+02:00  INFO 9164 --- [erp-system-backend] [http-nio-8080-exec-7] c.e.b.controller.ContractController      : GET /api/contracts - Fetching contracts (paginated: false)
-2025-08-30T11:57:13.036+02:00  INFO 9164 --- [erp-system-backend] [http-nio-8080-exec-8] c.erp.backend.service.CustomerService    : Fetched 25 customers
-2025-08-30T11:57:19.538+02:00  INFO 9164 --- [erp-system-backend] [http-nio-8080-exec-1] c.e.b.controller.ContractController      : GET /api/contracts - Fetching contracts (paginated: false)
-2025-08-30T11:57:19.540+02:00  INFO 9164 --- [erp-system-backend] [http-nio-8080-exec-9] c.e.b.controller.SubscriptionController  : GET /api/subscriptions - Fetching subscriptions (paginated: false)
-2025-08-30T11:57:19.705+02:00  INFO 9164 --- [erp-system-backend] [http-nio-8080-exec-9] c.e.backend.service.SubscriptionService  : Fetched 40 subscriptions
-2025-08-30T11:59:05.140+02:00  INFO 9164 --- [erp-system-backend] [http-nio-8080-exec-2] c.erp.backend.service.CustomerService    : Fetched 25 customers
-2025-08-30T12:00:00.038+02:00  INFO 9164 --- [erp-system-backend] [http-nio-8080-exec-3] c.e.b.controller.ProductController       : GET /api/products - Fetching products (paginated: false)
-2025-08-30T12:00:00.365+02:00  INFO 9164 --- [erp-system-backend] [http-nio-8080-exec-3] com.erp.backend.service.ProductService   : Fetched 20 products
-2025-08-30T12:00:00.365+02:00 DEBUG 9164 --- [erp-system-backend] [http-nio-8080-exec-3] c.e.b.controller.ProductController       : Found 20 products
-2025-08-30T12:00:04.259+02:00  INFO 9164 --- [erp-system-backend] [http-nio-8080-exec-2] c.e.b.controller.ContractController      : GET /api/contracts - Fetching contracts (paginated: false)
-2025-08-30T12:00:09.098+02:00  INFO 9164 --- [erp-system-backend] [http-nio-8080-exec-7] c.erp.backend.service.CustomerService    : Fetched 25 customers
-2025-08-30T12:08:01.406+02:00  INFO 9164 --- [erp-system-backend] [http-nio-8080-exec-8] c.e.b.controller.ContractController      : GET /api/contracts - Fetching contracts (paginated: false)
-2025-08-30T12:08:06.104+02:00  INFO 9164 --- [erp-system-backend] [http-nio-8080-exec-3] c.erp.backend.service.CustomerService    : Fetched 25 customers
-2025-08-30T12:08:22.318+02:00  INFO 9164 --- [erp-system-backend] [http-nio-8080-exec-9] c.e.b.controller.ContractController      : GET /api/contracts - Fetching contracts (paginated: false)
-2025-08-30T12:08:27.269+02:00  INFO 9164 --- [erp-system-backend] [http-nio-8080-exec-10] c.erp.backend.service.CustomerService    : Fetched 25 customers
-2025-08-30T12:08:30.017+02:00  INFO 9164 --- [erp-system-backend] [http-nio-8080-exec-1] c.e.b.controller.ContractController      : GET /api/contracts - Fetching contracts (paginated: false)
-2025-08-30T12:08:40.853+02:00  INFO 9164 --- [erp-system-backend] [http-nio-8080-exec-5] c.e.backend.service.SubscriptionService  : Found 4 subscriptions for customer 14f4166c-a869-4f75-97a7-97816ab08d27
-2025-08-30T12:08:46.254+02:00  INFO 9164 --- [erp-system-backend] [http-nio-8080-exec-8] c.e.backend.service.SubscriptionService  : Found 3 subscriptions for customer dabd4518-ceb0-4c0a-a198-07ea5af5275b
-2025-08-30T12:10:48.904+02:00  INFO 9164 --- [erp-system-backend] [http-nio-8080-exec-9] c.e.b.controller.ContractController      : GET /api/contracts - Fetching contracts (paginated: false)
-2025-08-30T12:12:20.287+02:00  INFO 9164 --- [erp-system-backend] [http-nio-8080-exec-5] c.e.backend.service.SubscriptionService  : Found 4 subscriptions for customer 14f4166c-a869-4f75-97a7-97816ab08d27
-2025-08-30T12:13:22.827+02:00  INFO 9164 --- [erp-system-backend] [http-nio-8080-exec-2] c.e.backend.service.SubscriptionService  : Found 6 subscriptions for customer 54f855e5-f095-4c3b-9d86-c2370ca8dfa8
-2025-08-30T12:13:25.342+02:00  INFO 9164 --- [erp-system-backend] [http-nio-8080-exec-10] c.e.backend.service.SubscriptionService  : Found 5 subscriptions for customer 63dfd6a4-1498-41af-9631-562e078d4d3c
-2025-08-30T12:14:33.156+02:00  INFO 9164 --- [erp-system-backend] [http-nio-8080-exec-4] c.e.backend.service.SubscriptionService  : Found 4 subscriptions for customer 14f4166c-a869-4f75-97a7-97816ab08d27
-2025-08-30T12:16:23.382+02:00  INFO 9164 --- [erp-system-backend] [http-nio-8080-exec-6] c.e.b.controller.ContractController      : GET /api/contracts - Fetching contracts (paginated: false)
-2025-08-30T12:17:03.128+02:00  INFO 9164 --- [erp-system-backend] [http-nio-8080-exec-10] c.e.b.controller.ContractController      : GET /api/contracts - Fetching contracts (paginated: false)
-2025-08-30T12:17:12.039+02:00  INFO 9164 --- [erp-system-backend] [http-nio-8080-exec-1] c.e.b.controller.SubscriptionController  : GET /api/subscriptions/contract/4c592746-5fd4-4129-a9de-d08121f824ac - Fetching subscriptions by contract (activeOnly: false)
-2025-08-30T12:17:12.373+02:00  INFO 9164 --- [erp-system-backend] [http-nio-8080-exec-1] c.e.backend.service.SubscriptionService  : Found 1 subscriptions for contract 4c592746-5fd4-4129-a9de-d08121f824ac
-2025-08-30T12:18:26.237+02:00  INFO 9164 --- [erp-system-backend] [http-nio-8080-exec-3] c.e.b.controller.ContractController      : GET /api/contracts - Fetching contracts (paginated: false)
-2025-08-30T12:18:29.765+02:00  INFO 9164 --- [erp-system-backend] [http-nio-8080-exec-6] c.e.b.controller.ContractController      : GET /api/contracts - Fetching contracts (paginated: false)
-2025-08-30T12:19:26.734+02:00  INFO 9164 --- [erp-system-backend] [http-nio-8080-exec-1] c.e.b.controller.SubscriptionController  : GET /api/subscriptions - Fetching subscriptions (paginated: false)
-2025-08-30T12:19:26.734+02:00  INFO 9164 --- [erp-system-backend] [http-nio-8080-exec-4] c.e.b.controller.ContractController      : GET /api/contracts - Fetching contracts (paginated: false)
-2025-08-30T12:19:26.897+02:00  INFO 9164 --- [erp-system-backend] [http-nio-8080-exec-1] c.e.backend.service.SubscriptionService  : Fetched 40 subscriptions
-2025-08-30T12:19:34.556+02:00  INFO 9164 --- [erp-system-backend] [http-nio-8080-exec-5] c.e.b.controller.ContractController      : GET /api/contracts - Fetching contracts (paginated: false)
-2025-08-30T12:19:44.644+02:00  INFO 9164 --- [erp-system-backend] [http-nio-8080-exec-3] c.e.b.controller.SubscriptionController  : GET /api/subscriptions/contract/fa0699ea-5c89-40b6-b246-d669b1b121d7 - Fetching subscriptions by contract (activeOnly: false)
-2025-08-30T12:19:44.965+02:00  INFO 9164 --- [erp-system-backend] [http-nio-8080-exec-3] c.e.backend.service.SubscriptionService  : Found 0 subscriptions for contract fa0699ea-5c89-40b6-b246-d669b1b121d7
-2025-08-30T12:19:47.711+02:00  INFO 9164 --- [erp-system-backend] [http-nio-8080-exec-2] c.e.b.controller.SubscriptionController  : GET /api/subscriptions/contract/4c592746-5fd4-4129-a9de-d08121f824ac - Fetching subscriptions by contract (activeOnly: false)
-2025-08-30T12:19:48.033+02:00  INFO 9164 --- [erp-system-backend] [http-nio-8080-exec-2] c.e.backend.service.SubscriptionService  : Found 1 subscriptions for contract 4c592746-5fd4-4129-a9de-d08121f824ac
-2025-08-30T12:19:49.304+02:00  INFO 9164 --- [erp-system-backend] [http-nio-8080-exec-9] c.e.b.controller.SubscriptionController  : GET /api/subscriptions/contract/5e65700f-e385-4971-9304-569aee4581bc - Fetching subscriptions by contract (activeOnly: false)
-2025-08-30T12:19:49.625+02:00  INFO 9164 --- [erp-system-backend] [http-nio-8080-exec-9] c.e.backend.service.SubscriptionService  : Found 2 subscriptions for contract 5e65700f-e385-4971-9304-569aee4581bc
-2025-08-30T12:22:08.986+02:00  INFO 9164 --- [erp-system-backend] [http-nio-8080-exec-8] c.e.b.controller.ContractController      : GET /api/contracts - Fetching contracts (paginated: false)
-2025-08-30T12:22:36.512+02:00  INFO 9164 --- [erp-system-backend] [http-nio-8080-exec-2] c.e.b.controller.ContractController      : GET /api/contracts - Fetching contracts (paginated: false)
-2025-08-30T12:23:44.578+02:00  INFO 9164 --- [erp-system-backend] [http-nio-8080-exec-10] c.e.b.controller.ContractController      : GET /api/contracts - Fetching contracts (paginated: false)
-2025-08-30T12:23:52.319+02:00  INFO 9164 --- [erp-system-backend] [http-nio-8080-exec-4] c.e.b.controller.ContractController      : GET /api/contracts - Fetching contracts (paginated: false)
-2025-08-30T12:24:20.097+02:00  INFO 9164 --- [erp-system-backend] [http-nio-8080-exec-6] c.e.b.controller.ProductController       : GET /api/products - Fetching products (paginated: false)
-2025-08-30T12:24:20.419+02:00  INFO 9164 --- [erp-system-backend] [http-nio-8080-exec-6] com.erp.backend.service.ProductService   : Fetched 20 products
-2025-08-30T12:24:20.419+02:00 DEBUG 9164 --- [erp-system-backend] [http-nio-8080-exec-6] c.e.b.controller.ProductController       : Found 20 products
-2025-08-30T12:24:36.212+02:00  INFO 9164 --- [erp-system-backend] [http-nio-8080-exec-7] c.erp.backend.service.CustomerService    : Fetched 25 customers
-2025-08-30T12:25:02.769+02:00  INFO 9164 --- [erp-system-backend] [http-nio-8080-exec-5] c.erp.backend.service.CustomerService    : Fetched 25 customers
-2025-08-30T12:25:11.227+02:00  INFO 9164 --- [erp-system-backend] [http-nio-8080-exec-3] c.e.b.controller.ContractController      : GET /api/contracts - Fetching contracts (paginated: false)
-2025-08-30T12:26:07.478+02:00  INFO 9164 --- [erp-system-backend] [http-nio-8080-exec-2] c.e.b.controller.ContractController      : GET /api/contracts - Fetching contracts (paginated: false)
-2025-08-30T12:26:14.985+02:00  INFO 9164 --- [erp-system-backend] [http-nio-8080-exec-9] c.e.b.controller.ContractController      : GET /api/contracts - Fetching contracts (paginated: false)
-2025-08-30T12:26:22.580+02:00  INFO 9164 --- [erp-system-backend] [http-nio-8080-exec-10] c.e.b.controller.ContractController      : GET /api/contracts - Fetching contracts (paginated: false)
-2025-08-30T12:26:31.497+02:00  INFO 9164 --- [erp-system-backend] [http-nio-8080-exec-5] c.e.b.controller.SubscriptionController  : GET /api/subscriptions/contract/3cb36adb-f605-4345-a30f-05f1dcb723d8 - Fetching subscriptions by contract (activeOnly: false)
-2025-08-30T12:26:31.819+02:00  INFO 9164 --- [erp-system-backend] [http-nio-8080-exec-5] c.e.backend.service.SubscriptionService  : Found 1 subscriptions for contract 3cb36adb-f605-4345-a30f-05f1dcb723d8
-2025-08-30T12:26:33.722+02:00  INFO 9164 --- [erp-system-backend] [http-nio-8080-exec-3] c.e.b.controller.SubscriptionController  : GET /api/subscriptions/contract/df151f77-af57-4e00-b299-83100e6a1072 - Fetching subscriptions by contract (activeOnly: false)
-2025-08-30T12:26:34.041+02:00  INFO 9164 --- [erp-system-backend] [http-nio-8080-exec-3] c.e.backend.service.SubscriptionService  : Found 0 subscriptions for contract df151f77-af57-4e00-b299-83100e6a1072
-2025-08-30T12:26:37.008+02:00  INFO 9164 --- [erp-system-backend] [http-nio-8080-exec-2] c.e.b.controller.SubscriptionController  : GET /api/subscriptions/contract/df151f77-af57-4e00-b299-83100e6a1072 - Fetching subscriptions by contract (activeOnly: false)
-2025-08-30T12:26:37.330+02:00  INFO 9164 --- [erp-system-backend] [http-nio-8080-exec-2] c.e.backend.service.SubscriptionService  : Found 0 subscriptions for contract df151f77-af57-4e00-b299-83100e6a1072
-2025-08-30T12:26:37.732+02:00  INFO 9164 --- [erp-system-backend] [http-nio-8080-exec-9] c.e.b.controller.SubscriptionController  : GET /api/subscriptions/contract/0dd72a08-9c34-4739-861f-b1e90e4df922 - Fetching subscriptions by contract (activeOnly: false)
-2025-08-30T12:26:38.052+02:00  INFO 9164 --- [erp-system-backend] [http-nio-8080-exec-9] c.e.backend.service.SubscriptionService  : Found 3 subscriptions for contract 0dd72a08-9c34-4739-861f-b1e90e4df922
-2025-08-30T12:26:39.896+02:00  INFO 9164 --- [erp-system-backend] [http-nio-8080-exec-4] c.e.b.controller.SubscriptionController  : GET /api/subscriptions/contract/f87ecd74-3d4a-4f4a-8ebb-599815081390 - Fetching subscriptions by contract (activeOnly: false)
-2025-08-30T12:26:40.217+02:00  INFO 9164 --- [erp-system-backend] [http-nio-8080-exec-4] c.e.backend.service.SubscriptionService  : Found 2 subscriptions for contract f87ecd74-3d4a-4f4a-8ebb-599815081390
-2025-08-30T12:26:45.564+02:00  INFO 9164 --- [erp-system-backend] [http-nio-8080-exec-8] c.e.b.controller.SubscriptionController  : GET /api/subscriptions/contract/0dd72a08-9c34-4739-861f-b1e90e4df922 - Fetching subscriptions by contract (activeOnly: false)
-2025-08-30T12:26:45.884+02:00  INFO 9164 --- [erp-system-backend] [http-nio-8080-exec-8] c.e.backend.service.SubscriptionService  : Found 3 subscriptions for contract 0dd72a08-9c34-4739-861f-b1e90e4df922
-2025-08-30T12:27:12.761+02:00  INFO 9164 --- [erp-system-backend] [http-nio-8080-exec-6] c.e.b.controller.ContractController      : GET /api/contracts - Fetching contracts (paginated: false)
-2025-08-30T12:27:21.235+02:00  INFO 9164 --- [erp-system-backend] [http-nio-8080-exec-1] c.e.b.controller.SubscriptionController  : GET /api/subscriptions/contract/1afa07ef-4908-4aca-9d9a-8e07eec66f1c - Fetching subscriptions by contract (activeOnly: false)
-2025-08-30T12:27:21.555+02:00  INFO 9164 --- [erp-system-backend] [http-nio-8080-exec-1] c.e.backend.service.SubscriptionService  : Found 1 subscriptions for contract 1afa07ef-4908-4aca-9d9a-8e07eec66f1c
-2025-08-30T12:27:23.062+02:00  INFO 9164 --- [erp-system-backend] [http-nio-8080-exec-9] c.e.b.controller.SubscriptionController  : GET /api/subscriptions/contract/f87ecd74-3d4a-4f4a-8ebb-599815081390 - Fetching subscriptions by contract (activeOnly: false)
-2025-08-30T12:27:23.382+02:00  INFO 9164 --- [erp-system-backend] [http-nio-8080-exec-9] c.e.backend.service.SubscriptionService  : Found 2 subscriptions for contract f87ecd74-3d4a-4f4a-8ebb-599815081390
-2025-08-30T12:27:38.808+02:00  INFO 9164 --- [erp-system-backend] [http-nio-8080-exec-5] c.e.b.controller.ContractController      : GET /api/contracts - Fetching contracts (paginated: false)
-2025-08-30T12:28:08.260+02:00  INFO 9164 --- [erp-system-backend] [http-nio-8080-exec-3] c.e.b.controller.SubscriptionController  : GET /api/subscriptions/contract/3cb36adb-f605-4345-a30f-05f1dcb723d8 - Fetching subscriptions by contract (activeOnly: false)
-2025-08-30T12:28:08.579+02:00  INFO 9164 --- [erp-system-backend] [http-nio-8080-exec-3] c.e.backend.service.SubscriptionService  : Found 1 subscriptions for contract 3cb36adb-f605-4345-a30f-05f1dcb723d8
-2025-08-30T12:29:11.663+02:00  INFO 9164 --- [erp-system-backend] [http-nio-8080-exec-1] c.e.b.controller.SubscriptionController  : GET /api/subscriptions/contract/3cb36adb-f605-4345-a30f-05f1dcb723d8 - Fetching subscriptions by contract (activeOnly: false)
-2025-08-30T12:29:11.983+02:00  INFO 9164 --- [erp-system-backend] [http-nio-8080-exec-1] c.e.backend.service.SubscriptionService  : Found 1 subscriptions for contract 3cb36adb-f605-4345-a30f-05f1dcb723d8
-2025-08-30T12:29:18.834+02:00  INFO 9164 --- [erp-system-backend] [http-nio-8080-exec-9] c.e.b.controller.SubscriptionController  : GET /api/subscriptions/contract/5e65700f-e385-4971-9304-569aee4581bc - Fetching subscriptions by contract (activeOnly: false)
-2025-08-30T12:29:19.154+02:00  INFO 9164 --- [erp-system-backend] [http-nio-8080-exec-9] c.e.backend.service.SubscriptionService  : Found 2 subscriptions for contract 5e65700f-e385-4971-9304-569aee4581bc
-2025-08-30T12:29:19.777+02:00  INFO 9164 --- [erp-system-backend] [http-nio-8080-exec-4] c.e.b.controller.SubscriptionController  : GET /api/subscriptions/contract/bdbf96b2-476e-4765-8eef-7567ae9010b4 - Fetching subscriptions by contract (activeOnly: false)
-2025-08-30T12:29:20.099+02:00  INFO 9164 --- [erp-system-backend] [http-nio-8080-exec-4] c.e.backend.service.SubscriptionService  : Found 2 subscriptions for contract bdbf96b2-476e-4765-8eef-7567ae9010b4
-2025-08-30T12:29:22.434+02:00  INFO 9164 --- [erp-system-backend] [http-nio-8080-exec-8] c.e.b.controller.SubscriptionController  : GET /api/subscriptions/contract/1afa07ef-4908-4aca-9d9a-8e07eec66f1c - Fetching subscriptions by contract (activeOnly: false)
-2025-08-30T12:29:22.751+02:00  INFO 9164 --- [erp-system-backend] [http-nio-8080-exec-8] c.e.backend.service.SubscriptionService  : Found 1 subscriptions for contract 1afa07ef-4908-4aca-9d9a-8e07eec66f1c
-2025-08-30T12:29:23.365+02:00  INFO 9164 --- [erp-system-backend] [http-nio-8080-exec-6] c.e.b.controller.SubscriptionController  : GET /api/subscriptions/contract/0dd72a08-9c34-4739-861f-b1e90e4df922 - Fetching subscriptions by contract (activeOnly: false)
-2025-08-30T12:29:23.689+02:00  INFO 9164 --- [erp-system-backend] [http-nio-8080-exec-6] c.e.backend.service.SubscriptionService  : Found 3 subscriptions for contract 0dd72a08-9c34-4739-861f-b1e90e4df922
-2025-08-30T12:29:24.262+02:00  INFO 9164 --- [erp-system-backend] [http-nio-8080-exec-1] c.e.b.controller.SubscriptionController  : GET /api/subscriptions/contract/f87ecd74-3d4a-4f4a-8ebb-599815081390 - Fetching subscriptions by contract (activeOnly: false)
-2025-08-30T12:29:24.603+02:00  INFO 9164 --- [erp-system-backend] [http-nio-8080-exec-1] c.e.backend.service.SubscriptionService  : Found 2 subscriptions for contract f87ecd74-3d4a-4f4a-8ebb-599815081390
-2025-08-30T12:29:27.547+02:00  INFO 9164 --- [erp-system-backend] [http-nio-8080-exec-2] c.e.b.controller.SubscriptionController  : GET /api/subscriptions/contract/0dd72a08-9c34-4739-861f-b1e90e4df922 - Fetching subscriptions by contract (activeOnly: false)
-2025-08-30T12:29:27.865+02:00  INFO 9164 --- [erp-system-backend] [http-nio-8080-exec-2] c.e.backend.service.SubscriptionService  : Found 3 subscriptions for contract 0dd72a08-9c34-4739-861f-b1e90e4df922
-2025-08-30T12:29:43.764+02:00  INFO 9164 --- [erp-system-backend] [http-nio-8080-exec-10] c.e.b.controller.SubscriptionController  : GET /api/subscriptions/contract/75c01510-04b4-482f-9e8b-124b312a3e33 - Fetching subscriptions by contract (activeOnly: false)
-2025-08-30T12:29:44.081+02:00  INFO 9164 --- [erp-system-backend] [http-nio-8080-exec-10] c.e.backend.service.SubscriptionService  : Found 2 subscriptions for contract 75c01510-04b4-482f-9e8b-124b312a3e33
-2025-08-30T12:29:44.260+02:00  INFO 9164 --- [erp-system-backend] [http-nio-8080-exec-5] c.e.b.controller.SubscriptionController  : GET /api/subscriptions/contract/0e703507-05b0-42dd-b92b-3c6c211990d6 - Fetching subscriptions by contract (activeOnly: false)
-2025-08-30T12:29:44.590+02:00  INFO 9164 --- [erp-system-backend] [http-nio-8080-exec-5] c.e.backend.service.SubscriptionService  : Found 0 subscriptions for contract 0e703507-05b0-42dd-b92b-3c6c211990d6
-2025-08-30T12:29:54.459+02:00  INFO 9164 --- [erp-system-backend] [http-nio-8080-exec-8] c.erp.backend.service.CustomerService    : Fetched 25 customers
-2025-08-30T12:29:59.903+02:00  INFO 9164 --- [erp-system-backend] [http-nio-8080-exec-2] c.erp.backend.service.CustomerService    : Fetched 25 customers
-2025-08-30T12:32:12.838+02:00  INFO 9164 --- [erp-system-backend] [http-nio-8080-exec-8] c.erp.backend.service.CustomerService    : Fetched 25 customers
-2025-08-30T12:32:19.473+02:00  INFO 9164 --- [erp-system-backend] [http-nio-8080-exec-4] c.e.b.controller.ContractController      : GET /api/contracts - Fetching contracts (paginated: false)
-2025-08-30T12:32:19.473+02:00  INFO 9164 --- [erp-system-backend] [http-nio-8080-exec-9] c.e.b.controller.SubscriptionController  : GET /api/subscriptions - Fetching subscriptions (paginated: false)
-2025-08-30T12:32:19.637+02:00  INFO 9164 --- [erp-system-backend] [http-nio-8080-exec-9] c.e.backend.service.SubscriptionService  : Fetched 40 subscriptions
-2025-08-30T12:32:27.404+02:00  INFO 9164 --- [erp-system-backend] [http-nio-8080-exec-5] c.e.b.controller.ContractController      : GET /api/contracts - Fetching contracts (paginated: false)
-2025-08-30T12:32:37.803+02:00  INFO 9164 --- [erp-system-backend] [http-nio-8080-exec-8] c.e.b.controller.SubscriptionController  : GET /api/subscriptions - Fetching subscriptions (paginated: false)
-2025-08-30T12:32:37.808+02:00  INFO 9164 --- [erp-system-backend] [http-nio-8080-exec-6] c.e.b.controller.ContractController      : GET /api/contracts - Fetching contracts (paginated: false)
-2025-08-30T12:32:37.965+02:00  INFO 9164 --- [erp-system-backend] [http-nio-8080-exec-8] c.e.backend.service.SubscriptionService  : Fetched 40 subscriptions
-2025-08-30T12:33:26.756+02:00  INFO 9164 --- [erp-system-backend] [http-nio-8080-exec-9] c.e.b.controller.ContractController      : GET /api/contracts - Fetching contracts (paginated: false)
-2025-08-30T12:33:26.810+02:00  INFO 9164 --- [erp-system-backend] [http-nio-8080-exec-10] c.e.b.controller.SubscriptionController  : GET /api/subscriptions - Fetching subscriptions (paginated: false)
-2025-08-30T12:33:26.979+02:00  INFO 9164 --- [erp-system-backend] [http-nio-8080-exec-10] c.e.backend.service.SubscriptionService  : Fetched 40 subscriptions
-2025-08-30T12:33:32.151+02:00  INFO 9164 --- [erp-system-backend] [http-nio-8080-exec-5] c.e.b.controller.ProductController       : GET /api/products - Fetching products (paginated: false)
-2025-08-30T12:33:32.473+02:00  INFO 9164 --- [erp-system-backend] [http-nio-8080-exec-5] com.erp.backend.service.ProductService   : Fetched 20 products
-2025-08-30T12:33:32.473+02:00 DEBUG 9164 --- [erp-system-backend] [http-nio-8080-exec-5] c.e.b.controller.ProductController       : Found 20 products
-2025-08-30T12:33:40.708+02:00  INFO 9164 --- [erp-system-backend] [http-nio-8080-exec-6] c.erp.backend.service.CustomerService    : Fetched 25 customers
-2025-08-30T12:36:15.809+02:00  INFO 9164 --- [erp-system-backend] [http-nio-8080-exec-3] c.erp.backend.service.CustomerService    : Fetched 25 customers
-2025-08-30T12:36:56.100+02:00  INFO 9164 --- [erp-system-backend] [http-nio-8080-exec-8] c.e.b.controller.SubscriptionController  : GET /api/subscriptions - Fetching subscriptions (paginated: false)
-2025-08-30T12:36:56.100+02:00  INFO 9164 --- [erp-system-backend] [http-nio-8080-exec-6] c.e.b.controller.ContractController      : GET /api/contracts - Fetching contracts (paginated: false)
-2025-08-30T12:36:56.261+02:00  INFO 9164 --- [erp-system-backend] [http-nio-8080-exec-8] c.e.backend.service.SubscriptionService  : Fetched 40 subscriptions
-2025-08-30T12:38:37.539+02:00  INFO 9164 --- [erp-system-backend] [http-nio-8080-exec-5] c.e.b.controller.ContractController      : GET /api/contracts - Fetching contracts (paginated: false)
-2025-08-30T12:38:37.549+02:00  INFO 9164 --- [erp-system-backend] [http-nio-8080-exec-3] c.e.b.controller.SubscriptionController  : GET /api/subscriptions - Fetching subscriptions (paginated: false)
-2025-08-30T12:38:37.711+02:00  INFO 9164 --- [erp-system-backend] [http-nio-8080-exec-3] c.e.backend.service.SubscriptionService  : Fetched 40 subscriptions
-2025-08-30T12:38:42.960+02:00  INFO 9164 --- [erp-system-backend] [http-nio-8080-exec-6] c.e.b.controller.ProductController       : GET /api/products - Fetching products (paginated: false)
-2025-08-30T12:38:43.358+02:00  INFO 9164 --- [erp-system-backend] [http-nio-8080-exec-6] com.erp.backend.service.ProductService   : Fetched 20 products
-2025-08-30T12:38:43.358+02:00 DEBUG 9164 --- [erp-system-backend] [http-nio-8080-exec-6] c.e.b.controller.ProductController       : Found 20 products
-2025-08-30T12:41:45.820+02:00  INFO 9164 --- [erp-system-backend] [http-nio-8080-exec-4] c.erp.backend.service.CustomerService    : Fetched 25 customers
+2025-09-02T22:48:40.123+02:00  INFO 13056 --- [erp-system-backend] [restartedMain] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2025-09-02T22:48:46.765+02:00  INFO 13056 --- [erp-system-backend] [restartedMain] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2025-09-02T22:48:47.063+02:00 DEBUG 13056 --- [erp-system-backend] [restartedMain] com.erp.backend.config.JwtAuthFilter     : Filter 'jwtAuthFilter' configured for use
+2025-09-02T22:48:47.162+02:00  INFO 13056 --- [erp-system-backend] [restartedMain] o.s.d.j.r.query.QueryEnhancerFactory     : Hibernate is in classpath; If applicable, HQL parser will be used.
+2025-09-02T22:48:48.633+02:00  WARN 13056 --- [erp-system-backend] [restartedMain] JpaBaseConfiguration$JpaWebConfiguration : spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2025-09-02T22:48:48.671+02:00  INFO 13056 --- [erp-system-backend] [restartedMain] r$InitializeUserDetailsManagerConfigurer : Global AuthenticationManager configured with UserDetailsService bean with name userDetailsService
+2025-09-02T22:48:49.101+02:00  INFO 13056 --- [erp-system-backend] [restartedMain] o.s.b.a.e.web.EndpointLinksResolver      : Exposing 4 endpoints beneath base path '/actuator'
+2025-09-02T22:48:49.621+02:00  INFO 13056 --- [erp-system-backend] [restartedMain] o.s.b.d.a.OptionalLiveReloadServer       : LiveReload server is running on port 35729
+2025-09-02T22:48:49.708+02:00  INFO 13056 --- [erp-system-backend] [restartedMain] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port 8080 (http) with context path '/'
+2025-09-02T22:48:49.722+02:00  INFO 13056 --- [erp-system-backend] [restartedMain] c.e.backend.ErpSystemBackendApplication  : Started ErpSystemBackendApplication in 15.616 seconds (process running for 16.046)
+2025-09-02T22:49:01.270+02:00  INFO 13056 --- [erp-system-backend] [http-nio-8080-exec-2] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring DispatcherServlet 'dispatcherServlet'
+2025-09-02T22:49:01.270+02:00  INFO 13056 --- [erp-system-backend] [http-nio-8080-exec-2] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
+2025-09-02T22:49:01.272+02:00  INFO 13056 --- [erp-system-backend] [http-nio-8080-exec-2] o.s.web.servlet.DispatcherServlet        : Completed initialization in 2 ms
+2025-09-02T22:49:02.048+02:00  INFO 13056 --- [erp-system-backend] [http-nio-8080-exec-4] c.e.b.controller.ContractController      : GET /api/contracts - Fetching contracts (paginated: false)
+2025-09-02T22:49:02.106+02:00  INFO 13056 --- [erp-system-backend] [http-nio-8080-exec-3] c.e.b.controller.SubscriptionController  : GET /api/subscriptions - Fetching subscriptions (paginated: false)
+2025-09-02T22:49:02.226+02:00  INFO 13056 --- [erp-system-backend] [http-nio-8080-exec-3] c.e.backend.service.SubscriptionService  : Fetched 40 subscriptions
+2025-09-02T22:49:06.874+02:00  INFO 13056 --- [erp-system-backend] [http-nio-8080-exec-8] c.e.b.controller.ContractController      : GET /api/contracts - Fetching contracts (paginated: false)
+2025-09-02T22:49:10.124+02:00  WARN 13056 --- [erp-system-backend] [http-nio-8080-exec-7] ration$PageModule$WarningLoggingModifier : Serializing PageImpl instances as-is is not supported, meaning that there is no guarantee about the stability of the resulting JSON structure!
+	For a stable JSON structure, please use Spring Data's PagedModel (globally via @EnableSpringDataWebSupport(pageSerializationMode = VIA_DTO))
+	or Spring HATEOAS and Spring Data's PagedResourcesAssembler as documented in https://docs.spring.io/spring-data/commons/reference/repositories/core-extensions.html#core.web.pageables.
+
+2025-09-02T22:49:53.570+02:00  INFO 13056 --- [erp-system-backend] [http-nio-8080-exec-10] c.e.b.controller.ContractController      : GET /api/contracts - Fetching contracts (paginated: false)
+2025-09-02T22:50:02.390+02:00  INFO 13056 --- [erp-system-backend] [http-nio-8080-exec-5] c.e.b.controller.SubscriptionController  : GET /api/subscriptions/contract/57c636de-1551-4457-b605-de435a0df657 - Fetching subscriptions by contract (activeOnly: false)
+2025-09-02T22:50:02.604+02:00  INFO 13056 --- [erp-system-backend] [http-nio-8080-exec-5] c.e.backend.service.SubscriptionService  : Found 4 subscriptions for contract 57c636de-1551-4457-b605-de435a0df657
+2025-09-02T22:50:04.808+02:00  INFO 13056 --- [erp-system-backend] [http-nio-8080-exec-4] c.e.b.controller.ContractController      : GET /api/contracts - Fetching contracts (paginated: false)
+2025-09-02T22:50:04.808+02:00  INFO 13056 --- [erp-system-backend] [http-nio-8080-exec-6] c.e.b.controller.SubscriptionController  : GET /api/subscriptions - Fetching subscriptions (paginated: false)
+2025-09-02T22:50:05.020+02:00  INFO 13056 --- [erp-system-backend] [http-nio-8080-exec-6] c.e.backend.service.SubscriptionService  : Fetched 40 subscriptions
+2025-09-02T22:50:23.019+02:00  INFO 13056 --- [erp-system-backend] [http-nio-8080-exec-2] c.erp.backend.service.CustomerService    : Fetched 25 customers
+2025-09-02T22:50:27.062+02:00  INFO 13056 --- [erp-system-backend] [http-nio-8080-exec-3] c.e.b.controller.ProductController       : GET /api/products - Fetching products (paginated: false)
+2025-09-02T22:50:27.280+02:00  INFO 13056 --- [erp-system-backend] [http-nio-8080-exec-3] com.erp.backend.service.ProductService   : Fetched 20 products
+2025-09-02T22:50:27.280+02:00 DEBUG 13056 --- [erp-system-backend] [http-nio-8080-exec-3] c.e.b.controller.ProductController       : Found 20 products
+2025-09-02T22:50:29.619+02:00  INFO 13056 --- [erp-system-backend] [http-nio-8080-exec-8] c.e.b.controller.ContractController      : GET /api/contracts - Fetching contracts (paginated: false)
+2025-09-02T22:50:32.637+02:00  INFO 13056 --- [erp-system-backend] [http-nio-8080-exec-7] c.erp.backend.service.CustomerService    : Fetched 25 customers

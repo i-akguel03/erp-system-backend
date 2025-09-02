@@ -1,44 +1,40 @@
 package com.erp.backend.dto;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Positive;
-
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
+/**
+ * DTO für Zahlungsinformationen
+ */
 public class PaymentDto {
 
-    @NotNull(message = "Zahlungsbetrag ist erforderlich")
-    @Positive(message = "Zahlungsbetrag muss positiv sein")
     private BigDecimal paidAmount;
-
-    @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDate paidDate;
-
     private String paymentMethod;
     private String paymentReference;
     private String notes;
 
-    // Konstruktoren
+    // Standard-Konstruktor
     public PaymentDto() {
-        this.paidDate = LocalDate.now();
     }
 
-    public PaymentDto(BigDecimal paidAmount, LocalDate paidDate, String paymentMethod) {
+    // Konstruktor mit Grunddaten
+    public PaymentDto(BigDecimal paidAmount, LocalDate paidDate) {
+        this.paidAmount = paidAmount;
+        this.paidDate = paidDate;
+    }
+
+    // Vollständiger Konstruktor
+    public PaymentDto(BigDecimal paidAmount, LocalDate paidDate, String paymentMethod,
+                      String paymentReference, String notes) {
         this.paidAmount = paidAmount;
         this.paidDate = paidDate;
         this.paymentMethod = paymentMethod;
-    }
-
-    public PaymentDto(BigDecimal paidAmount, String paymentMethod, String paymentReference) {
-        this.paidAmount = paidAmount;
-        this.paidDate = LocalDate.now();
-        this.paymentMethod = paymentMethod;
         this.paymentReference = paymentReference;
+        this.notes = notes;
     }
 
-    // Getter und Setter
+    // Getters und Setters
     public BigDecimal getPaidAmount() {
         return paidAmount;
     }
@@ -79,6 +75,13 @@ public class PaymentDto {
         this.notes = notes;
     }
 
+    // Validierungs-Methoden
+    public boolean isValid() {
+        return paidAmount != null &&
+                paidAmount.compareTo(BigDecimal.ZERO) > 0 &&
+                paidDate != null;
+    }
+
     @Override
     public String toString() {
         return "PaymentDto{" +
@@ -86,6 +89,7 @@ public class PaymentDto {
                 ", paidDate=" + paidDate +
                 ", paymentMethod='" + paymentMethod + '\'' +
                 ", paymentReference='" + paymentReference + '\'' +
+                ", notes='" + notes + '\'' +
                 '}';
     }
 }
