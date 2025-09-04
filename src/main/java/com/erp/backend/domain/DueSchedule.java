@@ -1,6 +1,9 @@
 package com.erp.backend.domain;
 
 import jakarta.persistence.*;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.SQLRestriction;
+
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -8,6 +11,8 @@ import java.util.UUID;
 
 @Entity
 @Table(name = "due_schedules")
+@SQLDelete(sql = "UPDATE customers SET deleted = true WHERE id = ?")
+@SQLRestriction("deleted = false")
 public class DueSchedule {
 
     @Id
@@ -28,6 +33,9 @@ public class DueSchedule {
 
     @Column(name = "period_end", nullable = false)
     private LocalDate periodEnd;
+
+    @Column(nullable = false)
+    private boolean deleted = false;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
@@ -275,5 +283,13 @@ public class DueSchedule {
 
     public Boolean isReminderSent() {
         return false;
+    }
+
+    public boolean isDeleted() {
+        return deleted;
+    }
+
+    public void setDeleted(boolean deleted) {
+        this.deleted = deleted;
     }
 }

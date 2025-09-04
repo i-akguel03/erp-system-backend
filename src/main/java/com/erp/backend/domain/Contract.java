@@ -2,6 +2,9 @@ package com.erp.backend.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.SQLRestriction;
+
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -10,6 +13,8 @@ import java.util.UUID;
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 @Entity
 @Table(name = "contracts")
+@SQLDelete(sql = "UPDATE customers SET deleted = true WHERE id = ?")
+@SQLRestriction("deleted = false")
 public class Contract {
 
     @Id
@@ -28,6 +33,9 @@ public class Contract {
     @Column(name = "end_date")
     private LocalDate endDate;
 
+    @Column(nullable = false)
+    private boolean deleted = false;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "contract_status")
     private ContractStatus contractStatus;
@@ -41,7 +49,7 @@ public class Contract {
     private Customer customer;
 
     // One-to-Many Beziehung zu Abos
-    @OneToMany(mappedBy = "contract", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "contract", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, fetch = FetchType.LAZY)
     private List<Subscription> subscriptions = new ArrayList<>();
 
     public Contract() {

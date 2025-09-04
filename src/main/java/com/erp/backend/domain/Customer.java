@@ -1,6 +1,8 @@
 package com.erp.backend.domain;
 
 import jakarta.persistence.*;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.SQLRestriction;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -8,6 +10,8 @@ import java.util.UUID;
 
 @Entity
 @Table(name = "customers")
+@SQLDelete(sql = "UPDATE customers SET deleted = true WHERE id = ?")
+@SQLRestriction("deleted = false")
 public class Customer {
 
     @Id
@@ -27,6 +31,9 @@ public class Customer {
     private String email;
 
     private String tel;
+
+    @Column(nullable = false)
+    private boolean deleted = false;
 
     // Beziehungen zu Address-Entitäten
     @ManyToOne
@@ -125,7 +132,7 @@ public class Customer {
         this.residentialAddress = residentialAddress;
     }
 
-    @OneToMany(mappedBy = "customer", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "customer", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, fetch = FetchType.LAZY)
     private List<Contract> contracts = new ArrayList<>();
 
     public List<Contract> getContracts() {

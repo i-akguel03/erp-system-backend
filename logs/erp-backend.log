@@ -1,24 +1,24 @@
-2025-09-02T21:54:39.560+02:00  INFO 11592 --- [erp-system-backend] [restartedMain] c.e.backend.ErpSystemBackendApplication  : Starting ErpSystemBackendApplication using Java 24.0.1 with PID 11592 (C:\Users\ibrah\Desktop\ERP-Backend\erp-system-backend\target\classes started by ibrah in C:\Users\ibrah\Desktop\ERP-Backend\erp-system-backend)
-2025-09-02T21:54:39.566+02:00 DEBUG 11592 --- [erp-system-backend] [restartedMain] c.e.backend.ErpSystemBackendApplication  : Running with Spring Boot v3.5.3, Spring v6.2.8
-2025-09-02T21:54:39.567+02:00  INFO 11592 --- [erp-system-backend] [restartedMain] c.e.backend.ErpSystemBackendApplication  : No active profile set, falling back to 1 default profile: "default"
-2025-09-02T21:54:39.627+02:00  INFO 11592 --- [erp-system-backend] [restartedMain] .e.DevToolsPropertyDefaultsPostProcessor : Devtools property defaults active! Set 'spring.devtools.add-properties' to 'false' to disable
-2025-09-02T21:54:39.627+02:00  INFO 11592 --- [erp-system-backend] [restartedMain] .e.DevToolsPropertyDefaultsPostProcessor : For additional web related logging consider setting the 'logging.level.web' property to 'DEBUG'
-2025-09-02T21:54:41.190+02:00  INFO 11592 --- [erp-system-backend] [restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
-2025-09-02T21:54:41.273+02:00  INFO 11592 --- [erp-system-backend] [restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 72 ms. Found 11 JPA repository interfaces.
-2025-09-02T21:54:41.874+02:00  INFO 11592 --- [erp-system-backend] [restartedMain] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port 8080 (http)
-2025-09-02T21:54:41.888+02:00  INFO 11592 --- [erp-system-backend] [restartedMain] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
-2025-09-02T21:54:41.888+02:00  INFO 11592 --- [erp-system-backend] [restartedMain] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.42]
-2025-09-02T21:54:41.930+02:00  INFO 11592 --- [erp-system-backend] [restartedMain] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
-2025-09-02T21:54:41.930+02:00  INFO 11592 --- [erp-system-backend] [restartedMain] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 2303 ms
-2025-09-02T21:54:42.146+02:00  INFO 11592 --- [erp-system-backend] [restartedMain] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: default]
-2025-09-02T21:54:42.191+02:00  INFO 11592 --- [erp-system-backend] [restartedMain] org.hibernate.Version                    : HHH000412: Hibernate ORM core version 6.6.18.Final
-2025-09-02T21:54:42.220+02:00  INFO 11592 --- [erp-system-backend] [restartedMain] o.h.c.internal.RegionFactoryInitiator    : HHH000026: Second-level cache disabled
-2025-09-02T21:54:42.472+02:00  INFO 11592 --- [erp-system-backend] [restartedMain] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
-2025-09-02T21:54:42.499+02:00  INFO 11592 --- [erp-system-backend] [restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
-2025-09-02T21:54:43.761+02:00  INFO 11592 --- [erp-system-backend] [restartedMain] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection org.postgresql.jdbc.PgConnection@487d075
-2025-09-02T21:54:43.762+02:00  INFO 11592 --- [erp-system-backend] [restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
-2025-09-02T21:54:43.928+02:00  WARN 11592 --- [erp-system-backend] [restartedMain] org.hibernate.orm.deprecation            : HHH90000025: PostgreSQLDialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
-2025-09-02T21:54:44.332+02:00  INFO 11592 --- [erp-system-backend] [restartedMain] org.hibernate.orm.connections.pooling    : HHH10001005: Database info:
+2025-09-04T22:16:10.145+02:00  INFO 13988 --- [erp-system-backend] [restartedMain] c.e.backend.ErpSystemBackendApplication  : Starting ErpSystemBackendApplication using Java 24.0.1 with PID 13988 (C:\Users\ibrah\Desktop\ERP-Backend\erp-system-backend\target\classes started by ibrah in C:\Users\ibrah\Desktop\ERP-Backend\erp-system-backend)
+2025-09-04T22:16:10.153+02:00 DEBUG 13988 --- [erp-system-backend] [restartedMain] c.e.backend.ErpSystemBackendApplication  : Running with Spring Boot v3.5.3, Spring v6.2.8
+2025-09-04T22:16:10.155+02:00  INFO 13988 --- [erp-system-backend] [restartedMain] c.e.backend.ErpSystemBackendApplication  : No active profile set, falling back to 1 default profile: "default"
+2025-09-04T22:16:10.263+02:00  INFO 13988 --- [erp-system-backend] [restartedMain] .e.DevToolsPropertyDefaultsPostProcessor : Devtools property defaults active! Set 'spring.devtools.add-properties' to 'false' to disable
+2025-09-04T22:16:10.264+02:00  INFO 13988 --- [erp-system-backend] [restartedMain] .e.DevToolsPropertyDefaultsPostProcessor : For additional web related logging consider setting the 'logging.level.web' property to 'DEBUG'
+2025-09-04T22:16:13.193+02:00  INFO 13988 --- [erp-system-backend] [restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2025-09-04T22:16:13.332+02:00  INFO 13988 --- [erp-system-backend] [restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 118 ms. Found 11 JPA repository interfaces.
+2025-09-04T22:16:14.347+02:00  INFO 13988 --- [erp-system-backend] [restartedMain] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port 8080 (http)
+2025-09-04T22:16:14.375+02:00  INFO 13988 --- [erp-system-backend] [restartedMain] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2025-09-04T22:16:14.376+02:00  INFO 13988 --- [erp-system-backend] [restartedMain] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.42]
+2025-09-04T22:16:14.467+02:00  INFO 13988 --- [erp-system-backend] [restartedMain] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
+2025-09-04T22:16:14.470+02:00  INFO 13988 --- [erp-system-backend] [restartedMain] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 4205 ms
+2025-09-04T22:16:14.862+02:00  INFO 13988 --- [erp-system-backend] [restartedMain] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: default]
+2025-09-04T22:16:14.950+02:00  INFO 13988 --- [erp-system-backend] [restartedMain] org.hibernate.Version                    : HHH000412: Hibernate ORM core version 6.6.18.Final
+2025-09-04T22:16:15.001+02:00  INFO 13988 --- [erp-system-backend] [restartedMain] o.h.c.internal.RegionFactoryInitiator    : HHH000026: Second-level cache disabled
+2025-09-04T22:16:15.388+02:00  INFO 13988 --- [erp-system-backend] [restartedMain] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2025-09-04T22:16:15.429+02:00  INFO 13988 --- [erp-system-backend] [restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2025-09-04T22:16:17.273+02:00  INFO 13988 --- [erp-system-backend] [restartedMain] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection org.postgresql.jdbc.PgConnection@28013458
+2025-09-04T22:16:17.277+02:00  INFO 13988 --- [erp-system-backend] [restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2025-09-04T22:16:17.464+02:00  WARN 13988 --- [erp-system-backend] [restartedMain] org.hibernate.orm.deprecation            : HHH90000025: PostgreSQLDialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2025-09-04T22:16:17.809+02:00  INFO 13988 --- [erp-system-backend] [restartedMain] org.hibernate.orm.connections.pooling    : HHH10001005: Database info:
 	Database JDBC URL [Connecting through datasource 'HikariDataSource (HikariPool-1)']
 	Database driver: undefined/unknown
 	Database version: 17.5
@@ -26,58 +26,42 @@
 	Isolation level: undefined/unknown
 	Minimum pool size: undefined/unknown
 	Maximum pool size: undefined/unknown
-2025-09-02T21:54:45.235+02:00  INFO 11592 --- [erp-system-backend] [restartedMain] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
-2025-09-02T21:54:47.390+02:00  WARN 11592 --- [erp-system-backend] [restartedMain] o.h.engine.jdbc.spi.SqlExceptionHelper   : SQL Warning Code: 0, SQLState: 00000
-2025-09-02T21:54:47.390+02:00  WARN 11592 --- [erp-system-backend] [restartedMain] o.h.engine.jdbc.spi.SqlExceptionHelper   : constraint "ukbx9jyu2cccdntb3ehrf0ojpfd" of relation "contracts" does not exist, skipping
-2025-09-02T21:54:47.609+02:00  WARN 11592 --- [erp-system-backend] [restartedMain] o.h.engine.jdbc.spi.SqlExceptionHelper   : SQL Warning Code: 0, SQLState: 00000
-2025-09-02T21:54:47.609+02:00  WARN 11592 --- [erp-system-backend] [restartedMain] o.h.engine.jdbc.spi.SqlExceptionHelper   : constraint "ukt74y58jagthxqxysuw9l0jx6y" of relation "customers" does not exist, skipping
-2025-09-02T21:54:47.833+02:00  WARN 11592 --- [erp-system-backend] [restartedMain] o.h.engine.jdbc.spi.SqlExceptionHelper   : SQL Warning Code: 0, SQLState: 00000
-2025-09-02T21:54:47.833+02:00  WARN 11592 --- [erp-system-backend] [restartedMain] o.h.engine.jdbc.spi.SqlExceptionHelper   : constraint "ukrfbvkrffamfql7cjmen8v976v" of relation "customers" does not exist, skipping
-2025-09-02T21:54:48.095+02:00  WARN 11592 --- [erp-system-backend] [restartedMain] o.h.engine.jdbc.spi.SqlExceptionHelper   : SQL Warning Code: 0, SQLState: 00000
-2025-09-02T21:54:48.096+02:00  WARN 11592 --- [erp-system-backend] [restartedMain] o.h.engine.jdbc.spi.SqlExceptionHelper   : constraint "uk26t168ruspsissdut3v1slwtb" of relation "due_schedules" does not exist, skipping
-2025-09-02T21:54:48.306+02:00  WARN 11592 --- [erp-system-backend] [restartedMain] o.h.engine.jdbc.spi.SqlExceptionHelper   : SQL Warning Code: 0, SQLState: 00000
-2025-09-02T21:54:48.306+02:00  WARN 11592 --- [erp-system-backend] [restartedMain] o.h.engine.jdbc.spi.SqlExceptionHelper   : constraint "ukl1x55mfsay7co0r3m9ynvipd5" of relation "invoices" does not exist, skipping
-2025-09-02T21:54:48.517+02:00  WARN 11592 --- [erp-system-backend] [restartedMain] o.h.engine.jdbc.spi.SqlExceptionHelper   : SQL Warning Code: 0, SQLState: 00000
-2025-09-02T21:54:48.518+02:00  WARN 11592 --- [erp-system-backend] [restartedMain] o.h.engine.jdbc.spi.SqlExceptionHelper   : constraint "uklqi8h5lsinp980wucgpo1ubxe" of relation "products" does not exist, skipping
-2025-09-02T21:54:48.728+02:00  WARN 11592 --- [erp-system-backend] [restartedMain] o.h.engine.jdbc.spi.SqlExceptionHelper   : SQL Warning Code: 0, SQLState: 00000
-2025-09-02T21:54:48.728+02:00  WARN 11592 --- [erp-system-backend] [restartedMain] o.h.engine.jdbc.spi.SqlExceptionHelper   : constraint "ukk78exwkwlec6jiq40hfkw82xq" of relation "subscriptions" does not exist, skipping
-2025-09-02T21:54:48.940+02:00  WARN 11592 --- [erp-system-backend] [restartedMain] o.h.engine.jdbc.spi.SqlExceptionHelper   : SQL Warning Code: 0, SQLState: 00000
-2025-09-02T21:54:48.940+02:00  WARN 11592 --- [erp-system-backend] [restartedMain] o.h.engine.jdbc.spi.SqlExceptionHelper   : constraint "ukr43af9ap4edm43mmtq01oddj6" of relation "users" does not exist, skipping
-2025-09-02T21:54:50.872+02:00  INFO 11592 --- [erp-system-backend] [restartedMain] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
-2025-09-02T21:54:51.154+02:00 DEBUG 11592 --- [erp-system-backend] [restartedMain] com.erp.backend.config.JwtAuthFilter     : Filter 'jwtAuthFilter' configured for use
-2025-09-02T21:54:51.238+02:00  INFO 11592 --- [erp-system-backend] [restartedMain] o.s.d.j.r.query.QueryEnhancerFactory     : Hibernate is in classpath; If applicable, HQL parser will be used.
-2025-09-02T21:54:52.420+02:00  WARN 11592 --- [erp-system-backend] [restartedMain] JpaBaseConfiguration$JpaWebConfiguration : spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
-2025-09-02T21:54:52.444+02:00  INFO 11592 --- [erp-system-backend] [restartedMain] r$InitializeUserDetailsManagerConfigurer : Global AuthenticationManager configured with UserDetailsService bean with name userDetailsService
-2025-09-02T21:54:52.764+02:00  INFO 11592 --- [erp-system-backend] [restartedMain] o.s.b.a.e.web.EndpointLinksResolver      : Exposing 4 endpoints beneath base path '/actuator'
-2025-09-02T21:54:53.070+02:00  INFO 11592 --- [erp-system-backend] [restartedMain] o.s.b.d.a.OptionalLiveReloadServer       : LiveReload server is running on port 35729
-2025-09-02T21:54:53.141+02:00  INFO 11592 --- [erp-system-backend] [restartedMain] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port 8080 (http) with context path '/'
-2025-09-02T21:54:53.154+02:00  INFO 11592 --- [erp-system-backend] [restartedMain] c.e.backend.ErpSystemBackendApplication  : Started ErpSystemBackendApplication in 14.018 seconds (process running for 17.263)
-2025-09-02T22:17:56.056+02:00  INFO 11592 --- [erp-system-backend] [SpringApplicationShutdownHook] o.s.b.w.e.tomcat.GracefulShutdown        : Commencing graceful shutdown. Waiting for active requests to complete
-2025-09-02T22:17:56.060+02:00  INFO 11592 --- [erp-system-backend] [tomcat-shutdown] o.s.b.w.e.tomcat.GracefulShutdown        : Graceful shutdown complete
-2025-09-02T22:17:56.066+02:00  INFO 11592 --- [erp-system-backend] [SpringApplicationShutdownHook] j.LocalContainerEntityManagerFactoryBean : Closing JPA EntityManagerFactory for persistence unit 'default'
-2025-09-02T22:17:56.069+02:00  INFO 11592 --- [erp-system-backend] [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown initiated...
-2025-09-02T22:17:57.112+02:00  INFO 11592 --- [erp-system-backend] [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown completed.
-2025-09-02T22:25:39.856+02:00  INFO 14644 --- [erp-system-backend] [restartedMain] c.e.backend.ErpSystemBackendApplication  : Starting ErpSystemBackendApplication using Java 24.0.1 with PID 14644 (C:\Users\ibrah\Desktop\ERP-Backend\erp-system-backend\target\classes started by ibrah in C:\Users\ibrah\Desktop\ERP-Backend\erp-system-backend)
-2025-09-02T22:25:39.858+02:00 DEBUG 14644 --- [erp-system-backend] [restartedMain] c.e.backend.ErpSystemBackendApplication  : Running with Spring Boot v3.5.3, Spring v6.2.8
-2025-09-02T22:25:39.859+02:00  INFO 14644 --- [erp-system-backend] [restartedMain] c.e.backend.ErpSystemBackendApplication  : No active profile set, falling back to 1 default profile: "default"
-2025-09-02T22:25:39.917+02:00  INFO 14644 --- [erp-system-backend] [restartedMain] .e.DevToolsPropertyDefaultsPostProcessor : Devtools property defaults active! Set 'spring.devtools.add-properties' to 'false' to disable
-2025-09-02T22:25:39.917+02:00  INFO 14644 --- [erp-system-backend] [restartedMain] .e.DevToolsPropertyDefaultsPostProcessor : For additional web related logging consider setting the 'logging.level.web' property to 'DEBUG'
-2025-09-02T22:25:41.509+02:00  INFO 14644 --- [erp-system-backend] [restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
-2025-09-02T22:25:41.594+02:00  INFO 14644 --- [erp-system-backend] [restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 76 ms. Found 11 JPA repository interfaces.
-2025-09-02T22:25:42.212+02:00  INFO 14644 --- [erp-system-backend] [restartedMain] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port 8080 (http)
-2025-09-02T22:25:42.227+02:00  INFO 14644 --- [erp-system-backend] [restartedMain] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
-2025-09-02T22:25:42.227+02:00  INFO 14644 --- [erp-system-backend] [restartedMain] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.42]
-2025-09-02T22:25:42.279+02:00  INFO 14644 --- [erp-system-backend] [restartedMain] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
-2025-09-02T22:25:42.279+02:00  INFO 14644 --- [erp-system-backend] [restartedMain] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 2361 ms
-2025-09-02T22:25:42.513+02:00  INFO 14644 --- [erp-system-backend] [restartedMain] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: default]
-2025-09-02T22:25:42.566+02:00  INFO 14644 --- [erp-system-backend] [restartedMain] org.hibernate.Version                    : HHH000412: Hibernate ORM core version 6.6.18.Final
-2025-09-02T22:25:42.600+02:00  INFO 14644 --- [erp-system-backend] [restartedMain] o.h.c.internal.RegionFactoryInitiator    : HHH000026: Second-level cache disabled
-2025-09-02T22:25:42.865+02:00  INFO 14644 --- [erp-system-backend] [restartedMain] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
-2025-09-02T22:25:42.897+02:00  INFO 14644 --- [erp-system-backend] [restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
-2025-09-02T22:25:44.526+02:00  INFO 14644 --- [erp-system-backend] [restartedMain] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection org.postgresql.jdbc.PgConnection@221e63e1
-2025-09-02T22:25:44.528+02:00  INFO 14644 --- [erp-system-backend] [restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
-2025-09-02T22:25:44.682+02:00  WARN 14644 --- [erp-system-backend] [restartedMain] org.hibernate.orm.deprecation            : HHH90000025: PostgreSQLDialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
-2025-09-02T22:25:45.004+02:00  INFO 14644 --- [erp-system-backend] [restartedMain] org.hibernate.orm.connections.pooling    : HHH10001005: Database info:
+2025-09-04T22:16:19.269+02:00  INFO 13988 --- [erp-system-backend] [restartedMain] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2025-09-04T22:16:26.306+02:00  INFO 13988 --- [erp-system-backend] [restartedMain] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2025-09-04T22:16:26.745+02:00 DEBUG 13988 --- [erp-system-backend] [restartedMain] com.erp.backend.config.JwtAuthFilter     : Filter 'jwtAuthFilter' configured for use
+2025-09-04T22:16:26.890+02:00  INFO 13988 --- [erp-system-backend] [restartedMain] o.s.d.j.r.query.QueryEnhancerFactory     : Hibernate is in classpath; If applicable, HQL parser will be used.
+2025-09-04T22:16:28.773+02:00  WARN 13988 --- [erp-system-backend] [restartedMain] JpaBaseConfiguration$JpaWebConfiguration : spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2025-09-04T22:16:28.803+02:00  INFO 13988 --- [erp-system-backend] [restartedMain] r$InitializeUserDetailsManagerConfigurer : Global AuthenticationManager configured with UserDetailsService bean with name userDetailsService
+2025-09-04T22:16:29.231+02:00  INFO 13988 --- [erp-system-backend] [restartedMain] o.s.b.a.e.web.EndpointLinksResolver      : Exposing 4 endpoints beneath base path '/actuator'
+2025-09-04T22:16:29.670+02:00  INFO 13988 --- [erp-system-backend] [restartedMain] o.s.b.d.a.OptionalLiveReloadServer       : LiveReload server is running on port 35729
+2025-09-04T22:16:29.751+02:00  INFO 13988 --- [erp-system-backend] [restartedMain] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port 8080 (http) with context path '/'
+2025-09-04T22:16:29.770+02:00  INFO 13988 --- [erp-system-backend] [restartedMain] c.e.backend.ErpSystemBackendApplication  : Started ErpSystemBackendApplication in 20.37 seconds (process running for 26.421)
+2025-09-04T22:22:55.377+02:00  INFO 13988 --- [erp-system-backend] [SpringApplicationShutdownHook] o.s.b.w.e.tomcat.GracefulShutdown        : Commencing graceful shutdown. Waiting for active requests to complete
+2025-09-04T22:22:55.377+02:00  INFO 13988 --- [erp-system-backend] [tomcat-shutdown] o.s.b.w.e.tomcat.GracefulShutdown        : Graceful shutdown complete
+2025-09-04T22:22:55.393+02:00  INFO 13988 --- [erp-system-backend] [SpringApplicationShutdownHook] j.LocalContainerEntityManagerFactoryBean : Closing JPA EntityManagerFactory for persistence unit 'default'
+2025-09-04T22:22:55.395+02:00  INFO 13988 --- [erp-system-backend] [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown initiated...
+2025-09-04T22:22:56.488+02:00  INFO 13988 --- [erp-system-backend] [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown completed.
+2025-09-04T22:23:03.193+02:00  INFO 17484 --- [erp-system-backend] [restartedMain] c.e.backend.ErpSystemBackendApplication  : Starting ErpSystemBackendApplication using Java 24.0.1 with PID 17484 (C:\Users\ibrah\Desktop\ERP-Backend\erp-system-backend\target\classes started by ibrah in C:\Users\ibrah\Desktop\ERP-Backend\erp-system-backend)
+2025-09-04T22:23:03.195+02:00 DEBUG 17484 --- [erp-system-backend] [restartedMain] c.e.backend.ErpSystemBackendApplication  : Running with Spring Boot v3.5.3, Spring v6.2.8
+2025-09-04T22:23:03.196+02:00  INFO 17484 --- [erp-system-backend] [restartedMain] c.e.backend.ErpSystemBackendApplication  : No active profile set, falling back to 1 default profile: "default"
+2025-09-04T22:23:03.269+02:00  INFO 17484 --- [erp-system-backend] [restartedMain] .e.DevToolsPropertyDefaultsPostProcessor : Devtools property defaults active! Set 'spring.devtools.add-properties' to 'false' to disable
+2025-09-04T22:23:03.269+02:00  INFO 17484 --- [erp-system-backend] [restartedMain] .e.DevToolsPropertyDefaultsPostProcessor : For additional web related logging consider setting the 'logging.level.web' property to 'DEBUG'
+2025-09-04T22:23:04.410+02:00  INFO 17484 --- [erp-system-backend] [restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2025-09-04T22:23:04.496+02:00  INFO 17484 --- [erp-system-backend] [restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 75 ms. Found 11 JPA repository interfaces.
+2025-09-04T22:23:05.099+02:00  INFO 17484 --- [erp-system-backend] [restartedMain] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port 8080 (http)
+2025-09-04T22:23:05.117+02:00  INFO 17484 --- [erp-system-backend] [restartedMain] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2025-09-04T22:23:05.117+02:00  INFO 17484 --- [erp-system-backend] [restartedMain] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.42]
+2025-09-04T22:23:05.164+02:00  INFO 17484 --- [erp-system-backend] [restartedMain] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
+2025-09-04T22:23:05.164+02:00  INFO 17484 --- [erp-system-backend] [restartedMain] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 1894 ms
+2025-09-04T22:23:05.374+02:00  INFO 17484 --- [erp-system-backend] [restartedMain] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: default]
+2025-09-04T22:23:05.424+02:00  INFO 17484 --- [erp-system-backend] [restartedMain] org.hibernate.Version                    : HHH000412: Hibernate ORM core version 6.6.18.Final
+2025-09-04T22:23:05.456+02:00  INFO 17484 --- [erp-system-backend] [restartedMain] o.h.c.internal.RegionFactoryInitiator    : HHH000026: Second-level cache disabled
+2025-09-04T22:23:05.754+02:00  INFO 17484 --- [erp-system-backend] [restartedMain] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2025-09-04T22:23:05.780+02:00  INFO 17484 --- [erp-system-backend] [restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2025-09-04T22:23:07.051+02:00  INFO 17484 --- [erp-system-backend] [restartedMain] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection org.postgresql.jdbc.PgConnection@b3aa36
+2025-09-04T22:23:07.053+02:00  INFO 17484 --- [erp-system-backend] [restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2025-09-04T22:23:07.179+02:00  WARN 17484 --- [erp-system-backend] [restartedMain] org.hibernate.orm.deprecation            : HHH90000025: PostgreSQLDialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2025-09-04T22:23:07.500+02:00  INFO 17484 --- [erp-system-backend] [restartedMain] org.hibernate.orm.connections.pooling    : HHH10001005: Database info:
 	Database JDBC URL [Connecting through datasource 'HikariDataSource (HikariPool-1)']
 	Database driver: undefined/unknown
 	Database version: 17.5
@@ -85,277 +69,185 @@
 	Isolation level: undefined/unknown
 	Minimum pool size: undefined/unknown
 	Maximum pool size: undefined/unknown
-2025-09-02T22:25:45.956+02:00  INFO 14644 --- [erp-system-backend] [restartedMain] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
-2025-09-02T22:25:52.600+02:00  INFO 14644 --- [erp-system-backend] [restartedMain] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
-2025-09-02T22:25:52.887+02:00 DEBUG 14644 --- [erp-system-backend] [restartedMain] com.erp.backend.config.JwtAuthFilter     : Filter 'jwtAuthFilter' configured for use
-2025-09-02T22:25:52.980+02:00  INFO 14644 --- [erp-system-backend] [restartedMain] o.s.d.j.r.query.QueryEnhancerFactory     : Hibernate is in classpath; If applicable, HQL parser will be used.
-2025-09-02T22:25:54.493+02:00  WARN 14644 --- [erp-system-backend] [restartedMain] JpaBaseConfiguration$JpaWebConfiguration : spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
-2025-09-02T22:25:54.523+02:00  INFO 14644 --- [erp-system-backend] [restartedMain] r$InitializeUserDetailsManagerConfigurer : Global AuthenticationManager configured with UserDetailsService bean with name userDetailsService
-2025-09-02T22:25:54.947+02:00  INFO 14644 --- [erp-system-backend] [restartedMain] o.s.b.a.e.web.EndpointLinksResolver      : Exposing 4 endpoints beneath base path '/actuator'
-2025-09-02T22:25:55.301+02:00  INFO 14644 --- [erp-system-backend] [restartedMain] o.s.b.d.a.OptionalLiveReloadServer       : LiveReload server is running on port 35729
-2025-09-02T22:25:55.392+02:00  INFO 14644 --- [erp-system-backend] [restartedMain] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port 8080 (http) with context path '/'
-2025-09-02T22:25:55.405+02:00  INFO 14644 --- [erp-system-backend] [restartedMain] c.e.backend.ErpSystemBackendApplication  : Started ErpSystemBackendApplication in 15.979 seconds (process running for 17.033)
-2025-09-02T22:26:13.618+02:00  INFO 14644 --- [erp-system-backend] [http-nio-8080-exec-1] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring DispatcherServlet 'dispatcherServlet'
-2025-09-02T22:26:13.618+02:00  INFO 14644 --- [erp-system-backend] [http-nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
-2025-09-02T22:26:13.619+02:00  INFO 14644 --- [erp-system-backend] [http-nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Completed initialization in 1 ms
-2025-09-02T22:26:13.881+02:00  WARN 14644 --- [erp-system-backend] [http-nio-8080-exec-8] o.springdoc.core.service.OpenAPIService  : found more than one OpenAPIDefinition class. springdoc-openapi will be using the first one found.
-2025-09-02T22:26:15.413+02:00  INFO 14644 --- [erp-system-backend] [http-nio-8080-exec-8] o.springdoc.api.AbstractOpenApiResource  : Init duration for springdoc-openapi is: 1536 ms
-2025-09-02T22:27:38.180+02:00  INFO 14644 --- [erp-system-backend] [http-nio-8080-exec-1] com.erp.backend.service.InvoiceService   : Fetched 0 invoices
-2025-09-02T22:27:38.530+02:00  INFO 14644 --- [erp-system-backend] [http-nio-8080-exec-1] com.erp.backend.service.InvoiceService   : Created invoice: id=fc3de499-1944-4539-8ca1-5e61c4a5afcd, invoiceNumber=INV-2025-0001
-2025-09-02T22:27:38.641+02:00  INFO 14644 --- [erp-system-backend] [http-nio-8080-exec-1] com.erp.backend.service.InvoiceService   : Created invoice: id=c85d137d-5fca-46b9-b1d2-78ede53a004c, invoiceNumber=INV-2025-0002
-2025-09-02T22:27:38.740+02:00  INFO 14644 --- [erp-system-backend] [http-nio-8080-exec-1] com.erp.backend.service.InvoiceService   : Created invoice: id=d1525b9a-2b3e-4539-92f7-eeb1e358ee27, invoiceNumber=INV-2025-0003
-2025-09-02T22:27:38.839+02:00  INFO 14644 --- [erp-system-backend] [http-nio-8080-exec-1] com.erp.backend.service.InvoiceService   : Created invoice: id=3b44ff16-e3ff-4b91-b5ea-b753080fe5c4, invoiceNumber=INV-2025-0004
-2025-09-02T22:27:38.942+02:00  INFO 14644 --- [erp-system-backend] [http-nio-8080-exec-1] com.erp.backend.service.InvoiceService   : Created invoice: id=35043795-9098-4321-ac65-3b96630b4dfe, invoiceNumber=INV-2025-0005
-2025-09-02T22:27:39.047+02:00  INFO 14644 --- [erp-system-backend] [http-nio-8080-exec-1] com.erp.backend.service.InvoiceService   : Created invoice: id=3325e70f-ec68-4feb-a52f-ff1fe15e0bbc, invoiceNumber=INV-2025-0006
-2025-09-02T22:27:39.151+02:00  INFO 14644 --- [erp-system-backend] [http-nio-8080-exec-1] com.erp.backend.service.InvoiceService   : Created invoice: id=0e29f196-b375-4e74-bafd-f86e705da105, invoiceNumber=INV-2025-0007
-2025-09-02T22:27:39.251+02:00  INFO 14644 --- [erp-system-backend] [http-nio-8080-exec-1] com.erp.backend.service.InvoiceService   : Created invoice: id=27c876dc-fc5e-452e-b8c7-1a7af2c7c0c3, invoiceNumber=INV-2025-0008
-2025-09-02T22:27:39.351+02:00  INFO 14644 --- [erp-system-backend] [http-nio-8080-exec-1] com.erp.backend.service.InvoiceService   : Created invoice: id=fe381a3f-32ce-442a-a2e8-54f4b58c63c5, invoiceNumber=INV-2025-0009
-2025-09-02T22:27:39.453+02:00  INFO 14644 --- [erp-system-backend] [http-nio-8080-exec-1] com.erp.backend.service.InvoiceService   : Created invoice: id=286f6bf4-7549-43ed-8a60-057a6656f3e6, invoiceNumber=INV-2025-0010
-2025-09-02T22:27:39.556+02:00  INFO 14644 --- [erp-system-backend] [http-nio-8080-exec-1] com.erp.backend.service.InvoiceService   : Created invoice: id=843ca066-d885-487c-8f2e-cb5084a02571, invoiceNumber=INV-2025-0011
-2025-09-02T22:27:39.659+02:00  INFO 14644 --- [erp-system-backend] [http-nio-8080-exec-1] com.erp.backend.service.InvoiceService   : Created invoice: id=3665f814-bc4b-42cf-9d0b-d1acc377fbff, invoiceNumber=INV-2025-0012
-2025-09-02T22:27:39.761+02:00  INFO 14644 --- [erp-system-backend] [http-nio-8080-exec-1] com.erp.backend.service.InvoiceService   : Created invoice: id=67fcc03d-55a7-450d-8ba9-a784ed0b5a53, invoiceNumber=INV-2025-0013
-2025-09-02T22:27:39.859+02:00  INFO 14644 --- [erp-system-backend] [http-nio-8080-exec-1] com.erp.backend.service.InvoiceService   : Created invoice: id=0fd842de-0853-4577-aa42-f6f7202c79a3, invoiceNumber=INV-2025-0014
-2025-09-02T22:27:39.965+02:00  INFO 14644 --- [erp-system-backend] [http-nio-8080-exec-1] com.erp.backend.service.InvoiceService   : Created invoice: id=d748594b-99f4-4b10-bc9b-afc3ca8d17a6, invoiceNumber=INV-2025-0015
-2025-09-02T22:27:40.068+02:00  INFO 14644 --- [erp-system-backend] [http-nio-8080-exec-1] com.erp.backend.service.InvoiceService   : Created invoice: id=3d5f9c3d-dc39-4371-8613-ce47ca938b5a, invoiceNumber=INV-2025-0016
-2025-09-02T22:27:40.206+02:00  INFO 14644 --- [erp-system-backend] [http-nio-8080-exec-1] com.erp.backend.service.InvoiceService   : Created invoice: id=f03c4a06-92af-4ede-95b9-5228f69ea124, invoiceNumber=INV-2025-0017
-2025-09-02T22:27:40.341+02:00  INFO 14644 --- [erp-system-backend] [http-nio-8080-exec-1] com.erp.backend.service.InvoiceService   : Created invoice: id=d52f6376-c198-4002-8f1e-5824e97d5f7f, invoiceNumber=INV-2025-0018
-2025-09-02T22:27:40.445+02:00  INFO 14644 --- [erp-system-backend] [http-nio-8080-exec-1] com.erp.backend.service.InvoiceService   : Created invoice: id=7b936300-7fc9-467c-952a-65c0c5791831, invoiceNumber=INV-2025-0019
-2025-09-02T22:42:53.111+02:00  WARN 14644 --- [erp-system-backend] [http-nio-8080-exec-1] ration$PageModule$WarningLoggingModifier : Serializing PageImpl instances as-is is not supported, meaning that there is no guarantee about the stability of the resulting JSON structure!
-	For a stable JSON structure, please use Spring Data's PagedModel (globally via @EnableSpringDataWebSupport(pageSerializationMode = VIA_DTO))
-	or Spring HATEOAS and Spring Data's PagedResourcesAssembler as documented in https://docs.spring.io/spring-data/commons/reference/repositories/core-extensions.html#core.web.pageables.
+2025-09-04T22:23:08.430+02:00  INFO 17484 --- [erp-system-backend] [restartedMain] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2025-09-04T22:23:09.118+02:00  WARN 17484 --- [erp-system-backend] [restartedMain] o.h.t.s.i.ExceptionHandlerLoggedImpl     : GenerationTarget encountered exception accepting command : Error executing DDL "
+    alter table if exists customers 
+       add column deleted boolean not null" via JDBC [ERROR: column "deleted" of relation "customers" contains null values]
 
-2025-09-02T22:43:06.271+02:00  INFO 14644 --- [erp-system-backend] [http-nio-8080-exec-8] c.e.b.controller.ContractController      : GET /api/contracts - Fetching contracts (paginated: false)
-2025-09-02T22:43:06.307+02:00  INFO 14644 --- [erp-system-backend] [http-nio-8080-exec-9] c.e.b.controller.SubscriptionController  : GET /api/subscriptions - Fetching subscriptions (paginated: false)
-2025-09-02T22:43:06.538+02:00  INFO 14644 --- [erp-system-backend] [http-nio-8080-exec-9] c.e.backend.service.SubscriptionService  : Fetched 40 subscriptions
-2025-09-02T22:43:22.451+02:00  INFO 14644 --- [erp-system-backend] [http-nio-8080-exec-4] c.e.backend.service.SubscriptionService  : Updated subscription: id=1cfdb781-1a97-4240-bbf6-0869b94062bc, subscriptionNumber=SUB-20250902-1000
-2025-09-02T22:43:22.567+02:00  WARN 14644 --- [erp-system-backend] [http-nio-8080-exec-4] o.h.engine.jdbc.spi.SqlExceptionHelper   : SQL Error: 0, SQLState: 23502
-2025-09-02T22:43:22.567+02:00 ERROR 14644 --- [erp-system-backend] [http-nio-8080-exec-4] o.h.engine.jdbc.spi.SqlExceptionHelper   : ERROR: null value in column "contract_id" of relation "subscriptions" violates not-null constraint
-  Detail: Failing row contains (1cfdb781-1a97-4240-bbf6-0869b94062bc, f, ANNUALLY, null, 2025-05-11, 19.99, null, Netflix Business, 2024-12-23, SUB-20250902-1000, ACTIVE, null).
-2025-09-02T22:43:26.318+02:00  INFO 14644 --- [erp-system-backend] [http-nio-8080-exec-1] c.e.b.controller.ContractController      : GET /api/contracts - Fetching contracts (paginated: false)
-2025-09-02T22:43:29.201+02:00  INFO 14644 --- [erp-system-backend] [http-nio-8080-exec-3] c.erp.backend.service.CustomerService    : Fetched 25 customers
-2025-09-02T22:43:39.213+02:00  INFO 14644 --- [erp-system-backend] [http-nio-8080-exec-7] c.e.b.controller.ContractController      : === CONTROLLER UPDATE DEBUG ===
-2025-09-02T22:43:39.213+02:00  INFO 14644 --- [erp-system-backend] [http-nio-8080-exec-7] c.e.b.controller.ContractController      : PUT /api/contracts/480e2d7f-05f8-4e29-82cf-b8ad65a4e0a6 - Updating contract
-2025-09-02T22:43:39.213+02:00  INFO 14644 --- [erp-system-backend] [http-nio-8080-exec-7] c.e.b.controller.ContractController      : DTO Customer ID: 9502a846-e890-4952-bd0b-31b65cc5bfec
-2025-09-02T22:43:39.213+02:00  INFO 14644 --- [erp-system-backend] [http-nio-8080-exec-7] c.e.b.controller.ContractController      : DTO Contract Title: Contract 1
-2025-09-02T22:43:39.213+02:00  INFO 14644 --- [erp-system-backend] [http-nio-8080-exec-7] c.e.b.controller.ContractController      : DTO Status: ACTIVE
-2025-09-02T22:43:39.213+02:00  INFO 14644 --- [erp-system-backend] [http-nio-8080-exec-7] c.e.b.controller.ContractController      : Entity nach Mapping - Customer: Customer{id=9502a846-e890-4952-bd0b-31b65cc5bfec, customerNumber='null', firstName='null', lastName='null', email='null', tel='null', billingAddress=null, shippingAddress=null, residentialAddress=null}
-2025-09-02T22:43:39.214+02:00  INFO 14644 --- [erp-system-backend] [http-nio-8080-exec-7] c.e.b.controller.ContractController      : Entity Customer ID: 9502a846-e890-4952-bd0b-31b65cc5bfec
-2025-09-02T22:43:39.214+02:00  INFO 14644 --- [erp-system-backend] [http-nio-8080-exec-7] c.erp.backend.service.ContractService    : === CONTRACT UPDATE DEBUG START ===
-2025-09-02T22:43:39.214+02:00  INFO 14644 --- [erp-system-backend] [http-nio-8080-exec-7] c.erp.backend.service.ContractService    : Contract ID: 480e2d7f-05f8-4e29-82cf-b8ad65a4e0a6
-2025-09-02T22:43:39.214+02:00  INFO 14644 --- [erp-system-backend] [http-nio-8080-exec-7] c.erp.backend.service.ContractService    : Contract Title: Contract 1
-2025-09-02T22:43:39.417+02:00  INFO 14644 --- [erp-system-backend] [http-nio-8080-exec-7] c.erp.backend.service.ContractService    : Existing Customer ID: a60aee09-f8ae-41af-a23d-102740c46e52
-2025-09-02T22:43:39.517+02:00  INFO 14644 --- [erp-system-backend] [http-nio-8080-exec-7] c.erp.backend.service.ContractService    : Existing Customer Name: Julia Schmidt
-2025-09-02T22:43:39.517+02:00  INFO 14644 --- [erp-system-backend] [http-nio-8080-exec-7] c.erp.backend.service.ContractService    : New Contract Customer: Customer{id=9502a846-e890-4952-bd0b-31b65cc5bfec, customerNumber='null', firstName='null', lastName='null', email='null', tel='null', billingAddress=null, shippingAddress=null, residentialAddress=null}
-2025-09-02T22:43:39.517+02:00  INFO 14644 --- [erp-system-backend] [http-nio-8080-exec-7] c.erp.backend.service.ContractService    : New Customer ID: 9502a846-e890-4952-bd0b-31b65cc5bfec
-2025-09-02T22:43:39.517+02:00  INFO 14644 --- [erp-system-backend] [http-nio-8080-exec-7] c.erp.backend.service.ContractService    : Lade neuen Customer mit ID: 9502a846-e890-4952-bd0b-31b65cc5bfec
-2025-09-02T22:43:39.617+02:00  INFO 14644 --- [erp-system-backend] [http-nio-8080-exec-7] c.erp.backend.service.ContractService    : Neuer Customer geladen: Laura Müller
-2025-09-02T22:43:39.617+02:00  INFO 14644 --- [erp-system-backend] [http-nio-8080-exec-7] c.erp.backend.service.ContractService    : Customer geändert von Julia Schmidt zu Laura Müller
-2025-09-02T22:43:39.618+02:00  INFO 14644 --- [erp-system-backend] [http-nio-8080-exec-7] c.erp.backend.service.ContractService    : Contract gespeichert mit Customer ID: 9502a846-e890-4952-bd0b-31b65cc5bfec
-2025-09-02T22:43:39.618+02:00  INFO 14644 --- [erp-system-backend] [http-nio-8080-exec-7] c.erp.backend.service.ContractService    : === CONTRACT UPDATE DEBUG END ===
-2025-09-02T22:43:39.815+02:00  INFO 14644 --- [erp-system-backend] [http-nio-8080-exec-7] c.e.b.controller.ContractController      : Update abgeschlossen - Customer ID: 9502a846-e890-4952-bd0b-31b65cc5bfec
-2025-09-02T22:43:39.815+02:00  INFO 14644 --- [erp-system-backend] [http-nio-8080-exec-7] c.e.b.controller.ContractController      : === CONTROLLER UPDATE DEBUG END ===
-2025-09-02T22:44:04.073+02:00  INFO 14644 --- [erp-system-backend] [http-nio-8080-exec-8] c.e.b.controller.ContractController      : GET /api/contracts - Fetching contracts (paginated: false)
-2025-09-02T22:45:07.743+02:00  WARN 14644 --- [erp-system-backend] [http-nio-8080-exec-7] .w.s.m.a.ResponseStatusExceptionResolver : Resolved [com.erp.backend.exception.BusinessLogicException: Fälligkeitsplan ist bereits als bezahlt markiert]
-2025-09-02T22:45:17.712+02:00  INFO 14644 --- [erp-system-backend] [http-nio-8080-exec-10] c.e.backend.service.DueScheduleService   : Marked due schedule as paid: id=63543072-f31d-4362-b3b5-201c43a74773, amount=15.00
-2025-09-02T22:45:21.843+02:00  WARN 14644 --- [erp-system-backend] [http-nio-8080-exec-8] .w.s.m.a.ResponseStatusExceptionResolver : Resolved [com.erp.backend.exception.BusinessLogicException: Fälligkeitsplan ist bereits als bezahlt markiert]
-2025-09-02T22:45:25.532+02:00 ERROR 14644 --- [erp-system-backend] [http-nio-8080-exec-2] o.a.c.c.C.[.[.[/].[dispatcherServlet]    : Servlet.service() for servlet [dispatcherServlet] in context with path [] threw exception [Request processing failed: java.lang.NullPointerException: Cannot invoke "java.math.BigDecimal.compareTo(java.math.BigDecimal)" because the return value of "com.erp.backend.dto.PaymentDto.getPaidAmount()" is null] with root cause
-
-java.lang.NullPointerException: Cannot invoke "java.math.BigDecimal.compareTo(java.math.BigDecimal)" because the return value of "com.erp.backend.dto.PaymentDto.getPaidAmount()" is null
-	at com.erp.backend.service.DueScheduleService.recordPayment(DueScheduleService.java:222) ~[classes/:na]
+org.hibernate.tool.schema.spi.CommandAcceptanceException: Error executing DDL "
+    alter table if exists customers 
+       add column deleted boolean not null" via JDBC [ERROR: column "deleted" of relation "customers" contains null values]
+	at org.hibernate.tool.schema.internal.exec.GenerationTargetToDatabase.accept(GenerationTargetToDatabase.java:94) ~[hibernate-core-6.6.18.Final.jar:6.6.18.Final]
+	at org.hibernate.tool.schema.internal.AbstractSchemaMigrator.applySqlString(AbstractSchemaMigrator.java:576) ~[hibernate-core-6.6.18.Final.jar:6.6.18.Final]
+	at org.hibernate.tool.schema.internal.AbstractSchemaMigrator.applySqlStrings(AbstractSchemaMigrator.java:516) ~[hibernate-core-6.6.18.Final.jar:6.6.18.Final]
+	at org.hibernate.tool.schema.internal.AbstractSchemaMigrator.migrateTable(AbstractSchemaMigrator.java:334) ~[hibernate-core-6.6.18.Final.jar:6.6.18.Final]
+	at org.hibernate.tool.schema.internal.GroupedSchemaMigratorImpl.performTablesMigration(GroupedSchemaMigratorImpl.java:84) ~[hibernate-core-6.6.18.Final.jar:6.6.18.Final]
+	at org.hibernate.tool.schema.internal.AbstractSchemaMigrator.performMigration(AbstractSchemaMigrator.java:233) ~[hibernate-core-6.6.18.Final.jar:6.6.18.Final]
+	at org.hibernate.tool.schema.internal.AbstractSchemaMigrator.doMigration(AbstractSchemaMigrator.java:112) ~[hibernate-core-6.6.18.Final.jar:6.6.18.Final]
+	at org.hibernate.tool.schema.spi.SchemaManagementToolCoordinator.performDatabaseAction(SchemaManagementToolCoordinator.java:280) ~[hibernate-core-6.6.18.Final.jar:6.6.18.Final]
+	at org.hibernate.tool.schema.spi.SchemaManagementToolCoordinator.lambda$process$5(SchemaManagementToolCoordinator.java:144) ~[hibernate-core-6.6.18.Final.jar:6.6.18.Final]
+	at java.base/java.util.HashMap.forEach(HashMap.java:1430) ~[na:na]
+	at org.hibernate.tool.schema.spi.SchemaManagementToolCoordinator.process(SchemaManagementToolCoordinator.java:141) ~[hibernate-core-6.6.18.Final.jar:6.6.18.Final]
+	at org.hibernate.boot.internal.SessionFactoryObserverForSchemaExport.sessionFactoryCreated(SessionFactoryObserverForSchemaExport.java:37) ~[hibernate-core-6.6.18.Final.jar:6.6.18.Final]
+	at org.hibernate.internal.SessionFactoryObserverChain.sessionFactoryCreated(SessionFactoryObserverChain.java:35) ~[hibernate-core-6.6.18.Final.jar:6.6.18.Final]
+	at org.hibernate.internal.SessionFactoryImpl.<init>(SessionFactoryImpl.java:324) ~[hibernate-core-6.6.18.Final.jar:6.6.18.Final]
+	at org.hibernate.boot.internal.SessionFactoryBuilderImpl.build(SessionFactoryBuilderImpl.java:463) ~[hibernate-core-6.6.18.Final.jar:6.6.18.Final]
+	at org.hibernate.jpa.boot.internal.EntityManagerFactoryBuilderImpl.build(EntityManagerFactoryBuilderImpl.java:1517) ~[hibernate-core-6.6.18.Final.jar:6.6.18.Final]
+	at org.springframework.orm.jpa.vendor.SpringHibernateJpaPersistenceProvider.createContainerEntityManagerFactory(SpringHibernateJpaPersistenceProvider.java:66) ~[spring-orm-6.2.8.jar:6.2.8]
+	at org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean.createNativeEntityManagerFactory(LocalContainerEntityManagerFactoryBean.java:390) ~[spring-orm-6.2.8.jar:6.2.8]
+	at org.springframework.orm.jpa.AbstractEntityManagerFactoryBean.buildNativeEntityManagerFactory(AbstractEntityManagerFactoryBean.java:419) ~[spring-orm-6.2.8.jar:6.2.8]
+	at org.springframework.orm.jpa.AbstractEntityManagerFactoryBean.afterPropertiesSet(AbstractEntityManagerFactoryBean.java:400) ~[spring-orm-6.2.8.jar:6.2.8]
+	at org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean.afterPropertiesSet(LocalContainerEntityManagerFactoryBean.java:366) ~[spring-orm-6.2.8.jar:6.2.8]
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.invokeInitMethods(AbstractAutowireCapableBeanFactory.java:1873) ~[spring-beans-6.2.8.jar:6.2.8]
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.initializeBean(AbstractAutowireCapableBeanFactory.java:1822) ~[spring-beans-6.2.8.jar:6.2.8]
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.doCreateBean(AbstractAutowireCapableBeanFactory.java:607) ~[spring-beans-6.2.8.jar:6.2.8]
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBean(AbstractAutowireCapableBeanFactory.java:529) ~[spring-beans-6.2.8.jar:6.2.8]
+	at org.springframework.beans.factory.support.AbstractBeanFactory.lambda$doGetBean$0(AbstractBeanFactory.java:339) ~[spring-beans-6.2.8.jar:6.2.8]
+	at org.springframework.beans.factory.support.DefaultSingletonBeanRegistry.getSingleton(DefaultSingletonBeanRegistry.java:373) ~[spring-beans-6.2.8.jar:6.2.8]
+	at org.springframework.beans.factory.support.AbstractBeanFactory.doGetBean(AbstractBeanFactory.java:337) ~[spring-beans-6.2.8.jar:6.2.8]
+	at org.springframework.beans.factory.support.AbstractBeanFactory.getBean(AbstractBeanFactory.java:202) ~[spring-beans-6.2.8.jar:6.2.8]
+	at org.springframework.beans.factory.support.BeanDefinitionValueResolver.resolveReference(BeanDefinitionValueResolver.java:365) ~[spring-beans-6.2.8.jar:6.2.8]
+	at org.springframework.beans.factory.support.BeanDefinitionValueResolver.resolveValueIfNecessary(BeanDefinitionValueResolver.java:135) ~[spring-beans-6.2.8.jar:6.2.8]
+	at org.springframework.beans.factory.support.ConstructorResolver.resolveConstructorArguments(ConstructorResolver.java:691) ~[spring-beans-6.2.8.jar:6.2.8]
+	at org.springframework.beans.factory.support.ConstructorResolver.instantiateUsingFactoryMethod(ConstructorResolver.java:513) ~[spring-beans-6.2.8.jar:6.2.8]
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.instantiateUsingFactoryMethod(AbstractAutowireCapableBeanFactory.java:1375) ~[spring-beans-6.2.8.jar:6.2.8]
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBeanInstance(AbstractAutowireCapableBeanFactory.java:1205) ~[spring-beans-6.2.8.jar:6.2.8]
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.doCreateBean(AbstractAutowireCapableBeanFactory.java:569) ~[spring-beans-6.2.8.jar:6.2.8]
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBean(AbstractAutowireCapableBeanFactory.java:529) ~[spring-beans-6.2.8.jar:6.2.8]
+	at org.springframework.beans.factory.support.AbstractBeanFactory.lambda$doGetBean$0(AbstractBeanFactory.java:339) ~[spring-beans-6.2.8.jar:6.2.8]
+	at org.springframework.beans.factory.support.DefaultSingletonBeanRegistry.getSingleton(DefaultSingletonBeanRegistry.java:373) ~[spring-beans-6.2.8.jar:6.2.8]
+	at org.springframework.beans.factory.support.AbstractBeanFactory.doGetBean(AbstractBeanFactory.java:337) ~[spring-beans-6.2.8.jar:6.2.8]
+	at org.springframework.beans.factory.support.AbstractBeanFactory.getBean(AbstractBeanFactory.java:202) ~[spring-beans-6.2.8.jar:6.2.8]
+	at org.springframework.beans.factory.support.BeanDefinitionValueResolver.resolveReference(BeanDefinitionValueResolver.java:365) ~[spring-beans-6.2.8.jar:6.2.8]
+	at org.springframework.beans.factory.support.BeanDefinitionValueResolver.resolveValueIfNecessary(BeanDefinitionValueResolver.java:135) ~[spring-beans-6.2.8.jar:6.2.8]
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.applyPropertyValues(AbstractAutowireCapableBeanFactory.java:1725) ~[spring-beans-6.2.8.jar:6.2.8]
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.populateBean(AbstractAutowireCapableBeanFactory.java:1474) ~[spring-beans-6.2.8.jar:6.2.8]
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.doCreateBean(AbstractAutowireCapableBeanFactory.java:606) ~[spring-beans-6.2.8.jar:6.2.8]
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBean(AbstractAutowireCapableBeanFactory.java:529) ~[spring-beans-6.2.8.jar:6.2.8]
+	at org.springframework.beans.factory.support.AbstractBeanFactory.lambda$doGetBean$0(AbstractBeanFactory.java:339) ~[spring-beans-6.2.8.jar:6.2.8]
+	at org.springframework.beans.factory.support.DefaultSingletonBeanRegistry.getSingleton(DefaultSingletonBeanRegistry.java:373) ~[spring-beans-6.2.8.jar:6.2.8]
+	at org.springframework.beans.factory.support.AbstractBeanFactory.doGetBean(AbstractBeanFactory.java:337) ~[spring-beans-6.2.8.jar:6.2.8]
+	at org.springframework.beans.factory.support.AbstractBeanFactory.getBean(AbstractBeanFactory.java:202) ~[spring-beans-6.2.8.jar:6.2.8]
+	at org.springframework.beans.factory.support.DefaultListableBeanFactory.doResolveDependency(DefaultListableBeanFactory.java:1683) ~[spring-beans-6.2.8.jar:6.2.8]
+	at org.springframework.beans.factory.support.DefaultListableBeanFactory.resolveDependency(DefaultListableBeanFactory.java:1628) ~[spring-beans-6.2.8.jar:6.2.8]
+	at org.springframework.beans.factory.support.ConstructorResolver.resolveAutowiredArgument(ConstructorResolver.java:913) ~[spring-beans-6.2.8.jar:6.2.8]
+	at org.springframework.beans.factory.support.ConstructorResolver.createArgumentArray(ConstructorResolver.java:791) ~[spring-beans-6.2.8.jar:6.2.8]
+	at org.springframework.beans.factory.support.ConstructorResolver.autowireConstructor(ConstructorResolver.java:240) ~[spring-beans-6.2.8.jar:6.2.8]
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.autowireConstructor(AbstractAutowireCapableBeanFactory.java:1395) ~[spring-beans-6.2.8.jar:6.2.8]
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBeanInstance(AbstractAutowireCapableBeanFactory.java:1232) ~[spring-beans-6.2.8.jar:6.2.8]
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.doCreateBean(AbstractAutowireCapableBeanFactory.java:569) ~[spring-beans-6.2.8.jar:6.2.8]
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBean(AbstractAutowireCapableBeanFactory.java:529) ~[spring-beans-6.2.8.jar:6.2.8]
+	at org.springframework.beans.factory.support.AbstractBeanFactory.lambda$doGetBean$0(AbstractBeanFactory.java:339) ~[spring-beans-6.2.8.jar:6.2.8]
+	at org.springframework.beans.factory.support.DefaultSingletonBeanRegistry.getSingleton(DefaultSingletonBeanRegistry.java:373) ~[spring-beans-6.2.8.jar:6.2.8]
+	at org.springframework.beans.factory.support.AbstractBeanFactory.doGetBean(AbstractBeanFactory.java:337) ~[spring-beans-6.2.8.jar:6.2.8]
+	at org.springframework.beans.factory.support.AbstractBeanFactory.getBean(AbstractBeanFactory.java:202) ~[spring-beans-6.2.8.jar:6.2.8]
+	at org.springframework.beans.factory.support.ConstructorResolver.instantiateUsingFactoryMethod(ConstructorResolver.java:413) ~[spring-beans-6.2.8.jar:6.2.8]
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.instantiateUsingFactoryMethod(AbstractAutowireCapableBeanFactory.java:1375) ~[spring-beans-6.2.8.jar:6.2.8]
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBeanInstance(AbstractAutowireCapableBeanFactory.java:1205) ~[spring-beans-6.2.8.jar:6.2.8]
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.doCreateBean(AbstractAutowireCapableBeanFactory.java:569) ~[spring-beans-6.2.8.jar:6.2.8]
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBean(AbstractAutowireCapableBeanFactory.java:529) ~[spring-beans-6.2.8.jar:6.2.8]
+	at org.springframework.beans.factory.support.AbstractBeanFactory.lambda$doGetBean$0(AbstractBeanFactory.java:339) ~[spring-beans-6.2.8.jar:6.2.8]
+	at org.springframework.beans.factory.support.DefaultSingletonBeanRegistry.getSingleton(DefaultSingletonBeanRegistry.java:373) ~[spring-beans-6.2.8.jar:6.2.8]
+	at org.springframework.beans.factory.support.AbstractBeanFactory.doGetBean(AbstractBeanFactory.java:337) ~[spring-beans-6.2.8.jar:6.2.8]
+	at org.springframework.beans.factory.support.AbstractBeanFactory.getBean(AbstractBeanFactory.java:207) ~[spring-beans-6.2.8.jar:6.2.8]
+	at org.springframework.boot.web.servlet.ServletContextInitializerBeans.getOrderedBeansOfType(ServletContextInitializerBeans.java:230) ~[spring-boot-3.5.3.jar:3.5.3]
+	at org.springframework.boot.web.servlet.ServletContextInitializerBeans.addAsRegistrationBean(ServletContextInitializerBeans.java:184) ~[spring-boot-3.5.3.jar:3.5.3]
+	at org.springframework.boot.web.servlet.ServletContextInitializerBeans.addAsRegistrationBean(ServletContextInitializerBeans.java:179) ~[spring-boot-3.5.3.jar:3.5.3]
+	at org.springframework.boot.web.servlet.ServletContextInitializerBeans.addAdaptableBeans(ServletContextInitializerBeans.java:164) ~[spring-boot-3.5.3.jar:3.5.3]
+	at org.springframework.boot.web.servlet.ServletContextInitializerBeans.<init>(ServletContextInitializerBeans.java:96) ~[spring-boot-3.5.3.jar:3.5.3]
+	at org.springframework.boot.web.servlet.context.ServletWebServerApplicationContext.getServletContextInitializerBeans(ServletWebServerApplicationContext.java:271) ~[spring-boot-3.5.3.jar:3.5.3]
+	at org.springframework.boot.web.servlet.context.ServletWebServerApplicationContext.selfInitialize(ServletWebServerApplicationContext.java:245) ~[spring-boot-3.5.3.jar:3.5.3]
+	at org.springframework.boot.web.embedded.tomcat.TomcatStarter.onStartup(TomcatStarter.java:52) ~[spring-boot-3.5.3.jar:3.5.3]
+	at org.apache.catalina.core.StandardContext.startInternal(StandardContext.java:4464) ~[tomcat-embed-core-10.1.42.jar:10.1.42]
+	at org.apache.catalina.util.LifecycleBase.start(LifecycleBase.java:164) ~[tomcat-embed-core-10.1.42.jar:10.1.42]
+	at org.apache.catalina.core.ContainerBase$StartChild.call(ContainerBase.java:1203) ~[tomcat-embed-core-10.1.42.jar:10.1.42]
+	at org.apache.catalina.core.ContainerBase$StartChild.call(ContainerBase.java:1193) ~[tomcat-embed-core-10.1.42.jar:10.1.42]
+	at java.base/java.util.concurrent.FutureTask.run(FutureTask.java:328) ~[na:na]
+	at org.apache.tomcat.util.threads.InlineExecutorService.execute(InlineExecutorService.java:75) ~[tomcat-embed-core-10.1.42.jar:10.1.42]
+	at java.base/java.util.concurrent.AbstractExecutorService.submit(AbstractExecutorService.java:148) ~[na:na]
+	at org.apache.catalina.core.ContainerBase.startInternal(ContainerBase.java:749) ~[tomcat-embed-core-10.1.42.jar:10.1.42]
+	at org.apache.catalina.core.StandardHost.startInternal(StandardHost.java:772) ~[tomcat-embed-core-10.1.42.jar:10.1.42]
+	at org.apache.catalina.util.LifecycleBase.start(LifecycleBase.java:164) ~[tomcat-embed-core-10.1.42.jar:10.1.42]
+	at org.apache.catalina.core.ContainerBase$StartChild.call(ContainerBase.java:1203) ~[tomcat-embed-core-10.1.42.jar:10.1.42]
+	at org.apache.catalina.core.ContainerBase$StartChild.call(ContainerBase.java:1193) ~[tomcat-embed-core-10.1.42.jar:10.1.42]
+	at java.base/java.util.concurrent.FutureTask.run(FutureTask.java:328) ~[na:na]
+	at org.apache.tomcat.util.threads.InlineExecutorService.execute(InlineExecutorService.java:75) ~[tomcat-embed-core-10.1.42.jar:10.1.42]
+	at java.base/java.util.concurrent.AbstractExecutorService.submit(AbstractExecutorService.java:148) ~[na:na]
+	at org.apache.catalina.core.ContainerBase.startInternal(ContainerBase.java:749) ~[tomcat-embed-core-10.1.42.jar:10.1.42]
+	at org.apache.catalina.core.StandardEngine.startInternal(StandardEngine.java:203) ~[tomcat-embed-core-10.1.42.jar:10.1.42]
+	at org.apache.catalina.util.LifecycleBase.start(LifecycleBase.java:164) ~[tomcat-embed-core-10.1.42.jar:10.1.42]
+	at org.apache.catalina.core.StandardService.startInternal(StandardService.java:412) ~[tomcat-embed-core-10.1.42.jar:10.1.42]
+	at org.apache.catalina.util.LifecycleBase.start(LifecycleBase.java:164) ~[tomcat-embed-core-10.1.42.jar:10.1.42]
+	at org.apache.catalina.core.StandardServer.startInternal(StandardServer.java:870) ~[tomcat-embed-core-10.1.42.jar:10.1.42]
+	at org.apache.catalina.util.LifecycleBase.start(LifecycleBase.java:164) ~[tomcat-embed-core-10.1.42.jar:10.1.42]
+	at org.apache.catalina.startup.Tomcat.start(Tomcat.java:438) ~[tomcat-embed-core-10.1.42.jar:10.1.42]
+	at org.springframework.boot.web.embedded.tomcat.TomcatWebServer.initialize(TomcatWebServer.java:128) ~[spring-boot-3.5.3.jar:3.5.3]
+	at org.springframework.boot.web.embedded.tomcat.TomcatWebServer.<init>(TomcatWebServer.java:107) ~[spring-boot-3.5.3.jar:3.5.3]
+	at org.springframework.boot.web.embedded.tomcat.TomcatServletWebServerFactory.getTomcatWebServer(TomcatServletWebServerFactory.java:517) ~[spring-boot-3.5.3.jar:3.5.3]
+	at org.springframework.boot.web.embedded.tomcat.TomcatServletWebServerFactory.getWebServer(TomcatServletWebServerFactory.java:219) ~[spring-boot-3.5.3.jar:3.5.3]
+	at org.springframework.boot.web.servlet.context.ServletWebServerApplicationContext.createWebServer(ServletWebServerApplicationContext.java:193) ~[spring-boot-3.5.3.jar:3.5.3]
+	at org.springframework.boot.web.servlet.context.ServletWebServerApplicationContext.onRefresh(ServletWebServerApplicationContext.java:167) ~[spring-boot-3.5.3.jar:3.5.3]
+	at org.springframework.context.support.AbstractApplicationContext.refresh(AbstractApplicationContext.java:621) ~[spring-context-6.2.8.jar:6.2.8]
+	at org.springframework.boot.web.servlet.context.ServletWebServerApplicationContext.refresh(ServletWebServerApplicationContext.java:146) ~[spring-boot-3.5.3.jar:3.5.3]
+	at org.springframework.boot.SpringApplication.refresh(SpringApplication.java:752) ~[spring-boot-3.5.3.jar:3.5.3]
+	at org.springframework.boot.SpringApplication.refreshContext(SpringApplication.java:439) ~[spring-boot-3.5.3.jar:3.5.3]
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:318) ~[spring-boot-3.5.3.jar:3.5.3]
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:1361) ~[spring-boot-3.5.3.jar:3.5.3]
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:1350) ~[spring-boot-3.5.3.jar:3.5.3]
+	at com.erp.backend.ErpSystemBackendApplication.main(ErpSystemBackendApplication.java:15) ~[classes/:na]
 	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:104) ~[na:na]
 	at java.base/java.lang.reflect.Method.invoke(Method.java:565) ~[na:na]
-	at org.springframework.aop.support.AopUtils.invokeJoinpointUsingReflection(AopUtils.java:359) ~[spring-aop-6.2.8.jar:6.2.8]
-	at org.springframework.aop.framework.ReflectiveMethodInvocation.invokeJoinpoint(ReflectiveMethodInvocation.java:196) ~[spring-aop-6.2.8.jar:6.2.8]
-	at org.springframework.aop.framework.ReflectiveMethodInvocation.proceed(ReflectiveMethodInvocation.java:163) ~[spring-aop-6.2.8.jar:6.2.8]
-	at org.springframework.transaction.interceptor.TransactionAspectSupport.invokeWithinTransaction(TransactionAspectSupport.java:380) ~[spring-tx-6.2.8.jar:6.2.8]
-	at org.springframework.transaction.interceptor.TransactionInterceptor.invoke(TransactionInterceptor.java:119) ~[spring-tx-6.2.8.jar:6.2.8]
-	at org.springframework.aop.framework.ReflectiveMethodInvocation.proceed(ReflectiveMethodInvocation.java:184) ~[spring-aop-6.2.8.jar:6.2.8]
-	at org.springframework.aop.framework.CglibAopProxy$DynamicAdvisedInterceptor.intercept(CglibAopProxy.java:728) ~[spring-aop-6.2.8.jar:6.2.8]
-	at com.erp.backend.service.DueScheduleService$$SpringCGLIB$$0.recordPayment(<generated>) ~[classes/:na]
-	at com.erp.backend.controller.DueScheduleController.recordPayment(DueScheduleController.java:138) ~[classes/:na]
-	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:104) ~[na:na]
-	at java.base/java.lang.reflect.Method.invoke(Method.java:565) ~[na:na]
-	at org.springframework.web.method.support.InvocableHandlerMethod.doInvoke(InvocableHandlerMethod.java:258) ~[spring-web-6.2.8.jar:6.2.8]
-	at org.springframework.web.method.support.InvocableHandlerMethod.invokeForRequest(InvocableHandlerMethod.java:191) ~[spring-web-6.2.8.jar:6.2.8]
-	at org.springframework.web.servlet.mvc.method.annotation.ServletInvocableHandlerMethod.invokeAndHandle(ServletInvocableHandlerMethod.java:118) ~[spring-webmvc-6.2.8.jar:6.2.8]
-	at org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter.invokeHandlerMethod(RequestMappingHandlerAdapter.java:986) ~[spring-webmvc-6.2.8.jar:6.2.8]
-	at org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter.handleInternal(RequestMappingHandlerAdapter.java:891) ~[spring-webmvc-6.2.8.jar:6.2.8]
-	at org.springframework.web.servlet.mvc.method.AbstractHandlerMethodAdapter.handle(AbstractHandlerMethodAdapter.java:87) ~[spring-webmvc-6.2.8.jar:6.2.8]
-	at org.springframework.web.servlet.DispatcherServlet.doDispatch(DispatcherServlet.java:1089) ~[spring-webmvc-6.2.8.jar:6.2.8]
-	at org.springframework.web.servlet.DispatcherServlet.doService(DispatcherServlet.java:979) ~[spring-webmvc-6.2.8.jar:6.2.8]
-	at org.springframework.web.servlet.FrameworkServlet.processRequest(FrameworkServlet.java:1014) ~[spring-webmvc-6.2.8.jar:6.2.8]
-	at org.springframework.web.servlet.FrameworkServlet.doPost(FrameworkServlet.java:914) ~[spring-webmvc-6.2.8.jar:6.2.8]
-	at jakarta.servlet.http.HttpServlet.service(HttpServlet.java:590) ~[tomcat-embed-core-10.1.42.jar:6.0]
-	at org.springframework.web.servlet.FrameworkServlet.service(FrameworkServlet.java:885) ~[spring-webmvc-6.2.8.jar:6.2.8]
-	at jakarta.servlet.http.HttpServlet.service(HttpServlet.java:658) ~[tomcat-embed-core-10.1.42.jar:6.0]
-	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:195) ~[tomcat-embed-core-10.1.42.jar:10.1.42]
-	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140) ~[tomcat-embed-core-10.1.42.jar:10.1.42]
-	at org.apache.tomcat.websocket.server.WsFilter.doFilter(WsFilter.java:51) ~[tomcat-embed-websocket-10.1.42.jar:10.1.42]
-	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164) ~[tomcat-embed-core-10.1.42.jar:10.1.42]
-	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140) ~[tomcat-embed-core-10.1.42.jar:10.1.42]
-	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:110) ~[spring-web-6.2.8.jar:6.2.8]
-	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164) ~[tomcat-embed-core-10.1.42.jar:10.1.42]
-	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140) ~[tomcat-embed-core-10.1.42.jar:10.1.42]
-	at org.springframework.web.filter.CompositeFilter$VirtualFilterChain.doFilter(CompositeFilter.java:108) ~[spring-web-6.2.8.jar:6.2.8]
-	at org.springframework.web.filter.CompositeFilter$VirtualFilterChain.doFilter(CompositeFilter.java:108) ~[spring-web-6.2.8.jar:6.2.8]
-	at org.springframework.security.web.FilterChainProxy.lambda$doFilterInternal$3(FilterChainProxy.java:231) ~[spring-security-web-6.5.1.jar:6.5.1]
-	at org.springframework.security.web.ObservationFilterChainDecorator$FilterObservation$SimpleFilterObservation.lambda$wrap$1(ObservationFilterChainDecorator.java:479) ~[spring-security-web-6.5.1.jar:6.5.1]
-	at org.springframework.security.web.ObservationFilterChainDecorator$AroundFilterObservation$SimpleAroundFilterObservation.lambda$wrap$1(ObservationFilterChainDecorator.java:340) ~[spring-security-web-6.5.1.jar:6.5.1]
-	at org.springframework.security.web.ObservationFilterChainDecorator.lambda$wrapSecured$0(ObservationFilterChainDecorator.java:82) ~[spring-security-web-6.5.1.jar:6.5.1]
-	at org.springframework.security.web.ObservationFilterChainDecorator$VirtualFilterChain.doFilter(ObservationFilterChainDecorator.java:128) ~[spring-security-web-6.5.1.jar:6.5.1]
-	at org.springframework.security.web.access.intercept.AuthorizationFilter.doFilter(AuthorizationFilter.java:101) ~[spring-security-web-6.5.1.jar:6.5.1]
-	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.wrapFilter(ObservationFilterChainDecorator.java:240) ~[spring-security-web-6.5.1.jar:6.5.1]
-	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.doFilter(ObservationFilterChainDecorator.java:227) ~[spring-security-web-6.5.1.jar:6.5.1]
-	at org.springframework.security.web.ObservationFilterChainDecorator$VirtualFilterChain.doFilter(ObservationFilterChainDecorator.java:137) ~[spring-security-web-6.5.1.jar:6.5.1]
-	at org.springframework.security.web.access.ExceptionTranslationFilter.doFilter(ExceptionTranslationFilter.java:125) ~[spring-security-web-6.5.1.jar:6.5.1]
-	at org.springframework.security.web.access.ExceptionTranslationFilter.doFilter(ExceptionTranslationFilter.java:119) ~[spring-security-web-6.5.1.jar:6.5.1]
-	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.wrapFilter(ObservationFilterChainDecorator.java:240) ~[spring-security-web-6.5.1.jar:6.5.1]
-	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.doFilter(ObservationFilterChainDecorator.java:227) ~[spring-security-web-6.5.1.jar:6.5.1]
-	at org.springframework.security.web.ObservationFilterChainDecorator$VirtualFilterChain.doFilter(ObservationFilterChainDecorator.java:137) ~[spring-security-web-6.5.1.jar:6.5.1]
-	at org.springframework.security.web.session.SessionManagementFilter.doFilter(SessionManagementFilter.java:131) ~[spring-security-web-6.5.1.jar:6.5.1]
-	at org.springframework.security.web.session.SessionManagementFilter.doFilter(SessionManagementFilter.java:85) ~[spring-security-web-6.5.1.jar:6.5.1]
-	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.wrapFilter(ObservationFilterChainDecorator.java:240) ~[spring-security-web-6.5.1.jar:6.5.1]
-	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.doFilter(ObservationFilterChainDecorator.java:227) ~[spring-security-web-6.5.1.jar:6.5.1]
-	at org.springframework.security.web.ObservationFilterChainDecorator$VirtualFilterChain.doFilter(ObservationFilterChainDecorator.java:137) ~[spring-security-web-6.5.1.jar:6.5.1]
-	at org.springframework.security.web.authentication.AnonymousAuthenticationFilter.doFilter(AnonymousAuthenticationFilter.java:100) ~[spring-security-web-6.5.1.jar:6.5.1]
-	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.wrapFilter(ObservationFilterChainDecorator.java:240) ~[spring-security-web-6.5.1.jar:6.5.1]
-	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.doFilter(ObservationFilterChainDecorator.java:227) ~[spring-security-web-6.5.1.jar:6.5.1]
-	at org.springframework.security.web.ObservationFilterChainDecorator$VirtualFilterChain.doFilter(ObservationFilterChainDecorator.java:137) ~[spring-security-web-6.5.1.jar:6.5.1]
-	at org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestFilter.doFilter(SecurityContextHolderAwareRequestFilter.java:179) ~[spring-security-web-6.5.1.jar:6.5.1]
-	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.wrapFilter(ObservationFilterChainDecorator.java:240) ~[spring-security-web-6.5.1.jar:6.5.1]
-	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.doFilter(ObservationFilterChainDecorator.java:227) ~[spring-security-web-6.5.1.jar:6.5.1]
-	at org.springframework.security.web.ObservationFilterChainDecorator$VirtualFilterChain.doFilter(ObservationFilterChainDecorator.java:137) ~[spring-security-web-6.5.1.jar:6.5.1]
-	at org.springframework.security.web.savedrequest.RequestCacheAwareFilter.doFilter(RequestCacheAwareFilter.java:63) ~[spring-security-web-6.5.1.jar:6.5.1]
-	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.wrapFilter(ObservationFilterChainDecorator.java:240) ~[spring-security-web-6.5.1.jar:6.5.1]
-	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.doFilter(ObservationFilterChainDecorator.java:227) ~[spring-security-web-6.5.1.jar:6.5.1]
-	at org.springframework.security.web.ObservationFilterChainDecorator$VirtualFilterChain.doFilter(ObservationFilterChainDecorator.java:137) ~[spring-security-web-6.5.1.jar:6.5.1]
-	at com.erp.backend.config.JwtAuthFilter.doFilterInternal(JwtAuthFilter.java:51) ~[classes/:na]
-	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116) ~[spring-web-6.2.8.jar:6.2.8]
-	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.wrapFilter(ObservationFilterChainDecorator.java:240) ~[spring-security-web-6.5.1.jar:6.5.1]
-	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.doFilter(ObservationFilterChainDecorator.java:227) ~[spring-security-web-6.5.1.jar:6.5.1]
-	at org.springframework.security.web.ObservationFilterChainDecorator$VirtualFilterChain.doFilter(ObservationFilterChainDecorator.java:137) ~[spring-security-web-6.5.1.jar:6.5.1]
-	at org.springframework.security.web.authentication.logout.LogoutFilter.doFilter(LogoutFilter.java:107) ~[spring-security-web-6.5.1.jar:6.5.1]
-	at org.springframework.security.web.authentication.logout.LogoutFilter.doFilter(LogoutFilter.java:93) ~[spring-security-web-6.5.1.jar:6.5.1]
-	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.wrapFilter(ObservationFilterChainDecorator.java:240) ~[spring-security-web-6.5.1.jar:6.5.1]
-	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.doFilter(ObservationFilterChainDecorator.java:227) ~[spring-security-web-6.5.1.jar:6.5.1]
-	at org.springframework.security.web.ObservationFilterChainDecorator$VirtualFilterChain.doFilter(ObservationFilterChainDecorator.java:137) ~[spring-security-web-6.5.1.jar:6.5.1]
-	at org.springframework.web.filter.CorsFilter.doFilterInternal(CorsFilter.java:91) ~[spring-web-6.2.8.jar:6.2.8]
-	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116) ~[spring-web-6.2.8.jar:6.2.8]
-	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.wrapFilter(ObservationFilterChainDecorator.java:240) ~[spring-security-web-6.5.1.jar:6.5.1]
-	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.doFilter(ObservationFilterChainDecorator.java:227) ~[spring-security-web-6.5.1.jar:6.5.1]
-	at org.springframework.security.web.ObservationFilterChainDecorator$VirtualFilterChain.doFilter(ObservationFilterChainDecorator.java:137) ~[spring-security-web-6.5.1.jar:6.5.1]
-	at org.springframework.security.web.header.HeaderWriterFilter.doHeadersAfter(HeaderWriterFilter.java:90) ~[spring-security-web-6.5.1.jar:6.5.1]
-	at org.springframework.security.web.header.HeaderWriterFilter.doFilterInternal(HeaderWriterFilter.java:75) ~[spring-security-web-6.5.1.jar:6.5.1]
-	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116) ~[spring-web-6.2.8.jar:6.2.8]
-	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.wrapFilter(ObservationFilterChainDecorator.java:240) ~[spring-security-web-6.5.1.jar:6.5.1]
-	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.doFilter(ObservationFilterChainDecorator.java:227) ~[spring-security-web-6.5.1.jar:6.5.1]
-	at org.springframework.security.web.ObservationFilterChainDecorator$VirtualFilterChain.doFilter(ObservationFilterChainDecorator.java:137) ~[spring-security-web-6.5.1.jar:6.5.1]
-	at org.springframework.security.web.context.SecurityContextHolderFilter.doFilter(SecurityContextHolderFilter.java:82) ~[spring-security-web-6.5.1.jar:6.5.1]
-	at org.springframework.security.web.context.SecurityContextHolderFilter.doFilter(SecurityContextHolderFilter.java:69) ~[spring-security-web-6.5.1.jar:6.5.1]
-	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.wrapFilter(ObservationFilterChainDecorator.java:240) ~[spring-security-web-6.5.1.jar:6.5.1]
-	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.doFilter(ObservationFilterChainDecorator.java:227) ~[spring-security-web-6.5.1.jar:6.5.1]
-	at org.springframework.security.web.ObservationFilterChainDecorator$VirtualFilterChain.doFilter(ObservationFilterChainDecorator.java:137) ~[spring-security-web-6.5.1.jar:6.5.1]
-	at org.springframework.security.web.context.request.async.WebAsyncManagerIntegrationFilter.doFilterInternal(WebAsyncManagerIntegrationFilter.java:62) ~[spring-security-web-6.5.1.jar:6.5.1]
-	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116) ~[spring-web-6.2.8.jar:6.2.8]
-	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.wrapFilter(ObservationFilterChainDecorator.java:240) ~[spring-security-web-6.5.1.jar:6.5.1]
-	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.doFilter(ObservationFilterChainDecorator.java:227) ~[spring-security-web-6.5.1.jar:6.5.1]
-	at org.springframework.security.web.ObservationFilterChainDecorator$VirtualFilterChain.doFilter(ObservationFilterChainDecorator.java:137) ~[spring-security-web-6.5.1.jar:6.5.1]
-	at org.springframework.security.web.session.DisableEncodeUrlFilter.doFilterInternal(DisableEncodeUrlFilter.java:42) ~[spring-security-web-6.5.1.jar:6.5.1]
-	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116) ~[spring-web-6.2.8.jar:6.2.8]
-	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.wrapFilter(ObservationFilterChainDecorator.java:240) ~[spring-security-web-6.5.1.jar:6.5.1]
-	at org.springframework.security.web.ObservationFilterChainDecorator$AroundFilterObservation$SimpleAroundFilterObservation.lambda$wrap$0(ObservationFilterChainDecorator.java:323) ~[spring-security-web-6.5.1.jar:6.5.1]
-	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.doFilter(ObservationFilterChainDecorator.java:224) ~[spring-security-web-6.5.1.jar:6.5.1]
-	at org.springframework.security.web.ObservationFilterChainDecorator$VirtualFilterChain.doFilter(ObservationFilterChainDecorator.java:137) ~[spring-security-web-6.5.1.jar:6.5.1]
-	at org.springframework.security.web.FilterChainProxy.doFilterInternal(FilterChainProxy.java:233) ~[spring-security-web-6.5.1.jar:6.5.1]
-	at org.springframework.security.web.FilterChainProxy.doFilter(FilterChainProxy.java:191) ~[spring-security-web-6.5.1.jar:6.5.1]
-	at org.springframework.web.filter.CompositeFilter$VirtualFilterChain.doFilter(CompositeFilter.java:113) ~[spring-web-6.2.8.jar:6.2.8]
-	at org.springframework.web.filter.ServletRequestPathFilter.doFilter(ServletRequestPathFilter.java:52) ~[spring-web-6.2.8.jar:6.2.8]
-	at org.springframework.web.filter.CompositeFilter$VirtualFilterChain.doFilter(CompositeFilter.java:113) ~[spring-web-6.2.8.jar:6.2.8]
-	at org.springframework.web.filter.CompositeFilter.doFilter(CompositeFilter.java:74) ~[spring-web-6.2.8.jar:6.2.8]
-	at org.springframework.security.config.annotation.web.configuration.WebSecurityConfiguration$CompositeFilterChainProxy.doFilter(WebSecurityConfiguration.java:319) ~[spring-security-config-6.5.1.jar:6.5.1]
-	at org.springframework.web.filter.CompositeFilter$VirtualFilterChain.doFilter(CompositeFilter.java:113) ~[spring-web-6.2.8.jar:6.2.8]
-	at org.springframework.web.servlet.handler.HandlerMappingIntrospector.lambda$createCacheFilter$4(HandlerMappingIntrospector.java:267) ~[spring-webmvc-6.2.8.jar:6.2.8]
-	at org.springframework.web.filter.CompositeFilter$VirtualFilterChain.doFilter(CompositeFilter.java:113) ~[spring-web-6.2.8.jar:6.2.8]
-	at org.springframework.web.filter.CompositeFilter.doFilter(CompositeFilter.java:74) ~[spring-web-6.2.8.jar:6.2.8]
-	at org.springframework.security.config.annotation.web.configuration.WebMvcSecurityConfiguration$CompositeFilterChainProxy.doFilter(WebMvcSecurityConfiguration.java:240) ~[spring-security-config-6.5.1.jar:6.5.1]
-	at org.springframework.web.filter.DelegatingFilterProxy.invokeDelegate(DelegatingFilterProxy.java:362) ~[spring-web-6.2.8.jar:6.2.8]
-	at org.springframework.web.filter.DelegatingFilterProxy.doFilter(DelegatingFilterProxy.java:278) ~[spring-web-6.2.8.jar:6.2.8]
-	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164) ~[tomcat-embed-core-10.1.42.jar:10.1.42]
-	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140) ~[tomcat-embed-core-10.1.42.jar:10.1.42]
-	at org.springframework.web.filter.RequestContextFilter.doFilterInternal(RequestContextFilter.java:100) ~[spring-web-6.2.8.jar:6.2.8]
-	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116) ~[spring-web-6.2.8.jar:6.2.8]
-	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164) ~[tomcat-embed-core-10.1.42.jar:10.1.42]
-	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140) ~[tomcat-embed-core-10.1.42.jar:10.1.42]
-	at org.springframework.web.filter.FormContentFilter.doFilterInternal(FormContentFilter.java:93) ~[spring-web-6.2.8.jar:6.2.8]
-	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116) ~[spring-web-6.2.8.jar:6.2.8]
-	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164) ~[tomcat-embed-core-10.1.42.jar:10.1.42]
-	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140) ~[tomcat-embed-core-10.1.42.jar:10.1.42]
-	at org.springframework.web.filter.ServerHttpObservationFilter.doFilterInternal(ServerHttpObservationFilter.java:114) ~[spring-web-6.2.8.jar:6.2.8]
-	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116) ~[spring-web-6.2.8.jar:6.2.8]
-	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164) ~[tomcat-embed-core-10.1.42.jar:10.1.42]
-	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140) ~[tomcat-embed-core-10.1.42.jar:10.1.42]
-	at org.springframework.web.filter.CharacterEncodingFilter.doFilterInternal(CharacterEncodingFilter.java:201) ~[spring-web-6.2.8.jar:6.2.8]
-	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116) ~[spring-web-6.2.8.jar:6.2.8]
-	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164) ~[tomcat-embed-core-10.1.42.jar:10.1.42]
-	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140) ~[tomcat-embed-core-10.1.42.jar:10.1.42]
-	at org.apache.catalina.core.StandardWrapperValve.invoke(StandardWrapperValve.java:167) ~[tomcat-embed-core-10.1.42.jar:10.1.42]
-	at org.apache.catalina.core.StandardContextValve.invoke(StandardContextValve.java:90) ~[tomcat-embed-core-10.1.42.jar:10.1.42]
-	at org.apache.catalina.authenticator.AuthenticatorBase.invoke(AuthenticatorBase.java:483) ~[tomcat-embed-core-10.1.42.jar:10.1.42]
-	at org.apache.catalina.core.StandardHostValve.invoke(StandardHostValve.java:116) ~[tomcat-embed-core-10.1.42.jar:10.1.42]
-	at org.apache.catalina.valves.ErrorReportValve.invoke(ErrorReportValve.java:93) ~[tomcat-embed-core-10.1.42.jar:10.1.42]
-	at org.apache.catalina.core.StandardEngineValve.invoke(StandardEngineValve.java:74) ~[tomcat-embed-core-10.1.42.jar:10.1.42]
-	at org.apache.catalina.connector.CoyoteAdapter.service(CoyoteAdapter.java:344) ~[tomcat-embed-core-10.1.42.jar:10.1.42]
-	at org.apache.coyote.http11.Http11Processor.service(Http11Processor.java:398) ~[tomcat-embed-core-10.1.42.jar:10.1.42]
-	at org.apache.coyote.AbstractProcessorLight.process(AbstractProcessorLight.java:63) ~[tomcat-embed-core-10.1.42.jar:10.1.42]
-	at org.apache.coyote.AbstractProtocol$ConnectionHandler.process(AbstractProtocol.java:903) ~[tomcat-embed-core-10.1.42.jar:10.1.42]
-	at org.apache.tomcat.util.net.NioEndpoint$SocketProcessor.doRun(NioEndpoint.java:1769) ~[tomcat-embed-core-10.1.42.jar:10.1.42]
-	at org.apache.tomcat.util.net.SocketProcessorBase.run(SocketProcessorBase.java:52) ~[tomcat-embed-core-10.1.42.jar:10.1.42]
-	at org.apache.tomcat.util.threads.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1189) ~[tomcat-embed-core-10.1.42.jar:10.1.42]
-	at org.apache.tomcat.util.threads.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:658) ~[tomcat-embed-core-10.1.42.jar:10.1.42]
-	at org.apache.tomcat.util.threads.TaskThread$WrappingRunnable.run(TaskThread.java:63) ~[tomcat-embed-core-10.1.42.jar:10.1.42]
-	at java.base/java.lang.Thread.run(Thread.java:1447) ~[na:na]
+	at org.springframework.boot.devtools.restart.RestartLauncher.run(RestartLauncher.java:50) ~[spring-boot-devtools-3.5.3.jar:3.5.3]
+Caused by: org.postgresql.util.PSQLException: ERROR: column "deleted" of relation "customers" contains null values
+	at org.postgresql.core.v3.QueryExecutorImpl.receiveErrorResponse(QueryExecutorImpl.java:2734) ~[postgresql-42.7.7.jar:42.7.7]
+	at org.postgresql.core.v3.QueryExecutorImpl.processResults(QueryExecutorImpl.java:2421) ~[postgresql-42.7.7.jar:42.7.7]
+	at org.postgresql.core.v3.QueryExecutorImpl.execute(QueryExecutorImpl.java:372) ~[postgresql-42.7.7.jar:42.7.7]
+	at org.postgresql.jdbc.PgStatement.executeInternal(PgStatement.java:518) ~[postgresql-42.7.7.jar:42.7.7]
+	at org.postgresql.jdbc.PgStatement.execute(PgStatement.java:435) ~[postgresql-42.7.7.jar:42.7.7]
+	at org.postgresql.jdbc.PgStatement.executeWithFlags(PgStatement.java:357) ~[postgresql-42.7.7.jar:42.7.7]
+	at org.postgresql.jdbc.PgStatement.executeCachedSql(PgStatement.java:342) ~[postgresql-42.7.7.jar:42.7.7]
+	at org.postgresql.jdbc.PgStatement.executeWithFlags(PgStatement.java:318) ~[postgresql-42.7.7.jar:42.7.7]
+	at org.postgresql.jdbc.PgStatement.execute(PgStatement.java:313) ~[postgresql-42.7.7.jar:42.7.7]
+	at com.zaxxer.hikari.pool.ProxyStatement.execute(ProxyStatement.java:95) ~[HikariCP-6.3.0.jar:na]
+	at com.zaxxer.hikari.pool.HikariProxyStatement.execute(HikariProxyStatement.java) ~[HikariCP-6.3.0.jar:na]
+	at org.hibernate.tool.schema.internal.exec.GenerationTargetToDatabase.accept(GenerationTargetToDatabase.java:80) ~[hibernate-core-6.6.18.Final.jar:6.6.18.Final]
+	... 120 common frames omitted
 
-2025-09-02T22:45:35.585+02:00  INFO 14644 --- [erp-system-backend] [http-nio-8080-exec-6] c.e.b.controller.ContractController      : GET /api/contracts - Fetching contracts (paginated: false)
-2025-09-02T22:45:35.602+02:00  INFO 14644 --- [erp-system-backend] [http-nio-8080-exec-7] c.e.b.controller.SubscriptionController  : GET /api/subscriptions - Fetching subscriptions (paginated: false)
-2025-09-02T22:45:35.833+02:00  INFO 14644 --- [erp-system-backend] [http-nio-8080-exec-7] c.e.backend.service.SubscriptionService  : Fetched 40 subscriptions
-2025-09-02T22:45:53.824+02:00  INFO 14644 --- [erp-system-backend] [http-nio-8080-exec-8] c.e.b.controller.ContractController      : GET /api/contracts - Fetching contracts (paginated: false)
-2025-09-02T22:45:59.747+02:00  INFO 14644 --- [erp-system-backend] [http-nio-8080-exec-2] c.e.b.controller.SubscriptionController  : GET /api/subscriptions/contract/842aa5ed-8ab0-4a2b-b024-f500c9dddba8 - Fetching subscriptions by contract (activeOnly: false)
-2025-09-02T22:45:59.955+02:00  INFO 14644 --- [erp-system-backend] [http-nio-8080-exec-2] c.e.backend.service.SubscriptionService  : Found 0 subscriptions for contract 842aa5ed-8ab0-4a2b-b024-f500c9dddba8
-2025-09-02T22:46:05.943+02:00  INFO 14644 --- [erp-system-backend] [http-nio-8080-exec-1] c.e.b.controller.SubscriptionController  : GET /api/subscriptions/contract/842aa5ed-8ab0-4a2b-b024-f500c9dddba8 - Fetching subscriptions by contract (activeOnly: false)
-2025-09-02T22:46:06.188+02:00  INFO 14644 --- [erp-system-backend] [http-nio-8080-exec-1] c.e.backend.service.SubscriptionService  : Found 0 subscriptions for contract 842aa5ed-8ab0-4a2b-b024-f500c9dddba8
-2025-09-02T22:46:06.927+02:00  INFO 14644 --- [erp-system-backend] [http-nio-8080-exec-9] c.e.b.controller.SubscriptionController  : GET /api/subscriptions/contract/95324cd6-0e5d-47c3-8bf5-8cddfe67becd - Fetching subscriptions by contract (activeOnly: false)
-2025-09-02T22:46:07.141+02:00  INFO 14644 --- [erp-system-backend] [http-nio-8080-exec-9] c.e.backend.service.SubscriptionService  : Found 1 subscriptions for contract 95324cd6-0e5d-47c3-8bf5-8cddfe67becd
-2025-09-02T22:46:08.114+02:00  INFO 14644 --- [erp-system-backend] [http-nio-8080-exec-6] c.e.b.controller.SubscriptionController  : GET /api/subscriptions/contract/6cfa7986-4517-441e-9a14-5654756bca9c - Fetching subscriptions by contract (activeOnly: false)
-2025-09-02T22:46:08.309+02:00  INFO 14644 --- [erp-system-backend] [http-nio-8080-exec-6] c.e.backend.service.SubscriptionService  : Found 1 subscriptions for contract 6cfa7986-4517-441e-9a14-5654756bca9c
-2025-09-02T22:47:01.023+02:00  INFO 14644 --- [erp-system-backend] [http-nio-8080-exec-6] c.e.b.controller.SubscriptionController  : GET /api/subscriptions - Fetching subscriptions (paginated: false)
-2025-09-02T22:47:01.043+02:00  INFO 14644 --- [erp-system-backend] [http-nio-8080-exec-10] c.e.b.controller.ContractController      : GET /api/contracts - Fetching contracts (paginated: false)
-2025-09-02T22:47:01.222+02:00  INFO 14644 --- [erp-system-backend] [http-nio-8080-exec-6] c.e.backend.service.SubscriptionService  : Fetched 40 subscriptions
-2025-09-02T22:48:29.958+02:00  INFO 14644 --- [erp-system-backend] [SpringApplicationShutdownHook] o.s.b.w.e.tomcat.GracefulShutdown        : Commencing graceful shutdown. Waiting for active requests to complete
-2025-09-02T22:48:29.962+02:00  INFO 14644 --- [erp-system-backend] [tomcat-shutdown] o.s.b.w.e.tomcat.GracefulShutdown        : Graceful shutdown complete
-2025-09-02T22:48:29.969+02:00  INFO 14644 --- [erp-system-backend] [SpringApplicationShutdownHook] j.LocalContainerEntityManagerFactoryBean : Closing JPA EntityManagerFactory for persistence unit 'default'
-2025-09-02T22:48:29.972+02:00  INFO 14644 --- [erp-system-backend] [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown initiated...
-2025-09-02T22:48:31.064+02:00  INFO 14644 --- [erp-system-backend] [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown completed.
-2025-09-02T22:48:34.590+02:00  INFO 13056 --- [erp-system-backend] [restartedMain] c.e.backend.ErpSystemBackendApplication  : Starting ErpSystemBackendApplication using Java 24.0.1 with PID 13056 (C:\Users\ibrah\Desktop\ERP-Backend\erp-system-backend\target\classes started by ibrah in C:\Users\ibrah\Desktop\ERP-Backend\erp-system-backend)
-2025-09-02T22:48:34.592+02:00 DEBUG 13056 --- [erp-system-backend] [restartedMain] c.e.backend.ErpSystemBackendApplication  : Running with Spring Boot v3.5.3, Spring v6.2.8
-2025-09-02T22:48:34.593+02:00  INFO 13056 --- [erp-system-backend] [restartedMain] c.e.backend.ErpSystemBackendApplication  : No active profile set, falling back to 1 default profile: "default"
-2025-09-02T22:48:34.657+02:00  INFO 13056 --- [erp-system-backend] [restartedMain] .e.DevToolsPropertyDefaultsPostProcessor : Devtools property defaults active! Set 'spring.devtools.add-properties' to 'false' to disable
-2025-09-02T22:48:34.658+02:00  INFO 13056 --- [erp-system-backend] [restartedMain] .e.DevToolsPropertyDefaultsPostProcessor : For additional web related logging consider setting the 'logging.level.web' property to 'DEBUG'
-2025-09-02T22:48:35.801+02:00  INFO 13056 --- [erp-system-backend] [restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
-2025-09-02T22:48:35.892+02:00  INFO 13056 --- [erp-system-backend] [restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 73 ms. Found 11 JPA repository interfaces.
-2025-09-02T22:48:36.527+02:00  INFO 13056 --- [erp-system-backend] [restartedMain] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port 8080 (http)
-2025-09-02T22:48:36.541+02:00  INFO 13056 --- [erp-system-backend] [restartedMain] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
-2025-09-02T22:48:36.541+02:00  INFO 13056 --- [erp-system-backend] [restartedMain] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.42]
-2025-09-02T22:48:36.595+02:00  INFO 13056 --- [erp-system-backend] [restartedMain] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
-2025-09-02T22:48:36.596+02:00  INFO 13056 --- [erp-system-backend] [restartedMain] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 1938 ms
-2025-09-02T22:48:36.840+02:00  INFO 13056 --- [erp-system-backend] [restartedMain] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: default]
-2025-09-02T22:48:36.894+02:00  INFO 13056 --- [erp-system-backend] [restartedMain] org.hibernate.Version                    : HHH000412: Hibernate ORM core version 6.6.18.Final
-2025-09-02T22:48:36.935+02:00  INFO 13056 --- [erp-system-backend] [restartedMain] o.h.c.internal.RegionFactoryInitiator    : HHH000026: Second-level cache disabled
-2025-09-02T22:48:37.278+02:00  INFO 13056 --- [erp-system-backend] [restartedMain] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
-2025-09-02T22:48:37.322+02:00  INFO 13056 --- [erp-system-backend] [restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
-2025-09-02T22:48:38.626+02:00  INFO 13056 --- [erp-system-backend] [restartedMain] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection org.postgresql.jdbc.PgConnection@72f22ba4
-2025-09-02T22:48:38.628+02:00  INFO 13056 --- [erp-system-backend] [restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
-2025-09-02T22:48:38.758+02:00  WARN 13056 --- [erp-system-backend] [restartedMain] org.hibernate.orm.deprecation            : HHH90000025: PostgreSQLDialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
-2025-09-02T22:48:39.092+02:00  INFO 13056 --- [erp-system-backend] [restartedMain] org.hibernate.orm.connections.pooling    : HHH10001005: Database info:
+2025-09-04T22:23:15.289+02:00  INFO 17484 --- [erp-system-backend] [restartedMain] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2025-09-04T22:23:15.581+02:00 DEBUG 17484 --- [erp-system-backend] [restartedMain] com.erp.backend.config.JwtAuthFilter     : Filter 'jwtAuthFilter' configured for use
+2025-09-04T22:23:15.665+02:00  INFO 17484 --- [erp-system-backend] [restartedMain] o.s.d.j.r.query.QueryEnhancerFactory     : Hibernate is in classpath; If applicable, HQL parser will be used.
+2025-09-04T22:23:16.941+02:00  WARN 17484 --- [erp-system-backend] [restartedMain] JpaBaseConfiguration$JpaWebConfiguration : spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2025-09-04T22:23:16.964+02:00  INFO 17484 --- [erp-system-backend] [restartedMain] r$InitializeUserDetailsManagerConfigurer : Global AuthenticationManager configured with UserDetailsService bean with name userDetailsService
+2025-09-04T22:23:17.291+02:00  INFO 17484 --- [erp-system-backend] [restartedMain] o.s.b.a.e.web.EndpointLinksResolver      : Exposing 4 endpoints beneath base path '/actuator'
+2025-09-04T22:23:17.640+02:00  INFO 17484 --- [erp-system-backend] [restartedMain] o.s.b.d.a.OptionalLiveReloadServer       : LiveReload server is running on port 35729
+2025-09-04T22:23:17.728+02:00  INFO 17484 --- [erp-system-backend] [restartedMain] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port 8080 (http) with context path '/'
+2025-09-04T22:23:17.747+02:00  INFO 17484 --- [erp-system-backend] [restartedMain] c.e.backend.ErpSystemBackendApplication  : Started ErpSystemBackendApplication in 15.027 seconds (process running for 15.774)
+2025-09-04T22:24:20.784+02:00  INFO 17484 --- [erp-system-backend] [SpringApplicationShutdownHook] o.s.b.w.e.tomcat.GracefulShutdown        : Commencing graceful shutdown. Waiting for active requests to complete
+2025-09-04T22:24:20.788+02:00  INFO 17484 --- [erp-system-backend] [tomcat-shutdown] o.s.b.w.e.tomcat.GracefulShutdown        : Graceful shutdown complete
+2025-09-04T22:24:20.797+02:00  INFO 17484 --- [erp-system-backend] [SpringApplicationShutdownHook] j.LocalContainerEntityManagerFactoryBean : Closing JPA EntityManagerFactory for persistence unit 'default'
+2025-09-04T22:24:20.801+02:00  INFO 17484 --- [erp-system-backend] [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown initiated...
+2025-09-04T22:24:21.871+02:00  INFO 17484 --- [erp-system-backend] [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown completed.
+2025-09-04T22:24:24.966+02:00  INFO 3392 --- [erp-system-backend] [restartedMain] c.e.backend.ErpSystemBackendApplication  : Starting ErpSystemBackendApplication using Java 24.0.1 with PID 3392 (C:\Users\ibrah\Desktop\ERP-Backend\erp-system-backend\target\classes started by ibrah in C:\Users\ibrah\Desktop\ERP-Backend\erp-system-backend)
+2025-09-04T22:24:24.968+02:00 DEBUG 3392 --- [erp-system-backend] [restartedMain] c.e.backend.ErpSystemBackendApplication  : Running with Spring Boot v3.5.3, Spring v6.2.8
+2025-09-04T22:24:24.969+02:00  INFO 3392 --- [erp-system-backend] [restartedMain] c.e.backend.ErpSystemBackendApplication  : No active profile set, falling back to 1 default profile: "default"
+2025-09-04T22:24:25.033+02:00  INFO 3392 --- [erp-system-backend] [restartedMain] .e.DevToolsPropertyDefaultsPostProcessor : Devtools property defaults active! Set 'spring.devtools.add-properties' to 'false' to disable
+2025-09-04T22:24:25.033+02:00  INFO 3392 --- [erp-system-backend] [restartedMain] .e.DevToolsPropertyDefaultsPostProcessor : For additional web related logging consider setting the 'logging.level.web' property to 'DEBUG'
+2025-09-04T22:24:26.066+02:00  INFO 3392 --- [erp-system-backend] [restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2025-09-04T22:24:26.154+02:00  INFO 3392 --- [erp-system-backend] [restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 79 ms. Found 11 JPA repository interfaces.
+2025-09-04T22:24:26.740+02:00  INFO 3392 --- [erp-system-backend] [restartedMain] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port 8080 (http)
+2025-09-04T22:24:26.756+02:00  INFO 3392 --- [erp-system-backend] [restartedMain] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2025-09-04T22:24:26.757+02:00  INFO 3392 --- [erp-system-backend] [restartedMain] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.42]
+2025-09-04T22:24:26.801+02:00  INFO 3392 --- [erp-system-backend] [restartedMain] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
+2025-09-04T22:24:26.801+02:00  INFO 3392 --- [erp-system-backend] [restartedMain] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 1767 ms
+2025-09-04T22:24:27.005+02:00  INFO 3392 --- [erp-system-backend] [restartedMain] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: default]
+2025-09-04T22:24:27.052+02:00  INFO 3392 --- [erp-system-backend] [restartedMain] org.hibernate.Version                    : HHH000412: Hibernate ORM core version 6.6.18.Final
+2025-09-04T22:24:27.092+02:00  INFO 3392 --- [erp-system-backend] [restartedMain] o.h.c.internal.RegionFactoryInitiator    : HHH000026: Second-level cache disabled
+2025-09-04T22:24:27.346+02:00  INFO 3392 --- [erp-system-backend] [restartedMain] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2025-09-04T22:24:27.377+02:00  INFO 3392 --- [erp-system-backend] [restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2025-09-04T22:24:28.685+02:00  INFO 3392 --- [erp-system-backend] [restartedMain] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection org.postgresql.jdbc.PgConnection@18dad0b8
+2025-09-04T22:24:28.686+02:00  INFO 3392 --- [erp-system-backend] [restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2025-09-04T22:24:28.841+02:00  WARN 3392 --- [erp-system-backend] [restartedMain] org.hibernate.orm.deprecation            : HHH90000025: PostgreSQLDialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2025-09-04T22:24:29.200+02:00  INFO 3392 --- [erp-system-backend] [restartedMain] org.hibernate.orm.connections.pooling    : HHH10001005: Database info:
 	Database JDBC URL [Connecting through datasource 'HikariDataSource (HikariPool-1)']
 	Database driver: undefined/unknown
 	Database version: 17.5
@@ -363,36 +255,285 @@ java.lang.NullPointerException: Cannot invoke "java.math.BigDecimal.compareTo(ja
 	Isolation level: undefined/unknown
 	Minimum pool size: undefined/unknown
 	Maximum pool size: undefined/unknown
-2025-09-02T22:48:40.123+02:00  INFO 13056 --- [erp-system-backend] [restartedMain] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
-2025-09-02T22:48:46.765+02:00  INFO 13056 --- [erp-system-backend] [restartedMain] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
-2025-09-02T22:48:47.063+02:00 DEBUG 13056 --- [erp-system-backend] [restartedMain] com.erp.backend.config.JwtAuthFilter     : Filter 'jwtAuthFilter' configured for use
-2025-09-02T22:48:47.162+02:00  INFO 13056 --- [erp-system-backend] [restartedMain] o.s.d.j.r.query.QueryEnhancerFactory     : Hibernate is in classpath; If applicable, HQL parser will be used.
-2025-09-02T22:48:48.633+02:00  WARN 13056 --- [erp-system-backend] [restartedMain] JpaBaseConfiguration$JpaWebConfiguration : spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
-2025-09-02T22:48:48.671+02:00  INFO 13056 --- [erp-system-backend] [restartedMain] r$InitializeUserDetailsManagerConfigurer : Global AuthenticationManager configured with UserDetailsService bean with name userDetailsService
-2025-09-02T22:48:49.101+02:00  INFO 13056 --- [erp-system-backend] [restartedMain] o.s.b.a.e.web.EndpointLinksResolver      : Exposing 4 endpoints beneath base path '/actuator'
-2025-09-02T22:48:49.621+02:00  INFO 13056 --- [erp-system-backend] [restartedMain] o.s.b.d.a.OptionalLiveReloadServer       : LiveReload server is running on port 35729
-2025-09-02T22:48:49.708+02:00  INFO 13056 --- [erp-system-backend] [restartedMain] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port 8080 (http) with context path '/'
-2025-09-02T22:48:49.722+02:00  INFO 13056 --- [erp-system-backend] [restartedMain] c.e.backend.ErpSystemBackendApplication  : Started ErpSystemBackendApplication in 15.616 seconds (process running for 16.046)
-2025-09-02T22:49:01.270+02:00  INFO 13056 --- [erp-system-backend] [http-nio-8080-exec-2] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring DispatcherServlet 'dispatcherServlet'
-2025-09-02T22:49:01.270+02:00  INFO 13056 --- [erp-system-backend] [http-nio-8080-exec-2] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
-2025-09-02T22:49:01.272+02:00  INFO 13056 --- [erp-system-backend] [http-nio-8080-exec-2] o.s.web.servlet.DispatcherServlet        : Completed initialization in 2 ms
-2025-09-02T22:49:02.048+02:00  INFO 13056 --- [erp-system-backend] [http-nio-8080-exec-4] c.e.b.controller.ContractController      : GET /api/contracts - Fetching contracts (paginated: false)
-2025-09-02T22:49:02.106+02:00  INFO 13056 --- [erp-system-backend] [http-nio-8080-exec-3] c.e.b.controller.SubscriptionController  : GET /api/subscriptions - Fetching subscriptions (paginated: false)
-2025-09-02T22:49:02.226+02:00  INFO 13056 --- [erp-system-backend] [http-nio-8080-exec-3] c.e.backend.service.SubscriptionService  : Fetched 40 subscriptions
-2025-09-02T22:49:06.874+02:00  INFO 13056 --- [erp-system-backend] [http-nio-8080-exec-8] c.e.b.controller.ContractController      : GET /api/contracts - Fetching contracts (paginated: false)
-2025-09-02T22:49:10.124+02:00  WARN 13056 --- [erp-system-backend] [http-nio-8080-exec-7] ration$PageModule$WarningLoggingModifier : Serializing PageImpl instances as-is is not supported, meaning that there is no guarantee about the stability of the resulting JSON structure!
-	For a stable JSON structure, please use Spring Data's PagedModel (globally via @EnableSpringDataWebSupport(pageSerializationMode = VIA_DTO))
-	or Spring HATEOAS and Spring Data's PagedResourcesAssembler as documented in https://docs.spring.io/spring-data/commons/reference/repositories/core-extensions.html#core.web.pageables.
+2025-09-04T22:24:30.123+02:00  INFO 3392 --- [erp-system-backend] [restartedMain] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2025-09-04T22:24:30.835+02:00  WARN 3392 --- [erp-system-backend] [restartedMain] o.h.t.s.i.ExceptionHandlerLoggedImpl     : GenerationTarget encountered exception accepting command : Error executing DDL "
+    alter table if exists customers 
+       add column deleted boolean not null" via JDBC [ERROR: column "deleted" of relation "customers" contains null values]
 
-2025-09-02T22:49:53.570+02:00  INFO 13056 --- [erp-system-backend] [http-nio-8080-exec-10] c.e.b.controller.ContractController      : GET /api/contracts - Fetching contracts (paginated: false)
-2025-09-02T22:50:02.390+02:00  INFO 13056 --- [erp-system-backend] [http-nio-8080-exec-5] c.e.b.controller.SubscriptionController  : GET /api/subscriptions/contract/57c636de-1551-4457-b605-de435a0df657 - Fetching subscriptions by contract (activeOnly: false)
-2025-09-02T22:50:02.604+02:00  INFO 13056 --- [erp-system-backend] [http-nio-8080-exec-5] c.e.backend.service.SubscriptionService  : Found 4 subscriptions for contract 57c636de-1551-4457-b605-de435a0df657
-2025-09-02T22:50:04.808+02:00  INFO 13056 --- [erp-system-backend] [http-nio-8080-exec-4] c.e.b.controller.ContractController      : GET /api/contracts - Fetching contracts (paginated: false)
-2025-09-02T22:50:04.808+02:00  INFO 13056 --- [erp-system-backend] [http-nio-8080-exec-6] c.e.b.controller.SubscriptionController  : GET /api/subscriptions - Fetching subscriptions (paginated: false)
-2025-09-02T22:50:05.020+02:00  INFO 13056 --- [erp-system-backend] [http-nio-8080-exec-6] c.e.backend.service.SubscriptionService  : Fetched 40 subscriptions
-2025-09-02T22:50:23.019+02:00  INFO 13056 --- [erp-system-backend] [http-nio-8080-exec-2] c.erp.backend.service.CustomerService    : Fetched 25 customers
-2025-09-02T22:50:27.062+02:00  INFO 13056 --- [erp-system-backend] [http-nio-8080-exec-3] c.e.b.controller.ProductController       : GET /api/products - Fetching products (paginated: false)
-2025-09-02T22:50:27.280+02:00  INFO 13056 --- [erp-system-backend] [http-nio-8080-exec-3] com.erp.backend.service.ProductService   : Fetched 20 products
-2025-09-02T22:50:27.280+02:00 DEBUG 13056 --- [erp-system-backend] [http-nio-8080-exec-3] c.e.b.controller.ProductController       : Found 20 products
-2025-09-02T22:50:29.619+02:00  INFO 13056 --- [erp-system-backend] [http-nio-8080-exec-8] c.e.b.controller.ContractController      : GET /api/contracts - Fetching contracts (paginated: false)
-2025-09-02T22:50:32.637+02:00  INFO 13056 --- [erp-system-backend] [http-nio-8080-exec-7] c.erp.backend.service.CustomerService    : Fetched 25 customers
+org.hibernate.tool.schema.spi.CommandAcceptanceException: Error executing DDL "
+    alter table if exists customers 
+       add column deleted boolean not null" via JDBC [ERROR: column "deleted" of relation "customers" contains null values]
+	at org.hibernate.tool.schema.internal.exec.GenerationTargetToDatabase.accept(GenerationTargetToDatabase.java:94) ~[hibernate-core-6.6.18.Final.jar:6.6.18.Final]
+	at org.hibernate.tool.schema.internal.AbstractSchemaMigrator.applySqlString(AbstractSchemaMigrator.java:576) ~[hibernate-core-6.6.18.Final.jar:6.6.18.Final]
+	at org.hibernate.tool.schema.internal.AbstractSchemaMigrator.applySqlStrings(AbstractSchemaMigrator.java:516) ~[hibernate-core-6.6.18.Final.jar:6.6.18.Final]
+	at org.hibernate.tool.schema.internal.AbstractSchemaMigrator.migrateTable(AbstractSchemaMigrator.java:334) ~[hibernate-core-6.6.18.Final.jar:6.6.18.Final]
+	at org.hibernate.tool.schema.internal.GroupedSchemaMigratorImpl.performTablesMigration(GroupedSchemaMigratorImpl.java:84) ~[hibernate-core-6.6.18.Final.jar:6.6.18.Final]
+	at org.hibernate.tool.schema.internal.AbstractSchemaMigrator.performMigration(AbstractSchemaMigrator.java:233) ~[hibernate-core-6.6.18.Final.jar:6.6.18.Final]
+	at org.hibernate.tool.schema.internal.AbstractSchemaMigrator.doMigration(AbstractSchemaMigrator.java:112) ~[hibernate-core-6.6.18.Final.jar:6.6.18.Final]
+	at org.hibernate.tool.schema.spi.SchemaManagementToolCoordinator.performDatabaseAction(SchemaManagementToolCoordinator.java:280) ~[hibernate-core-6.6.18.Final.jar:6.6.18.Final]
+	at org.hibernate.tool.schema.spi.SchemaManagementToolCoordinator.lambda$process$5(SchemaManagementToolCoordinator.java:144) ~[hibernate-core-6.6.18.Final.jar:6.6.18.Final]
+	at java.base/java.util.HashMap.forEach(HashMap.java:1430) ~[na:na]
+	at org.hibernate.tool.schema.spi.SchemaManagementToolCoordinator.process(SchemaManagementToolCoordinator.java:141) ~[hibernate-core-6.6.18.Final.jar:6.6.18.Final]
+	at org.hibernate.boot.internal.SessionFactoryObserverForSchemaExport.sessionFactoryCreated(SessionFactoryObserverForSchemaExport.java:37) ~[hibernate-core-6.6.18.Final.jar:6.6.18.Final]
+	at org.hibernate.internal.SessionFactoryObserverChain.sessionFactoryCreated(SessionFactoryObserverChain.java:35) ~[hibernate-core-6.6.18.Final.jar:6.6.18.Final]
+	at org.hibernate.internal.SessionFactoryImpl.<init>(SessionFactoryImpl.java:324) ~[hibernate-core-6.6.18.Final.jar:6.6.18.Final]
+	at org.hibernate.boot.internal.SessionFactoryBuilderImpl.build(SessionFactoryBuilderImpl.java:463) ~[hibernate-core-6.6.18.Final.jar:6.6.18.Final]
+	at org.hibernate.jpa.boot.internal.EntityManagerFactoryBuilderImpl.build(EntityManagerFactoryBuilderImpl.java:1517) ~[hibernate-core-6.6.18.Final.jar:6.6.18.Final]
+	at org.springframework.orm.jpa.vendor.SpringHibernateJpaPersistenceProvider.createContainerEntityManagerFactory(SpringHibernateJpaPersistenceProvider.java:66) ~[spring-orm-6.2.8.jar:6.2.8]
+	at org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean.createNativeEntityManagerFactory(LocalContainerEntityManagerFactoryBean.java:390) ~[spring-orm-6.2.8.jar:6.2.8]
+	at org.springframework.orm.jpa.AbstractEntityManagerFactoryBean.buildNativeEntityManagerFactory(AbstractEntityManagerFactoryBean.java:419) ~[spring-orm-6.2.8.jar:6.2.8]
+	at org.springframework.orm.jpa.AbstractEntityManagerFactoryBean.afterPropertiesSet(AbstractEntityManagerFactoryBean.java:400) ~[spring-orm-6.2.8.jar:6.2.8]
+	at org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean.afterPropertiesSet(LocalContainerEntityManagerFactoryBean.java:366) ~[spring-orm-6.2.8.jar:6.2.8]
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.invokeInitMethods(AbstractAutowireCapableBeanFactory.java:1873) ~[spring-beans-6.2.8.jar:6.2.8]
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.initializeBean(AbstractAutowireCapableBeanFactory.java:1822) ~[spring-beans-6.2.8.jar:6.2.8]
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.doCreateBean(AbstractAutowireCapableBeanFactory.java:607) ~[spring-beans-6.2.8.jar:6.2.8]
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBean(AbstractAutowireCapableBeanFactory.java:529) ~[spring-beans-6.2.8.jar:6.2.8]
+	at org.springframework.beans.factory.support.AbstractBeanFactory.lambda$doGetBean$0(AbstractBeanFactory.java:339) ~[spring-beans-6.2.8.jar:6.2.8]
+	at org.springframework.beans.factory.support.DefaultSingletonBeanRegistry.getSingleton(DefaultSingletonBeanRegistry.java:373) ~[spring-beans-6.2.8.jar:6.2.8]
+	at org.springframework.beans.factory.support.AbstractBeanFactory.doGetBean(AbstractBeanFactory.java:337) ~[spring-beans-6.2.8.jar:6.2.8]
+	at org.springframework.beans.factory.support.AbstractBeanFactory.getBean(AbstractBeanFactory.java:202) ~[spring-beans-6.2.8.jar:6.2.8]
+	at org.springframework.beans.factory.support.BeanDefinitionValueResolver.resolveReference(BeanDefinitionValueResolver.java:365) ~[spring-beans-6.2.8.jar:6.2.8]
+	at org.springframework.beans.factory.support.BeanDefinitionValueResolver.resolveValueIfNecessary(BeanDefinitionValueResolver.java:135) ~[spring-beans-6.2.8.jar:6.2.8]
+	at org.springframework.beans.factory.support.ConstructorResolver.resolveConstructorArguments(ConstructorResolver.java:691) ~[spring-beans-6.2.8.jar:6.2.8]
+	at org.springframework.beans.factory.support.ConstructorResolver.instantiateUsingFactoryMethod(ConstructorResolver.java:513) ~[spring-beans-6.2.8.jar:6.2.8]
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.instantiateUsingFactoryMethod(AbstractAutowireCapableBeanFactory.java:1375) ~[spring-beans-6.2.8.jar:6.2.8]
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBeanInstance(AbstractAutowireCapableBeanFactory.java:1205) ~[spring-beans-6.2.8.jar:6.2.8]
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.doCreateBean(AbstractAutowireCapableBeanFactory.java:569) ~[spring-beans-6.2.8.jar:6.2.8]
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBean(AbstractAutowireCapableBeanFactory.java:529) ~[spring-beans-6.2.8.jar:6.2.8]
+	at org.springframework.beans.factory.support.AbstractBeanFactory.lambda$doGetBean$0(AbstractBeanFactory.java:339) ~[spring-beans-6.2.8.jar:6.2.8]
+	at org.springframework.beans.factory.support.DefaultSingletonBeanRegistry.getSingleton(DefaultSingletonBeanRegistry.java:373) ~[spring-beans-6.2.8.jar:6.2.8]
+	at org.springframework.beans.factory.support.AbstractBeanFactory.doGetBean(AbstractBeanFactory.java:337) ~[spring-beans-6.2.8.jar:6.2.8]
+	at org.springframework.beans.factory.support.AbstractBeanFactory.getBean(AbstractBeanFactory.java:202) ~[spring-beans-6.2.8.jar:6.2.8]
+	at org.springframework.beans.factory.support.BeanDefinitionValueResolver.resolveReference(BeanDefinitionValueResolver.java:365) ~[spring-beans-6.2.8.jar:6.2.8]
+	at org.springframework.beans.factory.support.BeanDefinitionValueResolver.resolveValueIfNecessary(BeanDefinitionValueResolver.java:135) ~[spring-beans-6.2.8.jar:6.2.8]
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.applyPropertyValues(AbstractAutowireCapableBeanFactory.java:1725) ~[spring-beans-6.2.8.jar:6.2.8]
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.populateBean(AbstractAutowireCapableBeanFactory.java:1474) ~[spring-beans-6.2.8.jar:6.2.8]
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.doCreateBean(AbstractAutowireCapableBeanFactory.java:606) ~[spring-beans-6.2.8.jar:6.2.8]
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBean(AbstractAutowireCapableBeanFactory.java:529) ~[spring-beans-6.2.8.jar:6.2.8]
+	at org.springframework.beans.factory.support.AbstractBeanFactory.lambda$doGetBean$0(AbstractBeanFactory.java:339) ~[spring-beans-6.2.8.jar:6.2.8]
+	at org.springframework.beans.factory.support.DefaultSingletonBeanRegistry.getSingleton(DefaultSingletonBeanRegistry.java:373) ~[spring-beans-6.2.8.jar:6.2.8]
+	at org.springframework.beans.factory.support.AbstractBeanFactory.doGetBean(AbstractBeanFactory.java:337) ~[spring-beans-6.2.8.jar:6.2.8]
+	at org.springframework.beans.factory.support.AbstractBeanFactory.getBean(AbstractBeanFactory.java:202) ~[spring-beans-6.2.8.jar:6.2.8]
+	at org.springframework.beans.factory.support.DefaultListableBeanFactory.doResolveDependency(DefaultListableBeanFactory.java:1683) ~[spring-beans-6.2.8.jar:6.2.8]
+	at org.springframework.beans.factory.support.DefaultListableBeanFactory.resolveDependency(DefaultListableBeanFactory.java:1628) ~[spring-beans-6.2.8.jar:6.2.8]
+	at org.springframework.beans.factory.support.ConstructorResolver.resolveAutowiredArgument(ConstructorResolver.java:913) ~[spring-beans-6.2.8.jar:6.2.8]
+	at org.springframework.beans.factory.support.ConstructorResolver.createArgumentArray(ConstructorResolver.java:791) ~[spring-beans-6.2.8.jar:6.2.8]
+	at org.springframework.beans.factory.support.ConstructorResolver.autowireConstructor(ConstructorResolver.java:240) ~[spring-beans-6.2.8.jar:6.2.8]
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.autowireConstructor(AbstractAutowireCapableBeanFactory.java:1395) ~[spring-beans-6.2.8.jar:6.2.8]
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBeanInstance(AbstractAutowireCapableBeanFactory.java:1232) ~[spring-beans-6.2.8.jar:6.2.8]
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.doCreateBean(AbstractAutowireCapableBeanFactory.java:569) ~[spring-beans-6.2.8.jar:6.2.8]
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBean(AbstractAutowireCapableBeanFactory.java:529) ~[spring-beans-6.2.8.jar:6.2.8]
+	at org.springframework.beans.factory.support.AbstractBeanFactory.lambda$doGetBean$0(AbstractBeanFactory.java:339) ~[spring-beans-6.2.8.jar:6.2.8]
+	at org.springframework.beans.factory.support.DefaultSingletonBeanRegistry.getSingleton(DefaultSingletonBeanRegistry.java:373) ~[spring-beans-6.2.8.jar:6.2.8]
+	at org.springframework.beans.factory.support.AbstractBeanFactory.doGetBean(AbstractBeanFactory.java:337) ~[spring-beans-6.2.8.jar:6.2.8]
+	at org.springframework.beans.factory.support.AbstractBeanFactory.getBean(AbstractBeanFactory.java:202) ~[spring-beans-6.2.8.jar:6.2.8]
+	at org.springframework.beans.factory.support.ConstructorResolver.instantiateUsingFactoryMethod(ConstructorResolver.java:413) ~[spring-beans-6.2.8.jar:6.2.8]
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.instantiateUsingFactoryMethod(AbstractAutowireCapableBeanFactory.java:1375) ~[spring-beans-6.2.8.jar:6.2.8]
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBeanInstance(AbstractAutowireCapableBeanFactory.java:1205) ~[spring-beans-6.2.8.jar:6.2.8]
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.doCreateBean(AbstractAutowireCapableBeanFactory.java:569) ~[spring-beans-6.2.8.jar:6.2.8]
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBean(AbstractAutowireCapableBeanFactory.java:529) ~[spring-beans-6.2.8.jar:6.2.8]
+	at org.springframework.beans.factory.support.AbstractBeanFactory.lambda$doGetBean$0(AbstractBeanFactory.java:339) ~[spring-beans-6.2.8.jar:6.2.8]
+	at org.springframework.beans.factory.support.DefaultSingletonBeanRegistry.getSingleton(DefaultSingletonBeanRegistry.java:373) ~[spring-beans-6.2.8.jar:6.2.8]
+	at org.springframework.beans.factory.support.AbstractBeanFactory.doGetBean(AbstractBeanFactory.java:337) ~[spring-beans-6.2.8.jar:6.2.8]
+	at org.springframework.beans.factory.support.AbstractBeanFactory.getBean(AbstractBeanFactory.java:207) ~[spring-beans-6.2.8.jar:6.2.8]
+	at org.springframework.boot.web.servlet.ServletContextInitializerBeans.getOrderedBeansOfType(ServletContextInitializerBeans.java:230) ~[spring-boot-3.5.3.jar:3.5.3]
+	at org.springframework.boot.web.servlet.ServletContextInitializerBeans.addAsRegistrationBean(ServletContextInitializerBeans.java:184) ~[spring-boot-3.5.3.jar:3.5.3]
+	at org.springframework.boot.web.servlet.ServletContextInitializerBeans.addAsRegistrationBean(ServletContextInitializerBeans.java:179) ~[spring-boot-3.5.3.jar:3.5.3]
+	at org.springframework.boot.web.servlet.ServletContextInitializerBeans.addAdaptableBeans(ServletContextInitializerBeans.java:164) ~[spring-boot-3.5.3.jar:3.5.3]
+	at org.springframework.boot.web.servlet.ServletContextInitializerBeans.<init>(ServletContextInitializerBeans.java:96) ~[spring-boot-3.5.3.jar:3.5.3]
+	at org.springframework.boot.web.servlet.context.ServletWebServerApplicationContext.getServletContextInitializerBeans(ServletWebServerApplicationContext.java:271) ~[spring-boot-3.5.3.jar:3.5.3]
+	at org.springframework.boot.web.servlet.context.ServletWebServerApplicationContext.selfInitialize(ServletWebServerApplicationContext.java:245) ~[spring-boot-3.5.3.jar:3.5.3]
+	at org.springframework.boot.web.embedded.tomcat.TomcatStarter.onStartup(TomcatStarter.java:52) ~[spring-boot-3.5.3.jar:3.5.3]
+	at org.apache.catalina.core.StandardContext.startInternal(StandardContext.java:4464) ~[tomcat-embed-core-10.1.42.jar:10.1.42]
+	at org.apache.catalina.util.LifecycleBase.start(LifecycleBase.java:164) ~[tomcat-embed-core-10.1.42.jar:10.1.42]
+	at org.apache.catalina.core.ContainerBase$StartChild.call(ContainerBase.java:1203) ~[tomcat-embed-core-10.1.42.jar:10.1.42]
+	at org.apache.catalina.core.ContainerBase$StartChild.call(ContainerBase.java:1193) ~[tomcat-embed-core-10.1.42.jar:10.1.42]
+	at java.base/java.util.concurrent.FutureTask.run(FutureTask.java:328) ~[na:na]
+	at org.apache.tomcat.util.threads.InlineExecutorService.execute(InlineExecutorService.java:75) ~[tomcat-embed-core-10.1.42.jar:10.1.42]
+	at java.base/java.util.concurrent.AbstractExecutorService.submit(AbstractExecutorService.java:148) ~[na:na]
+	at org.apache.catalina.core.ContainerBase.startInternal(ContainerBase.java:749) ~[tomcat-embed-core-10.1.42.jar:10.1.42]
+	at org.apache.catalina.core.StandardHost.startInternal(StandardHost.java:772) ~[tomcat-embed-core-10.1.42.jar:10.1.42]
+	at org.apache.catalina.util.LifecycleBase.start(LifecycleBase.java:164) ~[tomcat-embed-core-10.1.42.jar:10.1.42]
+	at org.apache.catalina.core.ContainerBase$StartChild.call(ContainerBase.java:1203) ~[tomcat-embed-core-10.1.42.jar:10.1.42]
+	at org.apache.catalina.core.ContainerBase$StartChild.call(ContainerBase.java:1193) ~[tomcat-embed-core-10.1.42.jar:10.1.42]
+	at java.base/java.util.concurrent.FutureTask.run(FutureTask.java:328) ~[na:na]
+	at org.apache.tomcat.util.threads.InlineExecutorService.execute(InlineExecutorService.java:75) ~[tomcat-embed-core-10.1.42.jar:10.1.42]
+	at java.base/java.util.concurrent.AbstractExecutorService.submit(AbstractExecutorService.java:148) ~[na:na]
+	at org.apache.catalina.core.ContainerBase.startInternal(ContainerBase.java:749) ~[tomcat-embed-core-10.1.42.jar:10.1.42]
+	at org.apache.catalina.core.StandardEngine.startInternal(StandardEngine.java:203) ~[tomcat-embed-core-10.1.42.jar:10.1.42]
+	at org.apache.catalina.util.LifecycleBase.start(LifecycleBase.java:164) ~[tomcat-embed-core-10.1.42.jar:10.1.42]
+	at org.apache.catalina.core.StandardService.startInternal(StandardService.java:412) ~[tomcat-embed-core-10.1.42.jar:10.1.42]
+	at org.apache.catalina.util.LifecycleBase.start(LifecycleBase.java:164) ~[tomcat-embed-core-10.1.42.jar:10.1.42]
+	at org.apache.catalina.core.StandardServer.startInternal(StandardServer.java:870) ~[tomcat-embed-core-10.1.42.jar:10.1.42]
+	at org.apache.catalina.util.LifecycleBase.start(LifecycleBase.java:164) ~[tomcat-embed-core-10.1.42.jar:10.1.42]
+	at org.apache.catalina.startup.Tomcat.start(Tomcat.java:438) ~[tomcat-embed-core-10.1.42.jar:10.1.42]
+	at org.springframework.boot.web.embedded.tomcat.TomcatWebServer.initialize(TomcatWebServer.java:128) ~[spring-boot-3.5.3.jar:3.5.3]
+	at org.springframework.boot.web.embedded.tomcat.TomcatWebServer.<init>(TomcatWebServer.java:107) ~[spring-boot-3.5.3.jar:3.5.3]
+	at org.springframework.boot.web.embedded.tomcat.TomcatServletWebServerFactory.getTomcatWebServer(TomcatServletWebServerFactory.java:517) ~[spring-boot-3.5.3.jar:3.5.3]
+	at org.springframework.boot.web.embedded.tomcat.TomcatServletWebServerFactory.getWebServer(TomcatServletWebServerFactory.java:219) ~[spring-boot-3.5.3.jar:3.5.3]
+	at org.springframework.boot.web.servlet.context.ServletWebServerApplicationContext.createWebServer(ServletWebServerApplicationContext.java:193) ~[spring-boot-3.5.3.jar:3.5.3]
+	at org.springframework.boot.web.servlet.context.ServletWebServerApplicationContext.onRefresh(ServletWebServerApplicationContext.java:167) ~[spring-boot-3.5.3.jar:3.5.3]
+	at org.springframework.context.support.AbstractApplicationContext.refresh(AbstractApplicationContext.java:621) ~[spring-context-6.2.8.jar:6.2.8]
+	at org.springframework.boot.web.servlet.context.ServletWebServerApplicationContext.refresh(ServletWebServerApplicationContext.java:146) ~[spring-boot-3.5.3.jar:3.5.3]
+	at org.springframework.boot.SpringApplication.refresh(SpringApplication.java:752) ~[spring-boot-3.5.3.jar:3.5.3]
+	at org.springframework.boot.SpringApplication.refreshContext(SpringApplication.java:439) ~[spring-boot-3.5.3.jar:3.5.3]
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:318) ~[spring-boot-3.5.3.jar:3.5.3]
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:1361) ~[spring-boot-3.5.3.jar:3.5.3]
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:1350) ~[spring-boot-3.5.3.jar:3.5.3]
+	at com.erp.backend.ErpSystemBackendApplication.main(ErpSystemBackendApplication.java:15) ~[classes/:na]
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:104) ~[na:na]
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565) ~[na:na]
+	at org.springframework.boot.devtools.restart.RestartLauncher.run(RestartLauncher.java:50) ~[spring-boot-devtools-3.5.3.jar:3.5.3]
+Caused by: org.postgresql.util.PSQLException: ERROR: column "deleted" of relation "customers" contains null values
+	at org.postgresql.core.v3.QueryExecutorImpl.receiveErrorResponse(QueryExecutorImpl.java:2734) ~[postgresql-42.7.7.jar:42.7.7]
+	at org.postgresql.core.v3.QueryExecutorImpl.processResults(QueryExecutorImpl.java:2421) ~[postgresql-42.7.7.jar:42.7.7]
+	at org.postgresql.core.v3.QueryExecutorImpl.execute(QueryExecutorImpl.java:372) ~[postgresql-42.7.7.jar:42.7.7]
+	at org.postgresql.jdbc.PgStatement.executeInternal(PgStatement.java:518) ~[postgresql-42.7.7.jar:42.7.7]
+	at org.postgresql.jdbc.PgStatement.execute(PgStatement.java:435) ~[postgresql-42.7.7.jar:42.7.7]
+	at org.postgresql.jdbc.PgStatement.executeWithFlags(PgStatement.java:357) ~[postgresql-42.7.7.jar:42.7.7]
+	at org.postgresql.jdbc.PgStatement.executeCachedSql(PgStatement.java:342) ~[postgresql-42.7.7.jar:42.7.7]
+	at org.postgresql.jdbc.PgStatement.executeWithFlags(PgStatement.java:318) ~[postgresql-42.7.7.jar:42.7.7]
+	at org.postgresql.jdbc.PgStatement.execute(PgStatement.java:313) ~[postgresql-42.7.7.jar:42.7.7]
+	at com.zaxxer.hikari.pool.ProxyStatement.execute(ProxyStatement.java:95) ~[HikariCP-6.3.0.jar:na]
+	at com.zaxxer.hikari.pool.HikariProxyStatement.execute(HikariProxyStatement.java) ~[HikariCP-6.3.0.jar:na]
+	at org.hibernate.tool.schema.internal.exec.GenerationTargetToDatabase.accept(GenerationTargetToDatabase.java:80) ~[hibernate-core-6.6.18.Final.jar:6.6.18.Final]
+	... 120 common frames omitted
+
+2025-09-04T22:24:37.466+02:00  INFO 3392 --- [erp-system-backend] [restartedMain] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2025-09-04T22:24:37.746+02:00 DEBUG 3392 --- [erp-system-backend] [restartedMain] com.erp.backend.config.JwtAuthFilter     : Filter 'jwtAuthFilter' configured for use
+2025-09-04T22:24:37.829+02:00  INFO 3392 --- [erp-system-backend] [restartedMain] o.s.d.j.r.query.QueryEnhancerFactory     : Hibernate is in classpath; If applicable, HQL parser will be used.
+2025-09-04T22:24:39.164+02:00  WARN 3392 --- [erp-system-backend] [restartedMain] JpaBaseConfiguration$JpaWebConfiguration : spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2025-09-04T22:24:39.189+02:00  INFO 3392 --- [erp-system-backend] [restartedMain] r$InitializeUserDetailsManagerConfigurer : Global AuthenticationManager configured with UserDetailsService bean with name userDetailsService
+2025-09-04T22:24:39.607+02:00  INFO 3392 --- [erp-system-backend] [restartedMain] o.s.b.a.e.web.EndpointLinksResolver      : Exposing 4 endpoints beneath base path '/actuator'
+2025-09-04T22:24:40.030+02:00  INFO 3392 --- [erp-system-backend] [restartedMain] o.s.b.d.a.OptionalLiveReloadServer       : LiveReload server is running on port 35729
+2025-09-04T22:24:40.099+02:00  INFO 3392 --- [erp-system-backend] [restartedMain] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port 8080 (http) with context path '/'
+2025-09-04T22:24:40.114+02:00  INFO 3392 --- [erp-system-backend] [restartedMain] c.e.backend.ErpSystemBackendApplication  : Started ErpSystemBackendApplication in 15.627 seconds (process running for 16.051)
+2025-09-04T22:25:38.338+02:00  INFO 3392 --- [erp-system-backend] [SpringApplicationShutdownHook] o.s.b.w.e.tomcat.GracefulShutdown        : Commencing graceful shutdown. Waiting for active requests to complete
+2025-09-04T22:25:38.338+02:00  INFO 3392 --- [erp-system-backend] [tomcat-shutdown] o.s.b.w.e.tomcat.GracefulShutdown        : Graceful shutdown complete
+2025-09-04T22:25:38.350+02:00  INFO 3392 --- [erp-system-backend] [SpringApplicationShutdownHook] j.LocalContainerEntityManagerFactoryBean : Closing JPA EntityManagerFactory for persistence unit 'default'
+2025-09-04T22:25:38.350+02:00  INFO 3392 --- [erp-system-backend] [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown initiated...
+2025-09-04T22:25:39.406+02:00  INFO 3392 --- [erp-system-backend] [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown completed.
+2025-09-04T22:25:42.248+02:00  INFO 5968 --- [erp-system-backend] [restartedMain] c.e.backend.ErpSystemBackendApplication  : Starting ErpSystemBackendApplication using Java 24.0.1 with PID 5968 (C:\Users\ibrah\Desktop\ERP-Backend\erp-system-backend\target\classes started by ibrah in C:\Users\ibrah\Desktop\ERP-Backend\erp-system-backend)
+2025-09-04T22:25:42.249+02:00 DEBUG 5968 --- [erp-system-backend] [restartedMain] c.e.backend.ErpSystemBackendApplication  : Running with Spring Boot v3.5.3, Spring v6.2.8
+2025-09-04T22:25:42.250+02:00  INFO 5968 --- [erp-system-backend] [restartedMain] c.e.backend.ErpSystemBackendApplication  : No active profile set, falling back to 1 default profile: "default"
+2025-09-04T22:25:42.316+02:00  INFO 5968 --- [erp-system-backend] [restartedMain] .e.DevToolsPropertyDefaultsPostProcessor : Devtools property defaults active! Set 'spring.devtools.add-properties' to 'false' to disable
+2025-09-04T22:25:42.316+02:00  INFO 5968 --- [erp-system-backend] [restartedMain] .e.DevToolsPropertyDefaultsPostProcessor : For additional web related logging consider setting the 'logging.level.web' property to 'DEBUG'
+2025-09-04T22:25:43.430+02:00  INFO 5968 --- [erp-system-backend] [restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2025-09-04T22:25:43.521+02:00  INFO 5968 --- [erp-system-backend] [restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 80 ms. Found 11 JPA repository interfaces.
+2025-09-04T22:25:44.188+02:00  INFO 5968 --- [erp-system-backend] [restartedMain] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port 8080 (http)
+2025-09-04T22:25:44.204+02:00  INFO 5968 --- [erp-system-backend] [restartedMain] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2025-09-04T22:25:44.204+02:00  INFO 5968 --- [erp-system-backend] [restartedMain] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.42]
+2025-09-04T22:25:44.273+02:00  INFO 5968 --- [erp-system-backend] [restartedMain] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
+2025-09-04T22:25:44.273+02:00  INFO 5968 --- [erp-system-backend] [restartedMain] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 1956 ms
+2025-09-04T22:25:44.526+02:00  INFO 5968 --- [erp-system-backend] [restartedMain] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: default]
+2025-09-04T22:25:44.581+02:00  INFO 5968 --- [erp-system-backend] [restartedMain] org.hibernate.Version                    : HHH000412: Hibernate ORM core version 6.6.18.Final
+2025-09-04T22:25:44.613+02:00  INFO 5968 --- [erp-system-backend] [restartedMain] o.h.c.internal.RegionFactoryInitiator    : HHH000026: Second-level cache disabled
+2025-09-04T22:25:44.907+02:00  INFO 5968 --- [erp-system-backend] [restartedMain] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2025-09-04T22:25:44.939+02:00  INFO 5968 --- [erp-system-backend] [restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2025-09-04T22:25:46.182+02:00  INFO 5968 --- [erp-system-backend] [restartedMain] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection org.postgresql.jdbc.PgConnection@18dad0b8
+2025-09-04T22:25:46.183+02:00  INFO 5968 --- [erp-system-backend] [restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2025-09-04T22:25:46.311+02:00  WARN 5968 --- [erp-system-backend] [restartedMain] org.hibernate.orm.deprecation            : HHH90000025: PostgreSQLDialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2025-09-04T22:25:46.644+02:00  INFO 5968 --- [erp-system-backend] [restartedMain] org.hibernate.orm.connections.pooling    : HHH10001005: Database info:
+	Database JDBC URL [Connecting through datasource 'HikariDataSource (HikariPool-1)']
+	Database driver: undefined/unknown
+	Database version: 17.5
+	Autocommit mode: undefined/unknown
+	Isolation level: undefined/unknown
+	Minimum pool size: undefined/unknown
+	Maximum pool size: undefined/unknown
+2025-09-04T22:25:47.618+02:00  INFO 5968 --- [erp-system-backend] [restartedMain] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2025-09-04T22:25:54.613+02:00  INFO 5968 --- [erp-system-backend] [restartedMain] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2025-09-04T22:25:54.997+02:00 DEBUG 5968 --- [erp-system-backend] [restartedMain] com.erp.backend.config.JwtAuthFilter     : Filter 'jwtAuthFilter' configured for use
+2025-09-04T22:25:55.102+02:00  INFO 5968 --- [erp-system-backend] [restartedMain] o.s.d.j.r.query.QueryEnhancerFactory     : Hibernate is in classpath; If applicable, HQL parser will be used.
+2025-09-04T22:25:56.767+02:00  WARN 5968 --- [erp-system-backend] [restartedMain] JpaBaseConfiguration$JpaWebConfiguration : spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2025-09-04T22:25:56.796+02:00  INFO 5968 --- [erp-system-backend] [restartedMain] r$InitializeUserDetailsManagerConfigurer : Global AuthenticationManager configured with UserDetailsService bean with name userDetailsService
+2025-09-04T22:25:57.296+02:00  INFO 5968 --- [erp-system-backend] [restartedMain] o.s.b.a.e.web.EndpointLinksResolver      : Exposing 4 endpoints beneath base path '/actuator'
+2025-09-04T22:25:57.739+02:00  INFO 5968 --- [erp-system-backend] [restartedMain] o.s.b.d.a.OptionalLiveReloadServer       : LiveReload server is running on port 35729
+2025-09-04T22:25:57.886+02:00  INFO 5968 --- [erp-system-backend] [restartedMain] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port 8080 (http) with context path '/'
+2025-09-04T22:25:57.903+02:00  INFO 5968 --- [erp-system-backend] [restartedMain] c.e.backend.ErpSystemBackendApplication  : Started ErpSystemBackendApplication in 16.154 seconds (process running for 16.633)
+2025-09-04T22:31:51.052+02:00  INFO 5968 --- [erp-system-backend] [SpringApplicationShutdownHook] o.s.b.w.e.tomcat.GracefulShutdown        : Commencing graceful shutdown. Waiting for active requests to complete
+2025-09-04T22:31:51.062+02:00  INFO 5968 --- [erp-system-backend] [tomcat-shutdown] o.s.b.w.e.tomcat.GracefulShutdown        : Graceful shutdown complete
+2025-09-04T22:31:51.071+02:00  INFO 5968 --- [erp-system-backend] [SpringApplicationShutdownHook] j.LocalContainerEntityManagerFactoryBean : Closing JPA EntityManagerFactory for persistence unit 'default'
+2025-09-04T22:31:51.076+02:00  INFO 5968 --- [erp-system-backend] [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown initiated...
+2025-09-04T22:31:52.156+02:00  INFO 5968 --- [erp-system-backend] [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown completed.
+2025-09-04T22:31:58.768+02:00  INFO 7584 --- [erp-system-backend] [restartedMain] c.e.backend.ErpSystemBackendApplication  : Starting ErpSystemBackendApplication using Java 24.0.1 with PID 7584 (C:\Users\ibrah\Desktop\ERP-Backend\erp-system-backend\target\classes started by ibrah in C:\Users\ibrah\Desktop\ERP-Backend\erp-system-backend)
+2025-09-04T22:31:58.770+02:00 DEBUG 7584 --- [erp-system-backend] [restartedMain] c.e.backend.ErpSystemBackendApplication  : Running with Spring Boot v3.5.3, Spring v6.2.8
+2025-09-04T22:31:58.771+02:00  INFO 7584 --- [erp-system-backend] [restartedMain] c.e.backend.ErpSystemBackendApplication  : No active profile set, falling back to 1 default profile: "default"
+2025-09-04T22:31:58.836+02:00  INFO 7584 --- [erp-system-backend] [restartedMain] .e.DevToolsPropertyDefaultsPostProcessor : Devtools property defaults active! Set 'spring.devtools.add-properties' to 'false' to disable
+2025-09-04T22:31:58.836+02:00  INFO 7584 --- [erp-system-backend] [restartedMain] .e.DevToolsPropertyDefaultsPostProcessor : For additional web related logging consider setting the 'logging.level.web' property to 'DEBUG'
+2025-09-04T22:32:00.560+02:00  INFO 7584 --- [erp-system-backend] [restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2025-09-04T22:32:00.644+02:00  INFO 7584 --- [erp-system-backend] [restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 74 ms. Found 11 JPA repository interfaces.
+2025-09-04T22:32:01.254+02:00  INFO 7584 --- [erp-system-backend] [restartedMain] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port 8080 (http)
+2025-09-04T22:32:01.269+02:00  INFO 7584 --- [erp-system-backend] [restartedMain] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2025-09-04T22:32:01.269+02:00  INFO 7584 --- [erp-system-backend] [restartedMain] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.42]
+2025-09-04T22:32:01.311+02:00  INFO 7584 --- [erp-system-backend] [restartedMain] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
+2025-09-04T22:32:01.311+02:00  INFO 7584 --- [erp-system-backend] [restartedMain] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 2474 ms
+2025-09-04T22:32:01.534+02:00  INFO 7584 --- [erp-system-backend] [restartedMain] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: default]
+2025-09-04T22:32:01.589+02:00  INFO 7584 --- [erp-system-backend] [restartedMain] org.hibernate.Version                    : HHH000412: Hibernate ORM core version 6.6.18.Final
+2025-09-04T22:32:01.631+02:00  INFO 7584 --- [erp-system-backend] [restartedMain] o.h.c.internal.RegionFactoryInitiator    : HHH000026: Second-level cache disabled
+2025-09-04T22:32:01.896+02:00  INFO 7584 --- [erp-system-backend] [restartedMain] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2025-09-04T22:32:01.923+02:00  INFO 7584 --- [erp-system-backend] [restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2025-09-04T22:32:03.197+02:00  INFO 7584 --- [erp-system-backend] [restartedMain] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection org.postgresql.jdbc.PgConnection@7d1d19f4
+2025-09-04T22:32:03.199+02:00  INFO 7584 --- [erp-system-backend] [restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2025-09-04T22:32:03.328+02:00  WARN 7584 --- [erp-system-backend] [restartedMain] org.hibernate.orm.deprecation            : HHH90000025: PostgreSQLDialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2025-09-04T22:32:03.647+02:00  INFO 7584 --- [erp-system-backend] [restartedMain] org.hibernate.orm.connections.pooling    : HHH10001005: Database info:
+	Database JDBC URL [Connecting through datasource 'HikariDataSource (HikariPool-1)']
+	Database driver: undefined/unknown
+	Database version: 17.5
+	Autocommit mode: undefined/unknown
+	Isolation level: undefined/unknown
+	Minimum pool size: undefined/unknown
+	Maximum pool size: undefined/unknown
+2025-09-04T22:32:04.606+02:00  INFO 7584 --- [erp-system-backend] [restartedMain] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2025-09-04T22:32:11.226+02:00  INFO 7584 --- [erp-system-backend] [restartedMain] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2025-09-04T22:32:11.566+02:00 DEBUG 7584 --- [erp-system-backend] [restartedMain] com.erp.backend.config.JwtAuthFilter     : Filter 'jwtAuthFilter' configured for use
+2025-09-04T22:32:11.682+02:00  INFO 7584 --- [erp-system-backend] [restartedMain] o.s.d.j.r.query.QueryEnhancerFactory     : Hibernate is in classpath; If applicable, HQL parser will be used.
+2025-09-04T22:32:13.351+02:00  WARN 7584 --- [erp-system-backend] [restartedMain] JpaBaseConfiguration$JpaWebConfiguration : spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2025-09-04T22:32:13.369+02:00  INFO 7584 --- [erp-system-backend] [restartedMain] r$InitializeUserDetailsManagerConfigurer : Global AuthenticationManager configured with UserDetailsService bean with name userDetailsService
+2025-09-04T22:32:13.828+02:00  INFO 7584 --- [erp-system-backend] [restartedMain] o.s.b.a.e.web.EndpointLinksResolver      : Exposing 4 endpoints beneath base path '/actuator'
+2025-09-04T22:32:14.242+02:00  INFO 7584 --- [erp-system-backend] [restartedMain] o.s.b.d.a.OptionalLiveReloadServer       : LiveReload server is running on port 35729
+2025-09-04T22:32:14.318+02:00  INFO 7584 --- [erp-system-backend] [restartedMain] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port 8080 (http) with context path '/'
+2025-09-04T22:32:14.349+02:00  INFO 7584 --- [erp-system-backend] [restartedMain] c.e.backend.ErpSystemBackendApplication  : Started ErpSystemBackendApplication in 16.07 seconds (process running for 17.079)
+2025-09-04T22:40:31.837+02:00  INFO 7584 --- [erp-system-backend] [SpringApplicationShutdownHook] o.s.b.w.e.tomcat.GracefulShutdown        : Commencing graceful shutdown. Waiting for active requests to complete
+2025-09-04T22:40:31.841+02:00  INFO 7584 --- [erp-system-backend] [tomcat-shutdown] o.s.b.w.e.tomcat.GracefulShutdown        : Graceful shutdown complete
+2025-09-04T22:40:31.849+02:00  INFO 7584 --- [erp-system-backend] [SpringApplicationShutdownHook] j.LocalContainerEntityManagerFactoryBean : Closing JPA EntityManagerFactory for persistence unit 'default'
+2025-09-04T22:40:31.852+02:00  INFO 7584 --- [erp-system-backend] [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown initiated...
+2025-09-04T22:40:32.916+02:00  INFO 7584 --- [erp-system-backend] [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown completed.
+2025-09-04T22:40:36.625+02:00  INFO 9612 --- [erp-system-backend] [restartedMain] c.e.backend.ErpSystemBackendApplication  : Starting ErpSystemBackendApplication using Java 24.0.1 with PID 9612 (C:\Users\ibrah\Desktop\ERP-Backend\erp-system-backend\target\classes started by ibrah in C:\Users\ibrah\Desktop\ERP-Backend\erp-system-backend)
+2025-09-04T22:40:36.627+02:00 DEBUG 9612 --- [erp-system-backend] [restartedMain] c.e.backend.ErpSystemBackendApplication  : Running with Spring Boot v3.5.3, Spring v6.2.8
+2025-09-04T22:40:36.628+02:00  INFO 9612 --- [erp-system-backend] [restartedMain] c.e.backend.ErpSystemBackendApplication  : No active profile set, falling back to 1 default profile: "default"
+2025-09-04T22:40:36.697+02:00  INFO 9612 --- [erp-system-backend] [restartedMain] .e.DevToolsPropertyDefaultsPostProcessor : Devtools property defaults active! Set 'spring.devtools.add-properties' to 'false' to disable
+2025-09-04T22:40:36.698+02:00  INFO 9612 --- [erp-system-backend] [restartedMain] .e.DevToolsPropertyDefaultsPostProcessor : For additional web related logging consider setting the 'logging.level.web' property to 'DEBUG'
+2025-09-04T22:40:37.837+02:00  INFO 9612 --- [erp-system-backend] [restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2025-09-04T22:40:37.929+02:00  INFO 9612 --- [erp-system-backend] [restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 79 ms. Found 11 JPA repository interfaces.
+2025-09-04T22:40:38.557+02:00  INFO 9612 --- [erp-system-backend] [restartedMain] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port 8080 (http)
+2025-09-04T22:40:38.572+02:00  INFO 9612 --- [erp-system-backend] [restartedMain] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2025-09-04T22:40:38.572+02:00  INFO 9612 --- [erp-system-backend] [restartedMain] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.42]
+2025-09-04T22:40:38.615+02:00  INFO 9612 --- [erp-system-backend] [restartedMain] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
+2025-09-04T22:40:38.616+02:00  INFO 9612 --- [erp-system-backend] [restartedMain] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 1918 ms
+2025-09-04T22:40:38.818+02:00  INFO 9612 --- [erp-system-backend] [restartedMain] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: default]
+2025-09-04T22:40:38.867+02:00  INFO 9612 --- [erp-system-backend] [restartedMain] org.hibernate.Version                    : HHH000412: Hibernate ORM core version 6.6.18.Final
+2025-09-04T22:40:38.901+02:00  INFO 9612 --- [erp-system-backend] [restartedMain] o.h.c.internal.RegionFactoryInitiator    : HHH000026: Second-level cache disabled
+2025-09-04T22:40:39.187+02:00  INFO 9612 --- [erp-system-backend] [restartedMain] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2025-09-04T22:40:39.221+02:00  INFO 9612 --- [erp-system-backend] [restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2025-09-04T22:40:40.488+02:00  INFO 9612 --- [erp-system-backend] [restartedMain] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection org.postgresql.jdbc.PgConnection@14362c38
+2025-09-04T22:40:40.490+02:00  INFO 9612 --- [erp-system-backend] [restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2025-09-04T22:40:40.620+02:00  WARN 9612 --- [erp-system-backend] [restartedMain] org.hibernate.orm.deprecation            : HHH90000025: PostgreSQLDialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2025-09-04T22:40:40.946+02:00  INFO 9612 --- [erp-system-backend] [restartedMain] org.hibernate.orm.connections.pooling    : HHH10001005: Database info:
+	Database JDBC URL [Connecting through datasource 'HikariDataSource (HikariPool-1)']
+	Database driver: undefined/unknown
+	Database version: 17.5
+	Autocommit mode: undefined/unknown
+	Isolation level: undefined/unknown
+	Minimum pool size: undefined/unknown
+	Maximum pool size: undefined/unknown
+2025-09-04T22:40:41.966+02:00  INFO 9612 --- [erp-system-backend] [restartedMain] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2025-09-04T22:40:48.741+02:00  INFO 9612 --- [erp-system-backend] [restartedMain] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2025-09-04T22:40:49.060+02:00 DEBUG 9612 --- [erp-system-backend] [restartedMain] com.erp.backend.config.JwtAuthFilter     : Filter 'jwtAuthFilter' configured for use
+2025-09-04T22:40:49.142+02:00  INFO 9612 --- [erp-system-backend] [restartedMain] o.s.d.j.r.query.QueryEnhancerFactory     : Hibernate is in classpath; If applicable, HQL parser will be used.
+2025-09-04T22:40:50.521+02:00  WARN 9612 --- [erp-system-backend] [restartedMain] JpaBaseConfiguration$JpaWebConfiguration : spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2025-09-04T22:40:50.552+02:00  INFO 9612 --- [erp-system-backend] [restartedMain] r$InitializeUserDetailsManagerConfigurer : Global AuthenticationManager configured with UserDetailsService bean with name userDetailsService
+2025-09-04T22:40:50.908+02:00  INFO 9612 --- [erp-system-backend] [restartedMain] o.s.b.a.e.web.EndpointLinksResolver      : Exposing 4 endpoints beneath base path '/actuator'
+2025-09-04T22:40:51.259+02:00  INFO 9612 --- [erp-system-backend] [restartedMain] o.s.b.d.a.OptionalLiveReloadServer       : LiveReload server is running on port 35729
+2025-09-04T22:40:51.329+02:00  INFO 9612 --- [erp-system-backend] [restartedMain] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port 8080 (http) with context path '/'
+2025-09-04T22:40:51.341+02:00  INFO 9612 --- [erp-system-backend] [restartedMain] c.e.backend.ErpSystemBackendApplication  : Started ErpSystemBackendApplication in 15.33 seconds (process running for 15.784)

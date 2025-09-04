@@ -386,26 +386,37 @@ public class SubscriptionService {
         return saved;
     }
 
+    @Transactional
     public void deleteSubscription(UUID id) {
-        if (!subscriptionRepository.existsById(id)) {
-            throw new IllegalArgumentException("Subscription not found with ID: " + id);
+        Subscription subscription = subscriptionRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Subscription not found with ID: " + id));
+
+        // Prüfen, ob der übergeordnete Vertrag aktiv ist
+        Contract contract = subscription.getContract();
+        if (contract != null && contract.getContractStatus().equals(ContractStatus.ACTIVE)) { // oder contract.getContractStatus() != TERMINATED
+            throw new IllegalStateException(
+                    "Cannot delete subscription because the parent contract is active (subscriptionId=" + id + ")"
+            );
         }
 
-        // Zuerst alle zugehörigen DueSchedules löschen
+        // Fälligkeitspläne löschen, falls nicht bezahlt
         try {
             List<DueScheduleDto> dueSchedules = dueScheduleService.getDueSchedulesBySubscription(id);
             for (DueScheduleDto schedule : dueSchedules) {
                 if (schedule.getStatus() != DueStatus.PAID) {
-                    dueScheduleService.deleteDueSchedule(schedule.getId());
+                    dueScheduleService.deleteDueSchedule(schedule.getId()); // hier Soft Delete möglich, falls implementiert
                 }
             }
         } catch (Exception e) {
             logger.warn("Fehler beim Löschen der Fälligkeitspläne für Subscription {}: {}", id, e.getMessage());
         }
 
-        subscriptionRepository.deleteById(id);
-        logger.info("Deleted subscription with id={}", id);
+        // Soft Delete auf Subscription (vorausgesetzt @SQLDelete in Subscription Entity)
+        subscriptionRepository.delete(subscription);
+
+        logger.info("Soft-deleted subscription with id={}", id);
     }
+
 
     @Transactional(readOnly = true)
     public long getTotalSubscriptionCount() {

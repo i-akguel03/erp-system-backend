@@ -1,6 +1,7 @@
 package com.erp.backend.service;
 
 import com.erp.backend.domain.Address;
+import com.erp.backend.domain.ContractStatus;
 import com.erp.backend.domain.Customer;
 import com.erp.backend.repository.AddressRepository;
 import com.erp.backend.repository.CustomerRepository;
@@ -163,12 +164,21 @@ public class CustomerService {
     }
 
     public void deleteCustomerById(UUID id) {
-        if (!customerRepository.existsById(id)) {
-            throw new IllegalArgumentException("Customer not found with ID: " + id);
+        Customer customer = customerRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Customer not found with ID: " + id));
+
+        // Prüfen, ob aktive Verträge vorhanden sind
+        boolean hasActiveContracts = customer.getContracts().stream()
+                .anyMatch(contract -> contract.getContractStatus().equals(ContractStatus.ACTIVE)); // oder contract.getStatus().equals("ACTIVE")
+
+        if (hasActiveContracts) {
+            throw new IllegalStateException("Cannot delete customer with active contracts (id=" + id + ")");
         }
+
         customerRepository.deleteById(id);
-        logger.info("Deleted customer with id={}", id);
+        logger.info("Soft-deleted customer with id={}", id);
     }
+
 
     @Transactional(readOnly = true)
     public long getTotalCustomerCount() {

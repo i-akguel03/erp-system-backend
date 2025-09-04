@@ -3,6 +3,7 @@ package com.erp.backend.service;
 import com.erp.backend.domain.Contract;
 import com.erp.backend.domain.ContractStatus;
 import com.erp.backend.domain.Customer;
+import com.erp.backend.domain.SubscriptionStatus;
 import com.erp.backend.repository.ContractRepository;
 import com.erp.backend.repository.CustomerRepository;
 import org.springframework.data.domain.Page;
@@ -206,9 +207,25 @@ public class ContractService {
     }
 
     public void deleteContract(UUID id) {
-        if(!contractRepository.existsById(id)) throw new IllegalArgumentException("Contract not found with ID: " + id);
-        contractRepository.deleteById(id);
+        Contract contract = contractRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Contract not found with ID: " + id));
+
+        // Prüfen, ob aktive Subscriptions existieren
+        boolean hasActiveSubscriptions = contract.getSubscriptions().stream()
+                .anyMatch(sub -> sub.getSubscriptionStatus().equals(SubscriptionStatus.ACTIVE)); // oder sub.getStatus().equals("ACTIVE")
+
+        if (hasActiveSubscriptions) {
+            throw new IllegalStateException(
+                    "Cannot delete contract with active subscriptions (id=" + id + ")"
+            );
+        }
+
+        // Soft delete durchführen
+        contractRepository.delete(contract);
+
+        logger.info("Soft-deleted contract with id={}", id);
     }
+
 
     // --- Statusänderungen nur mit contractId ---
     public Contract activateContract(UUID contractId) {
@@ -218,18 +235,49 @@ public class ContractService {
         return contractRepository.save(contract);
     }
 
+    @Transactional
     public Contract suspendContract(UUID contractId) {
         Contract contract = getContractForStatusUpdate(contractId);
+
+        // Contract auf SUSPENDED setzen
         contract.setContractStatus(ContractStatus.SUSPENDED);
+
+        // Alle aktiven Subscriptions ebenfalls suspendieren
+        if (contract.getSubscriptions() != null) {
+            contract.getSubscriptions().forEach(subscription -> {
+                if (subscription.getSubscriptionStatus().equals(SubscriptionStatus.ACTIVE)) { // nur aktive Subscriptions
+                    subscription.setSubscriptionStatus(SubscriptionStatus.CANCELLED); // oder active = false
+                }
+            });
+        }
+
+        // Änderungen speichern (Contract + Subscriptions)
         return contractRepository.save(contract);
     }
 
+
+    @Transactional
     public Contract terminateContract(UUID contractId, LocalDate terminationDate) {
         Contract contract = getContractForStatusUpdate(contractId);
+
+        // Contract terminieren
         contract.setContractStatus(ContractStatus.TERMINATED);
         contract.setEndDate(terminationDate != null ? terminationDate : LocalDate.now());
+
+        // Alle Subscriptions/Abo unter diesem Contract terminieren
+        if (contract.getSubscriptions() != null) {
+            contract.getSubscriptions().forEach(subscription -> {
+                if (subscription.getSubscriptionStatus().equals(SubscriptionStatus.ACTIVE)) { // nur aktive Subscriptions
+                    subscription.setSubscriptionStatus(SubscriptionStatus.CANCELLED); // oder active = false
+                    subscription.setEndDate(contract.getEndDate());
+                }
+            });
+        }
+
+        // Änderungen speichern (Contract + Subscriptions)
         return contractRepository.save(contract);
     }
+
 
     // --- Private Hilfsmethoden ---
     private Contract getContractForStatusUpdate(UUID contractId) {

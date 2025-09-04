@@ -1,12 +1,17 @@
 package com.erp.backend.domain;
 
 import jakarta.persistence.*;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.SQLRestriction;
+
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.UUID;
 
 @Entity
 @Table(name = "subscriptions")
+@SQLDelete(sql = "UPDATE customers SET deleted = true WHERE id = ?")
+@SQLRestriction("deleted = false")
 public class Subscription {
 
     @Id
@@ -30,6 +35,9 @@ public class Subscription {
 
     @Column(name = "end_date")
     private LocalDate endDate;
+
+    @Column(nullable = false)
+    private boolean deleted = false;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "subscription_status")
@@ -176,5 +184,13 @@ public class Subscription {
                 ", notes='" + notes + '\'' +
                 ", contract=" + (contract != null ? contract.getId() : null) +
                 '}';
+    }
+
+    public boolean isDeleted() {
+        return deleted;
+    }
+
+    public void setDeleted(boolean deleted) {
+        this.deleted = deleted;
     }
 }
