@@ -2,6 +2,7 @@ package com.erp.backend.mapper;
 
 import com.erp.backend.domain.DueSchedule;
 import com.erp.backend.dto.DueScheduleDto;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.stereotype.Component;
 
 /**
@@ -14,9 +15,7 @@ public class DueScheduleMapper {
      * Konvertiert Entity zu DTO
      */
     public DueScheduleDto toDto(DueSchedule entity) {
-        if (entity == null) {
-            return null;
-        }
+        if (entity == null) return null;
 
         DueScheduleDto dto = new DueScheduleDto();
 
@@ -36,17 +35,31 @@ public class DueScheduleMapper {
         dto.setReminderCount(entity.getReminderCount());
         dto.setLastReminderDate(entity.getLastReminderDate());
 
-        // Subscription-bezogene Daten
+        // Subscription-bezogene Daten defensiv abfragen
         if (entity.getSubscription() != null) {
             dto.setSubscriptionId(entity.getSubscription().getId());
             dto.setSubscriptionNumber(entity.getSubscription().getSubscriptionNumber());
-            dto.setProductName(entity.getSubscription().getProductName());
 
-            // Customer-Name über Contract-Relation
-            if (entity.getSubscription().getContract() != null &&
-                    entity.getSubscription().getContract().getCustomer() != null) {
-                dto.setCustomerName(entity.getSubscription().getContract().getCustomer().getName());
+            // Produktname über Subscription optional
+            dto.setProductName(entity.getSubscription().getProductName() != null ?
+                    entity.getSubscription().getProductName() : "Unknown Product");
+
+            // Customer über Contract defensiv abfragen
+            try {
+                if (entity.getSubscription().getContract() != null &&
+                        entity.getSubscription().getContract().getCustomer() != null) {
+                    dto.setCustomerName(entity.getSubscription().getContract().getCustomer().getName());
+                } else {
+                    dto.setCustomerName("Unknown Customer");
+                }
+            } catch (EntityNotFoundException ex) {
+                dto.setCustomerName("Unknown Customer");
             }
+        } else {
+            dto.setSubscriptionId(null);
+            dto.setSubscriptionNumber("Unknown Subscription");
+            dto.setCustomerName("Unknown Customer");
+            dto.setProductName("Unknown Product");
         }
 
         return dto;

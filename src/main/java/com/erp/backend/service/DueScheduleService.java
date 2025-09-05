@@ -9,6 +9,7 @@ import com.erp.backend.exception.ResourceNotFoundException;
 import com.erp.backend.mapper.DueScheduleMapper;
 import com.erp.backend.repository.DueScheduleRepository;
 import com.erp.backend.repository.SubscriptionRepository;
+import com.erp.backend.repository.ProductRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -35,6 +36,9 @@ public class DueScheduleService {
 
     @Autowired
     private SubscriptionRepository subscriptionRepository;
+
+    @Autowired
+    private ProductRepository productRepository;
 
     @Autowired
     private DueScheduleMapper dueScheduleMapper;
@@ -84,6 +88,11 @@ public class DueScheduleService {
 
         if (entity.getStatus() == null) {
             entity.setStatus(DueStatus.PENDING);
+        }
+
+        // Betrag von Produkt holen falls nicht explizit gesetzt
+        if (entity.getAmount() == null) {
+            entity.setAmount(calculateAmountFromProduct(subscription));
         }
 
         // Initial-Werte setzen
@@ -429,34 +438,28 @@ public class DueScheduleService {
     // ----------------------------------------------------------
 
     /**
-     * Generiert Fälligkeitspläne für ein Abonnement basierend auf dessen Billing-Zyklus
+     * Generiert automatisch Fälligkeitspläne für ein Abonnement
+     * und schließt bestehende Pläne korrekt an.
      */
     public List<DueScheduleDto> generateDueSchedulesForSubscription(UUID subscriptionId, int periods) {
         Subscription subscription = subscriptionRepository.findById(subscriptionId)
                 .orElseThrow(() -> new ResourceNotFoundException("Abonnement mit ID " + subscriptionId + " nicht gefunden"));
 
-        // Bestehende Fälligkeitspläne prüfen
         List<DueSchedule> existing = dueScheduleRepository.findBySubscriptionOrderByDueDateAsc(subscription);
 
-        // Startdatum für neue Pläne bestimmen
-        LocalDate lastPeriodEnd = existing.stream()
+        LocalDate currentPeriodStart = existing.stream()
                 .map(DueSchedule::getPeriodEnd)
                 .max(LocalDate::compareTo)
-                .orElse(subscription.getStartDate().minusDays(1));
+                .map(date -> date.plusDays(1))
+                .orElse(subscription.getStartDate() != null ? subscription.getStartDate() : LocalDate.now());
 
-        // Subscription sollte noch nicht abgelaufen sein
-        if (subscription.getEndDate() != null && lastPeriodEnd.isAfter(subscription.getEndDate())) {
-            throw new BusinessLogicException("Abonnement ist bereits abgelaufen");
-        }
 
         List<DueSchedule> newSchedules = new ArrayList<>();
-        LocalDate currentPeriodStart = lastPeriodEnd.plusDays(1);
 
         for (int i = 0; i < periods; i++) {
             LocalDate periodEnd = calculatePeriodEnd(currentPeriodStart, subscription.getBillingCycle());
-            LocalDate dueDate = calculateDueDate(periodEnd, subscription.getBillingCycle());
 
-            // Nicht über Abonnement-Enddatum hinaus
+            // Sicherstellen, dass das Subscription-Enddatum nicht überschritten wird
             if (subscription.getEndDate() != null && periodEnd.isAfter(subscription.getEndDate())) {
                 periodEnd = subscription.getEndDate();
                 if (currentPeriodStart.isAfter(periodEnd)) {
@@ -464,12 +467,14 @@ public class DueScheduleService {
                 }
             }
 
+            LocalDate dueDate = calculateDueDate(periodEnd, subscription.getBillingCycle());
+
             DueSchedule dueSchedule = new DueSchedule();
             dueSchedule.setDueNumber(numberGeneratorService.generateDueNumber());
-            dueSchedule.setDueDate(dueDate);
-            dueSchedule.setAmount(subscription.getMonthlyPrice());
             dueSchedule.setPeriodStart(currentPeriodStart);
             dueSchedule.setPeriodEnd(periodEnd);
+            dueSchedule.setDueDate(dueDate);
+            dueSchedule.setAmount(calculateAmountFromProduct(subscription));
             dueSchedule.setStatus(DueStatus.PENDING);
             dueSchedule.setSubscription(subscription);
             dueSchedule.setPaidAmount(BigDecimal.ZERO);
@@ -477,24 +482,28 @@ public class DueScheduleService {
             dueSchedule.setReminderCount(0);
 
             newSchedules.add(dueSchedule);
-            currentPeriodStart = periodEnd.plusDays(1);
 
-            // Stoppen wenn Abonnement-Ende erreicht
+            currentPeriodStart = periodEnd.plusDays(1);
             if (subscription.getEndDate() != null && currentPeriodStart.isAfter(subscription.getEndDate())) {
                 break;
             }
         }
 
-        if (newSchedules.isEmpty()) {
-            logger.warn("Keine neuen Fälligkeitspläne für Subscription {} generiert", subscriptionId);
-            return Collections.emptyList();
-        }
-
         List<DueSchedule> saved = dueScheduleRepository.saveAll(newSchedules);
-        logger.info("Generated {} new due schedules for subscription {}", saved.size(), subscriptionId);
+        logger.info("Generated {} due schedules for subscription {}", saved.size(), subscriptionId);
 
         return saved.stream().map(dueScheduleMapper::toDto).collect(Collectors.toList());
     }
+
+    /**
+     * Overload: Standardmäßig 12 Perioden generieren
+     */
+    public List<DueScheduleDto> generateDueSchedulesForSubscription(UUID subscriptionId) {
+        return generateDueSchedulesForSubscription(subscriptionId, 12);
+    }
+
+
+
 
     /**
      * Generiert automatisch fehlende Fälligkeitspläne für alle aktiven Abonnements
@@ -538,6 +547,100 @@ public class DueScheduleService {
     }
 
     // ----------------------------------------------------------
+    // Product Price Integration Methods
+    // ----------------------------------------------------------
+
+    /**
+     * Berechnet den Betrag basierend auf dem Produkt des Abonnements
+     */
+    private BigDecimal calculateAmountFromProduct(Subscription subscription) {
+        // Annahme: Das Subscription-Entity hat eine Beziehung zu Product
+        // Falls nicht, müssen Sie diese Beziehung erst hinzufügen
+        if (subscription.getProduct() != null) {
+            Product product = productRepository.findById(subscription.getProduct().getId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Produkt für Abonnement nicht gefunden: " + subscription.getId()));
+
+            if (product.getPrice() == null || product.getPrice().compareTo(BigDecimal.ZERO) <= 0) {
+                logger.warn("Produkt {} hat keinen gültigen Preis, verwende Fallback", product.getId());
+                return subscription.getMonthlyPrice(); // Fallback auf ursprünglichen Preis
+            }
+
+            return product.getPrice();
+        } else if (subscription.getProductId() != null) {
+            // Alternative: Falls nur Product-ID gespeichert ist
+            Product product = productRepository.findById(subscription.getProductId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Produkt nicht gefunden: " + subscription.getProductId()));
+
+            if (product.getPrice() == null || product.getPrice().compareTo(BigDecimal.ZERO) <= 0) {
+                logger.warn("Produkt {} hat keinen gültigen Preis, verwende Fallback", product.getId());
+                return subscription.getMonthlyPrice(); // Fallback
+            }
+
+            return product.getPrice();
+        } else {
+            // Fallback: Ursprünglichen Subscription-Preis verwenden
+            logger.warn("Kein Produkt für Subscription {} gefunden, verwende monthlyPrice", subscription.getId());
+            return subscription.getMonthlyPrice();
+        }
+    }
+
+    /**
+     * Aktualisiert alle Fälligkeitspläne eines Abonnements mit neuen Produktpreisen
+     */
+    public int updateDueSchedulePricesFromProduct(UUID subscriptionId) {
+        Subscription subscription = subscriptionRepository.findById(subscriptionId)
+                .orElseThrow(() -> new ResourceNotFoundException("Abonnement mit ID " + subscriptionId + " nicht gefunden"));
+
+        // Nur offene/teilbezahlte Fälligkeitspläne aktualisieren
+        List<DueSchedule> openSchedules = dueScheduleRepository.findBySubscriptionAndStatusIn(
+                subscription, Arrays.asList(DueStatus.PENDING, DueStatus.PARTIAL_PAID));
+
+        BigDecimal newAmount = calculateAmountFromProduct(subscription);
+        int updatedCount = 0;
+
+        for (DueSchedule schedule : openSchedules) {
+            // Bei Teilzahlung: Nur erhöhen, nicht reduzieren
+            if (schedule.getStatus() == DueStatus.PARTIAL_PAID &&
+                    newAmount.compareTo(schedule.getAmount()) < 0) {
+                logger.warn("Preis für teilbezahlten Fälligkeitsplan {} kann nicht reduziert werden",
+                        schedule.getDueNumber());
+                continue;
+            }
+
+            schedule.setAmount(newAmount);
+            schedule.setNotes(
+                    (schedule.getNotes() != null ? schedule.getNotes() + "\n" : "") +
+                            "[" + LocalDate.now() + "] Betrag automatisch aktualisiert basierend auf Produktpreis"
+            );
+            dueScheduleRepository.save(schedule);
+            updatedCount++;
+        }
+
+        logger.info("Updated {} due schedule prices for subscription {}", updatedCount, subscriptionId);
+        return updatedCount;
+    }
+
+    /**
+     * Batch-Update aller Fälligkeitspläne mit aktuellen Produktpreisen
+     */
+    public int batchUpdateAllDueSchedulePricesFromProducts() {
+        List<Subscription> subscriptions = subscriptionRepository.findAll();
+        int totalUpdated = 0;
+
+        for (Subscription subscription : subscriptions) {
+            try {
+                totalUpdated += updateDueSchedulePricesFromProduct(subscription.getId());
+            } catch (Exception e) {
+                logger.error("Fehler beim Aktualisieren der Preise für Subscription {}: {}",
+                        subscription.getId(), e.getMessage());
+            }
+        }
+
+        logger.info("Batch update completed: {} due schedules updated with new product prices", totalUpdated);
+        return totalUpdated;
+    }
+
+    // ----------------------------------------------------------
     // Hilfsmethoden für Validierung und Berechnung
     // ----------------------------------------------------------
 
@@ -551,7 +654,7 @@ public class DueScheduleService {
         if (dto.getDueDate().isBefore(dto.getPeriodEnd())) {
             throw new BusinessLogicException("Fälligkeitsdatum sollte nicht vor Ende der Periode liegen");
         }
-        if (dto.getAmount() == null || dto.getAmount().compareTo(BigDecimal.ZERO) <= 0) {
+        if (dto.getAmount() != null && dto.getAmount().compareTo(BigDecimal.ZERO) <= 0) {
             throw new BusinessLogicException("Betrag muss größer als 0 sein");
         }
         if (dto.getSubscriptionId() == null) {
@@ -668,7 +771,7 @@ public class DueScheduleService {
                 gapSchedule.setPeriodStart(gapStart);
                 gapSchedule.setPeriodEnd(gapEnd);
                 gapSchedule.setDueDate(calculateDueDate(gapEnd, subscription.getBillingCycle()));
-                gapSchedule.setAmount(subscription.getMonthlyPrice());
+                gapSchedule.setAmount(calculateAmountFromProduct(subscription));
                 gapSchedule.setStatus(DueStatus.PENDING);
                 gapSchedule.setSubscription(subscription);
                 gapSchedule.setPaidAmount(BigDecimal.ZERO);

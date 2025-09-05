@@ -132,7 +132,7 @@ public class Customer {
         this.residentialAddress = residentialAddress;
     }
 
-    @OneToMany(mappedBy = "customer", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "customer", cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE}, fetch = FetchType.LAZY)
     private List<Contract> contracts = new ArrayList<>();
 
     public List<Contract> getContracts() {
@@ -166,5 +166,13 @@ public class Customer {
 
     public String getName() {
         return this.getFirstName() + ' ' + this.getLastName();
+    }
+
+    public boolean isDeleted() {
+        return deleted;
+    }
+
+    public void setDeleted(boolean deleted) {
+        this.deleted = deleted;
     }
 }

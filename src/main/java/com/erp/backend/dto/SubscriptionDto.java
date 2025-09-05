@@ -2,20 +2,30 @@ package com.erp.backend.dto;
 
 import com.erp.backend.domain.BillingCycle;
 import com.erp.backend.domain.SubscriptionStatus;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.UUID;
 
 public class SubscriptionDto {
+
     private UUID id;
-    private String subscriptionNumber;
+
+    private String subscriptionNumber; // keine @NotNull mehr
+
+    @NotNull(message = "productId darf nicht null sein")
+    private UUID productId;
+
+    private BigDecimal monthlyPrice; // keine @NotNull, im Service setzen
+
     private String productName;
-    private BigDecimal monthlyPrice;
+
     private LocalDate startDate;
     private LocalDate endDate;
-    private BillingCycle billingCycle;           // Enum statt String
-    private SubscriptionStatus subscriptionStatus; // Enum statt String
+    private BillingCycle billingCycle;
+    private SubscriptionStatus subscriptionStatus;
     private boolean autoRenewal;
     private UUID contractId;
 
@@ -25,6 +35,9 @@ public class SubscriptionDto {
 
     public String getSubscriptionNumber() { return subscriptionNumber; }
     public void setSubscriptionNumber(String subscriptionNumber) { this.subscriptionNumber = subscriptionNumber; }
+
+    public UUID getProductId() { return productId; }
+    public void setProductId(UUID productId) { this.productId = productId; }
 
     public String getProductName() { return productName; }
     public void setProductName(String productName) { this.productName = productName; }

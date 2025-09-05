@@ -7,6 +7,7 @@ import com.erp.backend.repository.AddressRepository;
 import com.erp.backend.repository.CustomerRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -17,6 +18,7 @@ import java.util.UUID;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.web.server.ResponseStatusException;
 
 @Service
 @Transactional
@@ -165,17 +167,25 @@ public class CustomerService {
 
     public void deleteCustomerById(UUID id) {
         Customer customer = customerRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Customer not found with ID: " + id));
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND,
+                        "Customer not found with ID: " + id
+                ));
 
         // Prüfen, ob aktive Verträge vorhanden sind
         boolean hasActiveContracts = customer.getContracts().stream()
                 .anyMatch(contract -> contract.getContractStatus().equals(ContractStatus.ACTIVE)); // oder contract.getStatus().equals("ACTIVE")
 
         if (hasActiveContracts) {
-            throw new IllegalStateException("Cannot delete customer with active contracts (id=" + id + ")");
+            throw new ResponseStatusException(
+                    HttpStatus.CONFLICT,
+                    "Customer cannot be deleted because active contracts exist"
+            );
         }
 
-        customerRepository.deleteById(id);
+        // Soft Delete: Hibernate macht UPDATE ... SET deleted = true
+        customerRepository.delete(customer);
+        //customerRepository.deleteById(id); // deleteById(id) → benutzt getReference() (Problemquelle).
         logger.info("Soft-deleted customer with id={}", id);
     }
 

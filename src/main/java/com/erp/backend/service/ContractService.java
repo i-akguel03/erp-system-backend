@@ -8,6 +8,7 @@ import com.erp.backend.repository.ContractRepository;
 import com.erp.backend.repository.CustomerRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,6 +20,7 @@ import java.util.UUID;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.web.server.ResponseStatusException;
 
 @Service
 @Transactional
@@ -208,14 +210,18 @@ public class ContractService {
 
     public void deleteContract(UUID id) {
         Contract contract = contractRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Contract not found with ID: " + id));
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND,
+                        "Contract not found with ID: " + id
+                ));
 
         // Prüfen, ob aktive Subscriptions existieren
         boolean hasActiveSubscriptions = contract.getSubscriptions().stream()
-                .anyMatch(sub -> sub.getSubscriptionStatus().equals(SubscriptionStatus.ACTIVE)); // oder sub.getStatus().equals("ACTIVE")
+                .anyMatch(sub -> sub.getSubscriptionStatus().equals(SubscriptionStatus.ACTIVE));
 
         if (hasActiveSubscriptions) {
-            throw new IllegalStateException(
+            throw new ResponseStatusException(
+                    HttpStatus.CONFLICT,
                     "Cannot delete contract with active subscriptions (id=" + id + ")"
             );
         }

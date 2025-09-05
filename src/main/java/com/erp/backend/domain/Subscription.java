@@ -6,11 +6,13 @@ import org.hibernate.annotations.SQLRestriction;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @Entity
 @Table(name = "subscriptions")
-@SQLDelete(sql = "UPDATE customers SET deleted = true WHERE id = ?")
+@SQLDelete(sql = "UPDATE subscriptions SET deleted = true WHERE id = ?")
 @SQLRestriction("deleted = false")
 public class Subscription {
 
@@ -23,6 +25,15 @@ public class Subscription {
 
     @Column(name = "product_name", nullable = false)
     private String productName;
+
+    // Neue Spalte für Product-Referenz
+    @Column(name = "product_id")
+    private UUID productId;
+
+    // Optional: Direkte Beziehung zum Product (Lazy Loading)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "product_id", insertable = false, updatable = false)
+    private Product product;
 
     @Column(name = "description", length = 500)
     private String description;
@@ -58,6 +69,9 @@ public class Subscription {
     @JoinColumn(name = "contract_id", nullable = false)
     private Contract contract;
 
+    @OneToMany(mappedBy = "subscription", fetch = FetchType.LAZY)
+    private List<DueSchedule> paymentSchedules = new ArrayList<>();
+
     public Subscription() {
     }
 
@@ -71,6 +85,14 @@ public class Subscription {
     }
 
     // Getter & Setter
+
+    public List<DueSchedule> getPaymentSchedules() {
+        return paymentSchedules;
+    }
+
+    public void setPaymentSchedules(List<DueSchedule> paymentSchedules) {
+        this.paymentSchedules = paymentSchedules;
+    }
 
     public UUID getId() {
         return id;
@@ -94,6 +116,26 @@ public class Subscription {
 
     public void setProductName(String productName) {
         this.productName = productName;
+    }
+
+    public UUID getProductId() {
+        return productId;
+    }
+
+    public void setProductId(UUID productId) {
+        this.productId = productId;
+    }
+
+    public Product getProduct() {
+        return product;
+    }
+
+    public void setProduct(Product product) {
+        this.product = product;
+        if (product != null) {
+            this.productId = product.getId();
+            this.productName = product.getName();
+        }
     }
 
     public String getDescription() {
@@ -174,6 +216,7 @@ public class Subscription {
                 "id=" + id +
                 ", subscriptionNumber='" + subscriptionNumber + '\'' +
                 ", productName='" + productName + '\'' +
+                ", productId=" + productId +
                 ", description='" + description + '\'' +
                 ", monthlyPrice=" + monthlyPrice +
                 ", startDate=" + startDate +

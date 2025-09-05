@@ -11,7 +11,7 @@ import java.util.UUID;
 
 @Entity
 @Table(name = "due_schedules")
-@SQLDelete(sql = "UPDATE customers SET deleted = true WHERE id = ?")
+@SQLDelete(sql = "UPDATE due_schedules SET deleted = true WHERE id = ?")
 @SQLRestriction("deleted = false")
 public class DueSchedule {
 
@@ -31,7 +31,7 @@ public class DueSchedule {
     @Column(name = "period_start", nullable = false)
     private LocalDate periodStart;
 
-    @Column(name = "period_end", nullable = false)
+    @Column(name = "period_end")
     private LocalDate periodEnd;
 
     @Column(nullable = false)

@@ -1,13 +1,18 @@
 package com.erp.backend.dto;
 
 import com.erp.backend.domain.DueStatus;
+import com.erp.backend.domain.Subscription;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.UUID;
 
 /**
- * DTO für Fälligkeitspläne
+ * DTO für Fälligkeitspläne (DueSchedule)
+ * Defensiv gestaltet, um fehlende Subscriptions/Contracts zu tolerieren.
  */
 public class DueScheduleDto {
 
@@ -29,18 +34,23 @@ public class DueScheduleDto {
     private int reminderCount;
     private LocalDate lastReminderDate;
 
-    // Zusätzliche Felder für erweiterte Informationen
-    private String customerName;
-    private String productName;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "subscription_id", nullable = false)
+    private Subscription subscription;
 
-    // Standard-Konstruktor
+    // Erweiterte Felder
+    private String customerName; // Optional, über Contract → Customer
+    private String productName;  // Optional, über Contract → Product
+
+    // Konstruktoren
     public DueScheduleDto() {
         this.paidAmount = BigDecimal.ZERO;
         this.reminderSent = false;
         this.reminderCount = 0;
+        this.customerName = "Unknown Customer";
+        this.productName = "Unknown Product";
     }
 
-    // Konstruktor für schnelle Erstellung
     public DueScheduleDto(UUID subscriptionId, BigDecimal amount, LocalDate dueDate,
                           LocalDate periodStart, LocalDate periodEnd) {
         this();
@@ -52,157 +62,66 @@ public class DueScheduleDto {
         this.status = DueStatus.PENDING;
     }
 
-    // Getters und Setters
-    public UUID getId() {
-        return id;
-    }
+    // Getters & Setters
+    public UUID getId() { return id; }
+    public void setId(UUID id) { this.id = id; }
 
-    public void setId(UUID id) {
-        this.id = id;
-    }
+    public String getDueNumber() { return dueNumber; }
+    public void setDueNumber(String dueNumber) { this.dueNumber = dueNumber; }
 
-    public String getDueNumber() {
-        return dueNumber;
-    }
+    public UUID getSubscriptionId() { return subscriptionId; }
+    public void setSubscriptionId(UUID subscriptionId) { this.subscriptionId = subscriptionId; }
 
-    public void setDueNumber(String dueNumber) {
-        this.dueNumber = dueNumber;
-    }
+    public String getSubscriptionNumber() { return subscriptionNumber; }
+    public void setSubscriptionNumber(String subscriptionNumber) { this.subscriptionNumber = subscriptionNumber; }
 
-    public UUID getSubscriptionId() {
-        return subscriptionId;
-    }
+    public BigDecimal getAmount() { return amount; }
+    public void setAmount(BigDecimal amount) { this.amount = amount; }
 
-    public void setSubscriptionId(UUID subscriptionId) {
-        this.subscriptionId = subscriptionId;
-    }
+    public BigDecimal getPaidAmount() { return paidAmount; }
+    public void setPaidAmount(BigDecimal paidAmount) { this.paidAmount = paidAmount; }
 
-    public String getSubscriptionNumber() {
-        return subscriptionNumber;
-    }
+    public LocalDate getDueDate() { return dueDate; }
+    public void setDueDate(LocalDate dueDate) { this.dueDate = dueDate; }
 
-    public void setSubscriptionNumber(String subscriptionNumber) {
-        this.subscriptionNumber = subscriptionNumber;
-    }
+    public LocalDate getPeriodStart() { return periodStart; }
+    public void setPeriodStart(LocalDate periodStart) { this.periodStart = periodStart; }
 
-    public BigDecimal getAmount() {
-        return amount;
-    }
+    public LocalDate getPeriodEnd() { return periodEnd; }
+    public void setPeriodEnd(LocalDate periodEnd) { this.periodEnd = periodEnd; }
 
-    public void setAmount(BigDecimal amount) {
-        this.amount = amount;
-    }
+    public DueStatus getStatus() { return status; }
+    public void setStatus(DueStatus status) { this.status = status; }
 
-    public BigDecimal getPaidAmount() {
-        return paidAmount;
-    }
+    public LocalDate getPaidDate() { return paidDate; }
+    public void setPaidDate(LocalDate paidDate) { this.paidDate = paidDate; }
 
-    public void setPaidAmount(BigDecimal paidAmount) {
-        this.paidAmount = paidAmount;
-    }
+    public String getPaymentMethod() { return paymentMethod; }
+    public void setPaymentMethod(String paymentMethod) { this.paymentMethod = paymentMethod; }
 
-    public LocalDate getDueDate() {
-        return dueDate;
-    }
+    public String getPaymentReference() { return paymentReference; }
+    public void setPaymentReference(String paymentReference) { this.paymentReference = paymentReference; }
 
-    public void setDueDate(LocalDate dueDate) {
-        this.dueDate = dueDate;
-    }
+    public String getNotes() { return notes; }
+    public void setNotes(String notes) { this.notes = notes; }
 
-    public LocalDate getPeriodStart() {
-        return periodStart;
-    }
+    public boolean isReminderSent() { return reminderSent; }
+    public void setReminderSent(boolean reminderSent) { this.reminderSent = reminderSent; }
 
-    public void setPeriodStart(LocalDate periodStart) {
-        this.periodStart = periodStart;
-    }
+    public int getReminderCount() { return reminderCount; }
+    public void setReminderCount(int reminderCount) { this.reminderCount = reminderCount; }
 
-    public LocalDate getPeriodEnd() {
-        return periodEnd;
-    }
+    public LocalDate getLastReminderDate() { return lastReminderDate; }
+    public void setLastReminderDate(LocalDate lastReminderDate) { this.lastReminderDate = lastReminderDate; }
 
-    public void setPeriodEnd(LocalDate periodEnd) {
-        this.periodEnd = periodEnd;
-    }
-
-    public DueStatus getStatus() {
-        return status;
-    }
-
-    public void setStatus(DueStatus status) {
-        this.status = status;
-    }
-
-    public LocalDate getPaidDate() {
-        return paidDate;
-    }
-
-    public void setPaidDate(LocalDate paidDate) {
-        this.paidDate = paidDate;
-    }
-
-    public String getPaymentMethod() {
-        return paymentMethod;
-    }
-
-    public void setPaymentMethod(String paymentMethod) {
-        this.paymentMethod = paymentMethod;
-    }
-
-    public String getPaymentReference() {
-        return paymentReference;
-    }
-
-    public void setPaymentReference(String paymentReference) {
-        this.paymentReference = paymentReference;
-    }
-
-    public String getNotes() {
-        return notes;
-    }
-
-    public void setNotes(String notes) {
-        this.notes = notes;
-    }
-
-    public boolean isReminderSent() {
-        return reminderSent;
-    }
-
-    public void setReminderSent(boolean reminderSent) {
-        this.reminderSent = reminderSent;
-    }
-
-    public int getReminderCount() {
-        return reminderCount;
-    }
-
-    public void setReminderCount(int reminderCount) {
-        this.reminderCount = reminderCount;
-    }
-
-    public LocalDate getLastReminderDate() {
-        return lastReminderDate;
-    }
-
-    public void setLastReminderDate(LocalDate lastReminderDate) {
-        this.lastReminderDate = lastReminderDate;
-    }
-
-    public String getCustomerName() {
-        return customerName;
-    }
-
+    public String getCustomerName() { return customerName; }
     public void setCustomerName(String customerName) {
-        this.customerName = customerName;
+        this.customerName = (customerName != null) ? customerName : "Unknown Customer";
     }
 
-    public String getProductName() {
-        return productName;
-    }
-
+    public String getProductName() { return productName; }
     public void setProductName(String productName) {
-        this.productName = productName;
+        this.productName = (productName != null) ? productName : "Unknown Product";
     }
 
     // Berechnete Eigenschaften
@@ -212,13 +131,12 @@ public class DueScheduleDto {
     }
 
     public boolean isOverdue() {
-        return dueDate.isBefore(LocalDate.now()) &&
+        return dueDate != null && dueDate.isBefore(LocalDate.now()) &&
                 (status == DueStatus.PENDING || status == DueStatus.PARTIAL_PAID);
     }
 
     public boolean isFullyPaid() {
-        return status == DueStatus.PAID ||
-                (paidAmount != null && paidAmount.compareTo(amount) >= 0);
+        return status == DueStatus.PAID || (paidAmount != null && paidAmount.compareTo(amount) >= 0);
     }
 
     public long getDaysOverdue() {
@@ -230,16 +148,17 @@ public class DueScheduleDto {
         return isOverdue() && !reminderSent;
     }
 
-    // Validierungs-Methoden
+    // Validierung
     public boolean isValidForCreation() {
         return subscriptionId != null &&
                 amount != null && amount.compareTo(BigDecimal.ZERO) > 0 &&
                 dueDate != null &&
                 periodStart != null &&
-                periodEnd != null &&
+                periodEnd != null && // <-- hier prüfen
                 !periodStart.isAfter(periodEnd) &&
                 !dueDate.isBefore(periodEnd);
     }
+
 
     @Override
     public String toString() {
@@ -251,7 +170,8 @@ public class DueScheduleDto {
                 ", paidAmount=" + paidAmount +
                 ", dueDate=" + dueDate +
                 ", status=" + status +
-                ", isOverdue=" + isOverdue() +
+                ", customerName='" + customerName + '\'' +
+                ", productName='" + productName + '\'' +
                 '}';
     }
 }

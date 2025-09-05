@@ -119,4 +119,11 @@ public interface DueScheduleRepository extends JpaRepository<DueSchedule, UUID> 
     @Query("DELETE FROM DueSchedule ds WHERE ds.subscription = :subscription AND ds.dueDate > :cutoffDate AND ds.status = 'PENDING'")
     void deleteFuturePendingBySubscription(@Param("subscription") Subscription subscription,
                                            @Param("cutoffDate") LocalDate cutoffDate);
+
+    /**
+     * Findet Fälligkeitspläne nach Abonnement und mehreren Status
+     */
+    List<DueSchedule> findBySubscriptionAndStatusIn(Subscription subscription, List<DueStatus> statuses);
+
+
 }

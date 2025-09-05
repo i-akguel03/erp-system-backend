@@ -13,7 +13,7 @@ import java.util.UUID;
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 @Entity
 @Table(name = "contracts")
-@SQLDelete(sql = "UPDATE customers SET deleted = true WHERE id = ?")
+@SQLDelete(sql = "UPDATE contracts SET deleted = true WHERE id = ?")
 @SQLRestriction("deleted = false")
 public class Contract {
 
