@@ -41,15 +41,26 @@ Fullstack-Anwendung mit **Spring Boot (Java)**, **Angular (TypeScript)**, **Post
 
 ```mermaid
 graph TD
-  A[Angular Frontend] -->|REST + JWT| B[Spring Boot Backend]
+  A[Angular 20 Frontend] -->|REST + JWT| B[Spring Boot Backend]
   B --> C[PostgreSQL Database]
+
+  subgraph Frontend Stack
+    A1[Angular 20 + TypeScript]
+    A2[Bootstrap 5]
+    A3[Reactive Forms]
+    A4[HTTP Interceptors]
+  end
 
   subgraph Backend Layers
     B1[Controller Layer]
-    B2[Service Layer]
+    B2[Service Layer] 
     B3[Repository Layer]
-    B4[Entities]
+    B4[JPA Entities]
   end
+
+  A1 --> A2
+  A2 --> A3
+  A3 --> A4
 
   B1 --> B2
   B2 --> B3
@@ -63,19 +74,31 @@ graph TD
 
 ---
 
-## 💼 Für Recruiter & Hiring Manager
+## 💼 Für Recruiter & Tech-Teams
 
-**Dieses Projekt demonstriert:**
-- ✅ Fullstack-Entwicklung (Frontend + Backend + Database)
-- ✅ Moderne Java/Spring Boot Architektur 
-- ✅ Angular SPA mit TypeScript
-- ✅ RESTful API Design
-- ✅ Datenbank-Design und JPA/Hibernate
-- ✅ JWT Security Implementation
-- ✅ Clean Code & Best Practices
-- ✅ Testing (Unit & Integration Tests)
+**Dieses Projekt zeigt praktische Erfahrung mit:**
 
-**Entwicklungszeit:** ~X Wochen | **Lines of Code:** ~X.XXX
+### Backend Development
+- ✅ **Spring Boot 3** - Modern Java Enterprise Development
+- ✅ **Spring Security** - JWT Authentication & Authorization  
+- ✅ **JPA/Hibernate** - Complex Database Relationships
+- ✅ **RESTful APIs** - Clean API Design with OpenAPI/Swagger
+- ✅ **Maven** - Dependency Management & Build Automation
+
+### Frontend Development  
+- ✅ **Angular 17** - Component-based SPA Architecture
+- ✅ **TypeScript** - Type-safe Frontend Development
+- ✅ **Angular Material** - Modern UI Components
+- ✅ **Responsive Design** - Mobile-first Approach
+- ✅ **HTTP Interceptors** - Token Management & Error Handling
+
+### DevOps & Architecture
+- ✅ **PostgreSQL** - Relational Database Design
+- ✅ **Docker** - Containerization
+- ✅ **Clean Architecture** - Separation of Concerns
+- ✅ **Unit & Integration Testing** - Quality Assurance
+
+**💡 Highlights:** Komplexe Business Logic, Production-ready Code, Moderne Tech-Stack
 
 ---
 
