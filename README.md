@@ -1,18 +1,39 @@
 # ERP System – Fullstack mit Spring Boot & Angular
 
 Ein **ERP-System** zur Verwaltung von Kunden, Adressen, Produkten, Verträgen, Abonnements und Fälligkeitsplänen.  
-Fullstack-Anwendung mit **Spring Boot (Java)**, **Angular (TypeScript)**, **PostgreSQL** und **JWT-Authentifizierung**.  
+Fullstack-Anwendung mit **Spring Boot (Java)**, **Angular (TypeScript)**, **PostgreSQL** und **JWT-Authentifizierung**.
+
+## 🎯 Live Demo
+
+🌐 **[Frontend Live Demo](DEIN_FRONTEND_LINK)**  
+📚 **[API Dokumentation (Swagger)](DEIN_BACKEND_LINK/swagger-ui.html)**
+
+## 📸 Screenshots
+
+![Dashboard Overview](screenshots/dashboard.png)
+*Dashboard mit Kundenübersicht und Navigation*
+
+![Customer Management](screenshots/customers.png) 
+*Kunden- und Adressverwaltung mit CRUD-Operationen*
+
+![Contract Details](screenshots/contracts.png)
+*Vertragsverwaltung mit Abonnements und Fälligkeiten*
 
 ---
 
 ## ✨ Features
 
-- Authentifizierung & Autorisierung mit JWT (Login/Register)
-- Kunden- und Adressverwaltung (CRUD)
-- Produktverwaltung (CRUD)
-- Vertragsverwaltung inkl. Abos & DueSchedules
-- Geschäftslogik: Kunde kann nicht gelöscht werden, wenn aktive Verträge bestehen
-- Swagger API-Dokumentation
+- 🔐 **Authentifizierung & Autorisierung** mit JWT (Login/Register)
+- 👥 **Kunden- und Adressverwaltung** (CRUD)
+- 📦 **Produktverwaltung** (CRUD)
+- 📋 **Vertragsverwaltung** inkl. Abos & DueSchedules
+- 🛡️ **Geschäftslogik**: Kunde kann nicht gelöscht werden, wenn aktive Verträge bestehen
+- 📖 **Swagger API-Dokumentation**
+- 🎨 **Responsive Design** mit Angular Material
+- ⚡ **Real-time Updates** und Validierung
+
+![Tech Stack](screenshots/tech-stack.png)
+*Verwendete Technologien und Architektur*
 
 ---
 
@@ -39,6 +60,22 @@ graph TD
   B4 --> Contract[Contract]
   B4 --> Subscription[Subscription / DueSchedule]
 ```
+
+---
+
+## 💼 Für Recruiter & Hiring Manager
+
+**Dieses Projekt demonstriert:**
+- ✅ Fullstack-Entwicklung (Frontend + Backend + Database)
+- ✅ Moderne Java/Spring Boot Architektur 
+- ✅ Angular SPA mit TypeScript
+- ✅ RESTful API Design
+- ✅ Datenbank-Design und JPA/Hibernate
+- ✅ JWT Security Implementation
+- ✅ Clean Code & Best Practices
+- ✅ Testing (Unit & Integration Tests)
+
+**Entwicklungszeit:** ~X Wochen | **Lines of Code:** ~X.XXX
 
 ---
 
