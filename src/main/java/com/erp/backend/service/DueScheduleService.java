@@ -235,10 +235,6 @@ public class DueScheduleService {
         DueSchedule dueSchedule = dueScheduleRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Fälligkeit " + id + " nicht gefunden"));
 
-        // Prüfen ob bereits abgerechnet
-//        if (dueSchedule.getStatus() == DueStatus.COMPLETED && dueSchedule.getInvoice() != null) {
-//            throw new IllegalStateException("Abgerechnete Fälligkeiten können nicht gelöscht werden");
-//        }
 
         dueScheduleRepository.delete(dueSchedule);
         logger.info("Deleted due schedule: id={}", id);
@@ -302,6 +298,17 @@ public class DueScheduleService {
     public List<DueScheduleDto> getDueSchedulesReadyForBilling() {
         LocalDate today = LocalDate.now();
         return dueScheduleRepository.findByStatusAndDueDateLessThanEqual(DueStatus.ACTIVE, today)
+                .stream()
+                .map(dueScheduleMapper::toDto)
+                .toList();
+    }
+
+    /**
+     * Holt alle Fälligkeiten.
+     */
+    @Transactional(readOnly = true)
+    public List<DueScheduleDto> getAllDueSchedules() {
+        return dueScheduleRepository.findAll()
                 .stream()
                 .map(dueScheduleMapper::toDto)
                 .toList();

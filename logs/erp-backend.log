@@ -1631,3 +1631,272 @@ Caused by: org.hibernate.MappingException: Basic collection has element type 'co
 2025-09-13T17:32:32.235+02:00 ERROR 16220 --- [erp-system-backend] [http-nio-8080-exec-2] c.erp.backend.service.InitDataService    : Fehler beim Erstellen eines OpenItems: Payment amount must be positive
 2025-09-13T17:32:32.236+02:00  INFO 16220 --- [erp-system-backend] [http-nio-8080-exec-2] c.erp.backend.service.InitDataService    : Es wurden 2 Sample-OpenItems erstellt
 2025-09-13T17:32:32.236+02:00  INFO 16220 --- [erp-system-backend] [http-nio-8080-exec-2] c.erp.backend.service.InitDataService    : Testdateninitialisierung erfolgreich abgeschlossen.
+2025-09-13T17:38:09.713+02:00  INFO 16220 --- [erp-system-backend] [http-nio-8080-exec-10] c.e.b.controller.ProductController       : GET /api/products - Fetching products (paginated: false)
+2025-09-13T17:38:09.717+02:00  INFO 16220 --- [erp-system-backend] [http-nio-8080-exec-8] c.e.b.controller.ContractController      : GET /api/contracts - Fetching contracts (paginated: false)
+2025-09-13T17:38:09.937+02:00  INFO 16220 --- [erp-system-backend] [http-nio-8080-exec-10] com.erp.backend.service.ProductService   : Fetched 18 products
+2025-09-13T17:38:09.937+02:00 DEBUG 16220 --- [erp-system-backend] [http-nio-8080-exec-10] c.e.b.controller.ProductController       : Found 18 products
+2025-09-13T17:38:13.949+02:00  INFO 16220 --- [erp-system-backend] [http-nio-8080-exec-3] c.e.b.controller.ContractController      : GET /api/contracts - Fetching contracts (paginated: false)
+2025-09-13T17:38:14.947+02:00  INFO 16220 --- [erp-system-backend] [http-nio-8080-exec-6] c.erp.backend.service.CustomerService    : Fetched 25 customers
+2025-09-13T17:38:21.328+02:00  INFO 16220 --- [erp-system-backend] [http-nio-8080-exec-7] c.e.b.controller.ProductController       : GET /api/products - Fetching products (paginated: false)
+2025-09-13T17:38:21.551+02:00  INFO 16220 --- [erp-system-backend] [http-nio-8080-exec-7] com.erp.backend.service.ProductService   : Fetched 18 products
+2025-09-13T17:38:21.551+02:00 DEBUG 16220 --- [erp-system-backend] [http-nio-8080-exec-7] c.e.b.controller.ProductController       : Found 18 products
+2025-09-13T17:38:27.871+02:00  INFO 16220 --- [erp-system-backend] [http-nio-8080-exec-9] c.erp.backend.service.CustomerService    : Fetched 25 customers
+2025-09-13T17:38:33.422+02:00  INFO 16220 --- [erp-system-backend] [http-nio-8080-exec-6] c.e.b.controller.ContractController      : GET /api/contracts - Fetching contracts (paginated: false)
+2025-09-13T17:38:35.088+02:00  INFO 16220 --- [erp-system-backend] [http-nio-8080-exec-3] c.erp.backend.service.CustomerService    : Fetched 25 customers
+2025-09-13T17:38:43.199+02:00  WARN 16220 --- [erp-system-backend] [http-nio-8080-exec-2] .w.s.m.s.DefaultHandlerExceptionResolver : Resolved [org.springframework.http.converter.HttpMessageNotWritableException: Could not write JSON: Cannot invoke "java.math.BigDecimal.subtract(java.math.BigDecimal)" because "this.amount" is null]
+2025-09-13T17:38:49.950+02:00  WARN 16220 --- [erp-system-backend] [http-nio-8080-exec-6] .w.s.m.s.DefaultHandlerExceptionResolver : Resolved [org.springframework.http.converter.HttpMessageNotWritableException: Could not write JSON: Cannot invoke "java.math.BigDecimal.subtract(java.math.BigDecimal)" because "this.amount" is null]
+2025-09-13T17:38:52.472+02:00  WARN 16220 --- [erp-system-backend] [http-nio-8080-exec-7] .w.s.m.s.DefaultHandlerExceptionResolver : Resolved [org.springframework.http.converter.HttpMessageNotWritableException: Could not write JSON: Cannot invoke "java.math.BigDecimal.subtract(java.math.BigDecimal)" because "this.amount" is null]
+2025-09-13T17:38:53.973+02:00  WARN 16220 --- [erp-system-backend] [http-nio-8080-exec-2] .w.s.m.s.DefaultHandlerExceptionResolver : Resolved [org.springframework.http.converter.HttpMessageNotWritableException: Could not write JSON: Cannot invoke "java.math.BigDecimal.subtract(java.math.BigDecimal)" because "this.amount" is null]
+2025-09-13T17:38:56.047+02:00  WARN 16220 --- [erp-system-backend] [http-nio-8080-exec-9] ration$PageModule$WarningLoggingModifier : Serializing PageImpl instances as-is is not supported, meaning that there is no guarantee about the stability of the resulting JSON structure!
+	For a stable JSON structure, please use Spring Data's PagedModel (globally via @EnableSpringDataWebSupport(pageSerializationMode = VIA_DTO))
+	or Spring HATEOAS and Spring Data's PagedResourcesAssembler as documented in https://docs.spring.io/spring-data/commons/reference/repositories/core-extensions.html#core.web.pageables.
+
+2025-09-13T17:41:06.716+02:00  INFO 16220 --- [erp-system-backend] [SpringApplicationShutdownHook] o.s.b.w.e.tomcat.GracefulShutdown        : Commencing graceful shutdown. Waiting for active requests to complete
+2025-09-13T17:41:06.720+02:00  INFO 16220 --- [erp-system-backend] [tomcat-shutdown] o.s.b.w.e.tomcat.GracefulShutdown        : Graceful shutdown complete
+2025-09-13T17:41:06.728+02:00  INFO 16220 --- [erp-system-backend] [SpringApplicationShutdownHook] j.LocalContainerEntityManagerFactoryBean : Closing JPA EntityManagerFactory for persistence unit 'default'
+2025-09-13T17:41:06.730+02:00  INFO 16220 --- [erp-system-backend] [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown initiated...
+2025-09-13T17:41:07.769+02:00  INFO 16220 --- [erp-system-backend] [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown completed.
+2025-09-13T17:41:11.793+02:00  INFO 2332 --- [erp-system-backend] [restartedMain] c.e.backend.ErpSystemBackendApplication  : Starting ErpSystemBackendApplication using Java 24.0.1 with PID 2332 (C:\Users\ibrah\Desktop\ERP-Backend\erp-system-backend\target\classes started by ibrah in C:\Users\ibrah\Desktop\ERP-Backend\erp-system-backend)
+2025-09-13T17:41:11.796+02:00 DEBUG 2332 --- [erp-system-backend] [restartedMain] c.e.backend.ErpSystemBackendApplication  : Running with Spring Boot v3.5.3, Spring v6.2.8
+2025-09-13T17:41:11.797+02:00  INFO 2332 --- [erp-system-backend] [restartedMain] c.e.backend.ErpSystemBackendApplication  : No active profile set, falling back to 1 default profile: "default"
+2025-09-13T17:41:11.876+02:00  INFO 2332 --- [erp-system-backend] [restartedMain] .e.DevToolsPropertyDefaultsPostProcessor : Devtools property defaults active! Set 'spring.devtools.add-properties' to 'false' to disable
+2025-09-13T17:41:11.876+02:00  INFO 2332 --- [erp-system-backend] [restartedMain] .e.DevToolsPropertyDefaultsPostProcessor : For additional web related logging consider setting the 'logging.level.web' property to 'DEBUG'
+2025-09-13T17:41:13.070+02:00  INFO 2332 --- [erp-system-backend] [restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2025-09-13T17:41:13.166+02:00  INFO 2332 --- [erp-system-backend] [restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 82 ms. Found 12 JPA repository interfaces.
+2025-09-13T17:41:13.809+02:00  INFO 2332 --- [erp-system-backend] [restartedMain] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port 8080 (http)
+2025-09-13T17:41:13.823+02:00  INFO 2332 --- [erp-system-backend] [restartedMain] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2025-09-13T17:41:13.824+02:00  INFO 2332 --- [erp-system-backend] [restartedMain] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.42]
+2025-09-13T17:41:13.866+02:00  INFO 2332 --- [erp-system-backend] [restartedMain] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
+2025-09-13T17:41:13.866+02:00  INFO 2332 --- [erp-system-backend] [restartedMain] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 1990 ms
+2025-09-13T17:41:14.118+02:00  INFO 2332 --- [erp-system-backend] [restartedMain] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: default]
+2025-09-13T17:41:14.167+02:00  INFO 2332 --- [erp-system-backend] [restartedMain] org.hibernate.Version                    : HHH000412: Hibernate ORM core version 6.6.18.Final
+2025-09-13T17:41:14.205+02:00  INFO 2332 --- [erp-system-backend] [restartedMain] o.h.c.internal.RegionFactoryInitiator    : HHH000026: Second-level cache disabled
+2025-09-13T17:41:14.522+02:00  INFO 2332 --- [erp-system-backend] [restartedMain] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2025-09-13T17:41:14.549+02:00  INFO 2332 --- [erp-system-backend] [restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2025-09-13T17:41:15.911+02:00  INFO 2332 --- [erp-system-backend] [restartedMain] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection org.postgresql.jdbc.PgConnection@517d4bad
+2025-09-13T17:41:15.913+02:00  INFO 2332 --- [erp-system-backend] [restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2025-09-13T17:41:16.050+02:00  WARN 2332 --- [erp-system-backend] [restartedMain] org.hibernate.orm.deprecation            : HHH90000025: PostgreSQLDialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2025-09-13T17:41:16.398+02:00  INFO 2332 --- [erp-system-backend] [restartedMain] org.hibernate.orm.connections.pooling    : HHH10001005: Database info:
+	Database JDBC URL [Connecting through datasource 'HikariDataSource (HikariPool-1)']
+	Database driver: undefined/unknown
+	Database version: 17.5
+	Autocommit mode: undefined/unknown
+	Isolation level: undefined/unknown
+	Minimum pool size: undefined/unknown
+	Maximum pool size: undefined/unknown
+2025-09-13T17:41:17.425+02:00  INFO 2332 --- [erp-system-backend] [restartedMain] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2025-09-13T17:41:25.628+02:00  INFO 2332 --- [erp-system-backend] [restartedMain] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2025-09-13T17:41:25.942+02:00 DEBUG 2332 --- [erp-system-backend] [restartedMain] com.erp.backend.config.JwtAuthFilter     : Filter 'jwtAuthFilter' configured for use
+2025-09-13T17:41:26.044+02:00  INFO 2332 --- [erp-system-backend] [restartedMain] o.s.d.j.r.query.QueryEnhancerFactory     : Hibernate is in classpath; If applicable, HQL parser will be used.
+2025-09-13T17:41:27.332+02:00  WARN 2332 --- [erp-system-backend] [restartedMain] JpaBaseConfiguration$JpaWebConfiguration : spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2025-09-13T17:41:27.354+02:00  INFO 2332 --- [erp-system-backend] [restartedMain] r$InitializeUserDetailsManagerConfigurer : Global AuthenticationManager configured with UserDetailsService bean with name userDetailsService
+2025-09-13T17:41:27.706+02:00  INFO 2332 --- [erp-system-backend] [restartedMain] o.s.b.a.e.web.EndpointLinksResolver      : Exposing 4 endpoints beneath base path '/actuator'
+2025-09-13T17:41:28.068+02:00  INFO 2332 --- [erp-system-backend] [restartedMain] o.s.b.d.a.OptionalLiveReloadServer       : LiveReload server is running on port 35729
+2025-09-13T17:41:28.136+02:00  INFO 2332 --- [erp-system-backend] [restartedMain] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port 8080 (http) with context path '/'
+2025-09-13T17:41:28.151+02:00  INFO 2332 --- [erp-system-backend] [restartedMain] c.e.backend.ErpSystemBackendApplication  : Started ErpSystemBackendApplication in 16.884 seconds (process running for 17.347)
+2025-09-13T17:50:33.884+02:00  INFO 2332 --- [erp-system-backend] [http-nio-8080-exec-1] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring DispatcherServlet 'dispatcherServlet'
+2025-09-13T17:50:33.884+02:00  INFO 2332 --- [erp-system-backend] [http-nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
+2025-09-13T17:50:33.886+02:00  INFO 2332 --- [erp-system-backend] [http-nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Completed initialization in 2 ms
+2025-09-13T17:50:47.849+02:00  WARN 2332 --- [erp-system-backend] [http-nio-8080-exec-2] .w.s.m.s.DefaultHandlerExceptionResolver : Resolved [org.springframework.web.HttpRequestMethodNotSupportedException: Request method 'GET' is not supported]
+2025-09-13T17:50:53.310+02:00  WARN 2332 --- [erp-system-backend] [http-nio-8080-exec-8] .w.s.m.s.DefaultHandlerExceptionResolver : Resolved [org.springframework.web.HttpRequestMethodNotSupportedException: Request method 'GET' is not supported]
+2025-09-13T17:50:56.013+02:00  INFO 2332 --- [erp-system-backend] [http-nio-8080-exec-1] c.e.b.controller.ContractController      : GET /api/contracts - Fetching contracts (paginated: false)
+2025-09-13T17:50:57.855+02:00  INFO 2332 --- [erp-system-backend] [http-nio-8080-exec-5] c.erp.backend.service.CustomerService    : Fetched 25 customers
+2025-09-13T17:51:07.815+02:00  WARN 2332 --- [erp-system-backend] [http-nio-8080-exec-8] .w.s.m.s.DefaultHandlerExceptionResolver : Resolved [org.springframework.http.converter.HttpMessageNotWritableException: Could not write JSON: Cannot invoke "java.math.BigDecimal.subtract(java.math.BigDecimal)" because "this.amount" is null]
+2025-09-13T17:51:10.547+02:00  WARN 2332 --- [erp-system-backend] [http-nio-8080-exec-10] .w.s.m.s.DefaultHandlerExceptionResolver : Resolved [org.springframework.http.converter.HttpMessageNotWritableException: Could not write JSON: Cannot invoke "java.math.BigDecimal.subtract(java.math.BigDecimal)" because "this.amount" is null]
+2025-09-13T17:51:13.905+02:00  WARN 2332 --- [erp-system-backend] [http-nio-8080-exec-1] .w.s.m.s.DefaultHandlerExceptionResolver : Resolved [org.springframework.http.converter.HttpMessageNotWritableException: Could not write JSON: Cannot invoke "java.math.BigDecimal.subtract(java.math.BigDecimal)" because "this.amount" is null]
+2025-09-13T17:51:16.586+02:00  WARN 2332 --- [erp-system-backend] [http-nio-8080-exec-4] .w.s.m.s.DefaultHandlerExceptionResolver : Resolved [org.springframework.http.converter.HttpMessageNotWritableException: Could not write JSON: Cannot invoke "java.math.BigDecimal.subtract(java.math.BigDecimal)" because "this.amount" is null]
+2025-09-13T17:51:17.559+02:00  WARN 2332 --- [erp-system-backend] [http-nio-8080-exec-2] .w.s.m.s.DefaultHandlerExceptionResolver : Resolved [org.springframework.http.converter.HttpMessageNotWritableException: Could not write JSON: Cannot invoke "java.math.BigDecimal.subtract(java.math.BigDecimal)" because "this.amount" is null]
+2025-09-13T17:51:18.372+02:00  WARN 2332 --- [erp-system-backend] [http-nio-8080-exec-7] .w.s.m.s.DefaultHandlerExceptionResolver : Resolved [org.springframework.http.converter.HttpMessageNotWritableException: Could not write JSON: Cannot invoke "java.math.BigDecimal.subtract(java.math.BigDecimal)" because "this.amount" is null]
+2025-09-13T17:51:19.922+02:00  WARN 2332 --- [erp-system-backend] [http-nio-8080-exec-9] .w.s.m.s.DefaultHandlerExceptionResolver : Resolved [org.springframework.http.converter.HttpMessageNotWritableException: Could not write JSON: Cannot invoke "java.math.BigDecimal.subtract(java.math.BigDecimal)" because "this.amount" is null]
+2025-09-13T17:53:40.383+02:00 ERROR 2332 --- [erp-system-backend] [http-nio-8080-exec-10] o.a.c.c.C.[.[.[/].[dispatcherServlet]    : Servlet.service() for servlet [dispatcherServlet] in context with path [] threw exception
+
+java.lang.IllegalArgumentException: Invalid JWT token
+	at com.erp.backend.config.JwtUtil.extractUsername(JwtUtil.java:61) ~[classes/:na]
+	at com.erp.backend.config.JwtAuthFilter.doFilterInternal(JwtAuthFilter.java:39) ~[classes/:na]
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116) ~[spring-web-6.2.8.jar:6.2.8]
+	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.wrapFilter(ObservationFilterChainDecorator.java:240) ~[spring-security-web-6.5.1.jar:6.5.1]
+	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.doFilter(ObservationFilterChainDecorator.java:227) ~[spring-security-web-6.5.1.jar:6.5.1]
+	at org.springframework.security.web.ObservationFilterChainDecorator$VirtualFilterChain.doFilter(ObservationFilterChainDecorator.java:137) ~[spring-security-web-6.5.1.jar:6.5.1]
+	at org.springframework.security.web.authentication.logout.LogoutFilter.doFilter(LogoutFilter.java:107) ~[spring-security-web-6.5.1.jar:6.5.1]
+	at org.springframework.security.web.authentication.logout.LogoutFilter.doFilter(LogoutFilter.java:93) ~[spring-security-web-6.5.1.jar:6.5.1]
+	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.wrapFilter(ObservationFilterChainDecorator.java:240) ~[spring-security-web-6.5.1.jar:6.5.1]
+	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.doFilter(ObservationFilterChainDecorator.java:227) ~[spring-security-web-6.5.1.jar:6.5.1]
+	at org.springframework.security.web.ObservationFilterChainDecorator$VirtualFilterChain.doFilter(ObservationFilterChainDecorator.java:137) ~[spring-security-web-6.5.1.jar:6.5.1]
+	at org.springframework.web.filter.CorsFilter.doFilterInternal(CorsFilter.java:91) ~[spring-web-6.2.8.jar:6.2.8]
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116) ~[spring-web-6.2.8.jar:6.2.8]
+	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.wrapFilter(ObservationFilterChainDecorator.java:240) ~[spring-security-web-6.5.1.jar:6.5.1]
+	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.doFilter(ObservationFilterChainDecorator.java:227) ~[spring-security-web-6.5.1.jar:6.5.1]
+	at org.springframework.security.web.ObservationFilterChainDecorator$VirtualFilterChain.doFilter(ObservationFilterChainDecorator.java:137) ~[spring-security-web-6.5.1.jar:6.5.1]
+	at org.springframework.security.web.header.HeaderWriterFilter.doHeadersAfter(HeaderWriterFilter.java:90) ~[spring-security-web-6.5.1.jar:6.5.1]
+	at org.springframework.security.web.header.HeaderWriterFilter.doFilterInternal(HeaderWriterFilter.java:75) ~[spring-security-web-6.5.1.jar:6.5.1]
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116) ~[spring-web-6.2.8.jar:6.2.8]
+	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.wrapFilter(ObservationFilterChainDecorator.java:240) ~[spring-security-web-6.5.1.jar:6.5.1]
+	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.doFilter(ObservationFilterChainDecorator.java:227) ~[spring-security-web-6.5.1.jar:6.5.1]
+	at org.springframework.security.web.ObservationFilterChainDecorator$VirtualFilterChain.doFilter(ObservationFilterChainDecorator.java:137) ~[spring-security-web-6.5.1.jar:6.5.1]
+	at org.springframework.security.web.context.SecurityContextHolderFilter.doFilter(SecurityContextHolderFilter.java:82) ~[spring-security-web-6.5.1.jar:6.5.1]
+	at org.springframework.security.web.context.SecurityContextHolderFilter.doFilter(SecurityContextHolderFilter.java:69) ~[spring-security-web-6.5.1.jar:6.5.1]
+	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.wrapFilter(ObservationFilterChainDecorator.java:240) ~[spring-security-web-6.5.1.jar:6.5.1]
+	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.doFilter(ObservationFilterChainDecorator.java:227) ~[spring-security-web-6.5.1.jar:6.5.1]
+	at org.springframework.security.web.ObservationFilterChainDecorator$VirtualFilterChain.doFilter(ObservationFilterChainDecorator.java:137) ~[spring-security-web-6.5.1.jar:6.5.1]
+	at org.springframework.security.web.context.request.async.WebAsyncManagerIntegrationFilter.doFilterInternal(WebAsyncManagerIntegrationFilter.java:62) ~[spring-security-web-6.5.1.jar:6.5.1]
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116) ~[spring-web-6.2.8.jar:6.2.8]
+	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.wrapFilter(ObservationFilterChainDecorator.java:240) ~[spring-security-web-6.5.1.jar:6.5.1]
+	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.doFilter(ObservationFilterChainDecorator.java:227) ~[spring-security-web-6.5.1.jar:6.5.1]
+	at org.springframework.security.web.ObservationFilterChainDecorator$VirtualFilterChain.doFilter(ObservationFilterChainDecorator.java:137) ~[spring-security-web-6.5.1.jar:6.5.1]
+	at org.springframework.security.web.session.DisableEncodeUrlFilter.doFilterInternal(DisableEncodeUrlFilter.java:42) ~[spring-security-web-6.5.1.jar:6.5.1]
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116) ~[spring-web-6.2.8.jar:6.2.8]
+	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.wrapFilter(ObservationFilterChainDecorator.java:240) ~[spring-security-web-6.5.1.jar:6.5.1]
+	at org.springframework.security.web.ObservationFilterChainDecorator$AroundFilterObservation$SimpleAroundFilterObservation.lambda$wrap$0(ObservationFilterChainDecorator.java:323) ~[spring-security-web-6.5.1.jar:6.5.1]
+	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.doFilter(ObservationFilterChainDecorator.java:224) ~[spring-security-web-6.5.1.jar:6.5.1]
+	at org.springframework.security.web.ObservationFilterChainDecorator$VirtualFilterChain.doFilter(ObservationFilterChainDecorator.java:137) ~[spring-security-web-6.5.1.jar:6.5.1]
+	at org.springframework.security.web.FilterChainProxy.doFilterInternal(FilterChainProxy.java:233) ~[spring-security-web-6.5.1.jar:6.5.1]
+	at org.springframework.security.web.FilterChainProxy.doFilter(FilterChainProxy.java:191) ~[spring-security-web-6.5.1.jar:6.5.1]
+	at org.springframework.web.filter.CompositeFilter$VirtualFilterChain.doFilter(CompositeFilter.java:113) ~[spring-web-6.2.8.jar:6.2.8]
+	at org.springframework.web.filter.ServletRequestPathFilter.doFilter(ServletRequestPathFilter.java:52) ~[spring-web-6.2.8.jar:6.2.8]
+	at org.springframework.web.filter.CompositeFilter$VirtualFilterChain.doFilter(CompositeFilter.java:113) ~[spring-web-6.2.8.jar:6.2.8]
+	at org.springframework.web.filter.CompositeFilter.doFilter(CompositeFilter.java:74) ~[spring-web-6.2.8.jar:6.2.8]
+	at org.springframework.security.config.annotation.web.configuration.WebSecurityConfiguration$CompositeFilterChainProxy.doFilter(WebSecurityConfiguration.java:319) ~[spring-security-config-6.5.1.jar:6.5.1]
+	at org.springframework.web.filter.CompositeFilter$VirtualFilterChain.doFilter(CompositeFilter.java:113) ~[spring-web-6.2.8.jar:6.2.8]
+	at org.springframework.web.servlet.handler.HandlerMappingIntrospector.lambda$createCacheFilter$4(HandlerMappingIntrospector.java:267) ~[spring-webmvc-6.2.8.jar:6.2.8]
+	at org.springframework.web.filter.CompositeFilter$VirtualFilterChain.doFilter(CompositeFilter.java:113) ~[spring-web-6.2.8.jar:6.2.8]
+	at org.springframework.web.filter.CompositeFilter.doFilter(CompositeFilter.java:74) ~[spring-web-6.2.8.jar:6.2.8]
+	at org.springframework.security.config.annotation.web.configuration.WebMvcSecurityConfiguration$CompositeFilterChainProxy.doFilter(WebMvcSecurityConfiguration.java:240) ~[spring-security-config-6.5.1.jar:6.5.1]
+	at org.springframework.web.filter.DelegatingFilterProxy.invokeDelegate(DelegatingFilterProxy.java:362) ~[spring-web-6.2.8.jar:6.2.8]
+	at org.springframework.web.filter.DelegatingFilterProxy.doFilter(DelegatingFilterProxy.java:278) ~[spring-web-6.2.8.jar:6.2.8]
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164) ~[tomcat-embed-core-10.1.42.jar:10.1.42]
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140) ~[tomcat-embed-core-10.1.42.jar:10.1.42]
+	at org.springframework.web.filter.RequestContextFilter.doFilterInternal(RequestContextFilter.java:100) ~[spring-web-6.2.8.jar:6.2.8]
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116) ~[spring-web-6.2.8.jar:6.2.8]
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164) ~[tomcat-embed-core-10.1.42.jar:10.1.42]
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140) ~[tomcat-embed-core-10.1.42.jar:10.1.42]
+	at org.springframework.web.filter.FormContentFilter.doFilterInternal(FormContentFilter.java:93) ~[spring-web-6.2.8.jar:6.2.8]
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116) ~[spring-web-6.2.8.jar:6.2.8]
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164) ~[tomcat-embed-core-10.1.42.jar:10.1.42]
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140) ~[tomcat-embed-core-10.1.42.jar:10.1.42]
+	at org.springframework.web.filter.ServerHttpObservationFilter.doFilterInternal(ServerHttpObservationFilter.java:114) ~[spring-web-6.2.8.jar:6.2.8]
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116) ~[spring-web-6.2.8.jar:6.2.8]
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164) ~[tomcat-embed-core-10.1.42.jar:10.1.42]
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140) ~[tomcat-embed-core-10.1.42.jar:10.1.42]
+	at org.springframework.web.filter.CharacterEncodingFilter.doFilterInternal(CharacterEncodingFilter.java:201) ~[spring-web-6.2.8.jar:6.2.8]
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116) ~[spring-web-6.2.8.jar:6.2.8]
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164) ~[tomcat-embed-core-10.1.42.jar:10.1.42]
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140) ~[tomcat-embed-core-10.1.42.jar:10.1.42]
+	at org.apache.catalina.core.StandardWrapperValve.invoke(StandardWrapperValve.java:167) ~[tomcat-embed-core-10.1.42.jar:10.1.42]
+	at org.apache.catalina.core.StandardContextValve.invoke(StandardContextValve.java:90) ~[tomcat-embed-core-10.1.42.jar:10.1.42]
+	at org.apache.catalina.authenticator.AuthenticatorBase.invoke(AuthenticatorBase.java:483) ~[tomcat-embed-core-10.1.42.jar:10.1.42]
+	at org.apache.catalina.core.StandardHostValve.invoke(StandardHostValve.java:116) ~[tomcat-embed-core-10.1.42.jar:10.1.42]
+	at org.apache.catalina.valves.ErrorReportValve.invoke(ErrorReportValve.java:93) ~[tomcat-embed-core-10.1.42.jar:10.1.42]
+	at org.apache.catalina.core.StandardEngineValve.invoke(StandardEngineValve.java:74) ~[tomcat-embed-core-10.1.42.jar:10.1.42]
+	at org.apache.catalina.connector.CoyoteAdapter.service(CoyoteAdapter.java:344) ~[tomcat-embed-core-10.1.42.jar:10.1.42]
+	at org.apache.coyote.http11.Http11Processor.service(Http11Processor.java:398) ~[tomcat-embed-core-10.1.42.jar:10.1.42]
+	at org.apache.coyote.AbstractProcessorLight.process(AbstractProcessorLight.java:63) ~[tomcat-embed-core-10.1.42.jar:10.1.42]
+	at org.apache.coyote.AbstractProtocol$ConnectionHandler.process(AbstractProtocol.java:903) ~[tomcat-embed-core-10.1.42.jar:10.1.42]
+	at org.apache.tomcat.util.net.NioEndpoint$SocketProcessor.doRun(NioEndpoint.java:1769) ~[tomcat-embed-core-10.1.42.jar:10.1.42]
+	at org.apache.tomcat.util.net.SocketProcessorBase.run(SocketProcessorBase.java:52) ~[tomcat-embed-core-10.1.42.jar:10.1.42]
+	at org.apache.tomcat.util.threads.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1189) ~[tomcat-embed-core-10.1.42.jar:10.1.42]
+	at org.apache.tomcat.util.threads.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:658) ~[tomcat-embed-core-10.1.42.jar:10.1.42]
+	at org.apache.tomcat.util.threads.TaskThread$WrappingRunnable.run(TaskThread.java:63) ~[tomcat-embed-core-10.1.42.jar:10.1.42]
+	at java.base/java.lang.Thread.run(Thread.java:1447) ~[na:na]
+Caused by: io.jsonwebtoken.ExpiredJwtException: JWT expired at 2025-09-13T15:45:44Z. Current time: 2025-09-13T15:53:40Z, a difference of 476381 milliseconds.  Allowed clock skew: 0 milliseconds.
+	at io.jsonwebtoken.impl.DefaultJwtParser.parse(DefaultJwtParser.java:427) ~[jjwt-impl-0.11.5.jar:0.11.5]
+	at io.jsonwebtoken.impl.DefaultJwtParser.parse(DefaultJwtParser.java:529) ~[jjwt-impl-0.11.5.jar:0.11.5]
+	at io.jsonwebtoken.impl.DefaultJwtParser.parseClaimsJws(DefaultJwtParser.java:589) ~[jjwt-impl-0.11.5.jar:0.11.5]
+	at io.jsonwebtoken.impl.ImmutableJwtParser.parseClaimsJws(ImmutableJwtParser.java:173) ~[jjwt-impl-0.11.5.jar:0.11.5]
+	at com.erp.backend.config.JwtUtil.extractUsername(JwtUtil.java:57) ~[classes/:na]
+	... 85 common frames omitted
+
+2025-09-13T17:53:50.987+02:00  WARN 2332 --- [erp-system-backend] [http-nio-8080-exec-9] o.springdoc.core.service.OpenAPIService  : found more than one OpenAPIDefinition class. springdoc-openapi will be using the first one found.
+2025-09-13T17:53:53.056+02:00  INFO 2332 --- [erp-system-backend] [http-nio-8080-exec-9] o.springdoc.api.AbstractOpenApiResource  : Init duration for springdoc-openapi is: 2075 ms
+2025-09-13T17:56:13.636+02:00  INFO 2332 --- [erp-system-backend] [SpringApplicationShutdownHook] o.s.b.w.e.tomcat.GracefulShutdown        : Commencing graceful shutdown. Waiting for active requests to complete
+2025-09-13T17:56:13.646+02:00  INFO 2332 --- [erp-system-backend] [tomcat-shutdown] o.s.b.w.e.tomcat.GracefulShutdown        : Graceful shutdown complete
+2025-09-13T17:56:13.657+02:00  INFO 2332 --- [erp-system-backend] [SpringApplicationShutdownHook] j.LocalContainerEntityManagerFactoryBean : Closing JPA EntityManagerFactory for persistence unit 'default'
+2025-09-13T17:56:13.657+02:00  INFO 2332 --- [erp-system-backend] [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown initiated...
+2025-09-13T17:56:14.775+02:00  INFO 2332 --- [erp-system-backend] [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown completed.
+2025-09-13T17:56:19.131+02:00  INFO 12804 --- [erp-system-backend] [restartedMain] c.e.backend.ErpSystemBackendApplication  : Starting ErpSystemBackendApplication using Java 24.0.1 with PID 12804 (C:\Users\ibrah\Desktop\ERP-Backend\erp-system-backend\target\classes started by ibrah in C:\Users\ibrah\Desktop\ERP-Backend\erp-system-backend)
+2025-09-13T17:56:19.133+02:00 DEBUG 12804 --- [erp-system-backend] [restartedMain] c.e.backend.ErpSystemBackendApplication  : Running with Spring Boot v3.5.3, Spring v6.2.8
+2025-09-13T17:56:19.134+02:00  INFO 12804 --- [erp-system-backend] [restartedMain] c.e.backend.ErpSystemBackendApplication  : No active profile set, falling back to 1 default profile: "default"
+2025-09-13T17:56:19.198+02:00  INFO 12804 --- [erp-system-backend] [restartedMain] .e.DevToolsPropertyDefaultsPostProcessor : Devtools property defaults active! Set 'spring.devtools.add-properties' to 'false' to disable
+2025-09-13T17:56:19.198+02:00  INFO 12804 --- [erp-system-backend] [restartedMain] .e.DevToolsPropertyDefaultsPostProcessor : For additional web related logging consider setting the 'logging.level.web' property to 'DEBUG'
+2025-09-13T17:56:20.332+02:00  INFO 12804 --- [erp-system-backend] [restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2025-09-13T17:56:20.418+02:00  INFO 12804 --- [erp-system-backend] [restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 76 ms. Found 12 JPA repository interfaces.
+2025-09-13T17:56:21.082+02:00  INFO 12804 --- [erp-system-backend] [restartedMain] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port 8080 (http)
+2025-09-13T17:56:21.098+02:00  INFO 12804 --- [erp-system-backend] [restartedMain] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2025-09-13T17:56:21.098+02:00  INFO 12804 --- [erp-system-backend] [restartedMain] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.42]
+2025-09-13T17:56:21.144+02:00  INFO 12804 --- [erp-system-backend] [restartedMain] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
+2025-09-13T17:56:21.144+02:00  INFO 12804 --- [erp-system-backend] [restartedMain] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 1945 ms
+2025-09-13T17:56:21.374+02:00  INFO 12804 --- [erp-system-backend] [restartedMain] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: default]
+2025-09-13T17:56:21.426+02:00  INFO 12804 --- [erp-system-backend] [restartedMain] org.hibernate.Version                    : HHH000412: Hibernate ORM core version 6.6.18.Final
+2025-09-13T17:56:21.471+02:00  INFO 12804 --- [erp-system-backend] [restartedMain] o.h.c.internal.RegionFactoryInitiator    : HHH000026: Second-level cache disabled
+2025-09-13T17:56:21.744+02:00  INFO 12804 --- [erp-system-backend] [restartedMain] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2025-09-13T17:56:21.775+02:00  INFO 12804 --- [erp-system-backend] [restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2025-09-13T17:56:23.152+02:00  INFO 12804 --- [erp-system-backend] [restartedMain] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection org.postgresql.jdbc.PgConnection@5134e048
+2025-09-13T17:56:23.153+02:00  INFO 12804 --- [erp-system-backend] [restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2025-09-13T17:56:23.287+02:00  WARN 12804 --- [erp-system-backend] [restartedMain] org.hibernate.orm.deprecation            : HHH90000025: PostgreSQLDialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2025-09-13T17:56:23.635+02:00  INFO 12804 --- [erp-system-backend] [restartedMain] org.hibernate.orm.connections.pooling    : HHH10001005: Database info:
+	Database JDBC URL [Connecting through datasource 'HikariDataSource (HikariPool-1)']
+	Database driver: undefined/unknown
+	Database version: 17.5
+	Autocommit mode: undefined/unknown
+	Isolation level: undefined/unknown
+	Minimum pool size: undefined/unknown
+	Maximum pool size: undefined/unknown
+2025-09-13T17:56:24.704+02:00  INFO 12804 --- [erp-system-backend] [restartedMain] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2025-09-13T17:56:32.906+02:00  INFO 12804 --- [erp-system-backend] [restartedMain] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2025-09-13T17:56:33.257+02:00 DEBUG 12804 --- [erp-system-backend] [restartedMain] com.erp.backend.config.JwtAuthFilter     : Filter 'jwtAuthFilter' configured for use
+2025-09-13T17:56:33.377+02:00  INFO 12804 --- [erp-system-backend] [restartedMain] o.s.d.j.r.query.QueryEnhancerFactory     : Hibernate is in classpath; If applicable, HQL parser will be used.
+2025-09-13T17:56:34.929+02:00  WARN 12804 --- [erp-system-backend] [restartedMain] JpaBaseConfiguration$JpaWebConfiguration : spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2025-09-13T17:56:34.962+02:00  INFO 12804 --- [erp-system-backend] [restartedMain] r$InitializeUserDetailsManagerConfigurer : Global AuthenticationManager configured with UserDetailsService bean with name userDetailsService
+2025-09-13T17:56:35.377+02:00  INFO 12804 --- [erp-system-backend] [restartedMain] o.s.b.a.e.web.EndpointLinksResolver      : Exposing 4 endpoints beneath base path '/actuator'
+2025-09-13T17:56:35.730+02:00  INFO 12804 --- [erp-system-backend] [restartedMain] o.s.b.d.a.OptionalLiveReloadServer       : LiveReload server is running on port 35729
+2025-09-13T17:56:35.810+02:00  INFO 12804 --- [erp-system-backend] [restartedMain] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port 8080 (http) with context path '/'
+2025-09-13T17:56:35.830+02:00  INFO 12804 --- [erp-system-backend] [restartedMain] c.e.backend.ErpSystemBackendApplication  : Started ErpSystemBackendApplication in 17.223 seconds (process running for 17.666)
+2025-09-13T17:56:35.937+02:00  INFO 12804 --- [erp-system-backend] [http-nio-8080-exec-1] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring DispatcherServlet 'dispatcherServlet'
+2025-09-13T17:56:35.937+02:00  INFO 12804 --- [erp-system-backend] [http-nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
+2025-09-13T17:56:35.937+02:00  INFO 12804 --- [erp-system-backend] [http-nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Completed initialization in 0 ms
+2025-09-13T17:56:36.217+02:00  WARN 12804 --- [erp-system-backend] [http-nio-8080-exec-9] o.springdoc.core.service.OpenAPIService  : found more than one OpenAPIDefinition class. springdoc-openapi will be using the first one found.
+2025-09-13T17:56:38.150+02:00  INFO 12804 --- [erp-system-backend] [http-nio-8080-exec-9] o.springdoc.api.AbstractOpenApiResource  : Init duration for springdoc-openapi is: 1938 ms
+2025-09-13T17:58:01.593+02:00  INFO 12804 --- [erp-system-backend] [http-nio-8080-exec-1] c.e.b.controller.ContractController      : GET /api/contracts - Fetching contracts (paginated: false)
+2025-09-13T17:58:03.487+02:00  INFO 12804 --- [erp-system-backend] [http-nio-8080-exec-10] c.erp.backend.service.CustomerService    : Fetched 25 customers
+2025-09-13T18:00:54.360+02:00  INFO 12804 --- [erp-system-backend] [http-nio-8080-exec-5] c.e.b.controller.ContractController      : GET /api/contracts - Fetching contracts (paginated: false)
+2025-09-13T18:00:56.017+02:00  INFO 12804 --- [erp-system-backend] [http-nio-8080-exec-1] c.erp.backend.service.CustomerService    : Fetched 25 customers
+2025-09-13T18:01:07.546+02:00  INFO 12804 --- [erp-system-backend] [http-nio-8080-exec-2] c.e.b.controller.ContractController      : GET /api/contracts - Fetching contracts (paginated: false)
+2025-09-13T18:01:09.186+02:00  INFO 12804 --- [erp-system-backend] [http-nio-8080-exec-6] c.erp.backend.service.CustomerService    : Fetched 25 customers
+2025-09-13T18:01:11.557+02:00  INFO 12804 --- [erp-system-backend] [http-nio-8080-exec-9] c.e.b.controller.ContractController      : GET /api/contracts - Fetching contracts (paginated: false)
+2025-09-13T18:01:13.131+02:00  INFO 12804 --- [erp-system-backend] [http-nio-8080-exec-7] c.erp.backend.service.CustomerService    : Fetched 25 customers
+2025-09-13T18:01:24.391+02:00  INFO 12804 --- [erp-system-backend] [http-nio-8080-exec-6] c.e.b.controller.ProductController       : GET /api/products - Fetching products (paginated: false)
+2025-09-13T18:01:24.417+02:00  INFO 12804 --- [erp-system-backend] [http-nio-8080-exec-3] c.e.b.controller.ContractController      : GET /api/contracts - Fetching contracts (paginated: false)
+2025-09-13T18:01:24.614+02:00  INFO 12804 --- [erp-system-backend] [http-nio-8080-exec-6] com.erp.backend.service.ProductService   : Fetched 18 products
+2025-09-13T18:01:24.614+02:00 DEBUG 12804 --- [erp-system-backend] [http-nio-8080-exec-6] c.e.b.controller.ProductController       : Found 18 products
+2025-09-13T18:01:33.542+02:00  INFO 12804 --- [erp-system-backend] [http-nio-8080-exec-7] c.e.b.controller.ContractController      : GET /api/contracts - Fetching contracts (paginated: false)
+2025-09-13T18:01:35.319+02:00  INFO 12804 --- [erp-system-backend] [http-nio-8080-exec-9] c.erp.backend.service.CustomerService    : Fetched 25 customers
+2025-09-13T18:11:17.100+02:00  INFO 12804 --- [erp-system-backend] [http-nio-8080-exec-9] c.e.b.controller.ContractController      : GET /api/contracts - Fetching contracts (paginated: false)
+2025-09-13T18:11:18.957+02:00  INFO 12804 --- [erp-system-backend] [http-nio-8080-exec-8] c.erp.backend.service.CustomerService    : Fetched 25 customers
+2025-09-13T18:28:46.411+02:00  INFO 12804 --- [erp-system-backend] [http-nio-8080-exec-4] c.e.b.controller.ContractController      : GET /api/contracts - Fetching contracts (paginated: false)
+2025-09-13T18:28:48.118+02:00  INFO 12804 --- [erp-system-backend] [http-nio-8080-exec-6] c.erp.backend.service.CustomerService    : Fetched 25 customers
+2025-09-13T18:29:09.769+02:00  INFO 12804 --- [erp-system-backend] [http-nio-8080-exec-4] c.erp.backend.service.CustomerService    : Fetched 25 customers
+2025-09-13T18:29:11.575+02:00  INFO 12804 --- [erp-system-backend] [http-nio-8080-exec-8] c.e.b.controller.ContractController      : GET /api/contracts - Fetching contracts (paginated: false)
+2025-09-13T18:29:13.509+02:00  INFO 12804 --- [erp-system-backend] [http-nio-8080-exec-2] c.erp.backend.service.CustomerService    : Fetched 25 customers
+2025-09-13T18:29:54.516+02:00  INFO 12804 --- [erp-system-backend] [http-nio-8080-exec-10] c.e.b.controller.ContractController      : GET /api/contracts - Fetching contracts (paginated: false)
+2025-09-13T18:29:56.291+02:00  INFO 12804 --- [erp-system-backend] [http-nio-8080-exec-1] c.erp.backend.service.CustomerService    : Fetched 25 customers
+2025-09-13T18:32:34.398+02:00  INFO 12804 --- [erp-system-backend] [http-nio-8080-exec-5] c.e.b.controller.ContractController      : GET /api/contracts - Fetching contracts (paginated: false)
+2025-09-13T18:32:36.314+02:00  INFO 12804 --- [erp-system-backend] [http-nio-8080-exec-1] c.erp.backend.service.CustomerService    : Fetched 25 customers
+2025-09-13T18:36:54.566+02:00  INFO 12804 --- [erp-system-backend] [http-nio-8080-exec-7] c.e.b.controller.ContractController      : GET /api/contracts - Fetching contracts (paginated: false)
+2025-09-13T18:36:54.884+02:00  INFO 12804 --- [erp-system-backend] [http-nio-8080-exec-2] c.erp.backend.service.CustomerService    : Fetched 25 customers
+2025-09-13T18:36:57.075+02:00  INFO 12804 --- [erp-system-backend] [http-nio-8080-exec-9] c.erp.backend.service.CustomerService    : Fetched 25 customers
+2025-09-13T18:37:48.662+02:00  INFO 12804 --- [erp-system-backend] [http-nio-8080-exec-5] c.e.b.controller.ContractController      : GET /api/contracts - Fetching contracts (paginated: false)
+2025-09-13T18:37:48.863+02:00  INFO 12804 --- [erp-system-backend] [http-nio-8080-exec-7] c.erp.backend.service.CustomerService    : Fetched 25 customers
+2025-09-13T18:37:50.831+02:00  INFO 12804 --- [erp-system-backend] [http-nio-8080-exec-10] c.erp.backend.service.CustomerService    : Fetched 25 customers
+2025-09-13T18:47:17.326+02:00  INFO 12804 --- [erp-system-backend] [http-nio-8080-exec-1] c.e.b.controller.ContractController      : GET /api/contracts - Fetching contracts (paginated: false)
+2025-09-13T18:47:19.073+02:00  INFO 12804 --- [erp-system-backend] [http-nio-8080-exec-9] c.erp.backend.service.CustomerService    : Fetched 25 customers
+2025-09-13T18:49:57.175+02:00  INFO 12804 --- [erp-system-backend] [http-nio-8080-exec-9] c.e.b.controller.ContractController      : GET /api/contracts - Fetching contracts (paginated: false)
+2025-09-13T18:49:58.844+02:00  INFO 12804 --- [erp-system-backend] [http-nio-8080-exec-3] c.erp.backend.service.CustomerService    : Fetched 25 customers
+2025-09-13T18:50:17.390+02:00  INFO 12804 --- [erp-system-backend] [http-nio-8080-exec-6] c.e.b.controller.ContractController      : GET /api/contracts - Fetching contracts (paginated: false)
+2025-09-13T18:50:19.251+02:00  INFO 12804 --- [erp-system-backend] [http-nio-8080-exec-5] c.erp.backend.service.CustomerService    : Fetched 25 customers
+2025-09-13T18:51:38.522+02:00  INFO 12804 --- [erp-system-backend] [http-nio-8080-exec-8] c.e.b.controller.ContractController      : GET /api/contracts - Fetching contracts (paginated: false)
+2025-09-13T18:51:40.391+02:00  INFO 12804 --- [erp-system-backend] [http-nio-8080-exec-6] c.erp.backend.service.CustomerService    : Fetched 25 customers
+2025-09-13T18:54:27.675+02:00  INFO 12804 --- [erp-system-backend] [http-nio-8080-exec-4] c.e.b.controller.ContractController      : GET /api/contracts - Fetching contracts (paginated: false)
+2025-09-13T18:54:29.396+02:00  INFO 12804 --- [erp-system-backend] [http-nio-8080-exec-8] c.erp.backend.service.CustomerService    : Fetched 25 customers
+2025-09-13T18:55:06.863+02:00  INFO 12804 --- [erp-system-backend] [http-nio-8080-exec-4] c.e.b.controller.ContractController      : GET /api/contracts - Fetching contracts (paginated: false)
+2025-09-13T18:55:08.545+02:00  INFO 12804 --- [erp-system-backend] [http-nio-8080-exec-2] c.erp.backend.service.CustomerService    : Fetched 25 customers
+2025-09-13T18:55:37.030+02:00  INFO 12804 --- [erp-system-backend] [http-nio-8080-exec-9] c.e.b.controller.ContractController      : GET /api/contracts - Fetching contracts (paginated: false)
+2025-09-13T18:55:38.581+02:00  INFO 12804 --- [erp-system-backend] [http-nio-8080-exec-3] c.erp.backend.service.CustomerService    : Fetched 25 customers
