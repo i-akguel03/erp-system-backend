@@ -1,41 +1,65 @@
+# =========================================
+# SERVER
+# =========================================
 server:
   port: ${PORT:8080}  # Render setzt PORT automatisch
 
+# =========================================
+# SPRING APPLICATION
+# =========================================
 spring:
   application:
     name: erp-system-backend
 
+  # ===============================
+  # DATASOURCE (PostgreSQL)
+  # ===============================
   datasource:
-    url: ${DATABASE_URL}            # z.B. aus .env: jdbc:postgresql://host/db?sslmode=require
-    username: ${DATABASE_USERNAME}  # z.B. aus .env
-    password: ${DATABASE_PASSWORD}  # z.B. aus .env
+    url: ${DATABASE_URL}  # JDBC URL
+    username: ${DATABASE_USERNAME}
+    password: ${DATABASE_PASSWORD}
     driver-class-name: org.postgresql.Driver
     hikari:
       maximum-pool-size: 10
 
+  # ===============================
+  # JPA / HIBERNATE
+  # ===============================
   jpa:
     hibernate:
-      ddl-auto: create
+      ddl-auto: create  # create, update, validate, none
     show-sql: true
     properties:
       hibernate:
         format_sql: true
     database-platform: org.hibernate.dialect.PostgreSQLDialect
 
+  # ===============================
+  # JACKSON
+  # ===============================
   jackson:
     serialization:
       indent_output: true
 
+  # ===============================
+  # SPRING SECURITY USER (optional, nur für lokale Tests)
+  # ===============================
   security:
     user:
-      name: ${SPRING_USER:erp}       # Default-Wert nur lokal
-      password: ${SPRING_PASSWORD}   # Passwort aus .env
+      name: ${SPRING_USER:erp}           # Default Benutzer lokal
+      password: ${SPRING_PASSWORD:erp}   # Default Passwort lokal
 
+# =========================================
+# JWT CONFIG
+# =========================================
 jwt:
-  secret: ${JWT_SECRET}             # z.B. aus .env
-  expiration: 86400000
+  secret: ${JWT_SECRET:meinSehrSicheresGeheimnis123456789}  # Default lokal
+  expiration: 86400000  # Millisekunden (1 Tag)
   issuer: erp-backend
 
+# =========================================
+# LOGGING
+# =========================================
 logging:
   level:
     root: INFO
@@ -43,6 +67,9 @@ logging:
   file:
     name: logs/erp-backend.log
 
+# =========================================
+# MANAGEMENT / ACTUATOR
+# =========================================
 management:
   endpoints:
     web:

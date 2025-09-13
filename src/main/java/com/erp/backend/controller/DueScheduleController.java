@@ -40,24 +40,24 @@ public class DueScheduleController {
                 : Sort.by(sortBy).ascending();
 
         Pageable pageable = PageRequest.of(page, size, sort);
-        Page<DueScheduleDto> dueSchedules = dueScheduleService.getAllDueSchedules(pageable);
+//        Page<DueScheduleDto> dueSchedules = dueScheduleService.getAllDueSchedules(pageable);
 
-        return ResponseEntity.ok(dueSchedules);
+        return ResponseEntity.ok(null);
     }
 
     // Einzelnen Fälligkeitsplan abrufen
     @GetMapping("/{id}")
     public ResponseEntity<DueScheduleDto> getDueScheduleById(@PathVariable UUID id) {
-        DueScheduleDto dueSchedule = dueScheduleService.getDueScheduleById(id);
-        return ResponseEntity.ok(dueSchedule);
+        //DueScheduleDto dueSchedule = dueScheduleService.get(id);
+        return null; //ResponseEntity.ok(ok);
     }
 
     // Fälligkeitsplan nach Nummer abrufen
-    @GetMapping("/number/{dueNumber}")
-    public ResponseEntity<DueScheduleDto> getDueScheduleByNumber(@PathVariable String dueNumber) {
-        DueScheduleDto dueSchedule = dueScheduleService.getDueScheduleByNumber(dueNumber);
-        return ResponseEntity.ok(dueSchedule);
-    }
+//    @GetMapping("/number/{dueNumber}")
+//    public ResponseEntity<DueScheduleDto> getDueScheduleByNumber(@PathVariable String dueNumber) {
+//        DueScheduleDto dueSchedule = dueScheduleService.getDueScheduleByNumber(dueNumber);
+//        return ResponseEntity.ok(dueSchedule);
+//    }
 
     // Neuen Fälligkeitsplan erstellen
     @PostMapping

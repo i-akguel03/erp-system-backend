@@ -59,7 +59,7 @@ public class DueScheduleDto {
         this.dueDate = dueDate;
         this.periodStart = periodStart;
         this.periodEnd = periodEnd;
-        this.status = DueStatus.PENDING;
+        this.status = DueStatus.ACTIVE;
     }
 
     // Getters & Setters
@@ -132,11 +132,11 @@ public class DueScheduleDto {
 
     public boolean isOverdue() {
         return dueDate != null && dueDate.isBefore(LocalDate.now()) &&
-                (status == DueStatus.PENDING || status == DueStatus.PARTIAL_PAID);
+                (status == DueStatus.ACTIVE);
     }
 
     public boolean isFullyPaid() {
-        return status == DueStatus.PAID || (paidAmount != null && paidAmount.compareTo(amount) >= 0);
+        return status == DueStatus.COMPLETED || (paidAmount != null && paidAmount.compareTo(amount) >= 0);
     }
 
     public long getDaysOverdue() {
@@ -173,5 +173,13 @@ public class DueScheduleDto {
                 ", customerName='" + customerName + '\'' +
                 ", productName='" + productName + '\'' +
                 '}';
+    }
+
+    public Subscription getSubscription() {
+        return subscription;
+    }
+
+    public void setSubscription(Subscription subscription) {
+        this.subscription = subscription;
     }
 }

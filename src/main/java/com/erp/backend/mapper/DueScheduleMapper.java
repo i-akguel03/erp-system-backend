@@ -21,19 +21,11 @@ public class DueScheduleMapper {
 
         dto.setId(entity.getId());
         dto.setDueNumber(entity.getDueNumber());
-        dto.setAmount(entity.getAmount());
-        dto.setPaidAmount(entity.getPaidAmount());
         dto.setDueDate(entity.getDueDate());
         dto.setPeriodStart(entity.getPeriodStart());
         dto.setPeriodEnd(entity.getPeriodEnd());
         dto.setStatus(entity.getStatus());
-        dto.setPaidDate(entity.getPaidDate());
-        dto.setPaymentMethod(entity.getPaymentMethod());
-        dto.setPaymentReference(entity.getPaymentReference());
         dto.setNotes(entity.getNotes());
-        dto.setReminderSent(entity.getReminderSent());
-        dto.setReminderCount(entity.getReminderCount());
-        dto.setLastReminderDate(entity.getLastReminderDate());
 
         // Subscription-bezogene Daten defensiv abfragen
         if (entity.getSubscription() != null) {
@@ -77,19 +69,11 @@ public class DueScheduleMapper {
 
         entity.setId(dto.getId());
         entity.setDueNumber(dto.getDueNumber());
-        entity.setAmount(dto.getAmount());
-        entity.setPaidAmount(dto.getPaidAmount());
         entity.setDueDate(dto.getDueDate());
         entity.setPeriodStart(dto.getPeriodStart());
         entity.setPeriodEnd(dto.getPeriodEnd());
         entity.setStatus(dto.getStatus());
-        entity.setPaidDate(dto.getPaidDate());
-        entity.setPaymentMethod(dto.getPaymentMethod());
-        entity.setPaymentReference(dto.getPaymentReference());
         entity.setNotes(dto.getNotes());
-        entity.setReminderSent(dto.isReminderSent());
-        entity.setReminderCount(dto.getReminderCount());
-        entity.setLastReminderDate(dto.getLastReminderDate());
 
         // Subscription wird separat gesetzt (im Service)
 
@@ -105,19 +89,11 @@ public class DueScheduleMapper {
         }
 
         // ID und DueNumber normalerweise nicht ändern
-        entity.setAmount(dto.getAmount());
-        entity.setPaidAmount(dto.getPaidAmount());
         entity.setDueDate(dto.getDueDate());
         entity.setPeriodStart(dto.getPeriodStart());
         entity.setPeriodEnd(dto.getPeriodEnd());
         entity.setStatus(dto.getStatus());
-        entity.setPaidDate(dto.getPaidDate());
-        entity.setPaymentMethod(dto.getPaymentMethod());
-        entity.setPaymentReference(dto.getPaymentReference());
         entity.setNotes(dto.getNotes());
-        entity.setReminderSent(dto.isReminderSent());
-        entity.setReminderCount(dto.getReminderCount());
-        entity.setLastReminderDate(dto.getLastReminderDate());
     }
 
     /**
@@ -130,19 +106,11 @@ public class DueScheduleMapper {
 
         DueSchedule copy = new DueSchedule();
         copy.setDueNumber(source.getDueNumber());
-        copy.setAmount(source.getAmount());
-        copy.setPaidAmount(source.getPaidAmount());
         copy.setDueDate(source.getDueDate());
         copy.setPeriodStart(source.getPeriodStart());
         copy.setPeriodEnd(source.getPeriodEnd());
         copy.setStatus(source.getStatus());
-        copy.setPaidDate(source.getPaidDate());
-        copy.setPaymentMethod(source.getPaymentMethod());
-        copy.setPaymentReference(source.getPaymentReference());
         copy.setNotes(source.getNotes());
-        copy.setReminderSent(source.getReminderSent());
-        copy.setReminderCount(source.getReminderCount());
-        copy.setLastReminderDate(source.getLastReminderDate());
         copy.setSubscription(source.getSubscription());
 
         return copy;

@@ -144,15 +144,19 @@ public class SubscriptionService {
         Subscription saved = saveFromDto(subscription, dto);
 
         // ===== Fälligkeitspläne erstellen =====
-        createPaymentSchedules(saved);
+        createDueSchedules(saved);
 
         return saved;
     }
 
     /**
-     * Erzeugt automatisch PaymentSchedules für die Subscription entsprechend BillingCycle
+     * Erzeugt automatisch DueSchedules für die Subscription entsprechend BillingCycle.
+     *
+     * Hinweis:
+     * - DueSchedules enthalten **keine Beträge**.
+     * - Preise werden erst beim Invoice-Generieren aus der Subscription gezogen.
      */
-    private void createPaymentSchedules(Subscription subscription) {
+    private void createDueSchedules(Subscription subscription) {
         LocalDate periodStart = subscription.getStartDate();
         LocalDate subscriptionEnd = subscription.getEndDate();
 
@@ -172,21 +176,17 @@ public class SubscriptionService {
 
             DueSchedule schedule = new DueSchedule();
             schedule.setSubscription(subscription);
-            schedule.setPeriodStart(periodStart);  // ✅ Periode Start setzen
-            schedule.setPeriodEnd(periodEnd);      // ✅ Periode Ende setzen
-            schedule.setDueDate(dueDate);          // ✅ Korrekte Fälligkeit
-            schedule.setAmount(subscription.getMonthlyPrice());
-            schedule.setStatus(DueStatus.PENDING); // ✅ Status explizit setzen
-            schedule.setPaidAmount(BigDecimal.ZERO); // ✅ Initialisierung
-            schedule.setReminderSent(false);
-            schedule.setReminderCount(0);
+            schedule.setPeriodStart(periodStart);   // Periode Start
+            schedule.setPeriodEnd(periodEnd);       // Periode Ende
+            schedule.setDueDate(dueDate);           // Fälligkeit
+            schedule.setStatus(DueStatus.ACTIVE);   // Status explizit setzen
 
             schedules.add(schedule);
 
             // Nächste Periode starten
             periodStart = periodEnd.plusDays(1);
 
-            // Abbruch wenn wir das Subscription-Ende überschreiten würden
+            // Abbruch, falls Subscription-Ende erreicht
             if (periodStart.isAfter(subscriptionEnd)) {
                 break;
             }
@@ -292,7 +292,7 @@ public class SubscriptionService {
 
         // Prüfen, ob offene Fälligkeiten existieren
         boolean hasOpenPaymentSchedules = subscription.getPaymentSchedules().stream()
-                .anyMatch(ps -> ps.getStatus() == DueStatus.PENDING);
+                .anyMatch(ps -> ps.getStatus() == DueStatus.ACTIVE);
 
         System.out.println(hasOpenPaymentSchedules);
 

@@ -51,7 +51,7 @@ public class InvoiceBatchService {
     public InvoiceBatchResult runInvoiceBatch(LocalDate billingRunDate) {
         // 1. Alle offenen DueSchedules bis zum angegebenen Datum abrufen
         List<DueSchedule> openDueSchedules = dueScheduleRepository
-                .findByStatusAndDueDateLessThanEqual(DueStatus.PENDING, billingRunDate);
+                .findByStatusAndDueDateLessThanEqual(DueStatus.ACTIVE, billingRunDate);
 
         // Keine offenen Fälligkeiten -> Abbruch
         if (openDueSchedules.isEmpty()) {

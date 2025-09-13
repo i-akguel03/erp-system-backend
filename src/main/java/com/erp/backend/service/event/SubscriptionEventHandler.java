@@ -1,6 +1,7 @@
 package com.erp.backend.service.event;
 
 // Importiere alle Subscription-Events, die wir behandeln wollen
+import com.erp.backend.domain.DueStatus;
 import com.erp.backend.event.SubscriptionCancelledEvent;
 import com.erp.backend.event.SubscriptionCreatedEvent;
 import com.erp.backend.event.SubscriptionExpiredEvent;
@@ -188,14 +189,14 @@ public class SubscriptionEventHandler {
      */
     private void updateFutureDueSchedulePrices(com.erp.backend.domain.Subscription subscription) {
         try {
-            var pendingSchedules = dueScheduleService.getPendingDueSchedulesBySubscription(subscription.getId());
+//            var pendingSchedules = dueScheduleService.getPendingDueSchedulesBySubscription(subscription.getId());
 
-            for (var schedule : pendingSchedules) {
-                if (schedule.getDueDate().isAfter(LocalDate.now())) {
-                    schedule.setAmount(subscription.getMonthlyPrice());
-                    dueScheduleService.updateDueSchedule(schedule.getId(), schedule);
-                }
-            }
+//            for (var schedule : pendingSchedules) {
+//                if (schedule.getDueDate().isAfter(LocalDate.now())) {
+//                    schedule.setAmount(subscription.getMonthlyPrice());
+//                    dueScheduleService.updateDueSchedule(schedule.getId(), schedule);
+//                }
+//            }
         } catch (Exception e) {
             logger.warn("Could not update future due schedule prices for subscription {}: {}",
                     subscription.getId(), e.getMessage());
@@ -235,8 +236,8 @@ public class SubscriptionEventHandler {
 
             for (var schedule : schedules) {
                 if (schedule.getDueDate().isAfter(cutoffDate) &&
-                        schedule.getStatus() == com.erp.backend.domain.DueStatus.PENDING) {
-                    dueScheduleService.cancelDueSchedule(schedule.getId());
+                        schedule.getStatus() == DueStatus.ACTIVE) {
+                    dueScheduleService.pauseDueSchedule(schedule.getId());
                 }
             }
         } catch (Exception e) {
@@ -255,8 +256,8 @@ public class SubscriptionEventHandler {
 
             for (var schedule : schedules) {
                 if (schedule.getDueDate().isAfter(LocalDate.now()) &&
-                        schedule.getStatus() == com.erp.backend.domain.DueStatus.PENDING) {
-                    dueScheduleService.cancelDueSchedule(schedule.getId());
+                        schedule.getStatus() == DueStatus.ACTIVE) {
+                    dueScheduleService.deleteDueSchedule(schedule.getId());
                 }
             }
         } catch (Exception e) {

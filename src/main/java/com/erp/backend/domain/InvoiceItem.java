@@ -166,7 +166,7 @@ public class InvoiceItem {
 
         // Setze Beträge
         item.setQuantity(BigDecimal.ONE);
-        item.setUnitPrice(dueSchedule.getAmount());
+        //item.setUnitPrice(dueSchedule.getAmount());
 
         // Produkt-Informationen falls verfügbar
         if (dueSchedule.getSubscription() != null &&

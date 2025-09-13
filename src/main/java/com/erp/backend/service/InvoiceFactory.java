@@ -73,7 +73,7 @@ public class InvoiceFactory {
 
         item.setDescription(description);
         item.setQuantity(BigDecimal.ONE);
-        item.setUnitPrice(dueSchedule.getAmount());
+        //item.setUnitPrice(dueSchedule.get());
         item.calculateLineTotal();
 
         return item;
