@@ -15,11 +15,11 @@ import java.util.Random;
 /**
  * Service zum Initialisieren von Testdaten für das ERP-System.
  *
- * Korrigierte Architektur:
- * - DueSchedule = nur Terminplan (Datum, Status), keine Beträge
+ * Bereinigte Architektur:
+ * - DueSchedule = nur Terminplan (Datum, Status), keine Beträge oder Invoice-Referenzen
  * - Subscription = enthält Produkt und Preise
- * - Invoice = wird beim Rechnungslauf aus DueSchedule + Subscription erzeugt
- * - OpenItem = offene Posten aus Rechnungen
+ * - Invoice = reine Rechnungsstruktur ohne Zahlungsinformationen
+ * - OpenItem = Zahlungsmanagement und ausstehende Beträge
  */
 @Service
 public class InitDataService {
@@ -36,7 +36,6 @@ public class InitDataService {
     private final OpenItemRepository openItemRepository;
     private final InvoiceRepository invoiceRepository;
 
-
     // Service-Abhängigkeiten
     private final InvoiceService invoiceService;
     private final NumberGeneratorService numberGeneratorService;
@@ -49,7 +48,8 @@ public class InitDataService {
                            ContractRepository contractRepository,
                            SubscriptionRepository subscriptionRepository,
                            DueScheduleRepository dueScheduleRepository,
-                           OpenItemRepository openItemRepository, InvoiceRepository invoiceRepository,
+                           OpenItemRepository openItemRepository,
+                           InvoiceRepository invoiceRepository,
                            InvoiceService invoiceService,
                            NumberGeneratorService numberGeneratorService) {
         this.addressRepository = addressRepository;
@@ -76,14 +76,15 @@ public class InitDataService {
         initProducts();
         initContracts();
         initSubscriptions();
-        initDueSchedules();      // Nur Terminpläne ohne Beträge
-        processInvoiceRun();     // Rechnungslauf: DueSchedules -> Invoices
+        initDueSchedules();      // Nur Terminpläne ohne Beträge oder Rechnungs-Referenzen
+        createSampleInvoices();  // Separate Rechnungserstellung
+        createSampleOpenItems(); // Separate OpenItem-Erstellung
 
         logger.info("Testdateninitialisierung erfolgreich abgeschlossen.");
     }
 
     // ===============================================================================================
-    // SCHRITT 1-4: Basisdaten (unverändert)
+    // SCHRITT 1-5: Basisdaten (unverändert)
     // ===============================================================================================
 
     private void initAddresses() {
@@ -168,14 +169,6 @@ public class InitDataService {
         logger.info("Initialisiere Produktkatalog...");
 
         Object[][] products = {
-                // Hardware-Produkte (einmalige Käufe)
-                {"Laptop Dell XPS 13", 1200.0, "Stück", "Hardware"},
-                {"MacBook Pro 14\"", 2200.0, "Stück", "Hardware"},
-                {"Samsung Galaxy S23", 900.0, "Stück", "Hardware"},
-                {"iPhone 15 Pro", 1300.0, "Stück", "Hardware"},
-                {"iPad Air", 650.0, "Stück", "Hardware"},
-                {"Surface Pro 9", 1100.0, "Stück", "Hardware"},
-
                 // Software-Lizenzen (monatliche Abonnements)
                 {"Adobe Creative Cloud", 59.99, "Monat", "Software"},
                 {"Microsoft 365 Business Premium", 18.90, "Monat", "Software"},
@@ -190,7 +183,15 @@ public class InitDataService {
                 {"Google Workspace Business", 12.00, "Monat", "Cloud"},
                 {"GitHub Enterprise", 21.00, "Monat", "Cloud"},
                 {"Atlassian Confluence", 5.50, "Monat", "Cloud"},
-                {"Docker Pro", 9.00, "Monat", "Cloud"}
+                {"Docker Pro", 9.00, "Monat", "Cloud"},
+
+                // Hardware-Produkte (einmalige Käufe)
+                {"Laptop Dell XPS 13", 1200.0, "Stück", "Hardware"},
+                {"MacBook Pro 14\"", 2200.0, "Stück", "Hardware"},
+                {"Samsung Galaxy S23", 900.0, "Stück", "Hardware"},
+                {"iPhone 15 Pro", 1300.0, "Stück", "Hardware"},
+                {"iPad Air", 650.0, "Stück", "Hardware"},
+                {"Surface Pro 9", 1100.0, "Stück", "Hardware"}
         };
 
         for (int i = 0; i < products.length; i++) {
@@ -281,7 +282,6 @@ public class InitDataService {
 
             LocalDate subscriptionStart = contract.getStartDate().plusDays(random.nextInt(30));
 
-            // Subscription enthält Produktreferenz und Preis
             Subscription subscription = new Subscription(
                     product.getName(),
                     product.getPrice() != null ? product.getPrice() : BigDecimal.ZERO,
@@ -289,7 +289,6 @@ public class InitDataService {
                     contract
             );
 
-            // Produktreferenz setzen (wichtig für Rechnungslauf)
             subscription.setProduct(product);
             subscription.setSubscriptionNumber(numberGeneratorService.generateSubscriptionNumber());
             subscription.setDescription("Monatliches Abonnement für " + product.getName());
@@ -314,13 +313,9 @@ public class InitDataService {
     }
 
     // ===============================================================================================
-    // SCHRITT 6: FÄLLIGKEITSPLÄNE (NUR TERMINE, KEINE BETRÄGE)
+    // SCHRITT 6: FÄLLIGKEITSPLÄNE (NUR TERMINE, KEINE BETRÄGE ODER RECHNUNGS-REFERENZEN)
     // ===============================================================================================
 
-    /**
-     * Erstellt Fälligkeitspläne nur mit Terminen und Status.
-     * Keine Beträge - die kommen erst beim Rechnungslauf aus den Subscriptions.
-     */
     private void initDueSchedules() {
         if (dueScheduleRepository.count() > 0) {
             logger.info("Fälligkeitspläne bereits vorhanden - Überspringe Initialisierung");
@@ -346,29 +341,23 @@ public class InitDataService {
                 LocalDate periodEnd = currentDate.plusMonths(1).minusDays(1);
                 LocalDate dueDate = periodEnd;
 
-                // DueSchedule enthält NUR Termine und Status
-                DueSchedule dueSchedule = new DueSchedule();
+                DueSchedule dueSchedule = new DueSchedule(dueDate, periodStart, periodEnd, subscription);
                 dueSchedule.setDueNumber(numberGeneratorService.generateDueNumber());
-                dueSchedule.setDueDate(dueDate);
-                dueSchedule.setPeriodStart(periodStart);
-                dueSchedule.setPeriodEnd(periodEnd);
-                dueSchedule.setSubscription(subscription);
 
-                // Nur Status setzen - keine Beträge!
-                // DueStatus aus dem korrigierten Service verwenden
+                // Nur Status setzen - keine Beträge oder Rechnungsreferenzen!
                 if (dueDate.isBefore(LocalDate.now())) {
-                    // Vergangene Fälligkeiten: 60% completed, 40% active (= überfällig)
-                    if (random.nextDouble() < 0.6) {
-                        dueSchedule.setStatus(DueStatus.COMPLETED); // Wurde bereits abgerechnet
+                    // Vergangene Fälligkeiten: 70% completed, 30% active
+                    if (random.nextDouble() < 0.7) {
+                        dueSchedule.markAsCompleted();
                     } else {
-                        dueSchedule.setStatus(DueStatus.ACTIVE); // Überfällig
+                        // Bleibt ACTIVE (überfällig)
                     }
                 } else {
                     // Zukünftige Fälligkeiten: meistens aktiv, wenige pausiert
                     if (random.nextDouble() < 0.9) {
-                        dueSchedule.setStatus(DueStatus.ACTIVE);
+                        // Bleibt ACTIVE
                     } else {
-                        dueSchedule.setStatus(DueStatus.PAUSED);
+                        dueSchedule.pause();
                     }
                 }
 
@@ -382,148 +371,156 @@ public class InitDataService {
     }
 
     // ===============================================================================================
-    // SCHRITT 7: RECHNUNGSLAUF (AUS DUESCHEDULES + SUBSCRIPTIONS)
+    // SCHRITT 7: SAMPLE RECHNUNGEN (UNABHÄNGIG VON DUESCHEDULES)
     // ===============================================================================================
 
-    /**
-     * Simuliert einen Rechnungslauf: Für abgerechnete DueSchedules werden Invoices erstellt.
-     * Beträge kommen aus den Subscriptions.
-     */
-    private void processInvoiceRun() {
-        logger.info("Starte Rechnungslauf...");
+    private void createSampleInvoices() {
+        if (invoiceRepository.count() > 0) {
+            logger.info("Rechnungen bereits vorhanden - Überspringe Erstellung");
+            return;
+        }
 
-        // Alle DueSchedules die als COMPLETED markiert sind (= bereits abgerechnet)
-        List<DueSchedule> completedSchedules = dueScheduleRepository.findByStatus(DueStatus.COMPLETED);
+        logger.info("Erstelle Sample-Rechnungen...");
 
+        List<Customer> customers = customerRepository.findAll();
+        List<Product> products = productRepository.findAll();
+
+        if (customers.isEmpty() || products.isEmpty()) {
+            logger.warn("Keine Kunden oder Produkte für Rechnungen gefunden");
+            return;
+        }
+
+        final int numberOfInvoices = 30;
         int invoicesCreated = 0;
-        int openItemsCreated = 0;
 
-        for (DueSchedule dueSchedule : completedSchedules) {
+        for (int i = 1; i <= numberOfInvoices; i++) {
             try {
-                // Prüfen ob bereits eine Rechnung existiert
-                if (dueSchedule.getInvoice() != null) {
-                    continue; // Bereits abgerechnet
+                Customer customer = customers.get(random.nextInt(customers.size()));
+                Product product = products.get(random.nextInt(products.size()));
+
+                Invoice invoice = new Invoice();
+                invoice.setCustomer(customer);
+                invoice.setBillingAddress(customer.getBillingAddress());
+                invoice.setInvoiceDate(LocalDate.now().minusDays(random.nextInt(90)));
+                invoice.setDueDate(invoice.getInvoiceDate().plusDays(14 + random.nextInt(16)));
+
+                // Zufälligen Status setzen
+                Invoice.InvoiceStatus[] statuses = {
+                        Invoice.InvoiceStatus.DRAFT,
+                        Invoice.InvoiceStatus.SENT,
+                        Invoice.InvoiceStatus.CANCELLED
+                };
+                invoice.setStatus(statuses[random.nextInt(statuses.length)]);
+
+                // InvoiceItem hinzufügen
+                InvoiceItem item = new InvoiceItem();
+                item.setDescription("Testposition: " + product.getName());
+                item.setQuantity(BigDecimal.ONE);
+                item.setUnitPrice(product.getPrice());
+                item.setTaxRate(BigDecimal.valueOf(19));
+
+                invoice.addInvoiceItem(item);
+
+                // Manchmal zweite Position hinzufügen
+                if (random.nextDouble() < 0.3) {
+                    Product secondProduct = products.get(random.nextInt(products.size()));
+                    InvoiceItem secondItem = new InvoiceItem();
+                    secondItem.setDescription("Zusätzliche Position: " + secondProduct.getName());
+                    secondItem.setQuantity(BigDecimal.ONE);
+                    secondItem.setUnitPrice(secondProduct.getPrice());
+                    secondItem.setTaxRate(BigDecimal.valueOf(19));
+
+                    invoice.addInvoiceItem(secondItem);
                 }
 
-                // Rechnung aus DueSchedule + Subscription erstellen
-                Invoice invoice = createInvoiceFromDueScheduleAndSubscription(dueSchedule);
+                Invoice savedInvoice = invoiceService.createInvoice(invoice);
                 invoicesCreated++;
 
-                // Zahlungsverhalten simulieren
-                double paymentRandom = random.nextDouble();
-
-                if (paymentRandom < 0.7) {
-                    // 70% vollständig bezahlt
-                    invoice.setStatus(Invoice.InvoiceStatus.PAID);
-
-                } else if (paymentRandom < 0.9) {
-                    // 20% teilweise bezahlt - OpenItem erstellen
-                    invoice.setStatus(Invoice.InvoiceStatus.PARTIALLY_PAID);
-                    createPartialPaymentOpenItem(invoice);
-                    openItemsCreated++;
-
-                } else {
-                    // 10% unbezahlt - OpenItem für Vollbetrag
-                    invoice.setStatus(Invoice.InvoiceStatus.OPEN);
-                    createFullOpenItem(invoice);
-                    openItemsCreated++;
-                }
-
-                invoiceRepository.save(invoice);
-
-                // DueSchedule als abgerechnet markieren
-                dueSchedule.setInvoice(invoice);
-                dueSchedule.setProcessedForInvoicing(true);
-                dueScheduleRepository.save(dueSchedule);
-
             } catch (Exception e) {
-                logger.error("Fehler beim Verarbeiten von DueSchedule {}: {}",
-                        dueSchedule.getDueNumber(), e.getMessage());
+                logger.error("Fehler beim Erstellen einer Sample-Rechnung: {}", e.getMessage());
             }
         }
 
-        logger.info("Rechnungslauf abgeschlossen: {} Rechnungen erstellt, {} offene Posten",
-                invoicesCreated, openItemsCreated);
+        logger.info("Es wurden {} Sample-Rechnungen erstellt", invoicesCreated);
     }
 
-    /**
-     * Erstellt eine Rechnung aus DueSchedule und holt Preise aus Subscription.
-     */
-    private Invoice createInvoiceFromDueScheduleAndSubscription(DueSchedule dueSchedule) {
-        Subscription subscription = dueSchedule.getSubscription();
-        Customer customer = subscription.getContract().getCustomer();
+    // ===============================================================================================
+    // SCHRITT 8: SAMPLE OPENITEMS (UNABHÄNGIG VON RECHNUNGEN)
+    // ===============================================================================================
 
-        // Preis aus Subscription holen
-        BigDecimal price = subscription.getMonthlyPrice() != null ?
-                subscription.getMonthlyPrice() : BigDecimal.ZERO;
+    private void createSampleOpenItems() {
+        logger.info("Erstelle Sample-OpenItems...");
 
-        // Rechnung erstellen
-        Invoice invoice = new Invoice();
-        invoice.setCustomer(customer);
-        invoice.setBillingAddress(customer.getBillingAddress());
-        invoice.setInvoiceDate(dueSchedule.getDueDate().minusDays(5)); // 5 Tage vor Fälligkeit
-        invoice.setDueDate(dueSchedule.getDueDate());
-        invoice.setInvoiceNumber(generateInvoiceNumber());
-        invoice.setStatus(Invoice.InvoiceStatus.DRAFT);
+        List<Invoice> allInvoices = invoiceService.getAllInvoices();
 
-        // Invoice Item mit Preis aus Subscription
-        InvoiceItem item = new InvoiceItem();
-        item.setInvoice(invoice);
-        item.setDescription(
-                "Abonnement: " + subscription.getProductName() +
-                        " | Periode: " + dueSchedule.getPeriodStart() + " bis " + dueSchedule.getPeriodEnd()
-        );
-        item.setQuantity(BigDecimal.ONE);
-        item.setUnitPrice(price);
-        item.setTaxRate(BigDecimal.valueOf(19));
+        if (allInvoices.isEmpty()) {
+            logger.warn("Keine Rechnungen für OpenItems gefunden");
+            return;
+        }
 
-        invoice.addInvoiceItem(item);
-        invoice.calculateTotals();
+        int openItemsCreated = 0;
 
-        return invoice;
-    }
+        for (Invoice invoice : allInvoices) {
+            // Nur Rechnungen mit Betrag > 0 verwenden
+            if (invoice.getTotalAmount() == null || invoice.getTotalAmount().compareTo(BigDecimal.ZERO) <= 0) {
+                logger.debug("Überspringe Rechnung {} - kein gültiger Betrag", invoice.getInvoiceNumber());
+                continue;
+            }
 
-    /**
-     * Erstellt OpenItem für teilweise bezahlte Rechnung
-     */
-    private void createPartialPaymentOpenItem(Invoice invoice) {
-        BigDecimal totalAmount = invoice.getTotalAmount();
-        BigDecimal paidAmount = totalAmount.multiply(BigDecimal.valueOf(0.6 + random.nextDouble() * 0.3)); // 60-90%
-        BigDecimal openAmount = totalAmount.subtract(paidAmount);
+            // 90% aller gültigen Rechnungen bekommen OpenItems (nicht nur versendete)
+            if (random.nextDouble() < 0.9) {
+                try {
+                    OpenItem openItem = new OpenItem(invoice,
+                            "Ausstehender Betrag für Rechnung " + invoice.getInvoiceNumber(),
+                            invoice.getTotalAmount(),
+                            invoice.getDueDate());
 
-        OpenItem openItem = new OpenItem();
-        openItem.setInvoice(invoice);
-        openItem.setAmount(openAmount);
-        openItem.setDescription("Ausstehender Betrag nach Teilzahlung");
-        openItem.setDueDate(invoice.getDueDate().plusDays(14));
-        openItem.setStatus(OpenItem.OpenItemStatus.OPEN);
+                    // Zahlungsstatus simulieren
+                    double paymentChance = random.nextDouble();
 
-        openItemRepository.save(openItem);
-    }
+                    if (paymentChance < 0.4) {
+                        // 40% vollständig bezahlt
+                        openItem.recordPayment(invoice.getTotalAmount(),
+                                "Überweisung",
+                                "REF-" + System.currentTimeMillis());
 
-    /**
-     * Erstellt OpenItem für unbezahlte Rechnung
-     */
-    private void createFullOpenItem(Invoice invoice) {
-        OpenItem openItem = new OpenItem();
-        openItem.setInvoice(invoice);
-        openItem.setAmount(invoice.getTotalAmount());
-        openItem.setDescription("Vollständig offener Rechnungsbetrag");
-        openItem.setDueDate(invoice.getDueDate().plusDays(7));
-        openItem.setStatus(OpenItem.OpenItemStatus.OPEN);
+                    } else if (paymentChance < 0.65) {
+                        // 25% teilweise bezahlt
+                        BigDecimal partialAmount = invoice.getTotalAmount()
+                                .multiply(BigDecimal.valueOf(0.3 + random.nextDouble() * 0.5)); // 30-80%
+                        openItem.recordPayment(partialAmount,
+                                "Teilzahlung",
+                                "REF-" + System.currentTimeMillis());
+                    }
+                    // 35% bleiben offen
 
-        openItemRepository.save(openItem);
+                    // Manchmal Mahnungen hinzufügen (bei überfälligen)
+                    if (openItem.isOverdue() && random.nextDouble() < 0.5) {
+                        int reminders = 1 + random.nextInt(3);
+                        for (int r = 0; r < reminders; r++) {
+                            openItem.addReminder();
+                        }
+                    }
+
+                    openItemRepository.save(openItem);
+                    openItemsCreated++;
+
+                    logger.debug("OpenItem erstellt für Rechnung {} mit Betrag {}",
+                            invoice.getInvoiceNumber(), invoice.getTotalAmount());
+
+                } catch (Exception e) {
+                    logger.error("Fehler beim Erstellen eines OpenItems für Rechnung {}: {}",
+                            invoice.getInvoiceNumber(), e.getMessage());
+                }
+            }
+        }
+
+        logger.info("Es wurden {} Sample-OpenItems erstellt", openItemsCreated);
     }
 
     // ===============================================================================================
     // HILFSMETHODEN
     // ===============================================================================================
-
-    private String generateInvoiceNumber() {
-        return String.format("INV-%d-%04d",
-                LocalDate.now().getYear(),
-                random.nextInt(9999) + 1);
-    }
 
     @Transactional(readOnly = true)
     public void logCurrentDataStatus() {
@@ -543,12 +540,17 @@ public class InitDataService {
         logger.info("  - Pausierte Fälligkeiten: {}", pausedSchedules);
         logger.info("  - Abgerechnete Fälligkeiten: {}", completedSchedules);
 
-        long totalInvoices = invoiceService.getAllInvoices().size();
-        long openItems = openItemRepository.count();
-        long openOpenItems = openItemRepository.countByStatus(OpenItem.OpenItemStatus.OPEN);
+        long totalInvoices = invoiceRepository.count();
+        long draftInvoices = invoiceService.getInvoiceCountByStatus(Invoice.InvoiceStatus.DRAFT);
+        long sentInvoices = invoiceService.getInvoiceCountByStatus(Invoice.InvoiceStatus.SENT);
 
-        logger.info("Rechnungen: {}", totalInvoices);
-        logger.info("Offene Posten: {} (davon offen: {})", openItems, openOpenItems);
+        logger.info("Rechnungen: {} (Entwürfe: {}, Versendet: {})", totalInvoices, draftInvoices, sentInvoices);
+
+        long totalOpenItems = openItemRepository.count();
+        long openOpenItems = openItemRepository.countByStatus(OpenItem.OpenItemStatus.OPEN);
+        long paidOpenItems = openItemRepository.countByStatus(OpenItem.OpenItemStatus.PAID);
+
+        logger.info("Offene Posten: {} (Offen: {}, Bezahlt: {})", totalOpenItems, openOpenItems, paidOpenItems);
         logger.info("==============================");
     }
 
@@ -557,13 +559,7 @@ public class InitDataService {
         logger.warn("WARNUNG: Lösche alle Testdaten...");
 
         openItemRepository.deleteAll();
-        invoiceService.getAllInvoices().forEach(invoice -> {
-            try {
-                invoiceService.deleteInvoice(invoice.getId());
-            } catch (Exception e) {
-                logger.warn("Fehler beim Löschen der Rechnung {}: {}", invoice.getId(), e.getMessage());
-            }
-        });
+        invoiceRepository.deleteAll();
         dueScheduleRepository.deleteAll();
         subscriptionRepository.deleteAll();
         contractRepository.deleteAll();

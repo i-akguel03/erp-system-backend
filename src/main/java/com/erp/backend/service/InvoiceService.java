@@ -13,12 +13,12 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
- * Service für Invoice-Verwaltung.
+ * Service für Invoice-Verwaltung (CRUD-fokussiert).
  *
- * Korrigierte Architektur:
- * - Invoices werden aus DueSchedule + Subscription erstellt
- * - DueSchedule liefert Termine, Subscription liefert Preise
- * - OpenItems werden aus Invoices abgeleitet
+ * Architektur:
+ * - Reine CRUD-Operationen für Rechnungen
+ * - Keine Rechnungslauf-Logik (wird in separatem BillingService gemacht)
+ * - Fokus auf Rechnungserstellung, -aktualisierung und -abfragen
  */
 @Service
 @Transactional
@@ -29,21 +29,18 @@ public class InvoiceService {
     private final InvoiceRepository invoiceRepository;
     private final CustomerRepository customerRepository;
     private final OpenItemRepository openItemRepository;
-    private final DueScheduleRepository dueScheduleRepository;
     private final AtomicInteger counter = new AtomicInteger(1);
 
     public InvoiceService(InvoiceRepository invoiceRepository,
                           CustomerRepository customerRepository,
-                          OpenItemRepository openItemRepository,
-                          DueScheduleRepository dueScheduleRepository) {
+                          OpenItemRepository openItemRepository) {
         this.invoiceRepository = invoiceRepository;
         this.customerRepository = customerRepository;
         this.openItemRepository = openItemRepository;
-        this.dueScheduleRepository = dueScheduleRepository;
     }
 
     // ========================================
-    // 1. Manuelle Rechnungserstellung
+    // 1. CRUD-Operationen
     // ========================================
 
     @Transactional
@@ -78,157 +75,6 @@ public class InvoiceService {
         return saved;
     }
 
-    // ========================================
-    // 2. Automatische Rechnungserstellung aus DueSchedule
-    // ========================================
-
-    /**
-     * Erstellt eine Rechnung aus einem DueSchedule und der zugehörigen Subscription.
-     * Die Preise kommen aus der Subscription, die Termine aus dem DueSchedule.
-     */
-    @Transactional
-    public Invoice createInvoiceFromDueSchedule(DueSchedule dueSchedule) {
-        if (dueSchedule == null) {
-            throw new IllegalArgumentException("DueSchedule darf nicht null sein");
-        }
-
-        Subscription subscription = dueSchedule.getSubscription();
-        if (subscription == null) {
-            throw new IllegalArgumentException("DueSchedule hat keine Subscription");
-        }
-
-        Contract contract = subscription.getContract();
-        if (contract == null) {
-            throw new IllegalArgumentException("Subscription hat keinen Contract");
-        }
-
-        Customer customer = contract.getCustomer();
-        if (customer == null) {
-            throw new IllegalArgumentException("Contract hat keinen Customer");
-        }
-
-        // Preis aus Subscription holen (nicht aus DueSchedule!)
-        BigDecimal unitPrice = subscription.getMonthlyPrice() != null ?
-                subscription.getMonthlyPrice() : BigDecimal.ZERO;
-
-        // Rechnung erstellen
-        Invoice invoice = new Invoice();
-        invoice.setCustomer(customer);
-        invoice.setBillingAddress(customer.getBillingAddress());
-        invoice.setInvoiceDate(LocalDate.now());
-        invoice.setDueDate(dueSchedule.getDueDate());
-        invoice.setInvoiceNumber(generateInvoiceNumber());
-        invoice.setStatus(Invoice.InvoiceStatus.DRAFT);
-
-        // InvoiceItem erstellen mit Preis aus Subscription
-        InvoiceItem item = new InvoiceItem();
-        item.setInvoice(invoice);
-        item.setDescription(buildInvoiceItemDescription(subscription, dueSchedule));
-        item.setQuantity(BigDecimal.ONE);
-        item.setUnitPrice(unitPrice);
-        item.setTaxRate(BigDecimal.valueOf(19)); // 19% MwSt
-
-        invoice.addInvoiceItem(item);
-        invoice.calculateTotals();
-
-        Invoice saved = invoiceRepository.save(invoice);
-
-        // DueSchedule als abgerechnet markieren
-        dueSchedule.setInvoice(saved);
-        dueSchedule.setProcessedForInvoicing(true);
-        dueSchedule.setStatus(DueStatus.COMPLETED);
-        dueScheduleRepository.save(dueSchedule);
-
-        logger.info("Created invoice from DueSchedule: invoice={}, dueSchedule={}, amount={}",
-                saved.getInvoiceNumber(), dueSchedule.getDueNumber(), unitPrice);
-
-        return saved;
-    }
-
-    /**
-     * Rechnungslauf: Verarbeitet alle fälligen DueSchedules.
-     */
-    @Transactional
-    public List<Invoice> processBillingRun() {
-        logger.info("Starte Rechnungslauf...");
-
-        // Alle DueSchedules die zur Abrechnung bereit sind
-        LocalDate today = LocalDate.now();
-        List<DueSchedule> readyForBilling = dueScheduleRepository
-                .findByStatusAndDueDateLessThanEqual(DueStatus.ACTIVE, today);
-
-        List<Invoice> createdInvoices = new ArrayList<>();
-
-        for (DueSchedule dueSchedule : readyForBilling) {
-            try {
-                // Prüfen ob bereits abgerechnet
-                if (dueSchedule.getInvoice() != null || dueSchedule.isProcessedForInvoicing()) {
-                    logger.debug("DueSchedule {} bereits abgerechnet, überspringe", dueSchedule.getDueNumber());
-                    continue;
-                }
-
-                Invoice invoice = createInvoiceFromDueSchedule(dueSchedule);
-                createdInvoices.add(invoice);
-
-            } catch (Exception e) {
-                logger.error("Fehler beim Verarbeiten von DueSchedule {}: {}",
-                        dueSchedule.getDueNumber(), e.getMessage());
-            }
-        }
-
-        logger.info("Rechnungslauf abgeschlossen: {} Rechnungen erstellt", createdInvoices.size());
-        return createdInvoices;
-    }
-
-    // ========================================
-    // 3. OpenItem-Verwaltung
-    // ========================================
-
-    @Transactional
-    public OpenItem createOpenItem(Invoice invoice, BigDecimal amount, String description) {
-        if (invoice == null) {
-            throw new IllegalArgumentException("Invoice is required");
-        }
-
-        OpenItem openItem = new OpenItem();
-        openItem.setInvoice(invoice);
-        openItem.setDescription(description);
-        openItem.setAmount(amount);
-        openItem.setDueDate(invoice.getDueDate());
-        openItem.setStatus(OpenItem.OpenItemStatus.OPEN);
-
-        OpenItem saved = openItemRepository.save(openItem);
-        logger.info("Created OpenItem for invoice {}: amount={}", invoice.getInvoiceNumber(), amount);
-        return saved;
-    }
-
-    @Transactional
-    public OpenItem createOpenItemFromInvoiceItem(Invoice invoice, InvoiceItem invoiceItem) {
-        if (invoiceItem == null) {
-            throw new IllegalArgumentException("InvoiceItem is required");
-        }
-
-        BigDecimal amount = invoiceItem.getUnitPrice().multiply(invoiceItem.getQuantity());
-        return createOpenItem(invoice, amount, invoiceItem.getDescription());
-    }
-
-    @Transactional
-    public OpenItem markOpenItemAsPaid(UUID openItemId, LocalDate paidDate, String paymentMethod) {
-        OpenItem openItem = openItemRepository.findById(openItemId)
-                .orElseThrow(() -> new IllegalArgumentException("OpenItem not found: " + openItemId));
-
-        openItem.markAsPaid(openItem.getAmount(), paymentMethod, "REF-" + System.currentTimeMillis());
-        if (paidDate != null) {
-            openItem.setPaidDate(paidDate);
-        }
-
-        return openItemRepository.save(openItem);
-    }
-
-    // ========================================
-    // 4. Rechnungsabfragen
-    // ========================================
-
     @Transactional(readOnly = true)
     public List<Invoice> getAllInvoices() {
         return invoiceRepository.findAll();
@@ -238,6 +84,53 @@ public class InvoiceService {
     public Optional<Invoice> getInvoiceById(UUID id) {
         return invoiceRepository.findById(id);
     }
+
+    @Transactional
+    public void deleteInvoice(UUID invoiceId) {
+        Invoice invoice = invoiceRepository.findById(invoiceId)
+                .orElseThrow(() -> new IllegalArgumentException("Invoice not found: " + invoiceId));
+
+        // Prüfen ob Rechnung storniert werden kann
+        if (hasOpenItems(invoice)) {
+            throw new IllegalStateException("Invoice cannot be deleted - has open items");
+        }
+
+        invoiceRepository.deleteById(invoiceId);
+        logger.info("Deleted invoice: id={}", invoiceId);
+    }
+
+    // ========================================
+    // 2. Status-Verwaltung
+    // ========================================
+
+    @Transactional
+    public Invoice changeStatus(UUID invoiceId, Invoice.InvoiceStatus newStatus) {
+        Invoice invoice = invoiceRepository.findById(invoiceId)
+                .orElseThrow(() -> new IllegalArgumentException("Invoice not found: " + invoiceId));
+
+        Invoice.InvoiceStatus oldStatus = invoice.getStatus();
+        invoice.setStatus(newStatus);
+
+        Invoice saved = invoiceRepository.save(invoice);
+        logger.info("Changed invoice status: id={}, oldStatus={}, newStatus={}",
+                invoiceId, oldStatus, newStatus);
+
+        return saved;
+    }
+
+    @Transactional
+    public Invoice cancelInvoice(UUID invoiceId) {
+        return changeStatus(invoiceId, Invoice.InvoiceStatus.CANCELLED);
+    }
+
+    @Transactional
+    public Invoice sendInvoice(UUID invoiceId) {
+        return changeStatus(invoiceId, Invoice.InvoiceStatus.SENT);
+    }
+
+    // ========================================
+    // 3. Abfragen
+    // ========================================
 
     @Transactional(readOnly = true)
     public List<Invoice> getInvoicesByCustomer(UUID customerId) {
@@ -253,110 +146,134 @@ public class InvoiceService {
 
     @Transactional(readOnly = true)
     public List<Invoice> getInvoicesByDateRange(LocalDate startDate, LocalDate endDate) {
-        return null; //invoiceRepository.findByInvoiceDateBetween(startDate, endDate);
+        // TODO: Repository-Methode implementieren
+        return invoiceRepository.findAll().stream()
+                .filter(invoice -> !invoice.getInvoiceDate().isBefore(startDate) &&
+                        !invoice.getInvoiceDate().isAfter(endDate))
+                .toList();
     }
 
     @Transactional(readOnly = true)
-    public List<Invoice> getOverdueInvoices() {
-        LocalDate today = LocalDate.now();
-        return null;//invoiceRepository.findByDueDateBeforeAndStatusIn(
-                //today,
-                //Arrays.asList(Invoice.InvoiceStatus.OPEN, Invoice.InvoiceStatus.PARTIALLY_PAID)
-        //);
+    public List<Invoice> getInvoicesByBatchId(String batchId) {
+        return invoiceRepository.findAll().stream()
+                .filter(invoice -> Objects.equals(invoice.getInvoiceBatchId(), batchId))
+                .toList();
     }
 
     // ========================================
-    // 5. Rechnungsstatus-Verwaltung
+    // 4. InvoiceItem-Verwaltung
     // ========================================
 
-    public Invoice markAsPaid(UUID invoiceId) {
-        return changeStatus(invoiceId, Invoice.InvoiceStatus.PAID);
-    }
-
-    public Invoice markAsPartiallyPaid(UUID invoiceId) {
-        return changeStatus(invoiceId, Invoice.InvoiceStatus.PARTIALLY_PAID);
-    }
-
-    public Invoice cancelInvoice(UUID invoiceId) {
+    @Transactional
+    public Invoice addInvoiceItem(UUID invoiceId, InvoiceItem item) {
         Invoice invoice = invoiceRepository.findById(invoiceId)
                 .orElseThrow(() -> new IllegalArgumentException("Invoice not found: " + invoiceId));
 
-        if (invoice.getStatus() == Invoice.InvoiceStatus.PAID) {
-            throw new IllegalStateException("Paid invoices cannot be cancelled");
-        }
-
-        invoice.setStatus(Invoice.InvoiceStatus.CANCELLED);
+        invoice.addInvoiceItem(item);
         return invoiceRepository.save(invoice);
     }
 
-    public Invoice changeStatus(UUID invoiceId, Invoice.InvoiceStatus newStatus) {
+    @Transactional
+    public Invoice removeInvoiceItem(UUID invoiceId, UUID itemId) {
         Invoice invoice = invoiceRepository.findById(invoiceId)
                 .orElseThrow(() -> new IllegalArgumentException("Invoice not found: " + invoiceId));
 
-        Invoice.InvoiceStatus oldStatus = invoice.getStatus();
-        invoice.setStatus(newStatus);
+        InvoiceItem itemToRemove = invoice.getInvoiceItems().stream()
+                .filter(item -> Objects.equals(item.getId(), itemId))
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("InvoiceItem not found: " + itemId));
 
-        Invoice saved = invoiceRepository.save(invoice);
-        logger.info("Changed invoice status: id={}, oldStatus={}, newStatus={}",
-                invoiceId, oldStatus, newStatus);
+        invoice.removeInvoiceItem(itemToRemove);
+        return invoiceRepository.save(invoice);
+    }
+
+    // ========================================
+    // 5. OpenItem-Integration
+    // ========================================
+
+    @Transactional
+    public List<OpenItem> createOpenItemsForInvoice(UUID invoiceId) {
+        Invoice invoice = invoiceRepository.findById(invoiceId)
+                .orElseThrow(() -> new IllegalArgumentException("Invoice not found: " + invoiceId));
+
+        List<OpenItem> openItems = new ArrayList<>();
+
+        // Ein OpenItem für die gesamte Rechnung erstellen
+        OpenItem openItem = new OpenItem();
+        openItem.setInvoice(invoice);
+        openItem.setDescription("Rechnung " + invoice.getInvoiceNumber());
+        openItem.setAmount(invoice.getTotalAmount());
+        openItem.setDueDate(invoice.getDueDate());
+        openItem.setStatus(OpenItem.OpenItemStatus.OPEN);
+
+        OpenItem saved = openItemRepository.save(openItem);
+        openItems.add(saved);
+
+        logger.info("Created OpenItem for invoice {}: amount={}",
+                invoice.getInvoiceNumber(), invoice.getTotalAmount());
+
+        return openItems;
+    }
+
+    @Transactional(readOnly = true)
+    public List<OpenItem> getOpenItemsForInvoice(UUID invoiceId) {
+        Invoice invoice = invoiceRepository.findById(invoiceId)
+                .orElseThrow(() -> new IllegalArgumentException("Invoice not found: " + invoiceId));
+
+        return invoice.getOpenItems();
+    }
+
+    @Transactional(readOnly = true)
+    public boolean hasOpenItems(Invoice invoice) {
+        return !invoice.getOpenItems().isEmpty() &&
+                invoice.getOpenItems().stream()
+                        .anyMatch(item -> item.getStatus() == OpenItem.OpenItemStatus.OPEN);
+    }
+
+    // ========================================
+    // 6. Gutschriften
+    // ========================================
+
+    @Transactional
+    public Invoice createCreditNote(UUID originalInvoiceId) {
+        Invoice originalInvoice = invoiceRepository.findById(originalInvoiceId)
+                .orElseThrow(() -> new IllegalArgumentException("Original invoice not found: " + originalInvoiceId));
+
+        Invoice creditNote = originalInvoice.createCreditNote();
+        creditNote.setInvoiceNumber(generateInvoiceNumber());
+
+        Invoice saved = invoiceRepository.save(creditNote);
+        logger.info("Created credit note {} for original invoice {}",
+                saved.getInvoiceNumber(), originalInvoice.getInvoiceNumber());
 
         return saved;
     }
 
-    public void deleteInvoice(UUID invoiceId) {
-        Invoice invoice = invoiceRepository.findById(invoiceId)
-                .orElseThrow(() -> new IllegalArgumentException("Invoice not found: " + invoiceId));
-
-        // Prüfen ob Rechnung bezahlt ist
-        if (invoice.getStatus() == Invoice.InvoiceStatus.PAID) {
-            throw new IllegalStateException("Paid invoices cannot be deleted");
-        }
-
-        // Zugehörige DueSchedule zurücksetzen
-        //if (invoice.getDueSchedule() != null) {
-        //    DueSchedule dueSchedule = invoice.getDueSchedule();
-        //    dueSchedule.setInvoice(null);
-        //    dueSchedule.setProcessedForInvoicing(false);
-        //    dueSchedule.setStatus(DueStatus.ACTIVE);
-        //    dueScheduleRepository.save(dueSchedule);
-        //}
-
-        invoiceRepository.deleteById(invoiceId);
-        logger.info("Deleted invoice: id={}", invoiceId);
-    }
-
     // ========================================
-    // 6. Statistiken und Reports
+    // 7. Statistiken
     // ========================================
 
     @Transactional(readOnly = true)
-    public BigDecimal getTotalOutstandingAmount() {
-        return openItemRepository.findByStatus(OpenItem.OpenItemStatus.OPEN)
-                .stream()
-                .map(OpenItem::getAmount)
+    public BigDecimal getTotalInvoiceAmount() {
+        return invoiceRepository.findAll().stream()
+                .map(Invoice::getTotalAmount)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 
     @Transactional(readOnly = true)
     public long getInvoiceCountByStatus(Invoice.InvoiceStatus status) {
-        return 22222;//invoiceRepository.countByStatus(status);
+        return invoiceRepository.findByStatus(status).size();
     }
 
     @Transactional(readOnly = true)
-    public BigDecimal getMonthlyRevenue(int year, int month) {
-        LocalDate startDate = LocalDate.of(year, month, 1);
-        LocalDate endDate = startDate.plusMonths(1).minusDays(1);
-
-        return  null;
-                //invoiceRepository.findByInvoiceDateBetweenAndStatus(
-                //        startDate, endDate, Invoice.InvoiceStatus.PAID)
-                //.stream()
-                //.map(Invoice::getTotalAmount)
-                //.reduce(BigDecimal.ZERO, BigDecimal::add);
+    public BigDecimal getInvoiceAmountByStatus(Invoice.InvoiceStatus status) {
+        return invoiceRepository.findByStatus(status).stream()
+                .map(Invoice::getTotalAmount)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 
     // ========================================
-    // 7. Hilfsmethoden
+    // 8. Hilfsmethoden
     // ========================================
 
     private void validateInvoice(Invoice invoice) {
@@ -377,22 +294,5 @@ public class InvoiceService {
     private String generateInvoiceNumber() {
         int number = counter.getAndIncrement();
         return String.format("INV-%d-%04d", LocalDate.now().getYear(), number);
-    }
-
-    private String buildInvoiceItemDescription(Subscription subscription, DueSchedule dueSchedule) {
-        StringBuilder description = new StringBuilder();
-
-        description.append("Abonnement: ");
-        description.append(subscription.getProductName() != null ?
-                subscription.getProductName() : "Unbekanntes Produkt");
-
-        if (dueSchedule.getPeriodStart() != null && dueSchedule.getPeriodEnd() != null) {
-            description.append(" | Periode: ");
-            description.append(dueSchedule.getPeriodStart());
-            description.append(" bis ");
-            description.append(dueSchedule.getPeriodEnd());
-        }
-
-        return description.toString();
     }
 }

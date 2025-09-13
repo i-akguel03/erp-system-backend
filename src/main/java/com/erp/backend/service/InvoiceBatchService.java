@@ -91,7 +91,7 @@ public class InvoiceBatchService {
                 }
 
                 // 3d. DueSchedules als abgerechnet markieren
-                dueSchedules.forEach(due -> due.markAsInvoiced(invoice, batchId));
+//                dueSchedules.forEach(due -> due.markAsInvoiced(invoice, batchId));
 
                 // 3e. Zähler erhöhen
                 createdInvoices++;

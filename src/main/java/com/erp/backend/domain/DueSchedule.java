@@ -6,13 +6,12 @@ import org.hibernate.annotations.SQLRestriction;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.UUID;
 
 /**
  * Repräsentiert eine einzelne Fälligkeit (DueSchedule) eines Abonnements.
  *
- * Verwaltet nur die Zeitplanung und den Status für den Rechnungslauf.
+ * Verwaltet nur die Zeitplanung und den Status für Fälligkeiten.
  * Preise werden zur Laufzeit aus der Subscription und den zugehörigen Produkten berechnet.
  */
 @Entity
@@ -74,39 +73,6 @@ public class DueSchedule {
     @Column(name = "notes", length = 500)
     private String notes;
 
-    // === Felder für Invoice Management ===
-
-    /**
-     * Referenz zur Rechnung, falls diese Fälligkeit bereits abgerechnet wurde
-     */
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "invoice_id")
-    private Invoice invoice;
-
-    /**
-     * Datum, an dem diese Fälligkeit in Rechnung gestellt wurde
-     */
-    @Column(name = "invoiced_date")
-    private LocalDate invoicedDate;
-
-    /**
-     * Referenz zum InvoiceItem, das aus dieser DueSchedule erzeugt wurde
-     */
-    @OneToOne(mappedBy = "dueSchedule", fetch = FetchType.LAZY)
-    private InvoiceItem invoiceItem;
-
-    /**
-     * Flag, ob diese Fälligkeit bereits in einem Rechnungslauf berücksichtigt wurde
-     */
-    @Column(name = "processed_for_invoicing", nullable = false)
-    private boolean processedForInvoicing = false;
-
-    /**
-     * Batch-ID des Rechnungslaufs
-     */
-    @Column(name = "invoice_batch_id")
-    private String invoiceBatchId;
-
     /**
      * Zugehöriges Abonnement
      */
@@ -145,28 +111,17 @@ public class DueSchedule {
     // === Business Methoden ===
 
     /**
-     * Markiert die Fälligkeit als in Rechnung gestellt
+     * Markiert die Fälligkeit als abgeschlossen
      */
-    public void markAsInvoiced(Invoice invoice, String batchId) {
-        this.invoice = invoice;
-        this.invoicedDate = LocalDate.now();
-        this.processedForInvoicing = true;
-        this.invoiceBatchId = batchId;
+    public void markAsCompleted() {
         this.status = DueStatus.COMPLETED;
-        this.notes = "Abgerechnet mit Rechnung " + invoice.getInvoiceNumber() +
-                " am " + invoice.getInvoiceDate().format(DateTimeFormatter.ofPattern("dd.MM.yyyy"));
     }
 
     /**
-     * Setzt die Fälligkeit zurück, z.B. bei Storno einer Rechnung
+     * Setzt die Fälligkeit auf aktiv zurück
      */
-    public void revertInvoicing() {
-        this.invoice = null;
-        this.invoicedDate = null;
-        this.processedForInvoicing = false;
-        this.invoiceBatchId = null;
+    public void revertToActive() {
         this.status = DueStatus.ACTIVE;
-        this.notes = null;
     }
 
     public void pause() {
@@ -190,7 +145,7 @@ public class DueSchedule {
     // === Hilfsmethoden ===
 
     public boolean isCompleted() {
-        return status == DueStatus.COMPLETED || invoice != null;
+        return status == DueStatus.COMPLETED;
     }
 
     public boolean isActive() {
@@ -209,8 +164,8 @@ public class DueSchedule {
         return status == DueStatus.ACTIVE && dueDate.isBefore(LocalDate.now());
     }
 
-    public boolean canBeInvoiced() {
-        return status == DueStatus.ACTIVE && !processedForInvoicing;
+    public boolean canBeProcessed() {
+        return status == DueStatus.ACTIVE;
     }
 
     // === Getter & Setter ===
@@ -245,21 +200,6 @@ public class DueSchedule {
     public Subscription getSubscription() { return subscription; }
     public void setSubscription(Subscription subscription) { this.subscription = subscription; }
 
-    public Invoice getInvoice() { return invoice; }
-    public void setInvoice(Invoice invoice) { this.invoice = invoice; }
-
-    public LocalDate getInvoicedDate() { return invoicedDate; }
-    public void setInvoicedDate(LocalDate invoicedDate) { this.invoicedDate = invoicedDate; }
-
-    public InvoiceItem getInvoiceItem() { return invoiceItem; }
-    public void setInvoiceItem(InvoiceItem invoiceItem) { this.invoiceItem = invoiceItem; }
-
-    public boolean isProcessedForInvoicing() { return processedForInvoicing; }
-    public void setProcessedForInvoicing(boolean processedForInvoicing) { this.processedForInvoicing = processedForInvoicing; }
-
-    public String getInvoiceBatchId() { return invoiceBatchId; }
-    public void setInvoiceBatchId(String invoiceBatchId) { this.invoiceBatchId = invoiceBatchId; }
-
     public boolean isDeleted() { return deleted; }
     public void setDeleted(boolean deleted) { this.deleted = deleted; }
 
@@ -273,8 +213,6 @@ public class DueSchedule {
                 ", periodStart=" + periodStart +
                 ", periodEnd=" + periodEnd +
                 ", status=" + status +
-                ", invoiced=" + isCompleted() +
-                ", invoice=" + (invoice != null ? invoice.getInvoiceNumber() : null) +
                 ", subscription=" + (subscription != null ? subscription.getId() : null) +
                 '}';
     }

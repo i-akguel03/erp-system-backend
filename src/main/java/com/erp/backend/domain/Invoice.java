@@ -12,10 +12,10 @@ import java.util.UUID;
 /**
  * Repräsentiert eine Rechnung im ERP-System.
  *
- * Architekturhinweise:
- * - Preise stammen NICHT aus DueSchedule, sondern aus Subscription → Produkt.
- * - DueSchedules liefern lediglich die Fälligkeitstermine für die Rechnung.
- * - InvoiceItems werden basierend auf Subscription-Preisen generiert.
+ * Reine Rechnungsinformationen:
+ * - Keine Zahlungsinformationen (werden in OpenItem verwaltet)
+ * - Keine direkte Verbindung zu DueSchedule
+ * - Fokus auf Rechnungsstruktur und -inhalt
  */
 @Entity
 @Table(name = "invoices")
@@ -25,7 +25,7 @@ public class Invoice {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private UUID id;
 
-    /** Eindeutige Rechnungsnummer, z. B. "INV-2025-0001" */
+    /** Eindeutige Rechnungsnummer, z. B. "INV-2025-0001" */
     @Column(name = "invoice_number", unique = true, nullable = false)
     private String invoiceNumber;
 
@@ -100,30 +100,6 @@ public class Invoice {
     @OneToMany(mappedBy = "originalInvoice", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Invoice> creditNotes = new ArrayList<>();
 
-    /** Bereits gezahlter Betrag */
-    @Column(name = "paid_amount", precision = 10, scale = 2)
-    private BigDecimal paidAmount;
-
-    /** Datum der Zahlung */
-    @Column(name = "paid_date")
-    private LocalDate paidDate;
-
-    /** Zahlungsmethode */
-    @Column(name = "payment_method")
-    private String paymentMethod;
-
-    /** Referenz zur Zahlung, z. B. Überweisung oder PayPal-ID */
-    @Column(name = "payment_reference")
-    private String paymentReference;
-
-    /** Datum der letzten Mahnung */
-    @Column(name = "last_reminder_date")
-    private LocalDate lastReminderDate;
-
-    /** Anzahl gesendeter Mahnungen */
-    @Column(name = "reminder_count")
-    private Integer reminderCount = 0;
-
     // ===================================================
     // Beziehungen
     // ===================================================
@@ -146,10 +122,6 @@ public class Invoice {
     @OneToMany(mappedBy = "invoice", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<OpenItem> openItems = new ArrayList<>();
 
-    /** Liste der abgerechneten DueSchedules (keine Preise hier!) */
-    @OneToMany(mappedBy = "invoice", fetch = FetchType.LAZY)
-    private List<DueSchedule> dueSchedules = new ArrayList<>();
-
     // ===================================================
     // Enums
     // ===================================================
@@ -157,12 +129,7 @@ public class Invoice {
     public enum InvoiceStatus {
         DRAFT("Entwurf"),
         SENT("Versendet"),
-        PAID("Bezahlt"),
-        PARTIALLY_PAID("Teilweise bezahlt"),
-        OVERDUE("Überfällig"),
-        CANCELLED("Storniert"),
-        OPEN("Offen"),
-        CREDIT_NOTE("Gutschrift");
+        CANCELLED("Storniert");
 
         private final String displayName;
         InvoiceStatus(String displayName) { this.displayName = displayName; }
@@ -247,29 +214,6 @@ public class Invoice {
         calculateTotals();
     }
 
-    /** Prüft, ob Rechnung überfällig ist */
-    public boolean isOverdue() {
-        return status != InvoiceStatus.PAID &&
-                status != InvoiceStatus.CANCELLED &&
-                status != InvoiceStatus.CREDIT_NOTE &&
-                dueDate.isBefore(LocalDate.now());
-    }
-
-    /** Berechnet offenen Betrag */
-    public BigDecimal getOutstandingAmount() {
-        if (paidAmount == null) return totalAmount;
-        return totalAmount.subtract(paidAmount);
-    }
-
-    /** Setzt DueSchedules zurück bei Stornierung */
-    public void cancel() {
-        this.status = InvoiceStatus.CANCELLED;
-        for (DueSchedule dueSchedule : dueSchedules) {
-            dueSchedule.revertInvoicing();
-        }
-        dueSchedules.clear();
-    }
-
     /** Erstellt eine Gutschriftrechnung */
     public Invoice createCreditNote() {
         Invoice creditNote = new Invoice();
@@ -278,7 +222,7 @@ public class Invoice {
         creditNote.setBillingAddress(this.billingAddress);
         creditNote.setInvoiceDate(LocalDate.now());
         creditNote.setDueDate(LocalDate.now());
-        creditNote.setStatus(InvoiceStatus.CREDIT_NOTE);
+        creditNote.setStatus(InvoiceStatus.DRAFT);
         creditNote.setInvoiceType(InvoiceType.CREDIT_NOTE);
 
         for (InvoiceItem originalItem : this.invoiceItems) {
@@ -351,24 +295,6 @@ public class Invoice {
     public List<Invoice> getCreditNotes() { return creditNotes; }
     public void setCreditNotes(List<Invoice> creditNotes) { this.creditNotes = creditNotes; }
 
-    public BigDecimal getPaidAmount() { return paidAmount; }
-    public void setPaidAmount(BigDecimal paidAmount) { this.paidAmount = paidAmount; }
-
-    public LocalDate getPaidDate() { return paidDate; }
-    public void setPaidDate(LocalDate paidDate) { this.paidDate = paidDate; }
-
-    public String getPaymentMethod() { return paymentMethod; }
-    public void setPaymentMethod(String paymentMethod) { this.paymentMethod = paymentMethod; }
-
-    public String getPaymentReference() { return paymentReference; }
-    public void setPaymentReference(String paymentReference) { this.paymentReference = paymentReference; }
-
-    public LocalDate getLastReminderDate() { return lastReminderDate; }
-    public void setLastReminderDate(LocalDate lastReminderDate) { this.lastReminderDate = lastReminderDate; }
-
-    public Integer getReminderCount() { return reminderCount; }
-    public void setReminderCount(Integer reminderCount) { this.reminderCount = reminderCount; }
-
     public Customer getCustomer() { return customer; }
     public void setCustomer(Customer customer) { this.customer = customer; }
 
@@ -381,9 +307,6 @@ public class Invoice {
     public List<OpenItem> getOpenItems() { return openItems; }
     public void setOpenItems(List<OpenItem> openItems) { this.openItems = openItems; }
 
-    public List<DueSchedule> getDueSchedules() { return dueSchedules; }
-    public void setDueSchedules(List<DueSchedule> dueSchedules) { this.dueSchedules = dueSchedules; }
-
     @Override
     public String toString() {
         return "Invoice{" +
@@ -394,9 +317,6 @@ public class Invoice {
                 ", status=" + status +
                 ", invoiceType=" + invoiceType +
                 ", totalAmount=" + totalAmount +
-                ", paidAmount=" + paidAmount +
-                ", outstandingAmount=" + getOutstandingAmount() +
-                ", dueSchedulesCount=" + dueSchedules.size() +
                 ", customer=" + (customer != null ? customer.getCustomerNumber() : null) +
                 ", batchId='" + invoiceBatchId + '\'' +
                 '}';

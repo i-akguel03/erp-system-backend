@@ -236,9 +236,9 @@ public class DueScheduleService {
                 .orElseThrow(() -> new ResourceNotFoundException("Fälligkeit " + id + " nicht gefunden"));
 
         // Prüfen ob bereits abgerechnet
-        if (dueSchedule.getStatus() == DueStatus.COMPLETED && dueSchedule.getInvoice() != null) {
-            throw new IllegalStateException("Abgerechnete Fälligkeiten können nicht gelöscht werden");
-        }
+//        if (dueSchedule.getStatus() == DueStatus.COMPLETED && dueSchedule.getInvoice() != null) {
+//            throw new IllegalStateException("Abgerechnete Fälligkeiten können nicht gelöscht werden");
+//        }
 
         dueScheduleRepository.delete(dueSchedule);
         logger.info("Deleted due schedule: id={}", id);
