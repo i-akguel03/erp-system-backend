@@ -1,0 +1,53 @@
+server:
+  port: ${PORT:8080}  # Render setzt PORT automatisch
+
+spring:
+  application:
+    name: erp-system-backend
+
+  datasource:
+    url: ${DATABASE_URL}            # z.B. aus .env: jdbc:postgresql://host/db?sslmode=require
+    username: ${DATABASE_USERNAME}  # z.B. aus .env
+    password: ${DATABASE_PASSWORD}  # z.B. aus .env
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      maximum-pool-size: 10
+
+  jpa:
+    hibernate:
+      ddl-auto: create
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+
+  jackson:
+    serialization:
+      indent_output: true
+
+  security:
+    user:
+      name: ${SPRING_USER:erp}       # Default-Wert nur lokal
+      password: ${SPRING_PASSWORD}   # Passwort aus .env
+
+jwt:
+  secret: ${JWT_SECRET}             # z.B. aus .env
+  expiration: 86400000
+  issuer: erp-backend
+
+logging:
+  level:
+    root: INFO
+    com.erp.backend: DEBUG
+  file:
+    name: logs/erp-backend.log
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,env,httptrace
+  endpoint:
+    health:
+      show-details: always
