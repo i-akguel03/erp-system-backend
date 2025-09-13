@@ -1,20 +1,23 @@
 package com.erp.backend.domain;
 
 public enum DueStatus {
-    PENDING("Ausstehend"),
-    PAID("Bezahlt"),
-    OVERDUE("Überfällig"),
-    CANCELLED("Storniert"),
-    PARTIAL_PAID("Teilweise bezahlt"),
-    REFUNDED("Erstattet");
+    /**
+     * Fälligkeit ist aktiv und kann abgerechnet werden
+     */
+    ACTIVE,
 
-    private final String displayName;
+    /**
+     * Fälligkeit ist pausiert - wird nicht abgerechnet aber kann reaktiviert werden
+     */
+    PAUSED,
 
-    DueStatus(String displayName) {
-        this.displayName = displayName;
-    }
+    /**
+     * Fälligkeit ist ausgesetzt - längerfristige Unterbrechung
+     */
+    SUSPENDED,
 
-    public String getDisplayName() {
-        return displayName;
-    }
+    /**
+     * Fälligkeit wurde bereits abgerechnet/erledigt
+     */
+    COMPLETED
 }

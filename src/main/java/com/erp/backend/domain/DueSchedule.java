@@ -4,11 +4,17 @@ import jakarta.persistence.*;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
 
-import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.UUID;
 
+/**
+ * Repräsentiert eine einzelne Fälligkeit (DueSchedule) eines Abonnements.
+ *
+ * Verwaltet nur die Zeitplanung und den Status für den Rechnungslauf.
+ * Preise werden zur Laufzeit aus der Subscription und den zugehörigen Produkten berechnet.
+ */
 @Entity
 @Table(name = "due_schedules")
 @SQLDelete(sql = "UPDATE due_schedules SET deleted = true WHERE id = ?")
@@ -19,68 +25,102 @@ public class DueSchedule {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
+    /**
+     * Eindeutige Nummer der Fälligkeit
+     */
     @Column(name = "due_number", unique = true)
     private String dueNumber;
 
+    /**
+     * Datum, an dem die Fälligkeit fällig ist
+     */
     @Column(name = "due_date", nullable = false)
     private LocalDate dueDate;
 
-    @Column(name = "amount", nullable = false, precision = 10, scale = 2)
-    private BigDecimal amount;
-
+    /**
+     * Zeitraum, den diese Fälligkeit abdeckt
+     */
     @Column(name = "period_start", nullable = false)
     private LocalDate periodStart;
 
     @Column(name = "period_end")
     private LocalDate periodEnd;
 
-    @Column(nullable = false)
-    private boolean deleted = false;
-
+    /**
+     * Status der Fälligkeit (ACTIVE, PAUSED, SUSPENDED, COMPLETED)
+     */
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
     private DueStatus status;
 
-    @Column(name = "paid_date")
-    private LocalDate paidDate;
+    /**
+     * Soft-Delete Flag
+     */
+    @Column(nullable = false)
+    private boolean deleted = false;
 
-    @Column(name = "paid_amount", precision = 10, scale = 2)
-    private BigDecimal paidAmount;
-
-    @Column(name = "payment_method")
-    private String paymentMethod;
-
-    @Column(name = "payment_reference")
-    private String paymentReference;
-
+    /**
+     * Zeitstempel der Erstellung
+     */
     @Column(name = "created_date", nullable = false)
     private LocalDateTime createdDate;
 
+    /**
+     * Zeitstempel der letzten Aktualisierung
+     */
     @Column(name = "updated_date")
     private LocalDateTime updatedDate;
 
     @Column(name = "notes", length = 500)
     private String notes;
 
-    @Column(name = "reminder_sent")
-    private Boolean reminderSent = false;
+    // === Felder für Invoice Management ===
 
-    @Column(name = "reminder_count")
-    private Integer reminderCount = 0;
+    /**
+     * Referenz zur Rechnung, falls diese Fälligkeit bereits abgerechnet wurde
+     */
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "invoice_id")
+    private Invoice invoice;
 
-    @Column(name = "last_reminder_date")
-    private LocalDate lastReminderDate;
+    /**
+     * Datum, an dem diese Fälligkeit in Rechnung gestellt wurde
+     */
+    @Column(name = "invoiced_date")
+    private LocalDate invoicedDate;
 
-    // Many-to-One Beziehung zum Subscription
+    /**
+     * Referenz zum InvoiceItem, das aus dieser DueSchedule erzeugt wurde
+     */
+    @OneToOne(mappedBy = "dueSchedule", fetch = FetchType.LAZY)
+    private InvoiceItem invoiceItem;
+
+    /**
+     * Flag, ob diese Fälligkeit bereits in einem Rechnungslauf berücksichtigt wurde
+     */
+    @Column(name = "processed_for_invoicing", nullable = false)
+    private boolean processedForInvoicing = false;
+
+    /**
+     * Batch-ID des Rechnungslaufs
+     */
+    @Column(name = "invoice_batch_id")
+    private String invoiceBatchId;
+
+    /**
+     * Zugehöriges Abonnement
+     */
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "subscription_id", nullable = false)
     private Subscription subscription;
+
+    // === Lifecycle Callbacks ===
 
     @PrePersist
     protected void onCreate() {
         createdDate = LocalDateTime.now();
         if (status == null) {
-            status = DueStatus.PENDING;
+            status = DueStatus.ACTIVE;
         }
     }
 
@@ -89,207 +129,153 @@ public class DueSchedule {
         updatedDate = LocalDateTime.now();
     }
 
-    public DueSchedule() {
-    }
+    // === Konstruktoren ===
 
-    public DueSchedule(LocalDate dueDate, BigDecimal amount, LocalDate periodStart,
+    public DueSchedule() {}
+
+    public DueSchedule(LocalDate dueDate, LocalDate periodStart,
                        LocalDate periodEnd, Subscription subscription) {
         this.dueDate = dueDate;
-        this.amount = amount;
         this.periodStart = periodStart;
         this.periodEnd = periodEnd;
         this.subscription = subscription;
-        this.status = DueStatus.PENDING;
+        this.status = DueStatus.ACTIVE;
     }
 
-    // Getter & Setter
+    // === Business Methoden ===
 
-    public UUID getId() {
-        return id;
+    /**
+     * Markiert die Fälligkeit als in Rechnung gestellt
+     */
+    public void markAsInvoiced(Invoice invoice, String batchId) {
+        this.invoice = invoice;
+        this.invoicedDate = LocalDate.now();
+        this.processedForInvoicing = true;
+        this.invoiceBatchId = batchId;
+        this.status = DueStatus.COMPLETED;
+        this.notes = "Abgerechnet mit Rechnung " + invoice.getInvoiceNumber() +
+                " am " + invoice.getInvoiceDate().format(DateTimeFormatter.ofPattern("dd.MM.yyyy"));
     }
 
-    public void setId(UUID id) {
-        this.id = id;
+    /**
+     * Setzt die Fälligkeit zurück, z.B. bei Storno einer Rechnung
+     */
+    public void revertInvoicing() {
+        this.invoice = null;
+        this.invoicedDate = null;
+        this.processedForInvoicing = false;
+        this.invoiceBatchId = null;
+        this.status = DueStatus.ACTIVE;
+        this.notes = null;
     }
 
-    public String getDueNumber() {
-        return dueNumber;
+    public void pause() {
+        if (status == DueStatus.ACTIVE) {
+            this.status = DueStatus.PAUSED;
+        }
     }
 
-    public void setDueNumber(String dueNumber) {
-        this.dueNumber = dueNumber;
+    public void activate() {
+        if (status == DueStatus.PAUSED || status == DueStatus.SUSPENDED) {
+            this.status = DueStatus.ACTIVE;
+        }
     }
 
-    public LocalDate getDueDate() {
-        return dueDate;
+    public void suspend() {
+        if (status != DueStatus.COMPLETED) {
+            this.status = DueStatus.SUSPENDED;
+        }
     }
 
-    public void setDueDate(LocalDate dueDate) {
-        this.dueDate = dueDate;
+    // === Hilfsmethoden ===
+
+    public boolean isCompleted() {
+        return status == DueStatus.COMPLETED || invoice != null;
     }
 
-    public BigDecimal getAmount() {
-        return amount;
+    public boolean isActive() {
+        return status == DueStatus.ACTIVE;
     }
 
-    public void setAmount(BigDecimal amount) {
-        this.amount = amount;
+    public boolean isPaused() {
+        return status == DueStatus.PAUSED;
     }
 
-    public LocalDate getPeriodStart() {
-        return periodStart;
-    }
-
-    public void setPeriodStart(LocalDate periodStart) {
-        this.periodStart = periodStart;
-    }
-
-    public LocalDate getPeriodEnd() {
-        return periodEnd;
-    }
-
-    public void setPeriodEnd(LocalDate periodEnd) {
-        this.periodEnd = periodEnd;
-    }
-
-    public DueStatus getStatus() {
-        return status;
-    }
-
-    public void setStatus(DueStatus status) {
-        this.status = status;
-    }
-
-    public LocalDate getPaidDate() {
-        return paidDate;
-    }
-
-    public void setPaidDate(LocalDate paidDate) {
-        this.paidDate = paidDate;
-    }
-
-    public BigDecimal getPaidAmount() {
-        return paidAmount;
-    }
-
-    public void setPaidAmount(BigDecimal paidAmount) {
-        this.paidAmount = paidAmount;
-    }
-
-    public String getPaymentMethod() {
-        return paymentMethod;
-    }
-
-    public void setPaymentMethod(String paymentMethod) {
-        this.paymentMethod = paymentMethod;
-    }
-
-    public String getPaymentReference() {
-        return paymentReference;
-    }
-
-    public void setPaymentReference(String paymentReference) {
-        this.paymentReference = paymentReference;
-    }
-
-    public LocalDateTime getCreatedDate() {
-        return createdDate;
-    }
-
-    public void setCreatedDate(LocalDateTime createdDate) {
-        this.createdDate = createdDate;
-    }
-
-    public LocalDateTime getUpdatedDate() {
-        return updatedDate;
-    }
-
-    public void setUpdatedDate(LocalDateTime updatedDate) {
-        this.updatedDate = updatedDate;
-    }
-
-    public String getNotes() {
-        return notes;
-    }
-
-    public void setNotes(String notes) {
-        this.notes = notes;
-    }
-
-    public Boolean getReminderSent() {
-        return reminderSent;
-    }
-
-    public void setReminderSent(Boolean reminderSent) {
-        this.reminderSent = reminderSent;
-    }
-
-    public Integer getReminderCount() {
-        return reminderCount;
-    }
-
-    public void setReminderCount(Integer reminderCount) {
-        this.reminderCount = reminderCount;
-    }
-
-    public LocalDate getLastReminderDate() {
-        return lastReminderDate;
-    }
-
-    public void setLastReminderDate(LocalDate lastReminderDate) {
-        this.lastReminderDate = lastReminderDate;
-    }
-
-    public Subscription getSubscription() {
-        return subscription;
-    }
-
-    public void setSubscription(Subscription subscription) {
-        this.subscription = subscription;
-    }
-
-    // Hilfsmethoden
-    public boolean isPaid() {
-        return status == DueStatus.PAID;
+    public boolean isSuspended() {
+        return status == DueStatus.SUSPENDED;
     }
 
     public boolean isOverdue() {
-        return status == DueStatus.PENDING && dueDate.isBefore(LocalDate.now());
+        return status == DueStatus.ACTIVE && dueDate.isBefore(LocalDate.now());
     }
 
-    public void markAsPaid(BigDecimal paidAmount, String paymentMethod, String paymentReference) {
-        this.status = DueStatus.PAID;
-        this.paidAmount = paidAmount;
-        this.paidDate = LocalDate.now();
-        this.paymentMethod = paymentMethod;
-        this.paymentReference = paymentReference;
+    public boolean canBeInvoiced() {
+        return status == DueStatus.ACTIVE && !processedForInvoicing;
     }
 
+    // === Getter & Setter ===
+
+    public UUID getId() { return id; }
+    public void setId(UUID id) { this.id = id; }
+
+    public String getDueNumber() { return dueNumber; }
+    public void setDueNumber(String dueNumber) { this.dueNumber = dueNumber; }
+
+    public LocalDate getDueDate() { return dueDate; }
+    public void setDueDate(LocalDate dueDate) { this.dueDate = dueDate; }
+
+    public LocalDate getPeriodStart() { return periodStart; }
+    public void setPeriodStart(LocalDate periodStart) { this.periodStart = periodStart; }
+
+    public LocalDate getPeriodEnd() { return periodEnd; }
+    public void setPeriodEnd(LocalDate periodEnd) { this.periodEnd = periodEnd; }
+
+    public DueStatus getStatus() { return status; }
+    public void setStatus(DueStatus status) { this.status = status; }
+
+    public LocalDateTime getCreatedDate() { return createdDate; }
+    public void setCreatedDate(LocalDateTime createdDate) { this.createdDate = createdDate; }
+
+    public LocalDateTime getUpdatedDate() { return updatedDate; }
+    public void setUpdatedDate(LocalDateTime updatedDate) { this.updatedDate = updatedDate; }
+
+    public String getNotes() { return notes; }
+    public void setNotes(String notes) { this.notes = notes; }
+
+    public Subscription getSubscription() { return subscription; }
+    public void setSubscription(Subscription subscription) { this.subscription = subscription; }
+
+    public Invoice getInvoice() { return invoice; }
+    public void setInvoice(Invoice invoice) { this.invoice = invoice; }
+
+    public LocalDate getInvoicedDate() { return invoicedDate; }
+    public void setInvoicedDate(LocalDate invoicedDate) { this.invoicedDate = invoicedDate; }
+
+    public InvoiceItem getInvoiceItem() { return invoiceItem; }
+    public void setInvoiceItem(InvoiceItem invoiceItem) { this.invoiceItem = invoiceItem; }
+
+    public boolean isProcessedForInvoicing() { return processedForInvoicing; }
+    public void setProcessedForInvoicing(boolean processedForInvoicing) { this.processedForInvoicing = processedForInvoicing; }
+
+    public String getInvoiceBatchId() { return invoiceBatchId; }
+    public void setInvoiceBatchId(String invoiceBatchId) { this.invoiceBatchId = invoiceBatchId; }
+
+    public boolean isDeleted() { return deleted; }
+    public void setDeleted(boolean deleted) { this.deleted = deleted; }
+
+    // === toString ===
     @Override
     public String toString() {
         return "DueSchedule{" +
                 "id=" + id +
                 ", dueNumber='" + dueNumber + '\'' +
                 ", dueDate=" + dueDate +
-                ", amount=" + amount +
                 ", periodStart=" + periodStart +
                 ", periodEnd=" + periodEnd +
                 ", status=" + status +
-                ", paidDate=" + paidDate +
-                ", paidAmount=" + paidAmount +
+                ", invoiced=" + isCompleted() +
+                ", invoice=" + (invoice != null ? invoice.getInvoiceNumber() : null) +
                 ", subscription=" + (subscription != null ? subscription.getId() : null) +
                 '}';
-    }
-
-    public Boolean isReminderSent() {
-        return false;
-    }
-
-    public boolean isDeleted() {
-        return deleted;
-    }
-
-    public void setDeleted(boolean deleted) {
-        this.deleted = deleted;
     }
 }

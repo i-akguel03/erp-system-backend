@@ -31,7 +31,7 @@ public class DueScheduleMapper {
         dto.setPaymentMethod(entity.getPaymentMethod());
         dto.setPaymentReference(entity.getPaymentReference());
         dto.setNotes(entity.getNotes());
-        dto.setReminderSent(entity.isReminderSent());
+        dto.setReminderSent(entity.getReminderSent());
         dto.setReminderCount(entity.getReminderCount());
         dto.setLastReminderDate(entity.getLastReminderDate());
 
@@ -140,7 +140,7 @@ public class DueScheduleMapper {
         copy.setPaymentMethod(source.getPaymentMethod());
         copy.setPaymentReference(source.getPaymentReference());
         copy.setNotes(source.getNotes());
-        copy.setReminderSent(source.isReminderSent());
+        copy.setReminderSent(source.getReminderSent());
         copy.setReminderCount(source.getReminderCount());
         copy.setLastReminderDate(source.getLastReminderDate());
         copy.setSubscription(source.getSubscription());

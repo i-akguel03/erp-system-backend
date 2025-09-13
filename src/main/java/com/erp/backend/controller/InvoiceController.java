@@ -54,7 +54,7 @@ public class InvoiceController {
 
     @GetMapping("/number/{invoiceNumber}")
     public ResponseEntity<Invoice> getInvoiceByNumber(@PathVariable String invoiceNumber) {
-        Optional<Invoice> invoice = invoiceService.getInvoiceByNumber(invoiceNumber);
+        Optional<Invoice> invoice = null;//invoiceService.getInvoiceByNumber(invoiceNumber);
         return invoice.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
 
@@ -75,7 +75,7 @@ public class InvoiceController {
 
     @GetMapping("/overdue")
     public ResponseEntity<List<Invoice>> getOverdueInvoices() {
-        List<Invoice> invoices = invoiceService.getOverdueInvoices(LocalDate.now());
+        List<Invoice> invoices =  null;//invoiceService.getOverdueInvoices(LocalDate.now());
         return ResponseEntity.ok(invoices);
     }
 

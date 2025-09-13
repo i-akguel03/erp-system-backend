@@ -2,7 +2,7 @@ package com.erp.backend.domain;
 
 import jakarta.persistence.*;
 import java.math.BigDecimal;
-import java.math.RoundingMode;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
@@ -10,153 +10,218 @@ import java.util.UUID;
 public class InvoiceItem {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
-    @Column(name = "position", nullable = false)
-    private Integer position;
-
-    @Column(name = "description", nullable = false, columnDefinition = "TEXT")
+    @Column(name = "description", nullable = false, length = 500)
     private String description;
 
     @Column(name = "quantity", precision = 10, scale = 3, nullable = false)
     private BigDecimal quantity;
 
-    @Column(name = "unit")
-    private String unit; // z.B. "Stück", "kg", "m", "Std."
-
     @Column(name = "unit_price", precision = 10, scale = 2, nullable = false)
     private BigDecimal unitPrice;
 
-    @Column(name = "discount_percentage", precision = 5, scale = 2)
-    private BigDecimal discountPercentage;
-
-    @Column(name = "discount_amount", precision = 10, scale = 2)
-    private BigDecimal discountAmount;
+    @Column(name = "line_total", precision = 10, scale = 2, nullable = false)
+    private BigDecimal lineTotal;
 
     @Column(name = "tax_rate", precision = 5, scale = 2)
     private BigDecimal taxRate;
 
-    @Column(name = "line_total", precision = 10, scale = 2)
-    private BigDecimal lineTotal;
+    @Column(name = "tax_amount", precision = 10, scale = 2)
+    private BigDecimal taxAmount;
 
-    @Column(name = "notes")
-    private String notes;
+    @Column(name = "discount_amount", precision = 10, scale = 2)
+    private BigDecimal discountAmount;
+
+    @Column(name = "sort_order")
+    private Integer sortOrder;
+
+    @Column(name = "created_at", nullable = false)
+    private LocalDateTime createdAt;
+
+    @Column(name = "updated_at")
+    private LocalDateTime updatedAt;
 
     // Beziehung zur Rechnung
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "invoice_id", nullable = false)
     private Invoice invoice;
 
-    // Optionale Beziehung zu einem Produkt/Service
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "product_id")
-    private Product product;
+    // === NEUE FELDER FÜR DUESCHEDULE REFERENZ ===
+
+    /**
+     * Referenz zur ursprünglichen DueSchedule, falls dieses Item daraus erstellt wurde
+     */
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "due_schedule_id")
+    private DueSchedule dueSchedule;
+
+    /**
+     * Typ des InvoiceItems
+     */
+    @Enumerated(EnumType.STRING)
+    @Column(name = "item_type", nullable = false)
+    private InvoiceItemType itemType = InvoiceItemType.SERVICE;
+
+    /**
+     * Periode Start (für Abonnement-Items)
+     */
+    @Column(name = "period_start")
+    private java.time.LocalDate periodStart;
+
+    /**
+     * Periode Ende (für Abonnement-Items)
+     */
+    @Column(name = "period_end")
+    private java.time.LocalDate periodEnd;
+
+    /**
+     * Produkt/Service-Referenz
+     */
+    @Column(name = "product_code")
+    private String productCode;
+
+    @Column(name = "product_name")
+    private String productName;
+
+    // Enum für Item-Typen
+    public enum InvoiceItemType {
+        SERVICE("Dienstleistung"),
+        PRODUCT("Produkt"),
+        SUBSCRIPTION("Abonnement"),
+        DISCOUNT("Rabatt"),
+        FEE("Gebühr");
+
+        private final String displayName;
+
+        InvoiceItemType(String displayName) {
+            this.displayName = displayName;
+        }
+
+        public String getDisplayName() {
+            return displayName;
+        }
+    }
 
     // Konstruktoren
     public InvoiceItem() {
+        this.createdAt = LocalDateTime.now();
         this.quantity = BigDecimal.ONE;
-        this.discountPercentage = BigDecimal.ZERO;
-        this.taxRate = BigDecimal.ZERO;
     }
 
-    public InvoiceItem(String description, BigDecimal quantity, String unit, BigDecimal unitPrice) {
+    public InvoiceItem(String description, BigDecimal quantity, BigDecimal unitPrice) {
         this();
         this.description = description;
         this.quantity = quantity;
-        this.unit = unit;
         this.unitPrice = unitPrice;
         calculateLineTotal();
     }
 
-    public InvoiceItem(Product product, BigDecimal quantity, BigDecimal unitPrice) {
-        this();
-        this.product = product;
-        this.description = product != null ? product.getName() : "";
-        this.quantity = quantity;
-        this.unit = product != null ? product.getUnit() : null;
-        this.unitPrice = unitPrice != null ? unitPrice : (product != null ? product.getPrice() : BigDecimal.ZERO);
+    // Lifecycle-Methoden
+    @PrePersist
+    protected void onCreate() {
+        this.createdAt = LocalDateTime.now();
+        calculateLineTotal();
+    }
+
+    @PreUpdate
+    protected void onUpdate() {
+        this.updatedAt = LocalDateTime.now();
         calculateLineTotal();
     }
 
     // Business-Methoden
-    @PrePersist
-    @PreUpdate
-    protected void calculateLineTotal() {
-        if (quantity == null || unitPrice == null) {
-            this.lineTotal = BigDecimal.ZERO;
-            return;
+    public void calculateLineTotal() {
+        BigDecimal gross = quantity.multiply(unitPrice);
+
+        if (discountAmount != null) {
+            gross = gross.subtract(discountAmount);
         }
 
-        // Basis-Betrag: Menge × Einzelpreis
-        BigDecimal baseAmount = quantity.multiply(unitPrice);
+        this.lineTotal = gross;
 
-        // Rabatt anwenden
-        BigDecimal afterDiscount = baseAmount;
-        if (discountPercentage != null && discountPercentage.compareTo(BigDecimal.ZERO) > 0) {
-            BigDecimal discountValue = baseAmount.multiply(discountPercentage.divide(BigDecimal.valueOf(100), 4, RoundingMode.HALF_UP));
-            afterDiscount = baseAmount.subtract(discountValue);
-        } else if (discountAmount != null && discountAmount.compareTo(BigDecimal.ZERO) > 0) {
-            afterDiscount = baseAmount.subtract(discountAmount);
-        }
-
-        // Endergebnis auf 2 Dezimalstellen runden
-        this.lineTotal = afterDiscount.setScale(2, RoundingMode.HALF_UP);
-    }
-
-    public BigDecimal getLineTotalWithTax() {
-        if (lineTotal == null) {
-            calculateLineTotal();
-        }
-
+        // Berechne Steuer falls angegeben
         if (taxRate != null && taxRate.compareTo(BigDecimal.ZERO) > 0) {
-            BigDecimal taxAmount = lineTotal.multiply(taxRate.divide(BigDecimal.valueOf(100), 4, RoundingMode.HALF_UP));
-            return lineTotal.add(taxAmount).setScale(2, RoundingMode.HALF_UP);
+            this.taxAmount = lineTotal.multiply(taxRate.divide(BigDecimal.valueOf(100)));
         }
-
-        return lineTotal;
     }
 
-    public BigDecimal getTaxAmount() {
-        if (lineTotal == null) {
-            calculateLineTotal();
+    /**
+     * Erstellt ein InvoiceItem basierend auf einer DueSchedule
+     */
+    public static InvoiceItem fromDueSchedule(DueSchedule dueSchedule, Invoice invoice) {
+        InvoiceItem item = new InvoiceItem();
+        item.setInvoice(invoice);
+        item.setDueSchedule(dueSchedule);
+        item.setItemType(InvoiceItemType.SUBSCRIPTION);
+
+        // Setze Periode
+        item.setPeriodStart(dueSchedule.getPeriodStart());
+        item.setPeriodEnd(dueSchedule.getPeriodEnd());
+
+        // Erstelle Beschreibung
+        String description = createDescriptionFromDueSchedule(dueSchedule);
+        item.setDescription(description);
+
+        // Setze Beträge
+        item.setQuantity(BigDecimal.ONE);
+        item.setUnitPrice(dueSchedule.getAmount());
+
+        // Produkt-Informationen falls verfügbar
+        if (dueSchedule.getSubscription() != null &&
+                dueSchedule.getSubscription().getProduct() != null) {
+            Product product = dueSchedule.getSubscription().getProduct();
+            item.setProductCode(product.getProductNumber());
+            item.setProductName(product.getName());
         }
 
-        if (taxRate != null && taxRate.compareTo(BigDecimal.ZERO) > 0) {
-            return lineTotal.multiply(taxRate.divide(BigDecimal.valueOf(100), 4, RoundingMode.HALF_UP))
-                    .setScale(2, RoundingMode.HALF_UP);
-        }
-
-        return BigDecimal.ZERO;
+        item.calculateLineTotal();
+        return item;
     }
 
-    public void updateFromProduct(Product product) {
-        if (product != null) {
-            this.product = product;
-            this.description = product.getName();
-            this.unit = product.getUnit();
-            if (this.unitPrice == null || this.unitPrice.compareTo(BigDecimal.ZERO) == 0) {
-                this.unitPrice = product.getPrice();
+    private static String createDescriptionFromDueSchedule(DueSchedule dueSchedule) {
+        StringBuilder desc = new StringBuilder();
+
+        // Produkt-/Service-Name
+        if (dueSchedule.getSubscription() != null) {
+            Subscription subscription = dueSchedule.getSubscription();
+            if (subscription.getProduct() != null) {
+                desc.append(subscription.getProduct().getName());
+            } else {
+                desc.append("Abonnement");
             }
-            calculateLineTotal();
+
+            // Periode hinzufügen
+            if (dueSchedule.getPeriodStart() != null) {
+                desc.append(" - Zeitraum: ");
+                desc.append(dueSchedule.getPeriodStart().format(
+                        java.time.format.DateTimeFormatter.ofPattern("dd.MM.yyyy")));
+
+                if (dueSchedule.getPeriodEnd() != null) {
+                    desc.append(" bis ");
+                    desc.append(dueSchedule.getPeriodEnd().format(
+                            java.time.format.DateTimeFormatter.ofPattern("dd.MM.yyyy")));
+                }
+            }
+
+            // Subscription-Details
+            if (subscription.getSubscriptionNumber() != null) {
+                desc.append(" (Abo-Nr.: ").append(subscription.getSubscriptionNumber()).append(")");
+            }
         }
+
+        return desc.toString();
     }
 
-    // Getter & Setter
+    // === GETTER & SETTER ===
+
     public UUID getId() {
         return id;
     }
 
     public void setId(UUID id) {
         this.id = id;
-    }
-
-    public Integer getPosition() {
-        return position;
-    }
-
-    public void setPosition(Integer position) {
-        this.position = position;
     }
 
     public String getDescription() {
@@ -173,15 +238,6 @@ public class InvoiceItem {
 
     public void setQuantity(BigDecimal quantity) {
         this.quantity = quantity;
-        calculateLineTotal();
-    }
-
-    public String getUnit() {
-        return unit;
-    }
-
-    public void setUnit(String unit) {
-        this.unit = unit;
     }
 
     public BigDecimal getUnitPrice() {
@@ -190,29 +246,14 @@ public class InvoiceItem {
 
     public void setUnitPrice(BigDecimal unitPrice) {
         this.unitPrice = unitPrice;
-        calculateLineTotal();
     }
 
-    public BigDecimal getDiscountPercentage() {
-        return discountPercentage;
+    public BigDecimal getLineTotal() {
+        return lineTotal;
     }
 
-    public void setDiscountPercentage(BigDecimal discountPercentage) {
-        this.discountPercentage = discountPercentage;
-        // Reset discount amount wenn percentage gesetzt wird
-        this.discountAmount = null;
-        calculateLineTotal();
-    }
-
-    public BigDecimal getDiscountAmount() {
-        return discountAmount;
-    }
-
-    public void setDiscountAmount(BigDecimal discountAmount) {
-        this.discountAmount = discountAmount;
-        // Reset discount percentage wenn amount gesetzt wird
-        this.discountPercentage = null;
-        calculateLineTotal();
+    public void setLineTotal(BigDecimal lineTotal) {
+        this.lineTotal = lineTotal;
     }
 
     public BigDecimal getTaxRate() {
@@ -223,23 +264,44 @@ public class InvoiceItem {
         this.taxRate = taxRate;
     }
 
-    public BigDecimal getLineTotal() {
-        if (lineTotal == null) {
-            calculateLineTotal();
-        }
-        return lineTotal;
+    public BigDecimal getTaxAmount() {
+        return taxAmount;
     }
 
-    public void setLineTotal(BigDecimal lineTotal) {
-        this.lineTotal = lineTotal;
+    public void setTaxAmount(BigDecimal taxAmount) {
+        this.taxAmount = taxAmount;
     }
 
-    public String getNotes() {
-        return notes;
+    public BigDecimal getDiscountAmount() {
+        return discountAmount;
     }
 
-    public void setNotes(String notes) {
-        this.notes = notes;
+    public void setDiscountAmount(BigDecimal discountAmount) {
+        this.discountAmount = discountAmount;
+    }
+
+    public Integer getSortOrder() {
+        return sortOrder;
+    }
+
+    public void setSortOrder(Integer sortOrder) {
+        this.sortOrder = sortOrder;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public LocalDateTime getUpdatedAt() {
+        return updatedAt;
+    }
+
+    public void setUpdatedAt(LocalDateTime updatedAt) {
+        this.updatedAt = updatedAt;
     }
 
     public Invoice getInvoice() {
@@ -250,29 +312,68 @@ public class InvoiceItem {
         this.invoice = invoice;
     }
 
-    public Product getProduct() {
-        return product;
+    // === NEUE GETTER & SETTER ===
+
+    public DueSchedule getDueSchedule() {
+        return dueSchedule;
     }
 
-    public void setProduct(Product product) {
-        this.product = product;
-        updateFromProduct(product);
+    public void setDueSchedule(DueSchedule dueSchedule) {
+        this.dueSchedule = dueSchedule;
+    }
+
+    public InvoiceItemType getItemType() {
+        return itemType;
+    }
+
+    public void setItemType(InvoiceItemType itemType) {
+        this.itemType = itemType;
+    }
+
+    public java.time.LocalDate getPeriodStart() {
+        return periodStart;
+    }
+
+    public void setPeriodStart(java.time.LocalDate periodStart) {
+        this.periodStart = periodStart;
+    }
+
+    public java.time.LocalDate getPeriodEnd() {
+        return periodEnd;
+    }
+
+    public void setPeriodEnd(java.time.LocalDate periodEnd) {
+        this.periodEnd = periodEnd;
+    }
+
+    public String getProductCode() {
+        return productCode;
+    }
+
+    public void setProductCode(String productCode) {
+        this.productCode = productCode;
+    }
+
+    public String getProductName() {
+        return productName;
+    }
+
+    public void setProductName(String productName) {
+        this.productName = productName;
     }
 
     @Override
     public String toString() {
         return "InvoiceItem{" +
                 "id=" + id +
-                ", position=" + position +
                 ", description='" + description + '\'' +
                 ", quantity=" + quantity +
-                ", unit='" + unit + '\'' +
                 ", unitPrice=" + unitPrice +
-                ", discountPercentage=" + discountPercentage +
-                ", discountAmount=" + discountAmount +
-                ", taxRate=" + taxRate +
                 ", lineTotal=" + lineTotal +
-                ", productId=" + (product != null ? product.getId() : null) +
+                ", itemType=" + itemType +
+                ", periodStart=" + periodStart +
+                ", periodEnd=" + periodEnd +
+                ", dueSchedule=" + (dueSchedule != null ? dueSchedule.getDueNumber() : null) +
                 '}';
     }
 }

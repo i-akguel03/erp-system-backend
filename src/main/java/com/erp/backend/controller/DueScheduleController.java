@@ -3,7 +3,6 @@ package com.erp.backend.controller;
 import com.erp.backend.domain.DueStatus;
 import com.erp.backend.dto.DueScheduleDto;
 import com.erp.backend.dto.DueScheduleStatisticsDto;
-import com.erp.backend.dto.PaymentDto;
 import com.erp.backend.service.DueScheduleService;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,8 +15,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import jakarta.validation.Valid;
-import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
@@ -48,7 +45,7 @@ public class DueScheduleController {
         return ResponseEntity.ok(dueSchedules);
     }
 
-    // Fälligkeitsplan nach ID abrufen
+    // Einzelnen Fälligkeitsplan abrufen
     @GetMapping("/{id}")
     public ResponseEntity<DueScheduleDto> getDueScheduleById(@PathVariable UUID id) {
         DueScheduleDto dueSchedule = dueScheduleService.getDueScheduleById(id);
@@ -64,7 +61,7 @@ public class DueScheduleController {
 
     // Neuen Fälligkeitsplan erstellen
     @PostMapping
-    public ResponseEntity<DueScheduleDto> createDueSchedule(@Valid @RequestBody DueScheduleDto dueScheduleDto) {
+    public ResponseEntity<DueScheduleDto> createDueSchedule(@RequestBody DueScheduleDto dueScheduleDto) {
         DueScheduleDto createdDueSchedule = dueScheduleService.createDueSchedule(dueScheduleDto);
         return ResponseEntity.status(HttpStatus.CREATED).body(createdDueSchedule);
     }
@@ -73,7 +70,7 @@ public class DueScheduleController {
     @PutMapping("/{id}")
     public ResponseEntity<DueScheduleDto> updateDueSchedule(
             @PathVariable UUID id,
-            @Valid @RequestBody DueScheduleDto dueScheduleDto) {
+            @RequestBody DueScheduleDto dueScheduleDto) {
         DueScheduleDto updatedDueSchedule = dueScheduleService.updateDueSchedule(id, dueScheduleDto);
         return ResponseEntity.ok(updatedDueSchedule);
     }
@@ -85,28 +82,28 @@ public class DueScheduleController {
         return ResponseEntity.noContent().build();
     }
 
-    // Fälligkeitspläne nach Abonnement abrufen
+    // Fälligkeitspläne nach Abonnement
     @GetMapping("/subscription/{subscriptionId}")
     public ResponseEntity<List<DueScheduleDto>> getDueSchedulesBySubscription(@PathVariable UUID subscriptionId) {
         List<DueScheduleDto> dueSchedules = dueScheduleService.getDueSchedulesBySubscription(subscriptionId);
         return ResponseEntity.ok(dueSchedules);
     }
 
-    // Fälligkeitspläne nach Status abrufen
+    // Fälligkeitspläne nach Status
     @GetMapping("/status/{status}")
     public ResponseEntity<List<DueScheduleDto>> getDueSchedulesByStatus(@PathVariable DueStatus status) {
         List<DueScheduleDto> dueSchedules = dueScheduleService.getDueSchedulesByStatus(status);
         return ResponseEntity.ok(dueSchedules);
     }
 
-    // Überfällige Fälligkeitspläne abrufen
+    // Überfällige Fälligkeitspläne
     @GetMapping("/overdue")
     public ResponseEntity<List<DueScheduleDto>> getOverdueDueSchedules() {
         List<DueScheduleDto> overdueDueSchedules = dueScheduleService.getOverdueDueSchedules();
         return ResponseEntity.ok(overdueDueSchedules);
     }
 
-    // Fälligkeitspläne die heute fällig sind
+    // Fälligkeitspläne heute fällig
     @GetMapping("/due-today")
     public ResponseEntity<List<DueScheduleDto>> getDueTodaySchedules() {
         List<DueScheduleDto> dueTodaySchedules = dueScheduleService.getDueTodaySchedules();
@@ -130,57 +127,6 @@ public class DueScheduleController {
         return ResponseEntity.ok(dueSchedules);
     }
 
-    // Zahlung für Fälligkeitsplan verbuchen
-    @PostMapping("/{id}/payment")
-    public ResponseEntity<DueScheduleDto> recordPayment(
-            @PathVariable UUID id,
-            @Valid @RequestBody PaymentDto paymentDto) {
-        DueScheduleDto updatedDueSchedule = dueScheduleService.recordPayment(id, paymentDto);
-        return ResponseEntity.ok(updatedDueSchedule);
-    }
-
-    // Fälligkeitsplan als bezahlt markieren
-    @PutMapping("/{id}/mark-paid")
-    public ResponseEntity<DueScheduleDto> markAsPaid(@PathVariable UUID id) {
-        DueScheduleDto updatedDueSchedule = dueScheduleService.markAsPaid(id);
-        return ResponseEntity.ok(updatedDueSchedule);
-    }
-
-    // Fälligkeitsplan stornieren
-    @PutMapping("/{id}/cancel")
-    public ResponseEntity<DueScheduleDto> cancelDueSchedule(@PathVariable UUID id) {
-        DueScheduleDto updatedDueSchedule = dueScheduleService.cancelDueSchedule(id);
-        return ResponseEntity.ok(updatedDueSchedule);
-    }
-
-    // Mahnung senden
-    @PostMapping("/{id}/send-reminder")
-    public ResponseEntity<DueScheduleDto> sendReminder(@PathVariable UUID id) {
-        DueScheduleDto updatedDueSchedule = dueScheduleService.sendReminder(id);
-        return ResponseEntity.ok(updatedDueSchedule);
-    }
-
-    // Alle Fälligkeitspläne die eine Mahnung benötigen
-    @GetMapping("/needs-reminder")
-    public ResponseEntity<List<DueScheduleDto>> getSchedulesNeedingReminder() {
-        List<DueScheduleDto> schedules = dueScheduleService.getSchedulesNeedingReminder();
-        return ResponseEntity.ok(schedules);
-    }
-
-    // Ausstehenden Betrag für Abonnement abrufen
-    @GetMapping("/subscription/{subscriptionId}/pending-amount")
-    public ResponseEntity<BigDecimal> getPendingAmountBySubscription(@PathVariable UUID subscriptionId) {
-        BigDecimal pendingAmount = dueScheduleService.getPendingAmountBySubscription(subscriptionId);
-        return ResponseEntity.ok(pendingAmount);
-    }
-
-    // Bezahlten Betrag für Abonnement abrufen
-    @GetMapping("/subscription/{subscriptionId}/paid-amount")
-    public ResponseEntity<BigDecimal> getPaidAmountBySubscription(@PathVariable UUID subscriptionId) {
-        BigDecimal paidAmount = dueScheduleService.getPaidAmountBySubscription(subscriptionId);
-        return ResponseEntity.ok(paidAmount);
-    }
-
     // Fälligkeitspläne eines Kunden über alle Abonnements
     @GetMapping("/customer/{customerId}")
     public ResponseEntity<List<DueScheduleDto>> getDueSchedulesByCustomer(@PathVariable UUID customerId) {
@@ -195,23 +141,7 @@ public class DueScheduleController {
         return ResponseEntity.ok(statistics);
     }
 
-    // Summen-Endpunkte (optional fürs Dashboard)
-    @GetMapping("/sum/pending")
-    public ResponseEntity<BigDecimal> getTotalPendingAmount() {
-        return ResponseEntity.ok(dueScheduleService.getTotalPendingAmount());
-    }
-
-    @GetMapping("/sum/paid")
-    public ResponseEntity<BigDecimal> getTotalPaidAmount() {
-        return ResponseEntity.ok(dueScheduleService.getTotalPaidAmount());
-    }
-
-    @GetMapping("/sum/overdue")
-    public ResponseEntity<BigDecimal> getTotalOverdueAmount() {
-        return ResponseEntity.ok(dueScheduleService.getTotalOverdueAmount());
-    }
-
-    // Fälligkeitspläne für ein Abonnement automatisch generieren
+    // Generierung von Fälligkeitsplänen für ein Abonnement
     @PostMapping("/subscription/{subscriptionId}/generate")
     public ResponseEntity<List<DueScheduleDto>> generateDueSchedulesForSubscription(
             @PathVariable UUID subscriptionId,
@@ -220,7 +150,7 @@ public class DueScheduleController {
         return ResponseEntity.status(HttpStatus.CREATED).body(generatedSchedules);
     }
 
-    // Nächste fällige Zahlung für Abonnement
+    // Nächste fällige Fälligkeit für Abonnement
     @GetMapping("/subscription/{subscriptionId}/next-due")
     public ResponseEntity<DueScheduleDto> getNextDueScheduleBySubscription(@PathVariable UUID subscriptionId) {
         DueScheduleDto nextDueSchedule = dueScheduleService.getNextDueScheduleBySubscription(subscriptionId);
