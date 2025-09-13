@@ -63,27 +63,6 @@ public void checkActiveContracts() {
         throw new BusinessException("Kunde mit aktiven Verträgen kann nicht gelöscht werden");
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 ```
 
 **Problem:** Wie generiert man automatische Zahlungspläne?
@@ -143,24 +122,6 @@ git push origin main
 # → Backend Deployment zu Render
 # → Frontend Deployment zu Vercel
 # → Zero-Downtime Updates
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 ```
 
 ### Code-Qualität
