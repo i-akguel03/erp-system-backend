@@ -3,6 +3,9 @@ target/
 build-run.ps1
 logs
 
+# Secrets
+.env
+
 
 .mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
