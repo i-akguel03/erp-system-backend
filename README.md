@@ -221,6 +221,12 @@ Swagger: http://localhost:8080/swagger-ui.html
 
 ## 📜 Lizenz
 
-MIT Lizenz - Siehe [LICENSE](LICENSE) für Details.
+Dieses Projekt ist **nicht frei verwendbar**.
+
+- Nutzung ausschließlich zu Lern- und Demonstrationszwecken gestattet.
+- Keine kommerzielle Verwendung ohne ausdrückliche schriftliche Erlaubnis des Autors.
+- Änderungen, Verbreitung oder Veröffentlichung nur mit Genehmigung.
+
+Alle Rechte vorbehalten.
 
 ---
