@@ -51,6 +51,10 @@ public class Customer {
     public Customer() {
     }
 
+    public Customer(UUID id) {
+        this.id = id;
+    }
+
     public Customer(String firstName, String lastName, String email, String tel) {
         this.firstName = firstName;
         this.lastName = lastName;

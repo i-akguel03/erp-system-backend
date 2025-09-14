@@ -77,12 +77,12 @@ public class InvoiceService {
 
     @Transactional(readOnly = true)
     public List<Invoice> getAllInvoices() {
-        return invoiceRepository.findAll();
+        return invoiceRepository.findAllWithItems();
     }
 
     @Transactional(readOnly = true)
     public Optional<Invoice> getInvoiceById(UUID id) {
-        return invoiceRepository.findById(id);
+        return invoiceRepository.findByIdWithItems(id);
     }
 
     @Transactional

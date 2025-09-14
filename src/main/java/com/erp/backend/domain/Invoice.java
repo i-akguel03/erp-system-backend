@@ -115,7 +115,7 @@ public class Invoice {
     private Address billingAddress;
 
     /** Positionen der Rechnung */
-    @OneToMany(mappedBy = "invoice", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "invoice", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private List<InvoiceItem> invoiceItems = new ArrayList<>();
 
     /** Offene Posten, die aus der Rechnung abgeleitet werden */

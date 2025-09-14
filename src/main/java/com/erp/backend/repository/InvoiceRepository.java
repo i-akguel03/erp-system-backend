@@ -4,6 +4,7 @@ import com.erp.backend.domain.Invoice;
 import com.erp.backend.domain.Customer;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
@@ -14,8 +15,6 @@ import java.util.UUID;
 @Repository
 public interface InvoiceRepository extends JpaRepository<Invoice, UUID> {
 
-    // Alle Rechnungen eines Kunden
-    List<Invoice> findByCustomer(Customer customer);
 
 
     // Alle überfälligen Rechnungen (z. B. für Rechnungslauf)
@@ -37,8 +36,19 @@ public interface InvoiceRepository extends JpaRepository<Invoice, UUID> {
     /**
      * Findet Rechnungen nach Status
      */
-    List<Invoice> findByStatus(Invoice.InvoiceStatus status);
 
+
+    @Query("SELECT i FROM Invoice i LEFT JOIN FETCH i.invoiceItems LEFT JOIN FETCH i.customer ORDER BY i.invoiceDate DESC")
+    List<Invoice> findAllWithItems();
+
+    @Query("SELECT i FROM Invoice i LEFT JOIN FETCH i.invoiceItems LEFT JOIN FETCH i.customer WHERE i.id = :id")
+    Optional<Invoice> findByIdWithItems(@Param("id") UUID id);
+
+    @Query("SELECT i FROM Invoice i LEFT JOIN FETCH i.invoiceItems WHERE i.customer = :customer ORDER BY i.invoiceDate DESC")
+    List<Invoice> findByCustomer(@Param("customer") Customer customer);
+
+    @Query("SELECT i FROM Invoice i LEFT JOIN FETCH i.invoiceItems WHERE i.status = :status ORDER BY i.invoiceDate DESC")
+    List<Invoice> findByStatus(@Param("status") Invoice.InvoiceStatus status);
     /**
      * Findet überfällige Rechnungen
      */

@@ -2,6 +2,7 @@ package com.erp.backend.domain;
 
 import jakarta.persistence.*;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -47,15 +48,6 @@ public class InvoiceItem {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "invoice_id", nullable = false)
     private Invoice invoice;
-
-    // === NEUE FELDER FÜR DUESCHEDULE REFERENZ ===
-
-    /**
-     * Referenz zur ursprünglichen DueSchedule, falls dieses Item daraus erstellt wurde
-     */
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "due_schedule_id")
-    private DueSchedule dueSchedule;
 
     /**
      * Typ des InvoiceItems
@@ -108,13 +100,15 @@ public class InvoiceItem {
     public InvoiceItem() {
         this.createdAt = LocalDateTime.now();
         this.quantity = BigDecimal.ONE;
+        this.unitPrice = BigDecimal.ZERO;
+        this.lineTotal = BigDecimal.ZERO;
     }
 
     public InvoiceItem(String description, BigDecimal quantity, BigDecimal unitPrice) {
         this();
         this.description = description;
-        this.quantity = quantity;
-        this.unitPrice = unitPrice;
+        this.quantity = quantity != null ? quantity : BigDecimal.ONE;
+        this.unitPrice = unitPrice != null ? unitPrice : BigDecimal.ZERO;
         calculateLineTotal();
     }
 
@@ -122,6 +116,8 @@ public class InvoiceItem {
     @PrePersist
     protected void onCreate() {
         this.createdAt = LocalDateTime.now();
+        if (this.quantity == null) this.quantity = BigDecimal.ONE;
+        if (this.unitPrice == null) this.unitPrice = BigDecimal.ZERO;
         calculateLineTotal();
     }
 
@@ -133,85 +129,46 @@ public class InvoiceItem {
 
     // Business-Methoden
     public void calculateLineTotal() {
+        if (quantity == null || unitPrice == null) {
+            this.lineTotal = BigDecimal.ZERO;
+            this.taxAmount = BigDecimal.ZERO;
+            return;
+        }
+
         BigDecimal gross = quantity.multiply(unitPrice);
 
-        if (discountAmount != null) {
+        if (discountAmount != null && discountAmount.compareTo(BigDecimal.ZERO) > 0) {
             gross = gross.subtract(discountAmount);
+            if (gross.compareTo(BigDecimal.ZERO) < 0) {
+                gross = BigDecimal.ZERO;
+            }
         }
 
         this.lineTotal = gross;
 
         // Berechne Steuer falls angegeben
         if (taxRate != null && taxRate.compareTo(BigDecimal.ZERO) > 0) {
-            this.taxAmount = lineTotal.multiply(taxRate.divide(BigDecimal.valueOf(100)));
+            this.taxAmount = lineTotal.multiply(taxRate.divide(BigDecimal.valueOf(100), 4, RoundingMode.HALF_UP));
+        } else {
+            this.taxAmount = BigDecimal.ZERO;
         }
     }
 
     /**
-     * Erstellt ein InvoiceItem basierend auf einer DueSchedule
+     * Aktualisiert Preis und Menge und berechnet LineTotal neu
      */
-    public static InvoiceItem fromDueSchedule(DueSchedule dueSchedule, Invoice invoice) {
-        InvoiceItem item = new InvoiceItem();
-        item.setInvoice(invoice);
-        item.setDueSchedule(dueSchedule);
-        item.setItemType(InvoiceItemType.SUBSCRIPTION);
-
-        // Setze Periode
-        item.setPeriodStart(dueSchedule.getPeriodStart());
-        item.setPeriodEnd(dueSchedule.getPeriodEnd());
-
-        // Erstelle Beschreibung
-        String description = createDescriptionFromDueSchedule(dueSchedule);
-        item.setDescription(description);
-
-        // Setze Beträge
-        item.setQuantity(BigDecimal.ONE);
-        //item.setUnitPrice(dueSchedule.getAmount());
-
-        // Produkt-Informationen falls verfügbar
-        if (dueSchedule.getSubscription() != null &&
-                dueSchedule.getSubscription().getProduct() != null) {
-            Product product = dueSchedule.getSubscription().getProduct();
-            item.setProductCode(product.getProductNumber());
-            item.setProductName(product.getName());
-        }
-
-        item.calculateLineTotal();
-        return item;
+    public void updatePriceAndQuantity(BigDecimal newUnitPrice, BigDecimal newQuantity) {
+        this.unitPrice = newUnitPrice != null ? newUnitPrice : BigDecimal.ZERO;
+        this.quantity = newQuantity != null ? newQuantity : BigDecimal.ONE;
+        calculateLineTotal();
     }
 
-    private static String createDescriptionFromDueSchedule(DueSchedule dueSchedule) {
-        StringBuilder desc = new StringBuilder();
-
-        // Produkt-/Service-Name
-        if (dueSchedule.getSubscription() != null) {
-            Subscription subscription = dueSchedule.getSubscription();
-            if (subscription.getProduct() != null) {
-                desc.append(subscription.getProduct().getName());
-            } else {
-                desc.append("Abonnement");
-            }
-
-            // Periode hinzufügen
-            if (dueSchedule.getPeriodStart() != null) {
-                desc.append(" - Zeitraum: ");
-                desc.append(dueSchedule.getPeriodStart().format(
-                        java.time.format.DateTimeFormatter.ofPattern("dd.MM.yyyy")));
-
-                if (dueSchedule.getPeriodEnd() != null) {
-                    desc.append(" bis ");
-                    desc.append(dueSchedule.getPeriodEnd().format(
-                            java.time.format.DateTimeFormatter.ofPattern("dd.MM.yyyy")));
-                }
-            }
-
-            // Subscription-Details
-            if (subscription.getSubscriptionNumber() != null) {
-                desc.append(" (Abo-Nr.: ").append(subscription.getSubscriptionNumber()).append(")");
-            }
-        }
-
-        return desc.toString();
+    /**
+     * Setzt einen Rabatt und berechnet LineTotal neu
+     */
+    public void applyDiscount(BigDecimal discountAmount) {
+        this.discountAmount = discountAmount;
+        calculateLineTotal();
     }
 
     // === GETTER & SETTER ===
@@ -238,6 +195,7 @@ public class InvoiceItem {
 
     public void setQuantity(BigDecimal quantity) {
         this.quantity = quantity;
+        calculateLineTotal(); // Automatisch neu berechnen
     }
 
     public BigDecimal getUnitPrice() {
@@ -246,6 +204,7 @@ public class InvoiceItem {
 
     public void setUnitPrice(BigDecimal unitPrice) {
         this.unitPrice = unitPrice;
+        calculateLineTotal(); // Automatisch neu berechnen
     }
 
     public BigDecimal getLineTotal() {
@@ -262,6 +221,7 @@ public class InvoiceItem {
 
     public void setTaxRate(BigDecimal taxRate) {
         this.taxRate = taxRate;
+        calculateLineTotal(); // Automatisch neu berechnen
     }
 
     public BigDecimal getTaxAmount() {
@@ -278,6 +238,7 @@ public class InvoiceItem {
 
     public void setDiscountAmount(BigDecimal discountAmount) {
         this.discountAmount = discountAmount;
+        calculateLineTotal(); // Automatisch neu berechnen
     }
 
     public Integer getSortOrder() {
@@ -310,16 +271,6 @@ public class InvoiceItem {
 
     public void setInvoice(Invoice invoice) {
         this.invoice = invoice;
-    }
-
-    // === NEUE GETTER & SETTER ===
-
-    public DueSchedule getDueSchedule() {
-        return dueSchedule;
-    }
-
-    public void setDueSchedule(DueSchedule dueSchedule) {
-        this.dueSchedule = dueSchedule;
     }
 
     public InvoiceItemType getItemType() {
@@ -370,10 +321,10 @@ public class InvoiceItem {
                 ", quantity=" + quantity +
                 ", unitPrice=" + unitPrice +
                 ", lineTotal=" + lineTotal +
+                ", taxAmount=" + taxAmount +
                 ", itemType=" + itemType +
                 ", periodStart=" + periodStart +
                 ", periodEnd=" + periodEnd +
-                ", dueSchedule=" + (dueSchedule != null ? dueSchedule.getDueNumber() : null) +
                 '}';
     }
 }

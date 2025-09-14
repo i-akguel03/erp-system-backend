@@ -1,250 +1,180 @@
 package com.erp.backend.controller;
 
 import com.erp.backend.domain.Invoice;
-import com.erp.backend.domain.InvoiceItem;
-import com.erp.backend.domain.OpenItem;
+import com.erp.backend.dto.InvoiceDTO;
+import com.erp.backend.dto.InvoiceItemDTO;
+import com.erp.backend.mapper.InvoiceMapper;
 import com.erp.backend.service.InvoiceService;
-import com.erp.backend.repository.CustomerRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.*;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/invoices")
+@CrossOrigin
 public class InvoiceController {
 
     private static final Logger logger = LoggerFactory.getLogger(InvoiceController.class);
-
     private final InvoiceService invoiceService;
-    private final CustomerRepository customerRepository;
 
-    public InvoiceController(InvoiceService invoiceService, CustomerRepository customerRepository) {
+    public InvoiceController(InvoiceService invoiceService) {
         this.invoiceService = invoiceService;
-        this.customerRepository = customerRepository;
     }
 
-    // ========================================
-    // 1. CRUD Endpoints
-    // ========================================
+    // ==============================
+    // 1. CRUD
+    // ==============================
 
     @GetMapping
-    public ResponseEntity<List<Invoice>> getAllInvoices() {
-        List<Invoice> invoices = invoiceService.getAllInvoices();
-        return ResponseEntity.ok(invoices);
+    public ResponseEntity<List<InvoiceDTO>> getAllInvoices(
+            @RequestParam(defaultValue = "false") boolean paginated,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size,
+            @RequestParam(defaultValue = "invoiceDate") String sortBy,
+            @RequestParam(defaultValue = "DESC") String sortDirection) {
+
+        logger.info("GET /api/invoices - Fetching invoices (paginated: {})", paginated);
+
+        if (paginated) {
+            Sort sort = Sort.by(Sort.Direction.fromString(sortDirection), sortBy);
+            Pageable pageable = PageRequest.of(page, size, sort);
+            Page<Invoice> invoicePage = new PageImpl<>(invoiceService.getAllInvoices(), pageable, invoiceService.getAllInvoices().size());
+
+            List<InvoiceDTO> dtoList = invoicePage.getContent().stream()
+                    .map(InvoiceMapper::toDTO)
+                    .toList();
+
+            return ResponseEntity.ok()
+                    .header("X-Total-Count", String.valueOf(invoicePage.getTotalElements()))
+                    .header("X-Total-Pages", String.valueOf(invoicePage.getTotalPages()))
+                    .header("X-Current-Page", String.valueOf(page))
+                    .body(dtoList);
+        } else {
+            List<InvoiceDTO> dtoList = invoiceService.getAllInvoices().stream()
+                    .map(InvoiceMapper::toDTO)
+                    .toList();
+            return ResponseEntity.ok(dtoList);
+        }
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Invoice> getInvoiceById(@PathVariable UUID id) {
-        Optional<Invoice> invoice = invoiceService.getInvoiceById(id);
-        return invoice.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
+    public ResponseEntity<InvoiceDTO> getInvoiceById(@PathVariable UUID id) {
+        return invoiceService.getInvoiceById(id)
+                .map(InvoiceMapper::toDTO)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
     }
 
     @PostMapping
-    public ResponseEntity<Invoice> createInvoice(@RequestBody Invoice invoice) {
-        try {
-            Invoice created = invoiceService.createInvoice(invoice);
-            return ResponseEntity.ok(created);
-        } catch (IllegalArgumentException e) {
-            logger.error("Error creating invoice: {}", e.getMessage());
-            return ResponseEntity.badRequest().build();
-        }
+    public ResponseEntity<InvoiceDTO> createInvoice(@RequestBody InvoiceDTO dto) {
+        Invoice invoice = new Invoice();
+        invoice.setCustomer(new com.erp.backend.domain.Customer(UUID.fromString(dto.getCustomerId())));
+        invoice.setInvoiceDate(dto.getInvoiceDate());
+        invoice.setDueDate(dto.getDueDate());
+        Invoice created = invoiceService.createInvoice(invoice);
+        return ResponseEntity.status(HttpStatus.CREATED).body(InvoiceMapper.toDTO(created));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Invoice> updateInvoice(@PathVariable UUID id, @RequestBody Invoice invoice) {
-        if (!id.equals(invoice.getId())) {
-            return ResponseEntity.badRequest().build();
-        }
-        try {
-            Invoice updated = invoiceService.updateInvoice(invoice);
-            return ResponseEntity.ok(updated);
-        } catch (IllegalArgumentException e) {
-            logger.error("Error updating invoice: {}", e.getMessage());
-            return ResponseEntity.notFound().build();
-        }
+    public ResponseEntity<InvoiceDTO> updateInvoice(@PathVariable UUID id, @RequestBody InvoiceDTO dto) {
+        Invoice invoice = new Invoice();
+        invoice.setId(id);
+        invoice.setInvoiceDate(dto.getInvoiceDate());
+        invoice.setDueDate(dto.getDueDate());
+        invoice.setCustomer(new com.erp.backend.domain.Customer(UUID.fromString(dto.getCustomerId())));
+        Invoice updated = invoiceService.updateInvoice(invoice);
+        return ResponseEntity.ok(InvoiceMapper.toDTO(updated));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteInvoice(@PathVariable UUID id) {
-        try {
-            invoiceService.deleteInvoice(id);
-            return ResponseEntity.noContent().build();
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.notFound().build();
-        } catch (IllegalStateException e) {
-            logger.error("Cannot delete invoice: {}", e.getMessage());
-            return ResponseEntity.badRequest().build();
-        }
+        invoiceService.deleteInvoice(id);
+        return ResponseEntity.noContent().build();
     }
 
-    // ========================================
-    // 2. Abfrage-Endpoints
-    // ========================================
+    // ==============================
+    // 2. Status Management
+    // ==============================
+
+    @PatchMapping("/{id}/cancel")
+    public ResponseEntity<InvoiceDTO> cancelInvoice(@PathVariable UUID id) {
+        Invoice invoice = invoiceService.cancelInvoice(id);
+        return ResponseEntity.ok(InvoiceMapper.toDTO(invoice));
+    }
+
+    @PatchMapping("/{id}/send")
+    public ResponseEntity<InvoiceDTO> sendInvoice(@PathVariable UUID id) {
+        Invoice invoice = invoiceService.sendInvoice(id);
+        return ResponseEntity.ok(InvoiceMapper.toDTO(invoice));
+    }
+
+    @PatchMapping("/{id}/status")
+    public ResponseEntity<InvoiceDTO> changeStatus(@PathVariable UUID id, @RequestParam Invoice.InvoiceStatus status) {
+        Invoice invoice = invoiceService.changeStatus(id, status);
+        return ResponseEntity.ok(InvoiceMapper.toDTO(invoice));
+    }
+
+    // ==============================
+    // 3. Items Management
+    // ==============================
+
+    @PostMapping("/{id}/items")
+    public ResponseEntity<InvoiceDTO> addItem(@PathVariable UUID id, @RequestBody InvoiceItemDTO itemDTO) {
+        Invoice invoice = new Invoice();
+        invoice.setId(id);
+        com.erp.backend.domain.InvoiceItem item = new com.erp.backend.domain.InvoiceItem();
+        item.setDescription(itemDTO.getDescription());
+        item.setQuantity(itemDTO.getQuantity());
+        item.setUnitPrice(itemDTO.getUnitPrice());
+        item.setProductCode(itemDTO.getProductCode());
+        item.setProductName(itemDTO.getProductName());
+        Invoice updated = invoiceService.addInvoiceItem(id, item);
+        return ResponseEntity.ok(InvoiceMapper.toDTO(updated));
+    }
+
+    @DeleteMapping("/{id}/items/{itemId}")
+    public ResponseEntity<InvoiceDTO> removeItem(@PathVariable UUID id, @PathVariable UUID itemId) {
+        Invoice updated = invoiceService.removeInvoiceItem(id, itemId);
+        return ResponseEntity.ok(InvoiceMapper.toDTO(updated));
+    }
+
+    // ==============================
+    // 4. Filtering / Queries
+    // ==============================
 
     @GetMapping("/customer/{customerId}")
-    public ResponseEntity<List<Invoice>> getInvoicesByCustomer(@PathVariable UUID customerId) {
-        if (!customerRepository.existsById(customerId)) {
-            return ResponseEntity.badRequest().build();
-        }
-        try {
-            List<Invoice> invoices = invoiceService.getInvoicesByCustomer(customerId);
-            return ResponseEntity.ok(invoices);
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().build();
-        }
+    public ResponseEntity<List<InvoiceDTO>> getInvoicesByCustomer(@PathVariable UUID customerId) {
+        List<InvoiceDTO> dtos = invoiceService.getInvoicesByCustomer(customerId).stream()
+                .map(InvoiceMapper::toDTO)
+                .toList();
+        return ResponseEntity.ok(dtos);
     }
 
     @GetMapping("/status/{status}")
-    public ResponseEntity<List<Invoice>> getInvoicesByStatus(@PathVariable Invoice.InvoiceStatus status) {
-        List<Invoice> invoices = invoiceService.getInvoicesByStatus(status);
-        return ResponseEntity.ok(invoices);
+    public ResponseEntity<List<InvoiceDTO>> getInvoicesByStatus(@PathVariable Invoice.InvoiceStatus status) {
+        List<InvoiceDTO> dtos = invoiceService.getInvoicesByStatus(status).stream()
+                .map(InvoiceMapper::toDTO)
+                .toList();
+        return ResponseEntity.ok(dtos);
     }
 
     @GetMapping("/date-range")
-    public ResponseEntity<List<Invoice>> getInvoicesByDateRange(
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate) {
+    public ResponseEntity<List<InvoiceDTO>> getInvoicesByDateRange(
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate start,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate end) {
 
-        List<Invoice> invoices = invoiceService.getInvoicesByDateRange(startDate, endDate);
-        return ResponseEntity.ok(invoices);
-    }
-
-    @GetMapping("/batch/{batchId}")
-    public ResponseEntity<List<Invoice>> getInvoicesByBatchId(@PathVariable String batchId) {
-        List<Invoice> invoices = invoiceService.getInvoicesByBatchId(batchId);
-        return ResponseEntity.ok(invoices);
-    }
-
-    // ========================================
-    // 3. Status-Management
-    // ========================================
-
-    @PutMapping("/{id}/status")
-    public ResponseEntity<Invoice> changeStatus(
-            @PathVariable UUID id,
-            @RequestParam Invoice.InvoiceStatus status) {
-        try {
-            Invoice invoice = invoiceService.changeStatus(id, status);
-            return ResponseEntity.ok(invoice);
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.notFound().build();
-        }
-    }
-
-    @PutMapping("/{id}/cancel")
-    public ResponseEntity<Invoice> cancelInvoice(@PathVariable UUID id) {
-        try {
-            Invoice invoice = invoiceService.cancelInvoice(id);
-            return ResponseEntity.ok(invoice);
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.notFound().build();
-        }
-    }
-
-    @PutMapping("/{id}/send")
-    public ResponseEntity<Invoice> sendInvoice(@PathVariable UUID id) {
-        try {
-            Invoice invoice = invoiceService.sendInvoice(id);
-            return ResponseEntity.ok(invoice);
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.notFound().build();
-        }
-    }
-
-    // ========================================
-    // 4. InvoiceItem-Management
-    // ========================================
-
-    @PostMapping("/{id}/items")
-    public ResponseEntity<Invoice> addInvoiceItem(
-            @PathVariable UUID id,
-            @RequestBody InvoiceItem item) {
-        try {
-            Invoice invoice = invoiceService.addInvoiceItem(id, item);
-            return ResponseEntity.ok(invoice);
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.notFound().build();
-        }
-    }
-
-    @DeleteMapping("/{invoiceId}/items/{itemId}")
-    public ResponseEntity<Invoice> removeInvoiceItem(
-            @PathVariable UUID invoiceId,
-            @PathVariable UUID itemId) {
-        try {
-            Invoice invoice = invoiceService.removeInvoiceItem(invoiceId, itemId);
-            return ResponseEntity.ok(invoice);
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.notFound().build();
-        }
-    }
-
-    // ========================================
-    // 5. OpenItem-Integration
-    // ========================================
-
-    @PostMapping("/{id}/open-items")
-    public ResponseEntity<List<OpenItem>> createOpenItemsForInvoice(@PathVariable UUID id) {
-        try {
-            List<OpenItem> openItems = invoiceService.createOpenItemsForInvoice(id);
-            return ResponseEntity.ok(openItems);
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.notFound().build();
-        }
-    }
-
-    @GetMapping("/{id}/open-items")
-    public ResponseEntity<List<OpenItem>> getOpenItemsForInvoice(@PathVariable UUID id) {
-        try {
-            List<OpenItem> openItems = invoiceService.getOpenItemsForInvoice(id);
-            return ResponseEntity.ok(openItems);
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.notFound().build();
-        }
-    }
-
-    // ========================================
-    // 6. Gutschriften
-    // ========================================
-
-    @PostMapping("/{id}/credit-note")
-    public ResponseEntity<Invoice> createCreditNote(@PathVariable UUID id) {
-        try {
-            Invoice creditNote = invoiceService.createCreditNote(id);
-            return ResponseEntity.ok(creditNote);
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.notFound().build();
-        }
-    }
-
-    // ========================================
-    // 7. Statistiken
-    // ========================================
-
-    @GetMapping("/stats/total-amount")
-    public ResponseEntity<BigDecimal> getTotalInvoiceAmount() {
-        BigDecimal total = invoiceService.getTotalInvoiceAmount();
-        return ResponseEntity.ok(total);
-    }
-
-    @GetMapping("/stats/count/{status}")
-    public ResponseEntity<Long> getInvoiceCountByStatus(@PathVariable Invoice.InvoiceStatus status) {
-        long count = invoiceService.getInvoiceCountByStatus(status);
-        return ResponseEntity.ok(count);
-    }
-
-    @GetMapping("/stats/amount/{status}")
-    public ResponseEntity<BigDecimal> getInvoiceAmountByStatus(@PathVariable Invoice.InvoiceStatus status) {
-        BigDecimal amount = invoiceService.getInvoiceAmountByStatus(status);
-        return ResponseEntity.ok(amount);
+        List<InvoiceDTO> dtos = invoiceService.getInvoicesByDateRange(start, end).stream()
+                .map(InvoiceMapper::toDTO)
+                .toList();
+        return ResponseEntity.ok(dtos);
     }
 }
