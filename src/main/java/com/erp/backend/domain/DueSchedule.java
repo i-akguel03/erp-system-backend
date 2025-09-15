@@ -52,6 +52,26 @@ public class DueSchedule {
     @Column(name = "status", nullable = false)
     private DueStatus status;
 
+    // ===== NEU: Rechnungsreferenzen =====
+    /**
+     * Referenz zur erstellten Rechnung (nach Abrechnung)
+     */
+    @Column(name = "invoice_id")
+    private UUID invoiceId;
+
+    /**
+     * Batch-ID des Rechnungslaufs
+     */
+    @Column(name = "invoice_batch_id")
+    private String invoiceBatchId;
+
+    /**
+     * Datum der Abrechnung
+     */
+    @Column(name = "invoiced_date")
+    private LocalDate invoicedDate;
+    // =====================================
+
     /**
      * Soft-Delete Flag
      */
@@ -115,13 +135,27 @@ public class DueSchedule {
      */
     public void markAsCompleted() {
         this.status = DueStatus.COMPLETED;
+        this.invoicedDate = LocalDate.now();
     }
 
     /**
-     * Setzt die Fälligkeit auf aktiv zurück
+     * Markiert die Fälligkeit als abgerechnet mit Rechnungsreferenz
+     */
+    public void markAsInvoiced(UUID invoiceId, String batchId) {
+        this.status = DueStatus.COMPLETED;
+        this.invoiceId = invoiceId;
+        this.invoiceBatchId = batchId;
+        this.invoicedDate = LocalDate.now();
+    }
+
+    /**
+     * Setzt die Fälligkeit auf aktiv zurück und entfernt Rechnungsreferenzen
      */
     public void revertToActive() {
         this.status = DueStatus.ACTIVE;
+        this.invoiceId = null;
+        this.invoiceBatchId = null;
+        this.invoicedDate = null;
     }
 
     public void pause() {
@@ -168,6 +202,14 @@ public class DueSchedule {
         return status == DueStatus.ACTIVE;
     }
 
+    public boolean isInvoiced() {
+        return invoiceId != null;
+    }
+
+    public boolean hasInvoice() {
+        return invoiceId != null && status == DueStatus.COMPLETED;
+    }
+
     // === Getter & Setter ===
 
     public UUID getId() { return id; }
@@ -187,6 +229,15 @@ public class DueSchedule {
 
     public DueStatus getStatus() { return status; }
     public void setStatus(DueStatus status) { this.status = status; }
+
+    public UUID getInvoiceId() { return invoiceId; }
+    public void setInvoiceId(UUID invoiceId) { this.invoiceId = invoiceId; }
+
+    public String getInvoiceBatchId() { return invoiceBatchId; }
+    public void setInvoiceBatchId(String invoiceBatchId) { this.invoiceBatchId = invoiceBatchId; }
+
+    public LocalDate getInvoicedDate() { return invoicedDate; }
+    public void setInvoicedDate(LocalDate invoicedDate) { this.invoicedDate = invoicedDate; }
 
     public LocalDateTime getCreatedDate() { return createdDate; }
     public void setCreatedDate(LocalDateTime createdDate) { this.createdDate = createdDate; }
@@ -213,6 +264,9 @@ public class DueSchedule {
                 ", periodStart=" + periodStart +
                 ", periodEnd=" + periodEnd +
                 ", status=" + status +
+                ", invoiceId=" + invoiceId +
+                ", batchId='" + invoiceBatchId + '\'' +
+                ", invoicedDate=" + invoicedDate +
                 ", subscription=" + (subscription != null ? subscription.getId() : null) +
                 '}';
     }

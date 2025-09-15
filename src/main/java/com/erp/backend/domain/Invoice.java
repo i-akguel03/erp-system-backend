@@ -114,6 +114,10 @@ public class Invoice {
     @JoinColumn(name = "billing_address_id")
     private Address billingAddress;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "subscription_id")
+    private Subscription subscription;
+
     /** Positionen der Rechnung */
     @OneToMany(mappedBy = "invoice", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private List<InvoiceItem> invoiceItems = new ArrayList<>();
@@ -121,6 +125,14 @@ public class Invoice {
     /** Offene Posten, die aus der Rechnung abgeleitet werden */
     @OneToMany(mappedBy = "invoice", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<OpenItem> openItems = new ArrayList<>();
+
+    public Subscription getSubscription() {
+        return subscription;
+    }
+
+    public void setSubscription(Subscription subscription) {
+        this.subscription = subscription;
+    }
 
     // ===================================================
     // Enums

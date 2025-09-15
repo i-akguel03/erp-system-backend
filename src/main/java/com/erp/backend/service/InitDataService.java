@@ -1,8 +1,8 @@
 package com.erp.backend.service;
 
 import com.erp.backend.domain.*;
-import com.erp.backend.repository.*;
-import org.slf4j.Logger;
+        import com.erp.backend.repository.*;
+        import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -15,16 +15,39 @@ import java.util.Random;
 /**
  * Service zum Initialisieren von Testdaten für das ERP-System.
  *
- * Bereinigte Architektur:
- * - DueSchedule = nur Terminplan (Datum, Status), keine Beträge oder Invoice-Referenzen
- * - Subscription = enthält Produkt und Preise
- * - Invoice = reine Rechnungsstruktur ohne Zahlungsinformationen
- * - OpenItem = Zahlungsmanagement und ausstehende Beträge
+ * Flexible Initialisierung mit verschiedenen Modi:
+ * - BASIC: Nur Stammdaten (Adressen, Kunden, Produkte)
+ * - CONTRACTS: Bis Verträge und Subscriptions
+ * - SCHEDULES: Bis DueSchedules (ohne Rechnungen)
+ * - INVOICES_MANUAL: + manuell erstellte Sample-Rechnungen
+ * - FULL: Komplette Initialisierung inkl. Rechnungslauf
  */
 @Service
 public class InitDataService {
 
     private static final Logger logger = LoggerFactory.getLogger(InitDataService.class);
+
+    /**
+     * Enum für verschiedene Initialisierungsmodi
+     */
+    public enum InitMode {
+        BASIC("Nur Stammdaten"),
+        CONTRACTS("Bis Verträge und Subscriptions"),
+        SCHEDULES("Bis Fälligkeitspläne"),
+        INVOICES_MANUAL("Mit manuellen Sample-Rechnungen"),
+        FULL("Komplett mit Rechnungslauf"),
+        FULL_WITH_BILLING("Komplett mit Rechnungslauf bis Stichtag");
+
+        private final String description;
+
+        InitMode(String description) {
+            this.description = description;
+        }
+
+        public String getDescription() {
+            return description;
+        }
+    }
 
     // Repository-Abhängigkeiten
     private final AddressRepository addressRepository;
@@ -38,6 +61,7 @@ public class InitDataService {
 
     // Service-Abhängigkeiten
     private final InvoiceService invoiceService;
+    private final InvoiceBatchService invoiceBatchService;
     private final NumberGeneratorService numberGeneratorService;
 
     private final Random random = new Random();
@@ -51,6 +75,7 @@ public class InitDataService {
                            OpenItemRepository openItemRepository,
                            InvoiceRepository invoiceRepository,
                            InvoiceService invoiceService,
+                           InvoiceBatchService invoiceBatchService,
                            NumberGeneratorService numberGeneratorService) {
         this.addressRepository = addressRepository;
         this.customerRepository = customerRepository;
@@ -61,30 +86,147 @@ public class InitDataService {
         this.openItemRepository = openItemRepository;
         this.invoiceRepository = invoiceRepository;
         this.invoiceService = invoiceService;
+        this.invoiceBatchService = invoiceBatchService;
         this.numberGeneratorService = numberGeneratorService;
     }
 
     /**
-     * Hauptmethode zur Initialisierung aller Testdaten.
+     * Hauptmethode mit Standard-Modus (FULL)
      */
     @Transactional
     public void initAllData() {
-        logger.info("Starte Initialisierung der Testdaten...");
+        initData(InitMode.FULL, null);
+    }
 
+    /**
+     * Flexible Initialisierung mit Modus-Auswahl
+     *
+     * @param mode Initialisierungsmodus
+     */
+    @Transactional
+    public void initData(InitMode mode) {
+        initData(mode, null);
+    }
+
+    /**
+     * Flexible Initialisierung mit Modus und optionalem Billing-Datum
+     *
+     * @param mode Initialisierungsmodus
+     * @param billingDate Stichtag für Rechnungslauf (optional)
+     */
+    @Transactional
+    public void initData(InitMode mode, LocalDate billingDate) {
+        logger.info("===========================================");
+        logger.info("Starte Testdaten-Initialisierung");
+        logger.info("Modus: {} - {}", mode, mode.getDescription());
+        if (billingDate != null) {
+            logger.info("Rechnungslauf-Stichtag: {}", billingDate);
+        }
+        logger.info("===========================================");
+
+        // Basis-Daten (immer)
         initAddresses();
         initCustomers();
         initProducts();
+
+        if (mode == InitMode.BASIC) {
+            logger.info("Basis-Initialisierung abgeschlossen (BASIC Mode)");
+            logCurrentDataStatus();
+            return;
+        }
+
+        // Verträge und Subscriptions
         initContracts();
         initSubscriptions();
-        initDueSchedules();      // Nur Terminpläne ohne Beträge oder Rechnungs-Referenzen
-        createSampleInvoices();  // Separate Rechnungserstellung
-        createSampleOpenItems(); // Separate OpenItem-Erstellung
 
-        logger.info("Testdateninitialisierung erfolgreich abgeschlossen.");
+        if (mode == InitMode.CONTRACTS) {
+            logger.info("Initialisierung bis Verträge abgeschlossen (CONTRACTS Mode)");
+            logCurrentDataStatus();
+            return;
+        }
+
+        // Fälligkeitspläne
+        initDueSchedules();
+
+        if (mode == InitMode.SCHEDULES) {
+            logger.info("Initialisierung bis Fälligkeitspläne abgeschlossen (SCHEDULES Mode)");
+            logCurrentDataStatus();
+            return;
+        }
+
+        // Manuelle Sample-Rechnungen
+        if (mode == InitMode.INVOICES_MANUAL || mode == InitMode.FULL) {
+            createSampleInvoices();
+            createSampleOpenItems();
+        }
+
+        if (mode == InitMode.INVOICES_MANUAL) {
+            logger.info("Initialisierung mit manuellen Rechnungen abgeschlossen (INVOICES_MANUAL Mode)");
+            logCurrentDataStatus();
+            return;
+        }
+
+        // Rechnungslauf durchführen
+        if (mode == InitMode.FULL || mode == InitMode.FULL_WITH_BILLING) {
+            LocalDate stichtag = billingDate != null ? billingDate : LocalDate.now();
+            runBillingProcess(stichtag);
+        }
+
+        logger.info("Vollständige Initialisierung abgeschlossen (FULL Mode)");
+        logCurrentDataStatus();
+    }
+
+    /**
+     * Führt den automatischen Rechnungslauf durch
+     */
+    private void runBillingProcess(LocalDate billingDate) {
+        logger.info("===========================================");
+        logger.info("Starte automatischen Rechnungslauf");
+        logger.info("Stichtag: {}", billingDate);
+        logger.info("===========================================");
+
+        try {
+            // Rechnungslauf durchführen
+            InvoiceBatchService.InvoiceBatchResult result =
+                    invoiceBatchService.runInvoiceBatch(billingDate);
+
+            logger.info("Rechnungslauf-Ergebnis:");
+            logger.info("  - Erstellte Rechnungen: {}", result.getCreatedInvoices());
+            logger.info("  - Verarbeitete Fälligkeiten: {}", result.getProcessedDueSchedules());
+            logger.info("  - Gesamtbetrag: {} EUR", result.getTotalAmount());
+            logger.info("  - Status: {}", result.getMessage());
+
+        } catch (Exception e) {
+            logger.error("Fehler beim Rechnungslauf: {}", e.getMessage(), e);
+        }
+    }
+
+    /**
+     * Convenience-Methode: Initialisierung bis DueSchedules
+     */
+    @Transactional
+    public void initUpToSchedules() {
+        initData(InitMode.SCHEDULES);
+    }
+
+    /**
+     * Convenience-Methode: Komplette Initialisierung mit Rechnungslauf heute
+     */
+    @Transactional
+    public void initWithBillingToday() {
+        initData(InitMode.FULL_WITH_BILLING, LocalDate.now());
+    }
+
+    /**
+     * Convenience-Methode: Komplette Initialisierung mit Rechnungslauf zum Stichtag
+     */
+    @Transactional
+    public void initWithBilling(LocalDate billingDate) {
+        initData(InitMode.FULL_WITH_BILLING, billingDate);
     }
 
     // ===============================================================================================
-    // SCHRITT 1-5: Basisdaten (unverändert)
+    // Die einzelnen Init-Methoden bleiben unverändert
     // ===============================================================================================
 
     private void initAddresses() {
@@ -118,7 +260,7 @@ public class InitDataService {
             addressRepository.save(address);
         }
 
-        logger.info("Es wurden {} Adressen erstellt", addressData.length);
+        logger.info("✓ {} Adressen erstellt", addressData.length);
     }
 
     private void initCustomers() {
@@ -157,7 +299,7 @@ public class InitDataService {
             customerRepository.save(customer);
         }
 
-        logger.info("Es wurden {} Kunden erstellt", numberOfCustomers);
+        logger.info("✓ {} Kunden erstellt", numberOfCustomers);
     }
 
     private void initProducts() {
@@ -518,40 +660,45 @@ public class InitDataService {
         logger.info("Es wurden {} Sample-OpenItems erstellt", openItemsCreated);
     }
 
-    // ===============================================================================================
-    // HILFSMETHODEN
-    // ===============================================================================================
-
     @Transactional(readOnly = true)
     public void logCurrentDataStatus() {
-        logger.info("=== AKTUELLER DATENBESTAND ===");
-        logger.info("Adressen: {}", addressRepository.count());
-        logger.info("Kunden: {}", customerRepository.count());
-        logger.info("Produkte: {}", productRepository.count());
-        logger.info("Verträge: {}", contractRepository.count());
-        logger.info("Abonnements: {}", subscriptionRepository.count());
-        logger.info("Fälligkeitspläne: {}", dueScheduleRepository.count());
+        logger.info("===========================================");
+        logger.info("AKTUELLER DATENBESTAND");
+        logger.info("===========================================");
+        logger.info("Stammdaten:");
+        logger.info("  - Adressen: {}", addressRepository.count());
+        logger.info("  - Kunden: {}", customerRepository.count());
+        logger.info("  - Produkte: {}", productRepository.count());
 
+        logger.info("Verträge & Abos:");
+        logger.info("  - Verträge: {}", contractRepository.count());
+        logger.info("  - Abonnements: {}", subscriptionRepository.count());
+
+        logger.info("Fälligkeiten:");
         long activeSchedules = dueScheduleRepository.countByStatus(DueStatus.ACTIVE);
         long pausedSchedules = dueScheduleRepository.countByStatus(DueStatus.PAUSED);
         long completedSchedules = dueScheduleRepository.countByStatus(DueStatus.COMPLETED);
+        logger.info("  - Gesamt: {}", dueScheduleRepository.count());
+        logger.info("  - Aktiv: {}", activeSchedules);
+        logger.info("  - Pausiert: {}", pausedSchedules);
+        logger.info("  - Abgerechnet: {}", completedSchedules);
 
-        logger.info("  - Aktive Fälligkeiten: {}", activeSchedules);
-        logger.info("  - Pausierte Fälligkeiten: {}", pausedSchedules);
-        logger.info("  - Abgerechnete Fälligkeiten: {}", completedSchedules);
-
+        logger.info("Rechnungen:");
         long totalInvoices = invoiceRepository.count();
         long draftInvoices = invoiceService.getInvoiceCountByStatus(Invoice.InvoiceStatus.DRAFT);
         long sentInvoices = invoiceService.getInvoiceCountByStatus(Invoice.InvoiceStatus.SENT);
+        logger.info("  - Gesamt: {}", totalInvoices);
+        logger.info("  - Entwürfe: {}", draftInvoices);
+        logger.info("  - Versendet: {}", sentInvoices);
 
-        logger.info("Rechnungen: {} (Entwürfe: {}, Versendet: {})", totalInvoices, draftInvoices, sentInvoices);
-
+        logger.info("Offene Posten:");
         long totalOpenItems = openItemRepository.count();
         long openOpenItems = openItemRepository.countByStatus(OpenItem.OpenItemStatus.OPEN);
         long paidOpenItems = openItemRepository.countByStatus(OpenItem.OpenItemStatus.PAID);
-
-        logger.info("Offene Posten: {} (Offen: {}, Bezahlt: {})", totalOpenItems, openOpenItems, paidOpenItems);
-        logger.info("==============================");
+        logger.info("  - Gesamt: {}", totalOpenItems);
+        logger.info("  - Offen: {}", openOpenItems);
+        logger.info("  - Bezahlt: {}", paidOpenItems);
+        logger.info("===========================================");
     }
 
     @Transactional

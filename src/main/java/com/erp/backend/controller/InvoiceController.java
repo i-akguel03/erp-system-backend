@@ -66,6 +66,15 @@ public class InvoiceController {
         }
     }
 
+    @GetMapping("/by-subscriptions")
+    public ResponseEntity<List<InvoiceDTO>> getInvoicesBySubscriptionIds(
+            @RequestParam List<UUID> subscriptionIds) {
+        List<InvoiceDTO> dtos = invoiceService.getInvoicesBySubscriptionIds(subscriptionIds)
+                .stream().map(InvoiceMapper::toDTO).toList();
+        return ResponseEntity.ok(dtos);
+    }
+
+
     @GetMapping("/{id}")
     public ResponseEntity<InvoiceDTO> getInvoiceById(@PathVariable UUID id) {
         return invoiceService.getInvoiceById(id)

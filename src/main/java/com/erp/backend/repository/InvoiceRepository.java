@@ -60,4 +60,8 @@ public interface InvoiceRepository extends JpaRepository<Invoice, UUID> {
      */
     @Query("SELECT MAX(i.invoiceNumber) FROM Invoice i WHERE i.invoiceNumber LIKE :prefix%")
     Optional<String> findHighestInvoiceNumberWithPrefix(String prefix);
+
+    @Query("SELECT i FROM Invoice i WHERE i.subscription.id IN :subscriptionIds")
+    List<Invoice> findBySubscriptionIds(@Param("subscriptionIds") List<UUID> subscriptionIds);
+
 }

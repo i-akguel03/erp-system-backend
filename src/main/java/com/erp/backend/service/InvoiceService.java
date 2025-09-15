@@ -118,6 +118,12 @@ public class InvoiceService {
         return saved;
     }
 
+    @Transactional(readOnly = true)
+    public List<Invoice> getInvoicesBySubscriptionIds(List<UUID> subscriptionIds) {
+        return invoiceRepository.findBySubscriptionIds(subscriptionIds);
+    }
+
+
     @Transactional
     public Invoice cancelInvoice(UUID invoiceId) {
         return changeStatus(invoiceId, Invoice.InvoiceStatus.CANCELLED);
