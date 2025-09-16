@@ -1,8 +1,7 @@
 package com.erp.backend.repository;
 
-import com.erp.backend.domain.Invoice;
 import com.erp.backend.domain.OpenItem;
-import com.erp.backend.domain.OpenItem.OpenItemStatus;
+import com.erp.backend.domain.Invoice;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -13,128 +12,116 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
-/**
- * Repository für offene Posten (OpenItem).
- *
- * Dieses Repository enthält alle wichtigen Methoden, um offene Posten:
- * - nach Status
- * - nach Fälligkeit
- * - nach Rechnung oder Kunde
- * zu filtern, zu summieren oder zu zählen.
- *
- * Ziel ist ein klarer, wartbarer Zugriff auf offene Posten ohne zu viele Referenzen.
- */
 @Repository
 public interface OpenItemRepository extends JpaRepository<OpenItem, UUID> {
 
-    // ============================
-    // Basis-Abfragen
-    // ============================
+    // ========================================
+    // 1. Basic Queries
+    // ========================================
 
-    /**
-     * Alle offenen Posten zu einer bestimmten Rechnung abrufen.
-     */
+    @Query("SELECT oi FROM OpenItem oi JOIN FETCH oi.invoice i JOIN FETCH i.customer ORDER BY oi.dueDate ASC")
+    List<OpenItem> findAllWithInvoiceAndCustomer();
+
+    @Query("SELECT oi FROM OpenItem oi JOIN FETCH oi.invoice i JOIN FETCH i.customer WHERE oi.id = :id")
+    OpenItem findByIdWithInvoiceAndCustomer(@Param("id") UUID id);
+
+    // ========================================
+    // 2. Status-based Queries
+    // ========================================
+
+    List<OpenItem> findByStatus(OpenItem.OpenItemStatus status);
+
+    @Query("SELECT oi FROM OpenItem oi WHERE oi.status IN ('OPEN', 'PARTIALLY_PAID', 'OVERDUE')")
+    List<OpenItem> findAllOpenItems();
+
+    @Query("SELECT oi FROM OpenItem oi WHERE oi.status = 'PAID'")
+    List<OpenItem> findAllPaidItems();
+
+    @Query("SELECT oi FROM OpenItem oi WHERE oi.status IN ('OPEN', 'OVERDUE') AND oi.dueDate < :currentDate")
+    List<OpenItem> findOverdueItems(@Param("currentDate") LocalDate currentDate);
+
+    // ========================================
+    // 3. Invoice-related Queries
+    // ========================================
+
     List<OpenItem> findByInvoice(Invoice invoice);
 
-    /**
-     * Alle offenen Posten mit einem bestimmten Status abrufen.
-     */
-    List<OpenItem> findByStatus(OpenItemStatus status);
+    @Query("SELECT oi FROM OpenItem oi WHERE oi.invoice.id = :invoiceId")
+    List<OpenItem> findByInvoiceId(@Param("invoiceId") UUID invoiceId);
 
-    /**
-     * Offene Posten nach Fälligkeit sortiert abrufen.
-     */
-    List<OpenItem> findByStatusOrderByDueDateAsc(OpenItemStatus status);
+    @Query("SELECT oi FROM OpenItem oi WHERE oi.invoice.id IN :invoiceIds")
+    List<OpenItem> findByInvoiceIds(@Param("invoiceIds") List<UUID> invoiceIds);
 
-    /**
-     * Offene Posten eines bestimmten Status, die vor einem bestimmten Datum fällig sind.
-     */
-    List<OpenItem> findByStatusAndDueDateBefore(OpenItemStatus status, LocalDate date);
+    // ========================================
+    // 4. Customer-related Queries
+    // ========================================
 
-    /**
-     * Alle offenen Posten anhand der Rechnungs-ID abrufen.
-     */
-    List<OpenItem> findByInvoiceId(UUID invoiceId);
+    @Query("SELECT oi FROM OpenItem oi WHERE oi.invoice.customer.id = :customerId")
+    List<OpenItem> findByCustomerId(@Param("customerId") UUID customerId);
 
-    // ============================
-    // Summen-Abfragen
-    // ============================
+    @Query("SELECT oi FROM OpenItem oi WHERE oi.invoice.customer.id = :customerId AND oi.status IN ('OPEN', 'PARTIALLY_PAID', 'OVERDUE')")
+    List<OpenItem> findOpenItemsByCustomerId(@Param("customerId") UUID customerId);
 
-    /**
-     * Gesamtsumme aller offenen Posten eines bestimmten Status.
-     *
-     * Beispiel: Summe aller OPEN-Posten
-     */
-    @Query("SELECT SUM(oi.amount - COALESCE(oi.paidAmount, 0)) FROM OpenItem oi WHERE oi.status = :status")
-    BigDecimal sumOutstandingAmountByStatus(@Param("status") OpenItemStatus status);
+    // ========================================
+    // 5. Date-based Queries
+    // ========================================
 
-    /**
-     * Summe der offenen Posten für einen bestimmten Kunden und Status.
-     */
-    @Query("SELECT SUM(oi.amount - COALESCE(oi.paidAmount, 0)) FROM OpenItem oi " +
-            "WHERE oi.invoice.customer.id = :customerId AND oi.status = :status")
-    BigDecimal sumOutstandingAmountByCustomer(@Param("customerId") UUID customerId,
-                                              @Param("status") OpenItemStatus status);
+    List<OpenItem> findByDueDateBetween(LocalDate startDate, LocalDate endDate);
 
-    /**
-     * Summe der bereits bezahlten Beträge für einen Kunden.
-     */
-    @Query("SELECT SUM(oi.paidAmount) FROM OpenItem oi " +
-            "WHERE oi.invoice.customer.id = :customerId AND oi.paidAmount IS NOT NULL")
-    BigDecimal sumPaidAmountByCustomer(@Param("customerId") UUID customerId);
+    @Query("SELECT oi FROM OpenItem oi WHERE oi.dueDate <= :date AND oi.status IN ('OPEN', 'PARTIALLY_PAID')")
+    List<OpenItem> findItemsDueByDate(@Param("date") LocalDate date);
 
-    // ============================
-    // Datum-basierte Abfragen
-    // ============================
+    @Query("SELECT oi FROM OpenItem oi WHERE oi.paidDate BETWEEN :startDate AND :endDate")
+    List<OpenItem> findItemsPaidBetween(@Param("startDate") LocalDate startDate, @Param("endDate") LocalDate endDate);
 
-    /**
-     * Alle offenen Posten, die bis zu einem bestimmten Datum fällig sind.
-     * Berücksichtigt Status OPEN und PARTIALLY_PAID.
-     */
-    @Query("SELECT oi FROM OpenItem oi WHERE oi.dueDate <= :cutoffDate AND oi.status IN ('OPEN','PARTIALLY_PAID') ORDER BY oi.dueDate")
-    List<OpenItem> findOpenItemsDueBefore(@Param("cutoffDate") LocalDate cutoffDate);
+    // ========================================
+    // 6. Amount-based Queries
+    // ========================================
 
-    /**
-     * Alle offenen Posten, die genau heute fällig sind.
-     */
-    @Query("SELECT oi FROM OpenItem oi WHERE oi.dueDate = :targetDate AND oi.status IN ('OPEN','PARTIALLY_PAID')")
-    List<OpenItem> findOpenItemsDueToday(@Param("targetDate") LocalDate targetDate);
+    @Query("SELECT SUM(oi.amount - COALESCE(oi.paidAmount, 0)) FROM OpenItem oi WHERE oi.status IN ('OPEN', 'PARTIALLY_PAID', 'OVERDUE')")
+    BigDecimal getTotalOutstandingAmount();
 
-    /**
-     * Alle überfälligen offenen Posten (Fälligkeitsdatum < heute).
-     */
-    @Query("SELECT oi FROM OpenItem oi WHERE oi.dueDate < :currentDate AND oi.status IN ('OPEN','PARTIALLY_PAID')")
-    List<OpenItem> findOverdueOpenItems(@Param("currentDate") LocalDate currentDate);
+    @Query("SELECT SUM(oi.paidAmount) FROM OpenItem oi WHERE oi.status IN ('PAID', 'PARTIALLY_PAID')")
+    BigDecimal getTotalPaidAmount();
 
-    // ============================
-    // Bulk-Updates
-    // ============================
+    @Query("SELECT SUM(oi.amount - COALESCE(oi.paidAmount, 0)) FROM OpenItem oi WHERE oi.invoice.customer.id = :customerId AND oi.status IN ('OPEN', 'PARTIALLY_PAID', 'OVERDUE')")
+    BigDecimal getOutstandingAmountByCustomer(@Param("customerId") UUID customerId);
 
-    /**
-     * Mehrere offene Posten gleichzeitig auf einen neuen Status setzen.
-     * Nützlich z.B. beim Verbuchen von Zahlungen.
-     */
-    @Query("UPDATE OpenItem oi SET oi.status = :newStatus WHERE oi.id IN :ids")
-    void bulkUpdateStatus(@Param("ids") List<UUID> ids, @Param("newStatus") OpenItemStatus newStatus);
+    // ========================================
+    // 7. Reminder Queries
+    // ========================================
 
-    // ============================
-    // Zählen
-    // ============================
+    @Query("SELECT oi FROM OpenItem oi WHERE oi.status IN ('OPEN', 'OVERDUE') AND (oi.lastReminderDate IS NULL OR oi.lastReminderDate < :reminderThreshold)")
+    List<OpenItem> findItemsNeedingReminder(@Param("reminderThreshold") LocalDate reminderThreshold);
 
-    /**
-     * Anzahl der offenen Posten nach Status.
-     */
-    long countByStatus(OpenItemStatus status);
+    List<OpenItem> findByReminderCountGreaterThan(int reminderCount);
 
-    /**
-     * Anzahl der überfälligen offenen Posten.
-     */
-    @Query("SELECT COUNT(oi) FROM OpenItem oi WHERE oi.dueDate < :currentDate AND oi.status IN ('OPEN','PARTIALLY_PAID')")
-    long countOverdue(@Param("currentDate") LocalDate currentDate);
+    // ========================================
+    // 8. Subscription-related Queries
+    // ========================================
 
-    /**
-     * Anzahl der offenen Posten eines bestimmten Kunden.
-     */
-    @Query("SELECT COUNT(oi) FROM OpenItem oi WHERE oi.invoice.customer.id = :customerId AND oi.status IN ('OPEN','PARTIALLY_PAID')")
-    long countOpenByCustomer(@Param("customerId") UUID customerId);
+    @Query("SELECT oi FROM OpenItem oi JOIN oi.invoice i WHERE i.subscription.id = :subscriptionId")
+    List<OpenItem> findBySubscriptionId(@Param("subscriptionId") UUID subscriptionId);
+
+    @Query("SELECT oi FROM OpenItem oi JOIN oi.invoice i WHERE i.subscription.id IN :subscriptionIds")
+    List<OpenItem> findBySubscriptionIds(@Param("subscriptionIds") List<UUID> subscriptionIds);
+
+    @Query("SELECT oi FROM OpenItem oi JOIN FETCH oi.invoice inv JOIN FETCH inv.customer WHERE inv.subscription.id = :subscriptionId ORDER BY oi.dueDate ASC")
+    List<OpenItem> findBySubscriptionIdWithInvoiceAndCustomer(@Param("subscriptionId") UUID subscriptionId);
+
+    @Query("SELECT oi FROM OpenItem oi JOIN FETCH oi.invoice inv JOIN FETCH inv.customer WHERE inv.subscription.id IN :subscriptionIds ORDER BY oi.dueDate ASC")
+    List<OpenItem> findBySubscriptionIdsWithInvoiceAndCustomer(@Param("subscriptionIds") List<UUID> subscriptionIds);
+
+    // ========================================
+    // 9. Statistics Queries
+    // ========================================
+
+    @Query("SELECT COUNT(oi) FROM OpenItem oi WHERE oi.status = :status")
+    long countByStatus(@Param("status") OpenItem.OpenItemStatus status);
+
+    @Query("SELECT AVG(oi.amount) FROM OpenItem oi WHERE oi.status = :status")
+    BigDecimal getAverageAmountByStatus(@Param("status") OpenItem.OpenItemStatus status);
+
+    @Query("SELECT COUNT(oi) FROM OpenItem oi WHERE oi.dueDate < :currentDate AND oi.status IN ('OPEN', 'PARTIALLY_PAID', 'OVERDUE')")
+    long countOverdueItems(@Param("currentDate") LocalDate currentDate);
 }

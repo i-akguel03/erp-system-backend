@@ -111,6 +111,22 @@ public interface DueScheduleRepository extends JpaRepository<DueSchedule, UUID> 
 
     long countBySubscriptionIdAndStatus(UUID subscriptionId, DueStatus status);
 
+    // === Neue Count-Methoden für Rechnungslauf ===
+
+    /** Zählt Fälligkeiten nach Status und DueDate <= billingDate */
+    long countByStatusAndDueDateLessThanEqual(DueStatus status, LocalDate dueDate);
+
+    /** Zählt Fälligkeiten nach Status und DueDate < billingDate */
+    long countByStatusAndDueDateBefore(DueStatus status, LocalDate dueDate);
+
+    /** Zählt aktive Fälligkeiten bis zu einem bestimmten Datum (alternative Query-Methode) */
+    @Query("SELECT COUNT(ds) FROM DueSchedule ds WHERE ds.status = :status AND ds.dueDate <= :dueDate")
+    long countSchedulesForBilling(@Param("status") DueStatus status, @Param("dueDate") LocalDate dueDate);
+
+    /** Zählt aktive Fälligkeiten für einen bestimmten Zeitraum */
+    @Query("SELECT COUNT(ds) FROM DueSchedule ds WHERE ds.status = 'ACTIVE' AND ds.dueDate BETWEEN :startDate AND :endDate")
+    long countActiveSchedulesBetween(@Param("startDate") LocalDate startDate, @Param("endDate") LocalDate endDate);
+
     // === Status-Management ===
 
     @Query("SELECT ds FROM DueSchedule ds WHERE ds.subscription = :subscription AND ds.status = 'PAUSED'")

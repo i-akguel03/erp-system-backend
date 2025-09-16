@@ -1,8 +1,8 @@
 package com.erp.backend.service;
 
 import com.erp.backend.domain.*;
-        import com.erp.backend.repository.*;
-        import org.slf4j.Logger;
+import com.erp.backend.repository.*;
+import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -177,31 +177,6 @@ public class InitDataService {
     }
 
     /**
-     * Führt den automatischen Rechnungslauf durch
-     */
-    private void runBillingProcess(LocalDate billingDate) {
-        logger.info("===========================================");
-        logger.info("Starte automatischen Rechnungslauf");
-        logger.info("Stichtag: {}", billingDate);
-        logger.info("===========================================");
-
-        try {
-            // Rechnungslauf durchführen
-            InvoiceBatchService.InvoiceBatchResult result =
-                    invoiceBatchService.runInvoiceBatch(billingDate);
-
-            logger.info("Rechnungslauf-Ergebnis:");
-            logger.info("  - Erstellte Rechnungen: {}", result.getCreatedInvoices());
-            logger.info("  - Verarbeitete Fälligkeiten: {}", result.getProcessedDueSchedules());
-            logger.info("  - Gesamtbetrag: {} EUR", result.getTotalAmount());
-            logger.info("  - Status: {}", result.getMessage());
-
-        } catch (Exception e) {
-            logger.error("Fehler beim Rechnungslauf: {}", e.getMessage(), e);
-        }
-    }
-
-    /**
      * Convenience-Methode: Initialisierung bis DueSchedules
      */
     @Transactional
@@ -226,7 +201,7 @@ public class InitDataService {
     }
 
     // ===============================================================================================
-    // Die einzelnen Init-Methoden bleiben unverändert
+    // Die einzelnen Init-Methoden
     // ===============================================================================================
 
     private void initAddresses() {
@@ -352,7 +327,7 @@ public class InitDataService {
             productRepository.save(product);
         }
 
-        logger.info("Es wurden {} Produkte erstellt", products.length);
+        logger.info("✓ {} Produkte erstellt", products.length);
     }
 
     private void initContracts() {
@@ -390,7 +365,7 @@ public class InitDataService {
             contractRepository.save(contract);
         }
 
-        logger.info("Es wurden {} Verträge erstellt", numberOfContracts);
+        logger.info("✓ {} Verträge erstellt", numberOfContracts);
     }
 
     private void initSubscriptions() {
@@ -451,12 +426,8 @@ public class InitDataService {
             subscriptionRepository.save(subscription);
         }
 
-        logger.info("Es wurden {} Abonnements erstellt", numberOfSubscriptions);
+        logger.info("✓ {} Abonnements erstellt", numberOfSubscriptions);
     }
-
-    // ===============================================================================================
-    // SCHRITT 6: FÄLLIGKEITSPLÄNE (NUR TERMINE, KEINE BETRÄGE ODER RECHNUNGS-REFERENZEN)
-    // ===============================================================================================
 
     private void initDueSchedules() {
         if (dueScheduleRepository.count() > 0) {
@@ -509,11 +480,11 @@ public class InitDataService {
             }
         }
 
-        logger.info("Es wurden {} Fälligkeitspläne erstellt (nur Termine)", totalSchedulesCreated);
+        logger.info("✓ {} Fälligkeitspläne erstellt (nur Termine)", totalSchedulesCreated);
     }
 
     // ===============================================================================================
-    // SCHRITT 7: SAMPLE RECHNUNGEN (UNABHÄNGIG VON DUESCHEDULES)
+    // SAMPLE RECHNUNGEN MIT GARANTIERTEN OPENITEMS
     // ===============================================================================================
 
     private void createSampleInvoices() {
@@ -526,6 +497,7 @@ public class InitDataService {
 
         List<Customer> customers = customerRepository.findAll();
         List<Product> products = productRepository.findAll();
+        List<Subscription> subscriptions = subscriptionRepository.findAll();
 
         if (customers.isEmpty() || products.isEmpty()) {
             logger.warn("Keine Kunden oder Produkte für Rechnungen gefunden");
@@ -534,6 +506,7 @@ public class InitDataService {
 
         final int numberOfInvoices = 30;
         int invoicesCreated = 0;
+        int openItemsCreated = 0;
 
         for (int i = 1; i <= numberOfInvoices; i++) {
             try {
@@ -546,6 +519,18 @@ public class InitDataService {
                 invoice.setInvoiceDate(LocalDate.now().minusDays(random.nextInt(90)));
                 invoice.setDueDate(invoice.getInvoiceDate().plusDays(14 + random.nextInt(16)));
 
+                // Optional: Subscription verknüpfen (50% Chance)
+                if (!subscriptions.isEmpty() && random.nextDouble() < 0.5) {
+                    // Finde Subscription des Kunden
+                    List<Subscription> customerSubscriptions = subscriptions.stream()
+                            .filter(sub -> sub.getContract().getCustomer().getId().equals(customer.getId()))
+                            .toList();
+
+                    if (!customerSubscriptions.isEmpty()) {
+                        invoice.setSubscription(customerSubscriptions.get(random.nextInt(customerSubscriptions.size())));
+                    }
+                }
+
                 // Zufälligen Status setzen
                 Invoice.InvoiceStatus[] statuses = {
                         Invoice.InvoiceStatus.DRAFT,
@@ -556,10 +541,16 @@ public class InitDataService {
 
                 // InvoiceItem hinzufügen
                 InvoiceItem item = new InvoiceItem();
-                item.setDescription("Testposition: " + product.getName());
+                item.setDescription("Sample-Position: " + product.getName());
                 item.setQuantity(BigDecimal.ONE);
                 item.setUnitPrice(product.getPrice());
                 item.setTaxRate(BigDecimal.valueOf(19));
+
+                // Product-Referenzen setzen
+                if (product.getProductNumber() != null) {
+                    item.setProductCode(product.getProductNumber());
+                }
+                item.setProductName(product.getName());
 
                 invoice.addInvoiceItem(item);
 
@@ -571,94 +562,254 @@ public class InitDataService {
                     secondItem.setQuantity(BigDecimal.ONE);
                     secondItem.setUnitPrice(secondProduct.getPrice());
                     secondItem.setTaxRate(BigDecimal.valueOf(19));
+                    secondItem.setProductName(secondProduct.getName());
+                    if (secondProduct.getProductNumber() != null) {
+                        secondItem.setProductCode(secondProduct.getProductNumber());
+                    }
 
                     invoice.addInvoiceItem(secondItem);
                 }
 
+                // Rechnung speichern
                 Invoice savedInvoice = invoiceService.createInvoice(invoice);
                 invoicesCreated++;
+
+                // GARANTIERT: OpenItem für jede Rechnung erstellen (außer CANCELLED)
+                if (savedInvoice.getStatus() != Invoice.InvoiceStatus.CANCELLED &&
+                        savedInvoice.getTotalAmount() != null &&
+                        savedInvoice.getTotalAmount().compareTo(BigDecimal.ZERO) > 0) {
+
+                    try {
+                        OpenItem openItem = new OpenItem(savedInvoice,
+                                "Sample-OpenItem für Rechnung " + savedInvoice.getInvoiceNumber(),
+                                savedInvoice.getTotalAmount(),
+                                savedInvoice.getDueDate());
+
+                        // Simuliere verschiedene Zahlungsstatus
+                        double paymentChance = random.nextDouble();
+                        if (paymentChance < 0.3) {
+                            // 30% vollständig bezahlt
+                            openItem.recordPayment(savedInvoice.getTotalAmount(),
+                                    "Überweisung",
+                                    "SAMPLE-REF-" + System.currentTimeMillis());
+                        } else if (paymentChance < 0.5) {
+                            // 20% teilweise bezahlt
+                            BigDecimal partialAmount = savedInvoice.getTotalAmount()
+                                    .multiply(BigDecimal.valueOf(0.3 + random.nextDouble() * 0.4));
+                            openItem.recordPayment(partialAmount,
+                                    "Teilzahlung",
+                                    "SAMPLE-PARTIAL-" + System.currentTimeMillis());
+                        }
+                        // 50% bleiben offen
+
+                        OpenItem savedOpenItem = openItemRepository.save(openItem);
+                        openItemsCreated++;
+
+                        logger.debug("OpenItem erstellt für Sample-Rechnung {}: {} EUR",
+                                savedInvoice.getInvoiceNumber(), savedInvoice.getTotalAmount());
+
+                    } catch (Exception e) {
+                        logger.error("Fehler beim Erstellen des OpenItems für Sample-Rechnung {}: {}",
+                                savedInvoice.getInvoiceNumber(), e.getMessage());
+                    }
+                }
 
             } catch (Exception e) {
                 logger.error("Fehler beim Erstellen einer Sample-Rechnung: {}", e.getMessage());
             }
         }
 
-        logger.info("Es wurden {} Sample-Rechnungen erstellt", invoicesCreated);
+        logger.info("✓ {} Sample-Rechnungen erstellt", invoicesCreated);
+        logger.info("✓ {} Sample-OpenItems erstellt", openItemsCreated);
     }
 
-    // ===============================================================================================
-    // SCHRITT 8: SAMPLE OPENITEMS (UNABHÄNGIG VON RECHNUNGEN)
-    // ===============================================================================================
-
+    /**
+     * Erstellt Sample-OpenItems für bestehende Rechnungen
+     * Diese Methode wird nur aufgerufen wenn createSampleInvoices() nicht läuft
+     */
     private void createSampleOpenItems() {
-        logger.info("Erstelle Sample-OpenItems...");
+        logger.info("Erstelle zusätzliche Sample-OpenItems...");
 
         List<Invoice> allInvoices = invoiceService.getAllInvoices();
 
         if (allInvoices.isEmpty()) {
-            logger.warn("Keine Rechnungen für OpenItems gefunden");
+            logger.warn("Keine Rechnungen für zusätzliche OpenItems gefunden");
             return;
         }
 
         int openItemsCreated = 0;
 
-        for (Invoice invoice : allInvoices) {
-            // Nur Rechnungen mit Betrag > 0 verwenden
-            if (invoice.getTotalAmount() == null || invoice.getTotalAmount().compareTo(BigDecimal.ZERO) <= 0) {
-                logger.debug("Überspringe Rechnung {} - kein gültiger Betrag", invoice.getInvoiceNumber());
-                continue;
-            }
+        // Nur für Rechnungen die noch keine OpenItems haben
+        List<Invoice> invoicesWithoutOpenItems = allInvoices.stream()
+                .filter(invoice -> invoice.getOpenItems().isEmpty())
+                .filter(invoice -> invoice.getStatus() != Invoice.InvoiceStatus.CANCELLED)
+                .filter(invoice -> invoice.getTotalAmount() != null && invoice.getTotalAmount().compareTo(BigDecimal.ZERO) > 0)
+                .toList();
 
-            // 90% aller gültigen Rechnungen bekommen OpenItems (nicht nur versendete)
-            if (random.nextDouble() < 0.9) {
-                try {
-                    OpenItem openItem = new OpenItem(invoice,
-                            "Ausstehender Betrag für Rechnung " + invoice.getInvoiceNumber(),
-                            invoice.getTotalAmount(),
-                            invoice.getDueDate());
+        for (Invoice invoice : invoicesWithoutOpenItems) {
+            try {
+                OpenItem openItem = new OpenItem(invoice,
+                        "Nachträglich erstellter OpenItem für Rechnung " + invoice.getInvoiceNumber(),
+                        invoice.getTotalAmount(),
+                        invoice.getDueDate());
 
-                    // Zahlungsstatus simulieren
-                    double paymentChance = random.nextDouble();
+                // Zahlungsstatus simulieren
+                double paymentChance = random.nextDouble();
 
-                    if (paymentChance < 0.4) {
-                        // 40% vollständig bezahlt
-                        openItem.recordPayment(invoice.getTotalAmount(),
-                                "Überweisung",
-                                "REF-" + System.currentTimeMillis());
+                if (paymentChance < 0.4) {
+                    // 40% vollständig bezahlt
+                    openItem.recordPayment(invoice.getTotalAmount(),
+                            "Überweisung",
+                            "REF-" + System.currentTimeMillis());
 
-                    } else if (paymentChance < 0.65) {
-                        // 25% teilweise bezahlt
-                        BigDecimal partialAmount = invoice.getTotalAmount()
-                                .multiply(BigDecimal.valueOf(0.3 + random.nextDouble() * 0.5)); // 30-80%
-                        openItem.recordPayment(partialAmount,
-                                "Teilzahlung",
-                                "REF-" + System.currentTimeMillis());
-                    }
-                    // 35% bleiben offen
-
-                    // Manchmal Mahnungen hinzufügen (bei überfälligen)
-                    if (openItem.isOverdue() && random.nextDouble() < 0.5) {
-                        int reminders = 1 + random.nextInt(3);
-                        for (int r = 0; r < reminders; r++) {
-                            openItem.addReminder();
-                        }
-                    }
-
-                    openItemRepository.save(openItem);
-                    openItemsCreated++;
-
-                    logger.debug("OpenItem erstellt für Rechnung {} mit Betrag {}",
-                            invoice.getInvoiceNumber(), invoice.getTotalAmount());
-
-                } catch (Exception e) {
-                    logger.error("Fehler beim Erstellen eines OpenItems für Rechnung {}: {}",
-                            invoice.getInvoiceNumber(), e.getMessage());
+                } else if (paymentChance < 0.65) {
+                    // 25% teilweise bezahlt
+                    BigDecimal partialAmount = invoice.getTotalAmount()
+                            .multiply(BigDecimal.valueOf(0.3 + random.nextDouble() * 0.5)); // 30-80%
+                    openItem.recordPayment(partialAmount,
+                            "Teilzahlung",
+                            "REF-" + System.currentTimeMillis());
                 }
+                // 35% bleiben offen
+
+                // Manchmal Mahnungen hinzufügen (bei überfälligen)
+                if (openItem.isOverdue() && random.nextDouble() < 0.5) {
+                    int reminders = 1 + random.nextInt(3);
+                    for (int r = 0; r < reminders; r++) {
+                        openItem.addReminder();
+                    }
+                }
+
+                openItemRepository.save(openItem);
+                openItemsCreated++;
+
+                logger.debug("Zusätzlicher OpenItem erstellt für Rechnung {} mit Betrag {}",
+                        invoice.getInvoiceNumber(), invoice.getTotalAmount());
+
+            } catch (Exception e) {
+                logger.error("Fehler beim Erstellen eines zusätzlichen OpenItems für Rechnung {}: {}",
+                        invoice.getInvoiceNumber(), e.getMessage());
             }
         }
 
-        logger.info("Es wurden {} Sample-OpenItems erstellt", openItemsCreated);
+        logger.info("✓ {} zusätzliche Sample-OpenItems erstellt", openItemsCreated);
     }
+
+    // ===============================================================================================
+    // AUTOMATISCHER RECHNUNGSLAUF MIT VOLLSTÄNDIGER VALIDIERUNG
+    // ===============================================================================================
+
+    /**
+     * Führt den automatischen Rechnungslauf durch und stellt sicher,
+     * dass JEDE abgerechnete Fälligkeit eine Rechnung UND einen OpenItem erhält
+     */
+    private void runBillingProcess(LocalDate billingDate) {
+        logger.info("===========================================");
+        logger.info("Starte automatischen Rechnungslauf");
+        logger.info("Stichtag: {}", billingDate);
+        logger.info("===========================================");
+
+        try {
+            // 1. Status VOR dem Rechnungslauf
+            long activeDueSchedulesBefore = dueScheduleRepository.countByStatus(DueStatus.ACTIVE);
+            long invoicesBefore = invoiceRepository.count();
+            long openItemsBefore = openItemRepository.count();
+
+            logger.info("Status VOR Rechnungslauf:");
+            logger.info("  - Aktive Fälligkeiten: {}", activeDueSchedulesBefore);
+            logger.info("  - Rechnungen: {}", invoicesBefore);
+            logger.info("  - OpenItems: {}", openItemsBefore);
+
+            // 2. Rechnungslauf durchführen
+            InvoiceBatchService.InvoiceBatchResult result = invoiceBatchService.runInvoiceBatch(billingDate);
+
+            // 3. Status NACH dem Rechnungslauf
+            long activeDueSchedulesAfter = dueScheduleRepository.countByStatus(DueStatus.ACTIVE);
+            long completedDueSchedulesAfter = dueScheduleRepository.countByStatus(DueStatus.COMPLETED);
+            long invoicesAfter = invoiceRepository.count();
+            long openItemsAfter = openItemRepository.count();
+
+            logger.info("Status NACH Rechnungslauf:");
+            logger.info("  - Aktive Fälligkeiten: {} (war: {})", activeDueSchedulesAfter, activeDueSchedulesBefore);
+            logger.info("  - Abgerechnete Fälligkeiten: {}", completedDueSchedulesAfter);
+            logger.info("  - Rechnungen: {} (war: {}, neu: {})", invoicesAfter, invoicesBefore, invoicesAfter - invoicesBefore);
+            logger.info("  - OpenItems: {} (war: {}, neu: {})", openItemsAfter, openItemsBefore, openItemsAfter - openItemsBefore);
+
+            // 4. Validierung der Konsistenz
+            long processedDueSchedules = activeDueSchedulesBefore - activeDueSchedulesAfter;
+            long newInvoices = invoicesAfter - invoicesBefore;
+            long newOpenItems = openItemsAfter - openItemsBefore;
+
+            logger.info("Rechnungslauf-Ergebnis:");
+            logger.info("  - Verarbeitete Fälligkeiten: {} (erwartet: {})", processedDueSchedules, result.getProcessedDueSchedules());
+            logger.info("  - Erstellte Rechnungen: {} (erwartet: {})", newInvoices, result.getCreatedInvoices());
+            logger.info("  - Neue OpenItems: {}", newOpenItems);
+            logger.info("  - Gesamtbetrag: {} EUR", result.getTotalAmount());
+            logger.info("  - Status: {}", result.getMessage());
+
+            // 5. Konsistenz-Prüfung
+            boolean consistent = (processedDueSchedules == newInvoices) && (newInvoices == newOpenItems);
+
+            if (consistent) {
+                logger.info("✓ KONSISTENZ-PRÜFUNG ERFOLGREICH: Alle Zahlen stimmen überein!");
+            } else {
+                logger.error("✗ KONSISTENZ-FEHLER!");
+                logger.error("  Verarbeitete Fälligkeiten: {} | Neue Rechnungen: {} | Neue OpenItems: {}",
+                        processedDueSchedules, newInvoices, newOpenItems);
+
+                // Versuche fehlende OpenItems zu erstellen
+                logger.info("Versuche fehlende OpenItems automatisch zu erstellen...");
+                createMissingOpenItems();
+            }
+
+        } catch (Exception e) {
+            logger.error("KRITISCHER FEHLER beim Rechnungslauf: {}", e.getMessage(), e);
+            throw new RuntimeException("Rechnungslauf fehlgeschlagen", e);
+        }
+    }
+
+    /**
+     * Erstellt fehlende OpenItems für Rechnungen ohne OpenItems
+     */
+    private void createMissingOpenItems() {
+        try {
+            List<Invoice> invoicesWithoutOpenItems = invoiceRepository.findAll().stream()
+                    .filter(invoice -> invoice.getOpenItems().isEmpty())
+                    .filter(invoice -> invoice.getTotalAmount() != null && invoice.getTotalAmount().compareTo(BigDecimal.ZERO) > 0)
+                    .toList();
+
+            int created = 0;
+            for (Invoice invoice : invoicesWithoutOpenItems) {
+                try {
+                    OpenItem openItem = new OpenItem(invoice,
+                            "Nachträglich erstellter offener Posten für Rechnung " + invoice.getInvoiceNumber(),
+                            invoice.getTotalAmount(),
+                            invoice.getDueDate());
+
+                    openItemRepository.save(openItem);
+                    created++;
+
+                    logger.info("✓ OpenItem nachträglich erstellt für Rechnung {}", invoice.getInvoiceNumber());
+                } catch (Exception e) {
+                    logger.error("Fehler beim nachträglichen Erstellen des OpenItems für Rechnung {}: {}",
+                            invoice.getInvoiceNumber(), e.getMessage());
+                }
+            }
+
+            if (created > 0) {
+                logger.info("✓ {} fehlende OpenItems nachträglich erstellt", created);
+            } else {
+                logger.info("Keine fehlenden OpenItems gefunden");
+            }
+
+        } catch (Exception e) {
+            logger.error("Fehler beim nachträglichen Erstellen fehlender OpenItems: {}", e.getMessage());
+        }
+    }
+
+    // ===============================================================================================
+    // DATENBESTAND UND KONSISTENZ-MANAGEMENT
+    // ===============================================================================================
 
     @Transactional(readOnly = true)
     public void logCurrentDataStatus() {
@@ -687,17 +838,56 @@ public class InitDataService {
         long totalInvoices = invoiceRepository.count();
         long draftInvoices = invoiceService.getInvoiceCountByStatus(Invoice.InvoiceStatus.DRAFT);
         long sentInvoices = invoiceService.getInvoiceCountByStatus(Invoice.InvoiceStatus.SENT);
+        long cancelledInvoices = invoiceService.getInvoiceCountByStatus(Invoice.InvoiceStatus.CANCELLED);
         logger.info("  - Gesamt: {}", totalInvoices);
         logger.info("  - Entwürfe: {}", draftInvoices);
         logger.info("  - Versendet: {}", sentInvoices);
+        logger.info("  - Storniert: {}", cancelledInvoices);
 
         logger.info("Offene Posten:");
         long totalOpenItems = openItemRepository.count();
         long openOpenItems = openItemRepository.countByStatus(OpenItem.OpenItemStatus.OPEN);
+        long partiallyPaidOpenItems = openItemRepository.countByStatus(OpenItem.OpenItemStatus.PARTIALLY_PAID);
         long paidOpenItems = openItemRepository.countByStatus(OpenItem.OpenItemStatus.PAID);
+        long overdueOpenItems = openItemRepository.countByStatus(OpenItem.OpenItemStatus.OVERDUE);
+        long cancelledOpenItems = openItemRepository.countByStatus(OpenItem.OpenItemStatus.CANCELLED);
+
         logger.info("  - Gesamt: {}", totalOpenItems);
         logger.info("  - Offen: {}", openOpenItems);
+        logger.info("  - Teilweise bezahlt: {}", partiallyPaidOpenItems);
         logger.info("  - Bezahlt: {}", paidOpenItems);
+        logger.info("  - Überfällig: {}", overdueOpenItems);
+        logger.info("  - Storniert: {}", cancelledOpenItems);
+
+        // Zusätzliche Konsistenz-Prüfung
+        logger.info("Konsistenz-Prüfung:");
+        long invoicesWithoutOpenItems = 0;
+        long openItemsWithoutInvoices = 0;
+
+        try {
+            invoicesWithoutOpenItems = invoiceRepository.findAll().stream()
+                    .filter(invoice -> invoice.getStatus() != Invoice.InvoiceStatus.CANCELLED)
+                    .filter(invoice -> invoice.getTotalAmount() != null && invoice.getTotalAmount().compareTo(BigDecimal.ZERO) > 0)
+                    .filter(invoice -> invoice.getOpenItems().isEmpty())
+                    .count();
+
+            openItemsWithoutInvoices = openItemRepository.findAll().stream()
+                    .filter(openItem -> openItem.getInvoice() == null)
+                    .count();
+
+            logger.info("  - Rechnungen ohne OpenItems: {}", invoicesWithoutOpenItems);
+            logger.info("  - OpenItems ohne Rechnungen: {}", openItemsWithoutInvoices);
+
+            if (invoicesWithoutOpenItems == 0 && openItemsWithoutInvoices == 0) {
+                logger.info("  ✓ Konsistenz-Prüfung erfolgreich!");
+            } else {
+                logger.warn("  ⚠ Konsistenz-Probleme gefunden!");
+            }
+
+        } catch (Exception e) {
+            logger.error("Fehler bei Konsistenz-Prüfung: {}", e.getMessage());
+        }
+
         logger.info("===========================================");
     }
 
@@ -705,15 +895,87 @@ public class InitDataService {
     public void clearAllTestData() {
         logger.warn("WARNUNG: Lösche alle Testdaten...");
 
-        openItemRepository.deleteAll();
-        invoiceRepository.deleteAll();
-        dueScheduleRepository.deleteAll();
-        subscriptionRepository.deleteAll();
-        contractRepository.deleteAll();
-        productRepository.deleteAll();
-        customerRepository.deleteAll();
-        addressRepository.deleteAll();
+        try {
+            openItemRepository.deleteAll();
+            logger.info("OpenItems gelöscht");
 
-        logger.info("Alle Testdaten wurden gelöscht.");
+            invoiceRepository.deleteAll();
+            logger.info("Invoices gelöscht");
+
+            dueScheduleRepository.deleteAll();
+            logger.info("DueSchedules gelöscht");
+
+            subscriptionRepository.deleteAll();
+            logger.info("Subscriptions gelöscht");
+
+            contractRepository.deleteAll();
+            logger.info("Contracts gelöscht");
+
+            productRepository.deleteAll();
+            logger.info("Products gelöscht");
+
+            customerRepository.deleteAll();
+            logger.info("Customers gelöscht");
+
+            addressRepository.deleteAll();
+            logger.info("Addresses gelöscht");
+
+            logger.info("✓ Alle Testdaten wurden erfolgreich gelöscht.");
+
+        } catch (Exception e) {
+            logger.error("Fehler beim Löschen der Testdaten: {}", e.getMessage(), e);
+            throw new RuntimeException("Fehler beim Löschen der Testdaten", e);
+        }
+    }
+
+    /**
+     * Repariert inkonsistente Daten
+     */
+    @Transactional
+    public void repairDataConsistency() {
+        logger.info("Starte Daten-Konsistenz-Reparatur...");
+
+        try {
+            // 1. Erstelle fehlende OpenItems
+            createMissingOpenItems();
+
+            // 2. Entferne OpenItems ohne gültige Rechnungen
+            cleanupOrphanedOpenItems();
+
+            // 3. Update überfällige OpenItems
+            updateOverdueOpenItems();
+
+            logger.info("Daten-Konsistenz-Reparatur abgeschlossen");
+
+        } catch (Exception e) {
+            logger.error("Fehler bei der Daten-Konsistenz-Reparatur: {}", e.getMessage(), e);
+        }
+    }
+
+    private void cleanupOrphanedOpenItems() {
+        List<OpenItem> orphanedItems = openItemRepository.findAll().stream()
+                .filter(openItem -> openItem.getInvoice() == null)
+                .toList();
+
+        if (!orphanedItems.isEmpty()) {
+            openItemRepository.deleteAll(orphanedItems);
+            logger.info("✓ {} verwaiste OpenItems entfernt", orphanedItems.size());
+        }
+    }
+
+    private void updateOverdueOpenItems() {
+        List<OpenItem> openItems = openItemRepository.findAll().stream()
+                .filter(oi -> oi.getStatus() == OpenItem.OpenItemStatus.OPEN)
+                .filter(oi -> oi.getDueDate() != null && oi.getDueDate().isBefore(LocalDate.now()))
+                .toList();
+
+        for (OpenItem item : openItems) {
+            item.setStatus(OpenItem.OpenItemStatus.OVERDUE);
+            openItemRepository.save(item);
+        }
+
+        if (!openItems.isEmpty()) {
+            logger.info("✓ {} OpenItems auf OVERDUE aktualisiert", openItems.size());
+        }
     }
 }

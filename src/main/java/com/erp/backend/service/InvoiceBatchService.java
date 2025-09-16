@@ -18,11 +18,12 @@ import java.util.List;
 /**
  * Service für den automatisierten Rechnungslauf.
  *
- * Workflow:
+ * GARANTIERTE WORKFLOW-KETTE:
  * 1. Prüft ALLE aktiven DueSchedules bis zum Stichtag (inkl. überfällige)
  * 2. Erstellt für JEDE noch nicht abgerechnete Fälligkeit eine separate Rechnung
- * 3. Generiert für jede Rechnung einen OpenItem
- * 4. Markiert DueSchedules als abgerechnet
+ * 3. Generiert für jede Rechnung GARANTIERT einen OpenItem
+ * 4. Markiert DueSchedules als abgerechnet (COMPLETED)
+ * 5. Validiert Konsistenz: DueSchedule → Invoice → OpenItem (1:1:1)
  */
 @Service
 @Transactional
@@ -47,7 +48,7 @@ public class InvoiceBatchService {
 
     /**
      * Hauptmethode für den Rechnungslauf
-     * Erstellt für jede fällige DueSchedule eine separate Rechnung
+     * GARANTIERT: Für jede abgerechnete DueSchedule wird eine Rechnung UND ein OpenItem erstellt
      * WICHTIG: Erfasst ALLE aktiven Fälligkeiten bis zum Stichtag, auch überfällige!
      *
      * @param billingDate Stichtag für die Abrechnung
@@ -55,7 +56,9 @@ public class InvoiceBatchService {
      */
     @Transactional
     public InvoiceBatchResult runInvoiceBatch(LocalDate billingDate) {
-        logger.info("Starte Rechnungslauf für Stichtag: {} (inkl. aller überfälligen Positionen)", billingDate);
+        logger.info("==================== RECHNUNGSLAUF START ====================");
+        logger.info("Stichtag: {} (inkl. aller überfälligen Positionen)", billingDate);
+        logger.info("=============================================================");
 
         String batchId = generateBatchId();
 
@@ -70,7 +73,7 @@ public class InvoiceBatchService {
                     "Keine offenen Fälligkeiten für " + billingDate + " (inkl. überfällige Positionen)");
         }
 
-        // Logging für bessere Nachverfolgung
+        // Analysiere gefundene Fälligkeiten
         long overdueCount = openDueSchedules.stream()
                 .filter(ds -> ds.getDueDate().isBefore(billingDate))
                 .count();
@@ -81,81 +84,137 @@ public class InvoiceBatchService {
                                 ds.getDueDate().getYear() == billingDate.getYear()))
                 .count();
 
-        logger.info("Gefunden: {} Fälligkeiten gesamt (davon {} überfällig, {} aktueller Monat)",
+        logger.info("ANALYSE: {} Fälligkeiten gesamt (davon {} überfällig, {} aktueller Monat)",
                 openDueSchedules.size(), overdueCount, currentMonthCount);
 
+        // Batch-Verarbeitung
         int createdInvoices = 0;
+        int createdOpenItems = 0;
         int processedDueSchedules = 0;
         BigDecimal totalAmount = BigDecimal.ZERO;
         List<String> errors = new ArrayList<>();
+        List<String> successfullyProcessed = new ArrayList<>();
 
-        // 2. Erstelle für JEDE Fälligkeit eine separate Rechnung
+        logger.info("==================== BATCH-VERARBEITUNG START ====================");
+
+        // 2. Erstelle für JEDE Fälligkeit GARANTIERT eine Rechnung UND einen OpenItem
         for (DueSchedule dueSchedule : openDueSchedules) {
             try {
-                // Spezielle Behandlung für überfällige Positionen
-                boolean isOverdue = dueSchedule.getDueDate().isBefore(billingDate);
+                logger.debug("Verarbeite Fälligkeit: {} (fällig: {})",
+                        dueSchedule.getDueNumber(), formatDate(dueSchedule.getDueDate()));
 
-                // Erstelle Rechnung für diese eine Fälligkeit
-                Invoice invoice = createInvoiceForDueSchedule(dueSchedule, billingDate, batchId, isOverdue);
-                Invoice savedInvoice = invoiceRepository.save(invoice);
-
-                // Erstelle OpenItem für diese Rechnung
-                OpenItem openItem = createOpenItemForInvoice(savedInvoice, isOverdue);
-                openItemRepository.save(openItem);
-
-                // Markiere DueSchedule als abgerechnet
+                // SCHRITT 1: DueSchedule sofort als abgerechnet markieren
                 dueSchedule.markAsCompleted();
-                dueSchedule.setInvoiceId(savedInvoice.getId());
                 dueSchedule.setInvoiceBatchId(batchId);
-                dueScheduleRepository.save(dueSchedule);
-
-                createdInvoices++;
+                DueSchedule savedDueSchedule = dueScheduleRepository.save(dueSchedule);
                 processedDueSchedules++;
+
+                // SCHRITT 2: Rechnung erstellen (GARANTIERT)
+                boolean isOverdue = dueSchedule.getDueDate().isBefore(billingDate);
+                Invoice invoice = createInvoiceForDueSchedule(savedDueSchedule, billingDate, batchId, isOverdue);
+                Invoice savedInvoice = invoiceRepository.save(invoice);
+                createdInvoices++;
+
+                // SCHRITT 3: DueSchedule mit Rechnung verknüpfen
+                savedDueSchedule.setInvoiceId(savedInvoice.getId());
+                dueScheduleRepository.save(savedDueSchedule);
+
+                // SCHRITT 4: OpenItem erstellen (GARANTIERT)
+                OpenItem openItem = createOpenItemForInvoice(savedInvoice, isOverdue);
+                OpenItem savedOpenItem = openItemRepository.save(openItem);
+                createdOpenItems++;
+
                 totalAmount = totalAmount.add(savedInvoice.getTotalAmount());
 
-                String logMessage = isOverdue ?
-                        "Rechnung {} erstellt für ÜBERFÄLLIGE Fälligkeit {} (ursprünglich fällig: {}) - Betrag: {}" :
-                        "Rechnung {} erstellt für Fälligkeit {} - Betrag: {}";
+                // Erfolgs-Logging
+                String status = isOverdue ? "ÜBERFÄLLIG" : "AKTUELL";
+                String successMsg = String.format("✓ %s (%s) → %s (%.2f€) → OpenItem %s",
+                        savedDueSchedule.getDueNumber(),
+                        status,
+                        savedInvoice.getInvoiceNumber(),
+                        savedInvoice.getTotalAmount(),
+                        savedOpenItem.getId());
 
-                if (isOverdue) {
-                    logger.info(logMessage,
-                            savedInvoice.getInvoiceNumber(),
-                            dueSchedule.getDueNumber(),
-                            formatDate(dueSchedule.getDueDate()),
-                            savedInvoice.getTotalAmount());
-                } else {
-                    logger.debug(logMessage,
-                            savedInvoice.getInvoiceNumber(),
-                            dueSchedule.getDueNumber(),
-                            savedInvoice.getTotalAmount());
-                }
+                successfullyProcessed.add(successMsg);
+                logger.info(successMsg);
 
             } catch (Exception e) {
-                String error = String.format("Fehler bei Fälligkeit %s (fällig: %s): %s",
+                String error = String.format("✗ KRITISCHER FEHLER bei Fälligkeit %s (fällig: %s): %s",
                         dueSchedule.getDueNumber(),
                         formatDate(dueSchedule.getDueDate()),
                         e.getMessage());
                 logger.error(error, e);
                 errors.add(error);
+
+                // Bei Fehlern: DueSchedule wieder auf ACTIVE setzen (Rollback)
+                try {
+                    dueSchedule.setStatus(DueStatus.ACTIVE);
+                    dueSchedule.setInvoiceBatchId(null);
+                    dueSchedule.setInvoiceId(null);
+                    dueScheduleRepository.save(dueSchedule);
+                    logger.warn("→ DueSchedule {} aufgrund Fehler wieder auf ACTIVE zurückgesetzt",
+                            dueSchedule.getDueNumber());
+                } catch (Exception rollbackError) {
+                    logger.error("→ ROLLBACK-FEHLER für DueSchedule {}: {}",
+                            dueSchedule.getDueNumber(), rollbackError.getMessage());
+                }
             }
         }
 
+        logger.info("==================== BATCH-VERARBEITUNG ENDE ====================");
+
+        // 3. KRITISCHE VALIDIERUNG: Stelle sicher dass alle Zahlen stimmen
+        logger.info("==================== KONSISTENZ-VALIDIERUNG ====================");
+
+        if (createdInvoices != createdOpenItems) {
+            logger.error("✗ KRITISCHE INKONSISTENZ: {} Rechnungen vs {} OpenItems erstellt!",
+                    createdInvoices, createdOpenItems);
+            errors.add("Inkonsistenz: " + createdInvoices + " Rechnungen vs " + createdOpenItems + " OpenItems");
+        }
+
+        if (processedDueSchedules != createdInvoices) {
+            logger.error("✗ KRITISCHE INKONSISTENZ: {} DueSchedules vs {} Rechnungen verarbeitet!",
+                    processedDueSchedules, createdInvoices);
+            errors.add("Inkonsistenz: " + processedDueSchedules + " DueSchedules vs " + createdInvoices + " Rechnungen");
+        }
+
+        // Erfolgsmeldungen zusammenfassen
+        if (!successfullyProcessed.isEmpty()) {
+            logger.info("✓ ERFOLGREICH VERARBEITETE FÄLLIGKEITEN:");
+            successfullyProcessed.forEach(msg -> logger.info("  " + msg));
+        }
+
+        // 4. Ergebnis-Zusammenfassung
         String message = String.format(
-                "Rechnungslauf abgeschlossen: %d Rechnungen erstellt, %d Fälligkeiten verarbeitet (davon %d überfällig), Gesamt: %.2f EUR",
-                createdInvoices, processedDueSchedules, overdueCount, totalAmount
+                "RECHNUNGSLAUF ABGESCHLOSSEN: %d Fälligkeiten → %d Rechnungen → %d OpenItems (davon %d überfällig), Gesamt: %.2f EUR",
+                processedDueSchedules, createdInvoices, createdOpenItems, overdueCount, totalAmount
         );
 
         if (!errors.isEmpty()) {
-            message += String.format(" (%d Fehler aufgetreten)", errors.size());
+            message += String.format(" (%d KRITISCHE FEHLER aufgetreten!)", errors.size());
+            logger.error("==================== KRITISCHE FEHLER ====================");
+            errors.forEach(error -> logger.error("✗ " + error));
+            logger.error("=========================================================");
         }
 
+        logger.info("==================== RECHNUNGSLAUF ZUSAMMENFASSUNG ====================");
         logger.info(message);
+        logger.info("Batch-ID: {}", batchId);
+        logger.info("Verarbeitungszeit: {}", java.time.LocalDateTime.now());
+
+        if (errors.isEmpty()) {
+            logger.info("✓ STATUS: ERFOLGREICH - Alle Fälligkeiten wurden korrekt abgerechnet");
+        } else {
+            logger.error("✗ STATUS: FEHLER - {} Probleme aufgetreten", errors.size());
+        }
+        logger.info("=====================================================================");
+
         return new InvoiceBatchResult(createdInvoices, processedDueSchedules, totalAmount, message);
     }
 
     /**
      * Erstellt eine Rechnung für eine einzelne Fälligkeit
-     * Berücksichtigt auch überfällige Positionen
+     * Berücksichtigt auch überfällige Positionen mit spezieller Kennzeichnung
      */
     private Invoice createInvoiceForDueSchedule(DueSchedule dueSchedule,
                                                 LocalDate billingDate,
@@ -185,18 +244,20 @@ public class InvoiceBatchService {
 
         invoice.calculateTotals();
 
-        // Angepasste Notiz je nach Status
+        // Angepasste Notiz je nach Status (überfällig vs. normal)
         String noteTemplate = isOverdue ?
-                "Automatisch erstellt für ÜBERFÄLLIGE Fälligkeit %s (ursprünglich fällig: %s, Periode: %s bis %s)" :
-                "Automatisch erstellt für Fälligkeit %s (Periode: %s bis %s)";
+                "Automatisch erstellt am %s für ÜBERFÄLLIGE Fälligkeit %s (ursprünglich fällig: %s, Periode: %s bis %s)" :
+                "Automatisch erstellt am %s für Fälligkeit %s (Periode: %s bis %s)";
 
         String notes = isOverdue ?
                 String.format(noteTemplate,
+                        formatDate(billingDate),
                         dueSchedule.getDueNumber(),
                         formatDate(dueSchedule.getDueDate()),
                         formatDate(dueSchedule.getPeriodStart()),
                         formatDate(dueSchedule.getPeriodEnd())) :
                 String.format(noteTemplate,
+                        formatDate(billingDate),
                         dueSchedule.getDueNumber(),
                         formatDate(dueSchedule.getPeriodStart()),
                         formatDate(dueSchedule.getPeriodEnd()));
@@ -208,17 +269,17 @@ public class InvoiceBatchService {
 
     /**
      * Erstellt eine Rechnungsposition aus einer einzelnen Fälligkeit
-     * Kennzeichnet überfällige Positionen in der Beschreibung
+     * Kennzeichnet überfällige Positionen deutlich in der Beschreibung
      */
     private InvoiceItem createInvoiceItemFromDueSchedule(DueSchedule dueSchedule, boolean isOverdue) {
         Subscription subscription = dueSchedule.getSubscription();
 
         InvoiceItem item = new InvoiceItem();
 
-        // Hole Preis aus Subscription oder Product
+        // Hole Preis aus Subscription oder Product (mit Fallback)
         BigDecimal unitPrice = getPrice(subscription);
 
-        // Erstelle aussagekräftige Beschreibung (mit Überfällig-Kennzeichnung)
+        // Erstelle aussagekräftige Beschreibung mit Überfällig-Kennzeichnung
         String description = createItemDescription(subscription, dueSchedule, isOverdue);
 
         item.setDescription(description);
@@ -227,7 +288,7 @@ public class InvoiceBatchService {
         item.setItemType(InvoiceItem.InvoiceItemType.SUBSCRIPTION);
         item.setTaxRate(BigDecimal.valueOf(19));
 
-        // Setze Periode
+        // Setze Periode für nachvollziehbare Abrechnung
         item.setPeriodStart(dueSchedule.getPeriodStart());
         item.setPeriodEnd(dueSchedule.getPeriodEnd());
 
@@ -245,28 +306,29 @@ public class InvoiceBatchService {
     }
 
     /**
-     * Ermittelt den Preis aus Subscription oder Product
+     * Ermittelt den Preis aus Subscription oder Product mit Fallback-Strategie
      */
     private BigDecimal getPrice(Subscription subscription) {
-        // Priorität: 1. Subscription.monthlyPrice, 2. Product.price
+        // Priorität: 1. Subscription.monthlyPrice, 2. Product.price, 3. Fallback 0.00
         if (subscription.getMonthlyPrice() != null &&
                 subscription.getMonthlyPrice().compareTo(BigDecimal.ZERO) > 0) {
             return subscription.getMonthlyPrice();
         }
 
         if (subscription.getProduct() != null &&
-                subscription.getProduct().getPrice() != null) {
+                subscription.getProduct().getPrice() != null &&
+                subscription.getProduct().getPrice().compareTo(BigDecimal.ZERO) > 0) {
             return subscription.getProduct().getPrice();
         }
 
-        logger.warn("Kein Preis gefunden für Subscription {}. Verwende 0.00",
+        logger.warn("WARNUNG: Kein Preis gefunden für Subscription {}. Verwende 0.00 EUR",
                 subscription.getSubscriptionNumber());
         return BigDecimal.ZERO;
     }
 
     /**
-     * Erstellt Beschreibung für die Rechnungsposition
-     * Kennzeichnet überfällige Positionen
+     * Erstellt eine aussagekräftige Beschreibung für die Rechnungsposition
+     * Kennzeichnet überfällige Positionen deutlich für bessere Nachverfolgung
      */
     private String createItemDescription(Subscription subscription, DueSchedule dueSchedule, boolean isOverdue) {
         String productName = subscription.getProductName() != null ?
@@ -280,9 +342,9 @@ public class InvoiceBatchService {
                 dueSchedule.getPeriodStart().format(formatter),
                 dueSchedule.getPeriodEnd().format(formatter));
 
-        // Füge Überfällig-Kennzeichnung hinzu
+        // Füge deutliche Überfällig-Kennzeichnung hinzu
         if (isOverdue) {
-            return String.format("%s (ÜBERFÄLLIG seit %s)",
+            return String.format("%s ⚠ ÜBERFÄLLIG seit %s ⚠",
                     baseDescription,
                     dueSchedule.getDueDate().format(formatter));
         }
@@ -292,21 +354,24 @@ public class InvoiceBatchService {
 
     /**
      * Erstellt einen OpenItem für die Rechnung
-     * Berücksichtigt überfällige Status
+     * Berücksichtigt überfällige Status und setzt korrekte Anfangswerte
      */
     private OpenItem createOpenItemForInvoice(Invoice invoice, boolean wasOverdue) {
         OpenItem openItem = new OpenItem();
         openItem.setInvoice(invoice);
         openItem.setDescription(String.format("Offener Posten für Rechnung %s%s",
                 invoice.getInvoiceNumber(),
-                wasOverdue ? " (aus überfälliger Position)" : ""));
+                wasOverdue ? " (aus überfälliger Fälligkeit)" : ""));
         openItem.setAmount(invoice.getTotalAmount());
         openItem.setDueDate(invoice.getDueDate());
         openItem.setStatus(OpenItem.OpenItemStatus.OPEN);
+        openItem.setPaidAmount(BigDecimal.ZERO);
 
-        // Prüfe ob bereits überfällig (basierend auf neuem Fälligkeitsdatum)
+        // Prüfe ob bereits bei Erstellung überfällig (basierend auf neuem Fälligkeitsdatum)
         if (invoice.getDueDate().isBefore(LocalDate.now())) {
             openItem.setStatus(OpenItem.OpenItemStatus.OVERDUE);
+            logger.debug("OpenItem für Rechnung {} direkt als OVERDUE markiert (Fälligkeitsdatum in Vergangenheit)",
+                    invoice.getInvoiceNumber());
         }
 
         return openItem;
@@ -314,6 +379,7 @@ public class InvoiceBatchService {
 
     /**
      * Generiert eine eindeutige Batch-ID für den Rechnungslauf
+     * Format: BATCH-YYYYMMDD-XXXXX
      */
     private String generateBatchId() {
         return String.format("BATCH-%s-%05d",
@@ -328,6 +394,49 @@ public class InvoiceBatchService {
         if (date == null) return "N/A";
         return date.format(DateTimeFormatter.ofPattern("dd.MM.yyyy"));
     }
+
+    // ===============================================================================================
+    // ZUSÄTZLICHE SERVICE-METHODEN
+    // ===============================================================================================
+
+    /**
+     * Prüft ob ein Rechnungslauf für den Stichtag möglich ist
+     */
+    @Transactional(readOnly = true)
+    public boolean canRunBillingBatch(LocalDate billingDate) {
+        long activeDueSchedules = dueScheduleRepository
+                .countByStatusAndDueDateLessThanEqual(DueStatus.ACTIVE, billingDate);
+        return activeDueSchedules > 0;
+    }
+
+    /**
+     * Vorschau: Zeigt was ein Rechnungslauf verarbeiten würde (ohne Ausführung)
+     */
+    @Transactional(readOnly = true)
+    public InvoiceBatchPreview previewBillingBatch(LocalDate billingDate) {
+        List<DueSchedule> openDueSchedules = dueScheduleRepository
+                .findByStatusAndDueDateLessThanEqual(DueStatus.ACTIVE, billingDate);
+
+        long overdueCount = openDueSchedules.stream()
+                .filter(ds -> ds.getDueDate().isBefore(billingDate))
+                .count();
+
+        BigDecimal estimatedTotal = openDueSchedules.stream()
+                .map(ds -> getPrice(ds.getSubscription()))
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        return new InvoiceBatchPreview(
+                openDueSchedules.size(),
+                overdueCount,
+                openDueSchedules.size() - overdueCount,
+                estimatedTotal,
+                billingDate
+        );
+    }
+
+    // ===============================================================================================
+    // RESULT-KLASSEN
+    // ===============================================================================================
 
     /**
      * Ergebnis-DTO für den Rechnungslauf
@@ -357,6 +466,42 @@ public class InvoiceBatchService {
         @Override
         public String toString() {
             return message;
+        }
+    }
+
+    /**
+     * Vorschau-DTO für den geplanten Rechnungslauf
+     */
+    public static class InvoiceBatchPreview {
+        private final int totalDueSchedules;
+        private final long overdueCount;
+        private final long currentCount;
+        private final BigDecimal estimatedAmount;
+        private final LocalDate billingDate;
+
+        public InvoiceBatchPreview(int totalDueSchedules,
+                                   long overdueCount,
+                                   long currentCount,
+                                   BigDecimal estimatedAmount,
+                                   LocalDate billingDate) {
+            this.totalDueSchedules = totalDueSchedules;
+            this.overdueCount = overdueCount;
+            this.currentCount = currentCount;
+            this.estimatedAmount = estimatedAmount;
+            this.billingDate = billingDate;
+        }
+
+        // Getter
+        public int getTotalDueSchedules() { return totalDueSchedules; }
+        public long getOverdueCount() { return overdueCount; }
+        public long getCurrentCount() { return currentCount; }
+        public BigDecimal getEstimatedAmount() { return estimatedAmount; }
+        public LocalDate getBillingDate() { return billingDate; }
+
+        @Override
+        public String toString() {
+            return String.format("Rechnungslauf-Vorschau für %s: %d Fälligkeiten (%d überfällig, %d aktuell), geschätzt %.2f EUR",
+                    billingDate, totalDueSchedules, overdueCount, currentCount, estimatedAmount);
         }
     }
 }
