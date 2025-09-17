@@ -257,6 +257,9 @@ public class DueScheduleService {
     /**
      * Fälligkeitspläne für ein Abonnement automatisch generieren (nur Termine).
      */
+    /**
+     * Fälligkeitspläne für ein Abonnement automatisch generieren (nur Termine).
+     */
     public List<DueScheduleDto> generateDueSchedulesForSubscription(UUID subscriptionId, int months) {
         Subscription subscription = subscriptionRepository.findById(subscriptionId)
                 .orElseThrow(() -> new ResourceNotFoundException("Abo " + subscriptionId + " nicht gefunden"));
@@ -274,7 +277,7 @@ public class DueScheduleService {
         for (int i = 0; i < months; i++) {
             LocalDate periodStart = startDate.plusMonths(i);
             LocalDate periodEnd = periodStart.plusMonths(1).minusDays(1);
-            LocalDate dueDate = periodEnd.plusDays(1); // Fällig am Ende der Periode
+            LocalDate dueDate = periodStart; // Fällig am ersten Tag der Periode
 
             DueScheduleDto dto = new DueScheduleDto();
             dto.setSubscriptionId(subscriptionId);

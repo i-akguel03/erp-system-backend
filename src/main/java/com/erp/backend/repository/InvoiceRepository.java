@@ -64,4 +64,6 @@ public interface InvoiceRepository extends JpaRepository<Invoice, UUID> {
     @Query("SELECT i FROM Invoice i WHERE i.subscription.id IN :subscriptionIds")
     List<Invoice> findBySubscriptionIds(@Param("subscriptionIds") List<UUID> subscriptionIds);
 
+    @Query("SELECT i FROM Invoice i WHERE i.id NOT IN (SELECT DISTINCT oi.invoice.id FROM OpenItem oi WHERE oi.invoice IS NOT NULL)")
+    List<Invoice> findInvoicesWithoutOpenItems();
 }

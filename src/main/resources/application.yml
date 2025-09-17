@@ -27,12 +27,14 @@ spring:
   # ===============================
   jpa:
     hibernate:
-      ddl-auto: update  # create, update, validate, none
+      ddl-auto: update
+      # create, update, validate, none
     show-sql: true
     properties:
       hibernate:
         format_sql: true
     database-platform: org.hibernate.dialect.PostgreSQLDialect
+    defer-datasource-initialization: true  # Wichtig für automatische Initialisierung
 
   # ===============================
   # JACKSON
@@ -78,3 +80,12 @@ management:
   endpoint:
     health:
       show-details: always
+
+# =========================================
+# CUSTOM APP CONFIGURATION
+# =========================================
+app:
+  init:
+    enabled: true                # Init Service aktivieren
+    create-test-data: true       # Testdaten erstellen
+    auto-run-on-startup: true    # Automatisch beim Start ausführen

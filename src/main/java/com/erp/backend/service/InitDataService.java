@@ -1,9 +1,13 @@
 package com.erp.backend.service;
 
 import com.erp.backend.domain.*;
+import com.erp.backend.entity.Role;
 import com.erp.backend.repository.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.boot.ApplicationArguments;
+import org.springframework.boot.ApplicationRunner;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,7 +27,8 @@ import java.util.Random;
  * - FULL: Komplette Initialisierung inkl. Rechnungslauf
  */
 @Service
-public class InitDataService {
+@ConditionalOnProperty(name = "app.init.enabled", havingValue = "true")
+public class InitDataService implements ApplicationRunner {
 
     private static final Logger logger = LoggerFactory.getLogger(InitDataService.class);
 
@@ -63,6 +68,7 @@ public class InitDataService {
     private final InvoiceService invoiceService;
     private final InvoiceBatchService invoiceBatchService;
     private final NumberGeneratorService numberGeneratorService;
+    private final UserDetailsServiceImpl userDetailsService;
 
     private final Random random = new Random();
 
@@ -76,7 +82,7 @@ public class InitDataService {
                            InvoiceRepository invoiceRepository,
                            InvoiceService invoiceService,
                            InvoiceBatchService invoiceBatchService,
-                           NumberGeneratorService numberGeneratorService) {
+                           NumberGeneratorService numberGeneratorService, UserDetailsServiceImpl userDetailsService) {
         this.addressRepository = addressRepository;
         this.customerRepository = customerRepository;
         this.productRepository = productRepository;
@@ -88,6 +94,23 @@ public class InitDataService {
         this.invoiceService = invoiceService;
         this.invoiceBatchService = invoiceBatchService;
         this.numberGeneratorService = numberGeneratorService;
+        this.userDetailsService = userDetailsService;
+    }
+
+    @Override
+    public void run(ApplicationArguments args) throws Exception {
+        logger.info("🚀 Starting automatic data initialization with FULL mode...");
+
+        try {
+            // Deine bestehende initData Methode mit InitMode.FULL aufrufen
+            initData(InitMode.FULL, LocalDate.now());
+
+            logger.info("✅ Data initialization completed successfully");
+        } catch (Exception e) {
+            logger.error("❌ Data initialization failed", e);
+            // Optional: Exception weiterwerfen falls App nicht starten soll bei Fehler
+            // throw e;
+        }
     }
 
     /**
@@ -125,6 +148,7 @@ public class InitDataService {
         logger.info("===========================================");
 
         // Basis-Daten (immer)
+        initUser();
         initAddresses();
         initCustomers();
         initProducts();
@@ -174,6 +198,11 @@ public class InitDataService {
 
         logger.info("Vollständige Initialisierung abgeschlossen (FULL Mode)");
         logCurrentDataStatus();
+    }
+
+    @Transactional
+    private void initUser() {
+        userDetailsService.createUserSafe("a","a", Role.ROLE_ADMIN);
     }
 
     /**
@@ -368,6 +397,12 @@ public class InitDataService {
         logger.info("✓ {} Verträge erstellt", numberOfContracts);
     }
 
+    // In initSubscriptions() method, remove this line:
+    // contract.addSubscription(subscription);
+
+    // The subscription already has the contract reference set, so this line is redundant
+    // and causes the LazyInitializationException
+
     private void initSubscriptions() {
         if (subscriptionRepository.count() > 0) {
             logger.info("Abonnements bereits vorhanden - Überspringe Initialisierung");
@@ -422,7 +457,9 @@ public class InitDataService {
 
             subscription.setAutoRenewal(random.nextBoolean());
 
-            contract.addSubscription(subscription);
+            // REMOVE THIS LINE - it causes LazyInitializationException:
+            // contract.addSubscription(subscription);
+
             subscriptionRepository.save(subscription);
         }
 
@@ -446,13 +483,13 @@ public class InitDataService {
         int totalSchedulesCreated = 0;
 
         for (Subscription subscription : activeSubscriptions) {
-            LocalDate currentDate = subscription.getStartDate();
+            LocalDate subscriptionStart = subscription.getStartDate();
 
             // 12 Monate ab Abonnement-Start - nur Terminpläne
             for (int month = 0; month < 12; month++) {
-                LocalDate periodStart = currentDate;
-                LocalDate periodEnd = currentDate.plusMonths(1).minusDays(1);
-                LocalDate dueDate = periodEnd;
+                LocalDate periodStart = subscriptionStart.plusMonths(month);
+                LocalDate periodEnd = periodStart.plusMonths(1).minusDays(1);
+                LocalDate dueDate = periodStart;
 
                 DueSchedule dueSchedule = new DueSchedule(dueDate, periodStart, periodEnd, subscription);
                 dueSchedule.setDueNumber(numberGeneratorService.generateDueNumber());
@@ -476,7 +513,6 @@ public class InitDataService {
 
                 dueScheduleRepository.save(dueSchedule);
                 totalSchedulesCreated++;
-                currentDate = currentDate.plusMonths(1);
             }
         }
 
@@ -630,21 +666,22 @@ public class InitDataService {
     private void createSampleOpenItems() {
         logger.info("Erstelle zusätzliche Sample-OpenItems...");
 
-        List<Invoice> allInvoices = invoiceService.getAllInvoices();
+        List<Invoice> invoicesWithoutOpenItems = invoiceRepository.findInvoicesWithoutOpenItems();
 
-        if (allInvoices.isEmpty()) {
+
+        if (invoicesWithoutOpenItems.isEmpty()) {
             logger.warn("Keine Rechnungen für zusätzliche OpenItems gefunden");
             return;
         }
 
         int openItemsCreated = 0;
 
-        // Nur für Rechnungen die noch keine OpenItems haben
-        List<Invoice> invoicesWithoutOpenItems = allInvoices.stream()
-                .filter(invoice -> invoice.getOpenItems().isEmpty())
+        // Filter for non-cancelled and positive amounts
+        invoicesWithoutOpenItems = invoicesWithoutOpenItems.stream()
                 .filter(invoice -> invoice.getStatus() != Invoice.InvoiceStatus.CANCELLED)
                 .filter(invoice -> invoice.getTotalAmount() != null && invoice.getTotalAmount().compareTo(BigDecimal.ZERO) > 0)
                 .toList();
+
 
         for (Invoice invoice : invoicesWithoutOpenItems) {
             try {
@@ -859,17 +896,21 @@ public class InitDataService {
         logger.info("  - Überfällig: {}", overdueOpenItems);
         logger.info("  - Storniert: {}", cancelledOpenItems);
 
-        // Zusätzliche Konsistenz-Prüfung
+        // Konsistenz-Prüfung - FIXED VERSION
         logger.info("Konsistenz-Prüfung:");
         long invoicesWithoutOpenItems = 0;
         long openItemsWithoutInvoices = 0;
 
         try {
-            invoicesWithoutOpenItems = invoiceRepository.findAll().stream()
-                    .filter(invoice -> invoice.getStatus() != Invoice.InvoiceStatus.CANCELLED)
-                    .filter(invoice -> invoice.getTotalAmount() != null && invoice.getTotalAmount().compareTo(BigDecimal.ZERO) > 0)
-                    .filter(invoice -> invoice.getOpenItems().isEmpty())
-                    .count();
+            // OLD PROBLEMATIC CODE:
+            // invoicesWithoutOpenItems = invoiceRepository.findAll().stream()
+            //     .filter(invoice -> invoice.getStatus() != Invoice.InvoiceStatus.CANCELLED)
+            //     .filter(invoice -> invoice.getTotalAmount() != null && invoice.getTotalAmount().compareTo(BigDecimal.ZERO) > 0)
+            //     .filter(invoice -> invoice.getOpenItems().isEmpty()) // <-- LazyInitializationException hier!
+            //     .count();
+
+            // NEW FIXED CODE - use repository queries instead:
+            invoicesWithoutOpenItems = countInvoicesWithoutOpenItems();
 
             openItemsWithoutInvoices = openItemRepository.findAll().stream()
                     .filter(openItem -> openItem.getInvoice() == null)
@@ -889,6 +930,23 @@ public class InitDataService {
         }
 
         logger.info("===========================================");
+    }
+
+    // Helper method for consistency check
+    private long countInvoicesWithoutOpenItems() {
+        try {
+            // Use repository query to avoid lazy loading issues
+            List<Invoice> invoicesWithoutOpenItems = invoiceRepository.findInvoicesWithoutOpenItems();
+
+            return invoicesWithoutOpenItems.stream()
+                    .filter(invoice -> invoice.getStatus() != Invoice.InvoiceStatus.CANCELLED)
+                    .filter(invoice -> invoice.getTotalAmount() != null && invoice.getTotalAmount().compareTo(BigDecimal.ZERO) > 0)
+                    .count();
+
+        } catch (Exception e) {
+            logger.error("Fehler beim Zählen der Rechnungen ohne OpenItems: {}", e.getMessage());
+            return -1; // Indicator für Fehler
+        }
     }
 
     @Transactional
