@@ -100,6 +100,17 @@ public class DueSchedule {
     @JoinColumn(name = "subscription_id", nullable = false)
     private Subscription subscription;
 
+    /**
+     * Verknüpfung zum Vorgang, der diese Fälligkeit verarbeitet hat
+     */
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "vorgang_id")
+    private Vorgang vorgang;
+
+    // Getter und Setter
+    public Vorgang getVorgang() { return vorgang; }
+    public void setVorgang(Vorgang vorgang) { this.vorgang = vorgang; }
+
     // === Lifecycle Callbacks ===
 
     @PrePersist

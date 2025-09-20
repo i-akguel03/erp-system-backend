@@ -126,6 +126,17 @@ public class Invoice {
     @OneToMany(mappedBy = "invoice", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<OpenItem> openItems = new ArrayList<>();
 
+    /**
+     * Verknüpfung zum Vorgang, der diese Rechnung erstellt hat
+     */
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "vorgang_id")
+    private Vorgang vorgang;
+
+    // Getter und Setter
+    public Vorgang getVorgang() { return vorgang; }
+    public void setVorgang(Vorgang vorgang) { this.vorgang = vorgang; }
+
     public Subscription getSubscription() {
         return subscription;
     }
@@ -140,6 +151,7 @@ public class Invoice {
 
     public enum InvoiceStatus {
         DRAFT("Entwurf"),
+        ACTIVE("Aktiv"),
         SENT("Versendet"),
         CANCELLED("Storniert");
 

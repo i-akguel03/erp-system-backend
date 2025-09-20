@@ -90,6 +90,19 @@ public class OpenItem {
     @Column(name = "reminder_count")
     private Integer reminderCount = 0;
 
+    // In der OpenItem-Klasse hinzufügen:
+
+    /**
+     * Verknüpfung zum Vorgang, der diesen OpenItem erstellt hat
+     */
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "vorgang_id")
+    private Vorgang vorgang;
+
+    // Getter und Setter
+    public Vorgang getVorgang() { return vorgang; }
+    public void setVorgang(Vorgang vorgang) { this.vorgang = vorgang; }
+
     // ===================================================
     // Enums
     // ===================================================
