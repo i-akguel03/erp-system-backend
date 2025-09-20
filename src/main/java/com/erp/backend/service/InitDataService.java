@@ -5,6 +5,7 @@ import com.erp.backend.entity.Role;
 import com.erp.backend.repository.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -19,18 +20,148 @@ import java.util.Random;
 /**
  * Service zum Initialisieren von Testdaten für das ERP-System.
  *
- * Flexible Initialisierung mit verschiedenen Modi:
- * - BASIC: Nur Stammdaten (Adressen, Kunden, Produkte)
- * - CONTRACTS: Bis Verträge und Subscriptions
- * - SCHEDULES: Bis DueSchedules (ohne Rechnungen)
- * - INVOICES_MANUAL: + manuell erstellte Sample-Rechnungen
- * - FULL: Komplette Initialisierung inkl. Rechnungslauf
+ * NEUE STANDARD-LOGIK: Alle Entitäten werden standardmäßig auf ACTIVE erstellt!
+ * - Verträge: ACTIVE (statt gemischt mit TERMINATED)
+ * - Abonnements: ACTIVE (statt gemischt mit CANCELLED)
+ * - Rechnungen: ACTIVE (statt DRAFT/SENT/CANCELLED)
+ * - DueSchedules: ACTIVE (statt gemischt mit COMPLETED/PAUSED)
+ * - OpenItems: OPEN (aktiv, bereit für Zahlung)
+ *
+ * Variable Steuerung über InitConfig-Parameter für realistische Test-Szenarien.
  */
 @Service
 @ConditionalOnProperty(name = "app.init.enabled", havingValue = "true")
 public class InitDataService implements ApplicationRunner {
 
     private static final Logger logger = LoggerFactory.getLogger(InitDataService.class);
+
+    /**
+     * Konfiguration für die Initialisierung - steuert Status-Verteilungen
+     */
+    public static class InitConfig {
+        // Vertrag-Konfiguration
+        private double activeContractRatio = 1.0;  // Standard: 100% ACTIVE
+        private double terminatedContractRatio = 0.0;  // Standard: 0% TERMINATED
+
+        // Abonnement-Konfiguration
+        private double activeSubscriptionRatio = 1.0;  // Standard: 100% ACTIVE
+        private double cancelledSubscriptionRatio = 0.0;  // Standard: 0% CANCELLED
+        private double pausedSubscriptionRatio = 0.0;  // Standard: 0% PAUSED
+
+        // Rechnung-Konfiguration
+        private double activeInvoiceRatio = 1.0;  // Standard: 100% ACTIVE
+        private double draftInvoiceRatio = 0.0;  // Standard: 0% DRAFT
+        private double sentInvoiceRatio = 0.0;  // Standard: 0% SENT
+        private double cancelledInvoiceRatio = 0.0;  // Standard: 0% CANCELLED
+
+        // DueSchedule-Konfiguration
+        private double activeDueScheduleRatio = 1.0;  // Standard: 100% ACTIVE
+        private double completedDueScheduleRatio = 0.0;  // Standard: 0% COMPLETED
+        private double pausedDueScheduleRatio = 0.0;  // Standard: 0% PAUSED
+
+        // OpenItem-Konfiguration
+        private double openOpenItemRatio = 1.0;  // Standard: 100% OPEN
+        private double paidOpenItemRatio = 0.0;  // Standard: 0% PAID
+        private double partiallyPaidOpenItemRatio = 0.0;  // Standard: 0% PARTIALLY_PAID
+
+        // Getters und Setters
+        public double getActiveContractRatio() { return activeContractRatio; }
+        public void setActiveContractRatio(double activeContractRatio) { this.activeContractRatio = activeContractRatio; }
+        public double getTerminatedContractRatio() { return terminatedContractRatio; }
+        public void setTerminatedContractRatio(double terminatedContractRatio) { this.terminatedContractRatio = terminatedContractRatio; }
+
+        public double getActiveSubscriptionRatio() { return activeSubscriptionRatio; }
+        public void setActiveSubscriptionRatio(double activeSubscriptionRatio) { this.activeSubscriptionRatio = activeSubscriptionRatio; }
+        public double getCancelledSubscriptionRatio() { return cancelledSubscriptionRatio; }
+        public void setCancelledSubscriptionRatio(double cancelledSubscriptionRatio) { this.cancelledSubscriptionRatio = cancelledSubscriptionRatio; }
+        public double getPausedSubscriptionRatio() { return pausedSubscriptionRatio; }
+        public void setPausedSubscriptionRatio(double pausedSubscriptionRatio) { this.pausedSubscriptionRatio = pausedSubscriptionRatio; }
+
+        public double getActiveInvoiceRatio() { return activeInvoiceRatio; }
+        public void setActiveInvoiceRatio(double activeInvoiceRatio) { this.activeInvoiceRatio = activeInvoiceRatio; }
+        public double getDraftInvoiceRatio() { return draftInvoiceRatio; }
+        public void setDraftInvoiceRatio(double draftInvoiceRatio) { this.draftInvoiceRatio = draftInvoiceRatio; }
+        public double getSentInvoiceRatio() { return sentInvoiceRatio; }
+        public void setSentInvoiceRatio(double sentInvoiceRatio) { this.sentInvoiceRatio = sentInvoiceRatio; }
+        public double getCancelledInvoiceRatio() { return cancelledInvoiceRatio; }
+        public void setCancelledInvoiceRatio(double cancelledInvoiceRatio) { this.cancelledInvoiceRatio = cancelledInvoiceRatio; }
+
+        public double getActiveDueScheduleRatio() { return activeDueScheduleRatio; }
+        public void setActiveDueScheduleRatio(double activeDueScheduleRatio) { this.activeDueScheduleRatio = activeDueScheduleRatio; }
+        public double getCompletedDueScheduleRatio() { return completedDueScheduleRatio; }
+        public void setCompletedDueScheduleRatio(double completedDueScheduleRatio) { this.completedDueScheduleRatio = completedDueScheduleRatio; }
+        public double getPausedDueScheduleRatio() { return pausedDueScheduleRatio; }
+        public void setPausedDueScheduleRatio(double pausedDueScheduleRatio) { this.pausedDueScheduleRatio = pausedDueScheduleRatio; }
+
+        public double getOpenOpenItemRatio() { return openOpenItemRatio; }
+        public void setOpenOpenItemRatio(double openOpenItemRatio) { this.openOpenItemRatio = openOpenItemRatio; }
+        public double getPaidOpenItemRatio() { return paidOpenItemRatio; }
+        public void setPaidOpenItemRatio(double paidOpenItemRatio) { this.paidOpenItemRatio = paidOpenItemRatio; }
+        public double getPartiallyPaidOpenItemRatio() { return partiallyPaidOpenItemRatio; }
+        public void setPartiallyPaidOpenItemRatio(double partiallyPaidOpenItemRatio) { this.partiallyPaidOpenItemRatio = partiallyPaidOpenItemRatio; }
+
+        /**
+         * Factory-Methoden für verschiedene Szenarien
+         */
+        public static InitConfig allActive() {
+            return new InitConfig(); // Default ist bereits alles ACTIVE
+        }
+
+        public static InitConfig realistic() {
+            InitConfig config = new InitConfig();
+            // Verträge: 80% aktiv, 20% beendet
+            config.setActiveContractRatio(0.8);
+            config.setTerminatedContractRatio(0.2);
+
+            // Abos: 85% aktiv, 10% storniert, 5% pausiert
+            config.setActiveSubscriptionRatio(0.85);
+            config.setCancelledSubscriptionRatio(0.10);
+            config.setPausedSubscriptionRatio(0.05);
+
+            // Rechnungen: 60% aktiv, 20% versendet, 15% entwurf, 5% storniert
+            config.setActiveInvoiceRatio(0.60);
+            config.setSentInvoiceRatio(0.20);
+            config.setDraftInvoiceRatio(0.15);
+            config.setCancelledInvoiceRatio(0.05);
+
+            // DueSchedules: 40% aktiv, 50% abgerechnet, 10% pausiert
+            config.setActiveDueScheduleRatio(0.40);
+            config.setCompletedDueScheduleRatio(0.50);
+            config.setPausedDueScheduleRatio(0.10);
+
+            // OpenItems: 60% offen, 25% bezahlt, 15% teilweise bezahlt
+            config.setOpenOpenItemRatio(0.60);
+            config.setPaidOpenItemRatio(0.25);
+            config.setPartiallyPaidOpenItemRatio(0.15);
+
+            return config;
+        }
+
+        public static InitConfig development() {
+            InitConfig config = new InitConfig();
+            // Für Development: Mehr aktive Daten für Testing
+            config.setActiveContractRatio(0.95);
+            config.setTerminatedContractRatio(0.05);
+
+            config.setActiveSubscriptionRatio(0.90);
+            config.setCancelledSubscriptionRatio(0.05);
+            config.setPausedSubscriptionRatio(0.05);
+
+            config.setActiveInvoiceRatio(0.80);
+            config.setSentInvoiceRatio(0.15);
+            config.setDraftInvoiceRatio(0.05);
+
+            config.setActiveDueScheduleRatio(0.70);
+            config.setCompletedDueScheduleRatio(0.25);
+            config.setPausedDueScheduleRatio(0.05);
+
+            config.setOpenOpenItemRatio(0.80);
+            config.setPaidOpenItemRatio(0.15);
+            config.setPartiallyPaidOpenItemRatio(0.05);
+
+            return config;
+        }
+    }
 
     /**
      * Enum für verschiedene Initialisierungsmodi
@@ -44,15 +175,13 @@ public class InitDataService implements ApplicationRunner {
         FULL_WITH_BILLING("Komplett mit Rechnungslauf bis Stichtag");
 
         private final String description;
-
-        InitMode(String description) {
-            this.description = description;
-        }
-
-        public String getDescription() {
-            return description;
-        }
+        InitMode(String description) { this.description = description; }
+        public String getDescription() { return description; }
     }
+
+    // Neue Property für automatischen Start
+    //@Value("${app.init.auto-run-on-startup:false}")
+    private boolean autoRunOnStartup = false;
 
     // Repository-Abhängigkeiten
     private final AddressRepository addressRepository;
@@ -82,7 +211,8 @@ public class InitDataService implements ApplicationRunner {
                            InvoiceRepository invoiceRepository,
                            InvoiceService invoiceService,
                            InvoiceBatchService invoiceBatchService,
-                           NumberGeneratorService numberGeneratorService, UserDetailsServiceImpl userDetailsService) {
+                           NumberGeneratorService numberGeneratorService,
+                           UserDetailsServiceImpl userDetailsService) {
         this.addressRepository = addressRepository;
         this.customerRepository = customerRepository;
         this.productRepository = productRepository;
@@ -99,49 +229,64 @@ public class InitDataService implements ApplicationRunner {
 
     @Override
     public void run(ApplicationArguments args) throws Exception {
-        logger.info("🚀 Starting automatic data initialization with FULL mode...");
+        if (!autoRunOnStartup) {
+            logger.info("Auto-run-on-startup is disabled. Skipping automatic data initialization.");
+            logger.info("Use REST endpoints at /api/init/* for manual initialization.");
+            return;
+        }
+
+        logger.info("🚀 Starting automatic data initialization with FULL mode and ALL-ACTIVE standard...");
 
         try {
-            // Deine bestehende initData Methode mit InitMode.FULL aufrufen
-            initData(InitMode.FULL, LocalDate.now());
-
-            logger.info("✅ Data initialization completed successfully");
+            // Standard: Alle Entitäten auf ACTIVE
+            initData(InitMode.FULL, LocalDate.now(), InitConfig.allActive());
+            logger.info("✅ Data initialization completed successfully - ALL entities set to ACTIVE by default");
         } catch (Exception e) {
             logger.error("❌ Data initialization failed", e);
-            // Optional: Exception weiterwerfen falls App nicht starten soll bei Fehler
-            // throw e;
         }
     }
 
+    // ===============================================================================================
+    // HAUPT-INITIALISIERUNGS-METHODEN
+    // ===============================================================================================
+
     /**
-     * Hauptmethode mit Standard-Modus (FULL)
+     * Standard-Initialisierung: Alles ACTIVE
      */
     @Transactional
     public void initAllData() {
-        initData(InitMode.FULL, null);
+        initData(InitMode.FULL, null, InitConfig.allActive());
     }
 
     /**
-     * Flexible Initialisierung mit Modus-Auswahl
-     *
-     * @param mode Initialisierungsmodus
+     * Initialisierung mit Modus
      */
     @Transactional
     public void initData(InitMode mode) {
-        initData(mode, null);
+        initData(mode, null, InitConfig.allActive());
     }
 
     /**
-     * Flexible Initialisierung mit Modus und optionalem Billing-Datum
-     *
-     * @param mode Initialisierungsmodus
-     * @param billingDate Stichtag für Rechnungslauf (optional)
+     * Initialisierung mit Modus und Konfiguration
      */
     @Transactional
-    public void initData(InitMode mode, LocalDate billingDate) {
+    public void initData(InitMode mode, InitConfig config) {
+        initData(mode, null, config);
+    }
+
+    /**
+     * Vollständige Initialisierung mit allen Parametern
+     */
+    @Transactional
+    public void initData(InitMode mode, LocalDate billingDate, InitConfig config) {
+        if (config == null) {
+            config = InitConfig.allActive();
+        }
+
         logger.info("===========================================");
         logger.info("Starte Testdaten-Initialisierung");
         logger.info("Modus: {} - {}", mode, mode.getDescription());
+        logger.info("Konfiguration: {}", getConfigDescription(config));
         if (billingDate != null) {
             logger.info("Rechnungslauf-Stichtag: {}", billingDate);
         }
@@ -159,9 +304,9 @@ public class InitDataService implements ApplicationRunner {
             return;
         }
 
-        // Verträge und Subscriptions
-        initContracts();
-        initSubscriptions();
+        // Verträge und Subscriptions mit Konfiguration
+        initContracts(config);
+        initSubscriptions(config);
 
         if (mode == InitMode.CONTRACTS) {
             logger.info("Initialisierung bis Verträge abgeschlossen (CONTRACTS Mode)");
@@ -169,8 +314,8 @@ public class InitDataService implements ApplicationRunner {
             return;
         }
 
-        // Fälligkeitspläne
-        initDueSchedules();
+        // Fälligkeitspläne mit Konfiguration
+        initDueSchedules(config);
 
         if (mode == InitMode.SCHEDULES) {
             logger.info("Initialisierung bis Fälligkeitspläne abgeschlossen (SCHEDULES Mode)");
@@ -178,10 +323,10 @@ public class InitDataService implements ApplicationRunner {
             return;
         }
 
-        // Manuelle Sample-Rechnungen
+        // Manuelle Sample-Rechnungen mit Konfiguration
         if (mode == InitMode.INVOICES_MANUAL || mode == InitMode.FULL) {
-            createSampleInvoices();
-            createSampleOpenItems();
+            createSampleInvoices(config);
+            createSampleOpenItems(config);
         }
 
         if (mode == InitMode.INVOICES_MANUAL) {
@@ -200,38 +345,48 @@ public class InitDataService implements ApplicationRunner {
         logCurrentDataStatus();
     }
 
+    private String getConfigDescription(InitConfig config) {
+        if (config.getActiveContractRatio() == 1.0 &&
+                config.getActiveSubscriptionRatio() == 1.0 &&
+                config.getActiveInvoiceRatio() == 1.0 &&
+                config.getActiveDueScheduleRatio() == 1.0) {
+            return "ALL-ACTIVE (Standard)";
+        } else {
+            return String.format("Custom (Contracts: %.0f%% active, Subscriptions: %.0f%% active, Invoices: %.0f%% active)",
+                    config.getActiveContractRatio() * 100,
+                    config.getActiveSubscriptionRatio() * 100,
+                    config.getActiveInvoiceRatio() * 100);
+        }
+    }
+
+    // ===============================================================================================
+    // CONVENIENCE-METHODEN MIT VERSCHIEDENEN KONFIGURATIONEN
+    // ===============================================================================================
+
+    @Transactional
+    public void initRealisticTestData() {
+        initData(InitMode.FULL, LocalDate.now(), InitConfig.realistic());
+    }
+
+    @Transactional
+    public void initDevelopmentData() {
+        initData(InitMode.FULL, LocalDate.now(), InitConfig.development());
+    }
+
+    @Transactional
+    public void initAllActiveData() {
+        initData(InitMode.FULL, LocalDate.now(), InitConfig.allActive());
+    }
+
+    // ===============================================================================================
+    // BESTEHENDE INIT-METHODEN (unverändert)
+    // ===============================================================================================
+
     @Transactional
     private void initUser() {
         userDetailsService.createUserSafe("a","a", Role.ROLE_ADMIN);
+        userDetailsService.createUserSafe("string","string", Role.ROLE_ADMIN);
     }
-
-    /**
-     * Convenience-Methode: Initialisierung bis DueSchedules
-     */
-    @Transactional
-    public void initUpToSchedules() {
-        initData(InitMode.SCHEDULES);
-    }
-
-    /**
-     * Convenience-Methode: Komplette Initialisierung mit Rechnungslauf heute
-     */
-    @Transactional
-    public void initWithBillingToday() {
-        initData(InitMode.FULL_WITH_BILLING, LocalDate.now());
-    }
-
-    /**
-     * Convenience-Methode: Komplette Initialisierung mit Rechnungslauf zum Stichtag
-     */
-    @Transactional
-    public void initWithBilling(LocalDate billingDate) {
-        initData(InitMode.FULL_WITH_BILLING, billingDate);
-    }
-
-    // ===============================================================================================
-    // Die einzelnen Init-Methoden
-    // ===============================================================================================
 
     private void initAddresses() {
         if (addressRepository.count() > 0) {
@@ -359,13 +514,20 @@ public class InitDataService implements ApplicationRunner {
         logger.info("✓ {} Produkte erstellt", products.length);
     }
 
-    private void initContracts() {
+    // ===============================================================================================
+    // ANGEPASSTE INIT-METHODEN MIT CONFIG-STEUERUNG
+    // ===============================================================================================
+
+    private void initContracts(InitConfig config) {
         if (contractRepository.count() > 0) {
             logger.info("Verträge bereits vorhanden - Überspringe Initialisierung");
             return;
         }
 
-        logger.info("Initialisiere Verträge...");
+        logger.info("Initialisiere Verträge mit Konfiguration...");
+        logger.info("Status-Verteilung: {:.0f}% ACTIVE, {:.0f}% TERMINATED",
+                config.getActiveContractRatio() * 100,
+                config.getTerminatedContractRatio() * 100);
 
         List<Customer> customers = customerRepository.findAll();
         if (customers.isEmpty()) {
@@ -373,6 +535,9 @@ public class InitDataService implements ApplicationRunner {
         }
 
         final int numberOfContracts = 20;
+        int activeCount = 0;
+        int terminatedCount = 0;
+
         for (int i = 1; i <= numberOfContracts; i++) {
             Customer customer = customers.get(random.nextInt(customers.size()));
             LocalDate startDate = LocalDate.now().minusDays(random.nextInt(365));
@@ -381,35 +546,38 @@ public class InitDataService implements ApplicationRunner {
             contract.setId(null);
             contract.setContractNumber(numberGeneratorService.generateContractNumber());
 
-            if (random.nextDouble() < 0.8) {
+            // Status basierend auf Konfiguration setzen
+            double randomValue = random.nextDouble();
+            if (randomValue < config.getActiveContractRatio()) {
                 contract.setContractStatus(ContractStatus.ACTIVE);
+                // Wenige haben Enddatum (30% Chance)
                 if (random.nextDouble() < 0.3) {
                     contract.setEndDate(startDate.plusYears(1 + random.nextInt(2)));
                 }
+                activeCount++;
             } else {
                 contract.setContractStatus(ContractStatus.TERMINATED);
                 contract.setEndDate(startDate.plusDays(random.nextInt(300)));
+                terminatedCount++;
             }
 
             contractRepository.save(contract);
         }
 
-        logger.info("✓ {} Verträge erstellt", numberOfContracts);
+        logger.info("✓ {} Verträge erstellt: {} ACTIVE, {} TERMINATED", numberOfContracts, activeCount, terminatedCount);
     }
 
-    // In initSubscriptions() method, remove this line:
-    // contract.addSubscription(subscription);
-
-    // The subscription already has the contract reference set, so this line is redundant
-    // and causes the LazyInitializationException
-
-    private void initSubscriptions() {
+    private void initSubscriptions(InitConfig config) {
         if (subscriptionRepository.count() > 0) {
             logger.info("Abonnements bereits vorhanden - Überspringe Initialisierung");
             return;
         }
 
-        logger.info("Initialisiere Abonnements...");
+        logger.info("Initialisiere Abonnements mit Konfiguration...");
+        logger.info("Status-Verteilung: {:.0f}% ACTIVE, {:.0f}% CANCELLED, {:.0f}% PAUSED",
+                config.getActiveSubscriptionRatio() * 100,
+                config.getCancelledSubscriptionRatio() * 100,
+                config.getPausedSubscriptionRatio() * 100);
 
         List<Contract> contracts = contractRepository.findAll();
         List<Product> products = productRepository.findAll();
@@ -428,6 +596,10 @@ public class InitDataService implements ApplicationRunner {
         }
 
         final int numberOfSubscriptions = 35;
+        int activeCount = 0;
+        int cancelledCount = 0;
+        int pausedCount = 0;
+
         for (int i = 1; i <= numberOfSubscriptions; i++) {
             Contract contract = contracts.get(random.nextInt(contracts.size()));
             Product product = subscriptionProducts.get(random.nextInt(subscriptionProducts.size()));
@@ -447,32 +619,49 @@ public class InitDataService implements ApplicationRunner {
 
             BillingCycle[] cycles = BillingCycle.values();
             subscription.setBillingCycle(cycles[random.nextInt(cycles.length)]);
-
-            if (contract.getContractStatus() == ContractStatus.ACTIVE) {
-                subscription.setSubscriptionStatus(SubscriptionStatus.ACTIVE);
-            } else {
-                subscription.setSubscriptionStatus(SubscriptionStatus.CANCELLED);
-                subscription.setEndDate(contract.getEndDate());
-            }
-
             subscription.setAutoRenewal(random.nextBoolean());
 
-            // REMOVE THIS LINE - it causes LazyInitializationException:
-            // contract.addSubscription(subscription);
+            // Status basierend auf Konfiguration UND Contract-Status setzen
+            double randomValue = random.nextDouble();
+
+            if (contract.getContractStatus() == ContractStatus.TERMINATED) {
+                // Wenn Contract beendet ist, muss Subscription auch beendet/storniert sein
+                subscription.setSubscriptionStatus(SubscriptionStatus.CANCELLED);
+                subscription.setEndDate(contract.getEndDate());
+                cancelledCount++;
+            } else {
+                // Contract ist aktiv - verwende Konfiguration
+                if (randomValue < config.getActiveSubscriptionRatio()) {
+                    subscription.setSubscriptionStatus(SubscriptionStatus.ACTIVE);
+                    activeCount++;
+                } else if (randomValue < config.getActiveSubscriptionRatio() + config.getCancelledSubscriptionRatio()) {
+                    subscription.setSubscriptionStatus(SubscriptionStatus.CANCELLED);
+                    subscription.setEndDate(subscriptionStart.plusDays(random.nextInt(200)));
+                    cancelledCount++;
+                } else {
+                    subscription.setSubscriptionStatus(SubscriptionStatus.PAUSED);
+                    pausedCount++;
+                }
+            }
 
             subscriptionRepository.save(subscription);
         }
 
-        logger.info("✓ {} Abonnements erstellt", numberOfSubscriptions);
+        logger.info("✓ {} Abonnements erstellt: {} ACTIVE, {} CANCELLED, {} PAUSED",
+                numberOfSubscriptions, activeCount, cancelledCount, pausedCount);
     }
 
-    private void initDueSchedules() {
+    private void initDueSchedules(InitConfig config) {
         if (dueScheduleRepository.count() > 0) {
             logger.info("Fälligkeitspläne bereits vorhanden - Überspringe Initialisierung");
             return;
         }
 
-        logger.info("Initialisiere Fälligkeitspläne (nur Termine)...");
+        logger.info("Initialisiere Fälligkeitspläne mit Konfiguration...");
+        logger.info("Status-Verteilung: {:.0f}% ACTIVE, {:.0f}% COMPLETED, {:.0f}% PAUSED",
+                config.getActiveDueScheduleRatio() * 100,
+                config.getCompletedDueScheduleRatio() * 100,
+                config.getPausedDueScheduleRatio() * 100);
 
         List<Subscription> activeSubscriptions = subscriptionRepository.findBySubscriptionStatus(SubscriptionStatus.ACTIVE);
         if (activeSubscriptions.isEmpty()) {
@@ -481,11 +670,14 @@ public class InitDataService implements ApplicationRunner {
         }
 
         int totalSchedulesCreated = 0;
+        int activeCount = 0;
+        int completedCount = 0;
+        int pausedCount = 0;
 
         for (Subscription subscription : activeSubscriptions) {
             LocalDate subscriptionStart = subscription.getStartDate();
 
-            // 12 Monate ab Abonnement-Start - nur Terminpläne
+            // 12 Monate ab Abonnement-Start
             for (int month = 0; month < 12; month++) {
                 LocalDate periodStart = subscriptionStart.plusMonths(month);
                 LocalDate periodEnd = periodStart.plusMonths(1).minusDays(1);
@@ -494,20 +686,29 @@ public class InitDataService implements ApplicationRunner {
                 DueSchedule dueSchedule = new DueSchedule(dueDate, periodStart, periodEnd, subscription);
                 dueSchedule.setDueNumber(numberGeneratorService.generateDueNumber());
 
-                // Nur Status setzen - keine Beträge oder Rechnungsreferenzen!
+                // Status basierend auf Konfiguration setzen
+                double randomValue = random.nextDouble();
+
                 if (dueDate.isBefore(LocalDate.now())) {
-                    // Vergangene Fälligkeiten: 70% completed, 30% active
-                    if (random.nextDouble() < 0.7) {
+                    // Vergangene Fälligkeiten: Konfiguration anwenden
+                    if (randomValue < config.getCompletedDueScheduleRatio()) {
                         dueSchedule.markAsCompleted();
+                        completedCount++;
+                    } else if (randomValue < config.getCompletedDueScheduleRatio() + config.getPausedDueScheduleRatio()) {
+                        dueSchedule.pause();
+                        pausedCount++;
                     } else {
                         // Bleibt ACTIVE (überfällig)
+                        activeCount++;
                     }
                 } else {
-                    // Zukünftige Fälligkeiten: meistens aktiv, wenige pausiert
-                    if (random.nextDouble() < 0.9) {
+                    // Zukünftige Fälligkeiten: meist aktiv, aber konfigurierbar
+                    if (randomValue < config.getActiveDueScheduleRatio()) {
                         // Bleibt ACTIVE
+                        activeCount++;
                     } else {
                         dueSchedule.pause();
+                        pausedCount++;
                     }
                 }
 
@@ -516,20 +717,22 @@ public class InitDataService implements ApplicationRunner {
             }
         }
 
-        logger.info("✓ {} Fälligkeitspläne erstellt (nur Termine)", totalSchedulesCreated);
+        logger.info("✓ {} Fälligkeitspläne erstellt: {} ACTIVE, {} COMPLETED, {} PAUSED",
+                totalSchedulesCreated, activeCount, completedCount, pausedCount);
     }
 
-    // ===============================================================================================
-    // SAMPLE RECHNUNGEN MIT GARANTIERTEN OPENITEMS
-    // ===============================================================================================
-
-    private void createSampleInvoices() {
+    private void createSampleInvoices(InitConfig config) {
         if (invoiceRepository.count() > 0) {
             logger.info("Rechnungen bereits vorhanden - Überspringe Erstellung");
             return;
         }
 
-        logger.info("Erstelle Sample-Rechnungen...");
+        logger.info("Erstelle Sample-Rechnungen mit Konfiguration...");
+        logger.info("Status-Verteilung: {:.0f}% ACTIVE, {:.0f}% DRAFT, {:.0f}% SENT, {:.0f}% CANCELLED",
+                config.getActiveInvoiceRatio() * 100,
+                config.getDraftInvoiceRatio() * 100,
+                config.getSentInvoiceRatio() * 100,
+                config.getCancelledInvoiceRatio() * 100);
 
         List<Customer> customers = customerRepository.findAll();
         List<Product> products = productRepository.findAll();
@@ -543,6 +746,10 @@ public class InitDataService implements ApplicationRunner {
         final int numberOfInvoices = 30;
         int invoicesCreated = 0;
         int openItemsCreated = 0;
+        int activeCount = 0;
+        int draftCount = 0;
+        int sentCount = 0;
+        int cancelledCount = 0;
 
         for (int i = 1; i <= numberOfInvoices; i++) {
             try {
@@ -557,7 +764,6 @@ public class InitDataService implements ApplicationRunner {
 
                 // Optional: Subscription verknüpfen (50% Chance)
                 if (!subscriptions.isEmpty() && random.nextDouble() < 0.5) {
-                    // Finde Subscription des Kunden
                     List<Subscription> customerSubscriptions = subscriptions.stream()
                             .filter(sub -> sub.getContract().getCustomer().getId().equals(customer.getId()))
                             .toList();
@@ -567,13 +773,21 @@ public class InitDataService implements ApplicationRunner {
                     }
                 }
 
-                // Zufälligen Status setzen
-                Invoice.InvoiceStatus[] statuses = {
-                        Invoice.InvoiceStatus.DRAFT,
-                        Invoice.InvoiceStatus.SENT,
-                        Invoice.InvoiceStatus.CANCELLED
-                };
-                invoice.setStatus(statuses[random.nextInt(statuses.length)]);
+                // Status basierend auf Konfiguration setzen
+                double randomValue = random.nextDouble();
+                if (randomValue < config.getActiveInvoiceRatio()) {
+                    invoice.setStatus(Invoice.InvoiceStatus.ACTIVE);
+                    activeCount++;
+                } else if (randomValue < config.getActiveInvoiceRatio() + config.getDraftInvoiceRatio()) {
+                    invoice.setStatus(Invoice.InvoiceStatus.DRAFT);
+                    draftCount++;
+                } else if (randomValue < config.getActiveInvoiceRatio() + config.getDraftInvoiceRatio() + config.getSentInvoiceRatio()) {
+                    invoice.setStatus(Invoice.InvoiceStatus.SENT);
+                    sentCount++;
+                } else {
+                    invoice.setStatus(Invoice.InvoiceStatus.CANCELLED);
+                    cancelledCount++;
+                }
 
                 // InvoiceItem hinzufügen
                 InvoiceItem item = new InvoiceItem();
@@ -582,7 +796,6 @@ public class InitDataService implements ApplicationRunner {
                 item.setUnitPrice(product.getPrice());
                 item.setTaxRate(BigDecimal.valueOf(19));
 
-                // Product-Referenzen setzen
                 if (product.getProductNumber() != null) {
                     item.setProductCode(product.getProductNumber());
                 }
@@ -610,7 +823,7 @@ public class InitDataService implements ApplicationRunner {
                 Invoice savedInvoice = invoiceService.createInvoice(invoice);
                 invoicesCreated++;
 
-                // GARANTIERT: OpenItem für jede Rechnung erstellen (außer CANCELLED)
+                // OpenItem nur für nicht-stornierte Rechnungen erstellen
                 if (savedInvoice.getStatus() != Invoice.InvoiceStatus.CANCELLED &&
                         savedInvoice.getTotalAmount() != null &&
                         savedInvoice.getTotalAmount().compareTo(BigDecimal.ZERO) > 0) {
@@ -621,22 +834,8 @@ public class InitDataService implements ApplicationRunner {
                                 savedInvoice.getTotalAmount(),
                                 savedInvoice.getDueDate());
 
-                        // Simuliere verschiedene Zahlungsstatus
-                        double paymentChance = random.nextDouble();
-                        if (paymentChance < 0.3) {
-                            // 30% vollständig bezahlt
-                            openItem.recordPayment(savedInvoice.getTotalAmount(),
-                                    "Überweisung",
-                                    "SAMPLE-REF-" + System.currentTimeMillis());
-                        } else if (paymentChance < 0.5) {
-                            // 20% teilweise bezahlt
-                            BigDecimal partialAmount = savedInvoice.getTotalAmount()
-                                    .multiply(BigDecimal.valueOf(0.3 + random.nextDouble() * 0.4));
-                            openItem.recordPayment(partialAmount,
-                                    "Teilzahlung",
-                                    "SAMPLE-PARTIAL-" + System.currentTimeMillis());
-                        }
-                        // 50% bleiben offen
+                        // OpenItem-Status basierend auf Konfiguration setzen
+                        applyOpenItemConfig(openItem, config);
 
                         OpenItem savedOpenItem = openItemRepository.save(openItem);
                         openItemsCreated++;
@@ -655,19 +854,15 @@ public class InitDataService implements ApplicationRunner {
             }
         }
 
-        logger.info("✓ {} Sample-Rechnungen erstellt", invoicesCreated);
+        logger.info("✓ {} Sample-Rechnungen erstellt: {} ACTIVE, {} DRAFT, {} SENT, {} CANCELLED",
+                invoicesCreated, activeCount, draftCount, sentCount, cancelledCount);
         logger.info("✓ {} Sample-OpenItems erstellt", openItemsCreated);
     }
 
-    /**
-     * Erstellt Sample-OpenItems für bestehende Rechnungen
-     * Diese Methode wird nur aufgerufen wenn createSampleInvoices() nicht läuft
-     */
-    private void createSampleOpenItems() {
-        logger.info("Erstelle zusätzliche Sample-OpenItems...");
+    private void createSampleOpenItems(InitConfig config) {
+        logger.info("Erstelle zusätzliche Sample-OpenItems mit Konfiguration...");
 
         List<Invoice> invoicesWithoutOpenItems = invoiceRepository.findInvoicesWithoutOpenItems();
-
 
         if (invoicesWithoutOpenItems.isEmpty()) {
             logger.warn("Keine Rechnungen für zusätzliche OpenItems gefunden");
@@ -675,13 +870,14 @@ public class InitDataService implements ApplicationRunner {
         }
 
         int openItemsCreated = 0;
+        int openCount = 0;
+        int paidCount = 0;
+        int partiallyPaidCount = 0;
 
-        // Filter for non-cancelled and positive amounts
         invoicesWithoutOpenItems = invoicesWithoutOpenItems.stream()
                 .filter(invoice -> invoice.getStatus() != Invoice.InvoiceStatus.CANCELLED)
                 .filter(invoice -> invoice.getTotalAmount() != null && invoice.getTotalAmount().compareTo(BigDecimal.ZERO) > 0)
                 .toList();
-
 
         for (Invoice invoice : invoicesWithoutOpenItems) {
             try {
@@ -690,38 +886,21 @@ public class InitDataService implements ApplicationRunner {
                         invoice.getTotalAmount(),
                         invoice.getDueDate());
 
-                // Zahlungsstatus simulieren
-                double paymentChance = random.nextDouble();
+                // Status basierend auf Konfiguration setzen
+                applyOpenItemConfig(openItem, config);
 
-                if (paymentChance < 0.4) {
-                    // 40% vollständig bezahlt
-                    openItem.recordPayment(invoice.getTotalAmount(),
-                            "Überweisung",
-                            "REF-" + System.currentTimeMillis());
-
-                } else if (paymentChance < 0.65) {
-                    // 25% teilweise bezahlt
-                    BigDecimal partialAmount = invoice.getTotalAmount()
-                            .multiply(BigDecimal.valueOf(0.3 + random.nextDouble() * 0.5)); // 30-80%
-                    openItem.recordPayment(partialAmount,
-                            "Teilzahlung",
-                            "REF-" + System.currentTimeMillis());
-                }
-                // 35% bleiben offen
-
-                // Manchmal Mahnungen hinzufügen (bei überfälligen)
-                if (openItem.isOverdue() && random.nextDouble() < 0.5) {
-                    int reminders = 1 + random.nextInt(3);
-                    for (int r = 0; r < reminders; r++) {
-                        openItem.addReminder();
-                    }
+                // Zähle für Statistik
+                switch (openItem.getStatus()) {
+                    case OPEN, OVERDUE -> openCount++;
+                    case PAID -> paidCount++;
+                    case PARTIALLY_PAID -> partiallyPaidCount++;
                 }
 
                 openItemRepository.save(openItem);
                 openItemsCreated++;
 
-                logger.debug("Zusätzlicher OpenItem erstellt für Rechnung {} mit Betrag {}",
-                        invoice.getInvoiceNumber(), invoice.getTotalAmount());
+                logger.debug("Zusätzlicher OpenItem erstellt für Rechnung {} mit Status {}",
+                        invoice.getInvoiceNumber(), openItem.getStatus());
 
             } catch (Exception e) {
                 logger.error("Fehler beim Erstellen eines zusätzlichen OpenItems für Rechnung {}: {}",
@@ -729,17 +908,46 @@ public class InitDataService implements ApplicationRunner {
             }
         }
 
-        logger.info("✓ {} zusätzliche Sample-OpenItems erstellt", openItemsCreated);
+        logger.info("✓ {} zusätzliche Sample-OpenItems erstellt: {} OPEN/OVERDUE, {} PAID, {} PARTIALLY_PAID",
+                openItemsCreated, openCount, paidCount, partiallyPaidCount);
+    }
+
+    private void applyOpenItemConfig(OpenItem openItem, InitConfig config) {
+        double randomValue = random.nextDouble();
+
+        if (randomValue < config.getPaidOpenItemRatio()) {
+            // Vollständig bezahlt
+            openItem.recordPayment(openItem.getAmount(),
+                    "Überweisung",
+                    "REF-" + System.currentTimeMillis());
+        } else if (randomValue < config.getPaidOpenItemRatio() + config.getPartiallyPaidOpenItemRatio()) {
+            // Teilweise bezahlt
+            BigDecimal partialAmount = openItem.getAmount()
+                    .multiply(BigDecimal.valueOf(0.3 + random.nextDouble() * 0.5));
+            openItem.recordPayment(partialAmount,
+                    "Teilzahlung",
+                    "REF-PARTIAL-" + System.currentTimeMillis());
+        }
+        // Sonst bleibt es OPEN (Standard)
+
+        // Prüfe auf Überfälligkeit
+        if (openItem.getDueDate().isBefore(LocalDate.now()) && openItem.getStatus() == OpenItem.OpenItemStatus.OPEN) {
+            openItem.setStatus(OpenItem.OpenItemStatus.OVERDUE);
+        }
+
+        // Manchmal Mahnungen hinzufügen (bei überfälligen)
+        if (openItem.getStatus() == OpenItem.OpenItemStatus.OVERDUE && random.nextDouble() < 0.5) {
+            int reminders = 1 + random.nextInt(3);
+            for (int r = 0; r < reminders; r++) {
+                openItem.addReminder();
+            }
+        }
     }
 
     // ===============================================================================================
-    // AUTOMATISCHER RECHNUNGSLAUF MIT VOLLSTÄNDIGER VALIDIERUNG
+    // RECHNUNGSLAUF (unverändert)
     // ===============================================================================================
 
-    /**
-     * Führt den automatischen Rechnungslauf durch und stellt sicher,
-     * dass JEDE abgerechnete Fälligkeit eine Rechnung UND einen OpenItem erhält
-     */
     private void runBillingProcess(LocalDate billingDate) {
         logger.info("===========================================");
         logger.info("Starte automatischen Rechnungslauf");
@@ -747,7 +955,7 @@ public class InitDataService implements ApplicationRunner {
         logger.info("===========================================");
 
         try {
-            // 1. Status VOR dem Rechnungslauf
+            // Status VOR dem Rechnungslauf
             long activeDueSchedulesBefore = dueScheduleRepository.countByStatus(DueStatus.ACTIVE);
             long invoicesBefore = invoiceRepository.count();
             long openItemsBefore = openItemRepository.count();
@@ -757,10 +965,10 @@ public class InitDataService implements ApplicationRunner {
             logger.info("  - Rechnungen: {}", invoicesBefore);
             logger.info("  - OpenItems: {}", openItemsBefore);
 
-            // 2. Rechnungslauf durchführen
+            // Rechnungslauf durchführen
             InvoiceBatchService.InvoiceBatchResult result = invoiceBatchService.runInvoiceBatch(billingDate);
 
-            // 3. Status NACH dem Rechnungslauf
+            // Status NACH dem Rechnungslauf
             long activeDueSchedulesAfter = dueScheduleRepository.countByStatus(DueStatus.ACTIVE);
             long completedDueSchedulesAfter = dueScheduleRepository.countByStatus(DueStatus.COMPLETED);
             long invoicesAfter = invoiceRepository.count();
@@ -772,7 +980,7 @@ public class InitDataService implements ApplicationRunner {
             logger.info("  - Rechnungen: {} (war: {}, neu: {})", invoicesAfter, invoicesBefore, invoicesAfter - invoicesBefore);
             logger.info("  - OpenItems: {} (war: {}, neu: {})", openItemsAfter, openItemsBefore, openItemsAfter - openItemsBefore);
 
-            // 4. Validierung der Konsistenz
+            // Validierung der Konsistenz
             long processedDueSchedules = activeDueSchedulesBefore - activeDueSchedulesAfter;
             long newInvoices = invoicesAfter - invoicesBefore;
             long newOpenItems = openItemsAfter - openItemsBefore;
@@ -784,7 +992,7 @@ public class InitDataService implements ApplicationRunner {
             logger.info("  - Gesamtbetrag: {} EUR", result.getTotalAmount());
             logger.info("  - Status: {}", result.getMessage());
 
-            // 5. Konsistenz-Prüfung
+            // Konsistenz-Prüfung
             boolean consistent = (processedDueSchedules == newInvoices) && (newInvoices == newOpenItems);
 
             if (consistent) {
@@ -794,7 +1002,6 @@ public class InitDataService implements ApplicationRunner {
                 logger.error("  Verarbeitete Fälligkeiten: {} | Neue Rechnungen: {} | Neue OpenItems: {}",
                         processedDueSchedules, newInvoices, newOpenItems);
 
-                // Versuche fehlende OpenItems zu erstellen
                 logger.info("Versuche fehlende OpenItems automatisch zu erstellen...");
                 createMissingOpenItems();
             }
@@ -805,9 +1012,6 @@ public class InitDataService implements ApplicationRunner {
         }
     }
 
-    /**
-     * Erstellt fehlende OpenItems für Rechnungen ohne OpenItems
-     */
     private void createMissingOpenItems() {
         try {
             List<Invoice> invoicesWithoutOpenItems = invoiceRepository.findAll().stream()
@@ -845,7 +1049,7 @@ public class InitDataService implements ApplicationRunner {
     }
 
     // ===============================================================================================
-    // DATENBESTAND UND KONSISTENZ-MANAGEMENT
+    // STATUS UND MANAGEMENT (angepasst für neue Konfiguration)
     // ===============================================================================================
 
     @Transactional(readOnly = true)
@@ -859,27 +1063,43 @@ public class InitDataService implements ApplicationRunner {
         logger.info("  - Produkte: {}", productRepository.count());
 
         logger.info("Verträge & Abos:");
-        logger.info("  - Verträge: {}", contractRepository.count());
-        logger.info("  - Abonnements: {}", subscriptionRepository.count());
+        long totalContracts = contractRepository.count();
+        long activeContracts = contractRepository.countByContractStatus(ContractStatus.ACTIVE);
+        long terminatedContracts = contractRepository.countByContractStatus(ContractStatus.TERMINATED);
+        logger.info("  - Verträge gesamt: {} ({}% ACTIVE, {}% TERMINATED)", totalContracts,
+                totalContracts > 0 ? (activeContracts * 100 / totalContracts) : 0,
+                totalContracts > 0 ? (terminatedContracts * 100 / totalContracts) : 0);
+
+        long totalSubscriptions = subscriptionRepository.count();
+        long activeSubscriptions = subscriptionRepository.countBySubscriptionStatus(SubscriptionStatus.ACTIVE);
+        long cancelledSubscriptions = subscriptionRepository.countBySubscriptionStatus(SubscriptionStatus.CANCELLED);
+        long pausedSubscriptions = subscriptionRepository.countBySubscriptionStatus(SubscriptionStatus.PAUSED);
+        logger.info("  - Abonnements gesamt: {} ({}% ACTIVE, {}% CANCELLED, {}% PAUSED)", totalSubscriptions,
+                totalSubscriptions > 0 ? (activeSubscriptions * 100 / totalSubscriptions) : 0,
+                totalSubscriptions > 0 ? (cancelledSubscriptions * 100 / totalSubscriptions) : 0,
+                totalSubscriptions > 0 ? (pausedSubscriptions * 100 / totalSubscriptions) : 0);
 
         logger.info("Fälligkeiten:");
         long activeSchedules = dueScheduleRepository.countByStatus(DueStatus.ACTIVE);
         long pausedSchedules = dueScheduleRepository.countByStatus(DueStatus.PAUSED);
         long completedSchedules = dueScheduleRepository.countByStatus(DueStatus.COMPLETED);
-        logger.info("  - Gesamt: {}", dueScheduleRepository.count());
-        logger.info("  - Aktiv: {}", activeSchedules);
-        logger.info("  - Pausiert: {}", pausedSchedules);
-        logger.info("  - Abgerechnet: {}", completedSchedules);
+        long totalSchedules = dueScheduleRepository.count();
+        logger.info("  - Gesamt: {} ({}% ACTIVE, {}% COMPLETED, {}% PAUSED)", totalSchedules,
+                totalSchedules > 0 ? (activeSchedules * 100 / totalSchedules) : 0,
+                totalSchedules > 0 ? (completedSchedules * 100 / totalSchedules) : 0,
+                totalSchedules > 0 ? (pausedSchedules * 100 / totalSchedules) : 0);
 
         logger.info("Rechnungen:");
         long totalInvoices = invoiceRepository.count();
+        long activeInvoices = invoiceService.getInvoiceCountByStatus(Invoice.InvoiceStatus.ACTIVE);
         long draftInvoices = invoiceService.getInvoiceCountByStatus(Invoice.InvoiceStatus.DRAFT);
         long sentInvoices = invoiceService.getInvoiceCountByStatus(Invoice.InvoiceStatus.SENT);
         long cancelledInvoices = invoiceService.getInvoiceCountByStatus(Invoice.InvoiceStatus.CANCELLED);
-        logger.info("  - Gesamt: {}", totalInvoices);
-        logger.info("  - Entwürfe: {}", draftInvoices);
-        logger.info("  - Versendet: {}", sentInvoices);
-        logger.info("  - Storniert: {}", cancelledInvoices);
+        logger.info("  - Gesamt: {} ({}% ACTIVE, {}% DRAFT, {}% SENT, {}% CANCELLED)", totalInvoices,
+                totalInvoices > 0 ? (activeInvoices * 100 / totalInvoices) : 0,
+                totalInvoices > 0 ? (draftInvoices * 100 / totalInvoices) : 0,
+                totalInvoices > 0 ? (sentInvoices * 100 / totalInvoices) : 0,
+                totalInvoices > 0 ? (cancelledInvoices * 100 / totalInvoices) : 0);
 
         logger.info("Offene Posten:");
         long totalOpenItems = openItemRepository.count();
@@ -889,63 +1109,42 @@ public class InitDataService implements ApplicationRunner {
         long overdueOpenItems = openItemRepository.countByStatus(OpenItem.OpenItemStatus.OVERDUE);
         long cancelledOpenItems = openItemRepository.countByStatus(OpenItem.OpenItemStatus.CANCELLED);
 
-        logger.info("  - Gesamt: {}", totalOpenItems);
-        logger.info("  - Offen: {}", openOpenItems);
-        logger.info("  - Teilweise bezahlt: {}", partiallyPaidOpenItems);
-        logger.info("  - Bezahlt: {}", paidOpenItems);
-        logger.info("  - Überfällig: {}", overdueOpenItems);
-        logger.info("  - Storniert: {}", cancelledOpenItems);
+        logger.info("  - Gesamt: {} ({}% OPEN, {}% PAID, {}% PARTIALLY_PAID, {}% OVERDUE, {}% CANCELLED)", totalOpenItems,
+                totalOpenItems > 0 ? (openOpenItems * 100 / totalOpenItems) : 0,
+                totalOpenItems > 0 ? (paidOpenItems * 100 / totalOpenItems) : 0,
+                totalOpenItems > 0 ? (partiallyPaidOpenItems * 100 / totalOpenItems) : 0,
+                totalOpenItems > 0 ? (overdueOpenItems * 100 / totalOpenItems) : 0,
+                totalOpenItems > 0 ? (cancelledOpenItems * 100 / totalOpenItems) : 0);
 
-        // Konsistenz-Prüfung - FIXED VERSION
+        // Konsistenz-Prüfung
         logger.info("Konsistenz-Prüfung:");
-        long invoicesWithoutOpenItems = 0;
-        long openItemsWithoutInvoices = 0;
+        long invoicesWithoutOpenItems = countInvoicesWithoutOpenItems();
+        long openItemsWithoutInvoices = openItemRepository.findAll().stream()
+                .filter(openItem -> openItem.getInvoice() == null)
+                .count();
 
-        try {
-            // OLD PROBLEMATIC CODE:
-            // invoicesWithoutOpenItems = invoiceRepository.findAll().stream()
-            //     .filter(invoice -> invoice.getStatus() != Invoice.InvoiceStatus.CANCELLED)
-            //     .filter(invoice -> invoice.getTotalAmount() != null && invoice.getTotalAmount().compareTo(BigDecimal.ZERO) > 0)
-            //     .filter(invoice -> invoice.getOpenItems().isEmpty()) // <-- LazyInitializationException hier!
-            //     .count();
+        logger.info("  - Rechnungen ohne OpenItems: {}", invoicesWithoutOpenItems);
+        logger.info("  - OpenItems ohne Rechnungen: {}", openItemsWithoutInvoices);
 
-            // NEW FIXED CODE - use repository queries instead:
-            invoicesWithoutOpenItems = countInvoicesWithoutOpenItems();
-
-            openItemsWithoutInvoices = openItemRepository.findAll().stream()
-                    .filter(openItem -> openItem.getInvoice() == null)
-                    .count();
-
-            logger.info("  - Rechnungen ohne OpenItems: {}", invoicesWithoutOpenItems);
-            logger.info("  - OpenItems ohne Rechnungen: {}", openItemsWithoutInvoices);
-
-            if (invoicesWithoutOpenItems == 0 && openItemsWithoutInvoices == 0) {
-                logger.info("  ✓ Konsistenz-Prüfung erfolgreich!");
-            } else {
-                logger.warn("  ⚠ Konsistenz-Probleme gefunden!");
-            }
-
-        } catch (Exception e) {
-            logger.error("Fehler bei Konsistenz-Prüfung: {}", e.getMessage());
+        if (invoicesWithoutOpenItems == 0 && openItemsWithoutInvoices == 0) {
+            logger.info("  ✓ Konsistenz-Prüfung erfolgreich!");
+        } else {
+            logger.warn("  ⚠ Konsistenz-Probleme gefunden!");
         }
 
         logger.info("===========================================");
     }
 
-    // Helper method for consistency check
     private long countInvoicesWithoutOpenItems() {
         try {
-            // Use repository query to avoid lazy loading issues
             List<Invoice> invoicesWithoutOpenItems = invoiceRepository.findInvoicesWithoutOpenItems();
-
             return invoicesWithoutOpenItems.stream()
                     .filter(invoice -> invoice.getStatus() != Invoice.InvoiceStatus.CANCELLED)
                     .filter(invoice -> invoice.getTotalAmount() != null && invoice.getTotalAmount().compareTo(BigDecimal.ZERO) > 0)
                     .count();
-
         } catch (Exception e) {
             logger.error("Fehler beim Zählen der Rechnungen ohne OpenItems: {}", e.getMessage());
-            return -1; // Indicator für Fehler
+            return -1;
         }
     }
 
@@ -986,25 +1185,15 @@ public class InitDataService implements ApplicationRunner {
         }
     }
 
-    /**
-     * Repariert inkonsistente Daten
-     */
     @Transactional
     public void repairDataConsistency() {
         logger.info("Starte Daten-Konsistenz-Reparatur...");
 
         try {
-            // 1. Erstelle fehlende OpenItems
             createMissingOpenItems();
-
-            // 2. Entferne OpenItems ohne gültige Rechnungen
             cleanupOrphanedOpenItems();
-
-            // 3. Update überfällige OpenItems
             updateOverdueOpenItems();
-
             logger.info("Daten-Konsistenz-Reparatur abgeschlossen");
-
         } catch (Exception e) {
             logger.error("Fehler bei der Daten-Konsistenz-Reparatur: {}", e.getMessage(), e);
         }

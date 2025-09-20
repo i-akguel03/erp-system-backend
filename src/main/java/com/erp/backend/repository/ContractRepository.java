@@ -68,9 +68,9 @@ public interface ContractRepository extends JpaRepository<Contract, UUID> {
     @Query("SELECT COUNT(c) FROM Contract c WHERE c.customer = :customer AND c.contractStatus = 'ACTIVE'")
     Long countActiveContractsByCustomer(@Param("customer") Customer customer);
 
-    // Alle Verträge eines Kunden mit Paginierung
+    // Alle Verträge eines Kunden mit Paginierung - UMBENANNT!
     @Query("SELECT c FROM Contract c JOIN FETCH c.customer WHERE c.customer = :customer")
-    Page<Contract> findByCustomer(@Param("customer") Customer customer, Pageable pageable);
+    Page<Contract> findByCustomerPaginated(@Param("customer") Customer customer, Pageable pageable);
 
     // Verträge mit mindestens einem aktiven Abo
     @Query("SELECT DISTINCT c FROM Contract c JOIN FETCH c.customer LEFT JOIN c.subscriptions s WHERE s.subscriptionStatus = 'ACTIVE'")
@@ -79,4 +79,51 @@ public interface ContractRepository extends JpaRepository<Contract, UUID> {
     // Verträge ohne Abos
     @Query("SELECT c FROM Contract c JOIN FETCH c.customer WHERE c.subscriptions IS EMPTY OR SIZE(c.subscriptions) = 0")
     List<Contract> findContractsWithoutSubscriptions();
+
+    long countByContractStatus(ContractStatus contractStatus);
+
+    /**
+     * Findet die letzten 5 Contracts nach Erstellungsdatum
+     */
+    @Query("SELECT c FROM Contract c JOIN FETCH c.customer ORDER BY c.startDate DESC")
+    List<Contract> findTop5ByOrderByCreatedAtDesc();
+
+    /**
+     * Alternative falls createdAt nicht vorhanden ist
+     */
+    @Query("SELECT c FROM Contract c JOIN FETCH c.customer ORDER BY c.id DESC")
+    List<Contract> findTop5ByOrderByIdDesc();
+
+    /**
+     * Findet die letzten Contracts nach Startdatum
+     */
+    @Query("SELECT c FROM Contract c JOIN FETCH c.customer ORDER BY c.startDate DESC")
+    List<Contract> findTop5ByOrderByStartDateDesc();
+
+    /**
+     * Zählt aktive Contracts ohne aktive Subscriptions
+     */
+    @Query("SELECT COUNT(c) FROM Contract c WHERE c.contractStatus = 'ACTIVE' AND c.id NOT IN " +
+            "(SELECT DISTINCT s.contract.id FROM Subscription s WHERE s.contract.id IS NOT NULL AND s.subscriptionStatus = 'ACTIVE')")
+    long countActiveContractsWithoutActiveSubscriptions();
+
+    /**
+     * Findet aktive Contracts ohne aktive Subscriptions
+     */
+    @Query("SELECT c FROM Contract c JOIN FETCH c.customer WHERE c.contractStatus = 'ACTIVE' AND c.id NOT IN " +
+            "(SELECT DISTINCT s.contract.id FROM Subscription s WHERE s.contract.id IS NOT NULL AND s.subscriptionStatus = 'ACTIVE')")
+    List<Contract> findActiveContractsWithoutActiveSubscriptions();
+
+    /**
+     * Findet Contracts eines bestimmten Kunden
+     */
+    @Query("SELECT c FROM Contract c JOIN FETCH c.customer WHERE c.customer.id = :customerId")
+    List<Contract> findByCustomerId(@Param("customerId") Long customerId);
+
+    /**
+     * Findet aktive Contracts eines bestimmten Kunden
+     */
+    @Query("SELECT c FROM Contract c JOIN FETCH c.customer WHERE c.customer.id = :customerId AND c.contractStatus = 'ACTIVE'")
+    List<Contract> findActiveByCustomerId(@Param("customerId") Long customerId);
+
 }

@@ -59,8 +59,9 @@ public class SubscriptionEventHandler {
             // Wenn mehr als 0 Monate erzeugt werden sollen
             if (monthsToGenerate > 0) {
                 // Erzeuge die Fälligkeitspläne
-                dueScheduleService.generateDueSchedulesForSubscription(
-                        event.getSubscription().getId(), monthsToGenerate);
+//                dueScheduleService.generateDueSchedulesForSubscription(
+//                        event.getSubscription().getId(), monthsToGenerate);tion(
+//                        event.getSubscription().getId(), monthsToGenerate);
 
                 // Log-Ausgabe
                 logger.info("Automatically generated {} months of due schedules for new subscription {}",
@@ -133,8 +134,8 @@ public class SubscriptionEventHandler {
             int additionalMonths = (int) event.getOldEndDate().until(event.getNewEndDate()).toTotalMonths();
 
             if (additionalMonths > 0) {
-                dueScheduleService.generateDueSchedulesForSubscription(
-                        event.getSubscription().getId(), additionalMonths);
+//                dueScheduleService.generateDueSchedulesForSubscription(
+//                        event.getSubscription().getId(), additionalMonths);
 
                 logger.info("Generated {} additional due schedules for renewed subscription {}",
                         additionalMonths, event.getSubscription().getId());
@@ -216,7 +217,7 @@ public class SubscriptionEventHandler {
             int additionalMonths = (int) oldSubscription.getEndDate().until(newSubscription.getEndDate()).toTotalMonths();
             if (additionalMonths > 0) {
                 try {
-                    dueScheduleService.generateDueSchedulesForSubscription(newSubscription.getId(), additionalMonths);
+//                    dueScheduleService.generateDueSchedulesForSubscription(newSubscription.getId(), additionalMonths);
                 } catch (Exception e) {
                     logger.warn("Could not generate additional due schedules: {}", e.getMessage());
                 }

@@ -59,8 +59,6 @@ public interface DueScheduleRepository extends JpaRepository<DueSchedule, UUID> 
 
     // === Datum-basierte Abfragen ===
 
-    List<DueSchedule> findByDueDateBetween(LocalDate startDate, LocalDate endDate);
-
     List<DueSchedule> findByDueDate(LocalDate dueDate);
 
     List<DueSchedule> findByStatusAndDueDateBefore(DueStatus status, LocalDate dueDate);
@@ -174,5 +172,156 @@ public interface DueScheduleRepository extends JpaRepository<DueSchedule, UUID> 
     @Query("DELETE FROM DueSchedule ds WHERE ds.periodStart = :periodStart AND ds.periodEnd = :periodEnd")
     void deleteByPeriod(@Param("periodStart") LocalDate periodStart,
                         @Param("periodEnd") LocalDate periodEnd);
+
+
+
+    // ===============================================================================================
+// ERGÄNZUNGEN FÜR DueScheduleRepository
+// ===============================================================================================
+
+// === Fehlende Basis-Abfragen für Service-Methoden ===
+
+    /** Holt Fälligkeiten nach Status und Fälligkeitsdatum (für getDueSchedulesByStatus mit Datum) */
+    List<DueSchedule> findByStatusAndDueDate(DueStatus status, LocalDate dueDate);
+
+    /** Holt Fälligkeiten nach Status zwischen zwei Daten (für getUpcomingDueSchedules) */
+    List<DueSchedule> findByStatusAndDueDateBetween(DueStatus status, LocalDate startDate, LocalDate endDate);
+
+    /** Holt alle Fälligkeiten eines Abos nach Perioden-Ende absteigend sortiert (für generateAdditionalDueSchedules) */
+    List<DueSchedule> findBySubscriptionIdOrderByPeriodEndDesc(UUID subscriptionId);
+
+    /** Holt Fälligkeiten eines Abos nach bestimmtem Status (für updateDueScheduleStatusForSubscription) */
+    List<DueSchedule> findBySubscriptionIdAndStatus(UUID subscriptionId, DueStatus status);
+
+// === Invoice/Batch-Verknüpfungen (für InvoiceBatchService) ===
+
+    /** Holt alle Fälligkeiten eines bestimmten Rechnungslaufs */
+    List<DueSchedule> findByInvoiceBatchId(String invoiceBatchId);
+
+    /** Holt alle Fälligkeiten einer bestimmten Rechnung */
+    List<DueSchedule> findByInvoiceId(UUID invoiceId);
+
+    /** Prüft ob es Fälligkeiten mit einer bestimmten Rechnungs-ID gibt */
+    boolean existsByInvoiceId(UUID invoiceId);
+
+    /** Prüft ob es Fälligkeiten mit einer bestimmten Batch-ID gibt */
+    boolean existsByInvoiceBatchId(String invoiceBatchId);
+
+// === Erweiterte Statistik-Queries für Dashboard ===
+
+    /** Zählt alle ACTIVE Fälligkeiten die bereits überfällig sind */
+    @Query("SELECT COUNT(ds) FROM DueSchedule ds WHERE ds.status = 'ACTIVE' AND ds.dueDate < :currentDate")
+    long countOverdueActive(@Param("currentDate") LocalDate currentDate);
+
+    /** Zählt alle ACTIVE Fälligkeiten für heute */
+    @Query("SELECT COUNT(ds) FROM DueSchedule ds WHERE ds.status = 'ACTIVE' AND ds.dueDate = :currentDate")
+    long countDueTodayActive(@Param("currentDate") LocalDate currentDate);
+
+    /** Zählt alle ACTIVE Fälligkeiten in den nächsten X Tagen */
+    @Query("SELECT COUNT(ds) FROM DueSchedule ds WHERE ds.status = 'ACTIVE' AND ds.dueDate BETWEEN :startDate AND :endDate")
+    long countUpcomingActive(@Param("startDate") LocalDate startDate, @Param("endDate") LocalDate endDate);
+
+// === Bulk-Operationen für Subscription Status-Änderungen ===
+
+    /** Bulk-Update aller offenen Fälligkeiten eines Abos */
+    @Query("UPDATE DueSchedule ds SET ds.status = :newStatus WHERE ds.subscription.id = :subscriptionId AND ds.status IN ('ACTIVE', 'PAUSED')")
+    int bulkUpdateStatusBySubscription(@Param("subscriptionId") UUID subscriptionId, @Param("newStatus") DueStatus newStatus);
+
+    /** Bulk-Update aller Fälligkeiten mit bestimmtem alten Status */
+    @Query("UPDATE DueSchedule ds SET ds.status = :newStatus WHERE ds.subscription.id = :subscriptionId AND ds.status = :oldStatus")
+    int bulkUpdateSpecificStatus(@Param("subscriptionId") UUID subscriptionId,
+                                 @Param("oldStatus") DueStatus oldStatus,
+                                 @Param("newStatus") DueStatus newStatus);
+
+// === Perioden-Validierung (für überschneidende Zeiträume) ===
+
+    /** Findet Fälligkeiten die sich mit einem gegebenen Zeitraum überschneiden */
+    @Query("SELECT ds FROM DueSchedule ds WHERE ds.subscription.id = :subscriptionId " +
+            "AND NOT (ds.periodEnd < :periodStart OR ds.periodStart > :periodEnd)")
+    List<DueSchedule> findOverlappingPeriods(@Param("subscriptionId") UUID subscriptionId,
+                                             @Param("periodStart") LocalDate periodStart,
+                                             @Param("periodEnd") LocalDate periodEnd);
+
+    /** Findet Fälligkeiten die sich überschneiden, außer der mit der angegebenen ID */
+    @Query("SELECT ds FROM DueSchedule ds WHERE ds.subscription.id = :subscriptionId " +
+            "AND ds.id != :excludeId " +
+            "AND NOT (ds.periodEnd < :periodStart OR ds.periodStart > :periodEnd)")
+    List<DueSchedule> findOverlappingPeriodsExcluding(@Param("subscriptionId") UUID subscriptionId,
+                                                      @Param("periodStart") LocalDate periodStart,
+                                                      @Param("periodEnd") LocalDate periodEnd,
+                                                      @Param("excludeId") UUID excludeId);
+
+// === Erweiterte Kunden-Abfragen ===
+
+    /** Holt aktive Fälligkeiten eines Kunden */
+    @Query("SELECT ds FROM DueSchedule ds JOIN ds.subscription s JOIN s.contract c " +
+            "WHERE c.customer.id = :customerId AND ds.status = 'ACTIVE' ORDER BY ds.dueDate")
+    List<DueSchedule> findActiveByCustomerId(@Param("customerId") UUID customerId);
+
+    /** Holt überfällige Fälligkeiten eines Kunden */
+    @Query("SELECT ds FROM DueSchedule ds JOIN ds.subscription s JOIN s.contract c " +
+            "WHERE c.customer.id = :customerId AND ds.status = 'ACTIVE' AND ds.dueDate < :currentDate")
+    List<DueSchedule> findOverdueByCustomerId(@Param("customerId") UUID customerId, @Param("currentDate") LocalDate currentDate);
+
+// === Audit/Cleanup Queries ===
+
+    /** Findet verwaiste Fälligkeiten ohne Subscription (für Data-Cleanup) */
+    @Query("SELECT ds FROM DueSchedule ds WHERE ds.subscription IS NULL")
+    List<DueSchedule> findOrphanedDueSchedules();
+
+    /** Findet COMPLETED Fälligkeiten ohne Invoice-Verknüpfung (Data-Integrity Check) */
+    @Query("SELECT ds FROM DueSchedule ds WHERE ds.status = 'COMPLETED' AND ds.invoiceId IS NULL")
+    List<DueSchedule> findCompletedWithoutInvoice();
+
+    /** Findet Fälligkeiten mit Invoice-Verknüpfung aber nicht COMPLETED Status */
+    @Query("SELECT ds FROM DueSchedule ds WHERE ds.invoiceId IS NOT NULL AND ds.status != 'COMPLETED'")
+    List<DueSchedule> findInconsistentInvoiceStatus();
+
+    /**
+     * Zählt überfällige DueSchedules (ACTIVE Status aber Fälligkeitsdatum überschritten)
+     */
+    @Query("SELECT COUNT(ds) FROM DueSchedule ds WHERE ds.status = 'ACTIVE' AND ds.dueDate < :date")
+    long countOverdueDueSchedules(@Param("date") LocalDate date);
+
+    /**
+     * Findet überfällige DueSchedules
+     */
+    @Query("SELECT ds FROM DueSchedule ds WHERE ds.status = 'ACTIVE' AND ds.dueDate < :date")
+    List<DueSchedule> findOverdueDueSchedules(@Param("date") LocalDate date);
+
+    /**
+     * Findet DueSchedules die bis zu einem bestimmten Datum fällig sind
+     */
+    @Query("SELECT ds FROM DueSchedule ds WHERE ds.status = 'ACTIVE' AND ds.dueDate <= :date")
+    List<DueSchedule> findDueSchedulesUntilDate(@Param("date") LocalDate date);
+
+    /**
+     * Findet DueSchedules einer bestimmten Subscription
+     */
+    @Query("SELECT ds FROM DueSchedule ds WHERE ds.subscription.id = :subscriptionId")
+    List<DueSchedule> findBySubscriptionId(@Param("subscriptionId") Long subscriptionId);
+
+    /**
+     * Findet aktive DueSchedules einer bestimmten Subscription
+     */
+    @Query("SELECT ds FROM DueSchedule ds WHERE ds.subscription.id = :subscriptionId AND ds.status = 'ACTIVE'")
+    List<DueSchedule> findActiveBySubscriptionId(@Param("subscriptionId") Long subscriptionId);
+
+    /**
+     * Findet DueSchedules in einem Datumsbereich
+     */
+    @Query("SELECT ds FROM DueSchedule ds WHERE ds.dueDate BETWEEN :startDate AND :endDate")
+    List<DueSchedule> findByDueDateBetween(@Param("startDate") LocalDate startDate, @Param("endDate") LocalDate endDate);
+
+    /**
+     * Findet die letzten 5 DueSchedules
+     */
+    @Query("SELECT ds FROM DueSchedule ds ORDER BY ds.createdDate DESC")
+    List<DueSchedule> findTop5ByOrderByCreatedAtDesc();
+
+    /**
+     * Alternative falls createdAt nicht vorhanden ist
+     */
+    List<DueSchedule> findTop5ByOrderByIdDesc();
 
 }

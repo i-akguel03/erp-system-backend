@@ -5,6 +5,9 @@ import com.erp.backend.dto.SubscriptionDto;
 import com.erp.backend.repository.ContractRepository;
 import com.erp.backend.repository.DueScheduleRepository;
 import com.erp.backend.repository.SubscriptionRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -20,15 +23,25 @@ import java.util.stream.Collectors;
 @Service
 public class SubscriptionService {
 
+    private static final Logger logger = LoggerFactory.getLogger(SubscriptionService.class);
+
     private final SubscriptionRepository subscriptionRepository;
     private final ContractRepository contractRepository;
     private final DueScheduleRepository dueScheduleRepository;
+    private final NumberGeneratorService numberGeneratorService;
+
+    // Konfigurierbarer Default für Fälligkeitsmonate
+    @Value("${app.billing.default-due-months:12}")
+    private int defaultDueMonths;
 
     public SubscriptionService(SubscriptionRepository subscriptionRepository,
-                               ContractRepository contractRepository, DueScheduleRepository dueScheduleRepository) {
+                               ContractRepository contractRepository,
+                               DueScheduleRepository dueScheduleRepository,
+                               NumberGeneratorService numberGeneratorService) {
         this.subscriptionRepository = subscriptionRepository;
         this.contractRepository = contractRepository;
         this.dueScheduleRepository = dueScheduleRepository;
+        this.numberGeneratorService = numberGeneratorService;
     }
 
     // ================= DTO Mapping =================
@@ -110,6 +123,11 @@ public class SubscriptionService {
     // ================= CREATE / UPDATE =================
     @Transactional
     public Subscription createSubscriptionFromDto(SubscriptionDto dto) {
+        return createSubscriptionFromDto(dto, null);
+    }
+
+    @Transactional
+    public Subscription createSubscriptionFromDto(SubscriptionDto dto, Integer dueMonths) {
         Subscription subscription = new Subscription();
 
         // SubscriptionNumber generieren, falls leer
@@ -143,56 +161,85 @@ public class SubscriptionService {
         // Subscription speichern
         Subscription saved = saveFromDto(subscription, dto);
 
-        // ===== Fälligkeitspläne erstellen =====
-        createDueSchedules(saved);
+        // ===== Fälligkeitspläne automatisch erstellen =====
+        int monthsToGenerate = dueMonths != null ? dueMonths : defaultDueMonths;
+        createDueSchedulesForSubscription(saved, monthsToGenerate);
+
+        logger.info("Created subscription {} with {} due schedules",
+                saved.getSubscriptionNumber(), monthsToGenerate);
 
         return saved;
     }
 
     /**
-     * Erzeugt automatisch DueSchedules für die Subscription entsprechend BillingCycle.
+     * Erzeugt automatisch DueSchedules für die Subscription.
      *
-     * Hinweis:
-     * - DueSchedules enthalten **keine Beträge**.
-     * - Preise werden erst beim Invoice-Generieren aus der Subscription gezogen.
+     * WICHTIGE REGELN:
+     * - Erste Fälligkeit beginnt am Abo-Startdatum
+     * - Fälligkeiten sind nur Terminpläne (keine Beträge)
+     * - Status ist immer ACTIVE (außer bei deaktivierten Abos)
+     * - Nur der Rechnungslauf darf Status auf COMPLETED setzen
+     *
+     * @param subscription Das Abonnement
+     * @param months Anzahl Monate für die Fälligkeitspläne
      */
-    private void createDueSchedules(Subscription subscription) {
-        LocalDate periodStart = subscription.getStartDate();
+    private void createDueSchedulesForSubscription(Subscription subscription, int months) {
+        LocalDate subscriptionStart = subscription.getStartDate();
         LocalDate subscriptionEnd = subscription.getEndDate();
 
-        List<DueSchedule> schedules = new ArrayList<>();
+        logger.info("Creating {} due schedules for subscription {} starting from {}",
+                months, subscription.getSubscriptionNumber(), subscriptionStart);
 
-        while (!periodStart.isAfter(subscriptionEnd)) {
+        List<DueSchedule> schedules = new ArrayList<>();
+        LocalDate currentPeriodStart = subscriptionStart;
+
+        for (int i = 0; i < months; i++) {
+            // Prüfe ob wir über das Abo-Ende hinausgehen würden
+            if (currentPeriodStart.isAfter(subscriptionEnd)) {
+                logger.info("Stopping schedule generation at {} months due to subscription end date", i);
+                break;
+            }
+
             // Periode Ende berechnen basierend auf BillingCycle
-            LocalDate periodEnd = calculatePeriodEnd(periodStart, subscription.getBillingCycle());
+            LocalDate periodEnd = calculatePeriodEnd(currentPeriodStart, subscription.getBillingCycle());
 
             // Sicherstellen, dass die Periode nicht über das Subscription-Ende hinausgeht
             if (periodEnd.isAfter(subscriptionEnd)) {
                 periodEnd = subscriptionEnd;
             }
 
-            // Fälligkeitsdatum berechnen (normalerweise am Ende der Periode oder mit Zahlungsfrist)
-            LocalDate dueDate = calculateDueDate(periodEnd, subscription.getBillingCycle());
+            // Fälligkeitsdatum = erster Tag der Periode (sofort fällig)
+            LocalDate dueDate = currentPeriodStart;
 
             DueSchedule schedule = new DueSchedule();
+            schedule.setDueNumber(numberGeneratorService.generateDueNumber());
             schedule.setSubscription(subscription);
-            schedule.setPeriodStart(periodStart);   // Periode Start
-            schedule.setPeriodEnd(periodEnd);       // Periode Ende
-            schedule.setDueDate(dueDate);           // Fälligkeit
-            schedule.setStatus(DueStatus.ACTIVE);   // Status explizit setzen
+            schedule.setPeriodStart(currentPeriodStart);
+            schedule.setPeriodEnd(periodEnd);
+            schedule.setDueDate(dueDate);
+
+            // Status abhängig vom Abo-Status
+            if (subscription.getSubscriptionStatus() == SubscriptionStatus.ACTIVE) {
+                schedule.setStatus(DueStatus.ACTIVE);
+            } else {
+                schedule.setStatus(DueStatus.PAUSED);
+            }
 
             schedules.add(schedule);
 
-            // Nächste Periode starten
-            periodStart = periodEnd.plusDays(1);
+            // Nächste Periode berechnen
+            currentPeriodStart = calculateNextPeriodStart(currentPeriodStart, subscription.getBillingCycle());
 
-            // Abbruch, falls Subscription-Ende erreicht
-            if (periodStart.isAfter(subscriptionEnd)) {
-                break;
-            }
+            logger.debug("Created schedule {} for period {} to {} (due: {})",
+                    schedule.getDueNumber(), schedule.getPeriodStart(),
+                    schedule.getPeriodEnd(), schedule.getDueDate());
         }
 
-        dueScheduleRepository.saveAll(schedules);
+        // Alle Fälligkeitspläne in einem Batch speichern
+        List<DueSchedule> savedSchedules = dueScheduleRepository.saveAll(schedules);
+
+        logger.info("Successfully created {} due schedules for subscription {}",
+                savedSchedules.size(), subscription.getSubscriptionNumber());
     }
 
     /**
@@ -203,25 +250,124 @@ public class SubscriptionService {
             case MONTHLY -> periodStart.plusMonths(1).minusDays(1);
             case QUARTERLY -> periodStart.plusMonths(3).minusDays(1);
             case ANNUALLY -> periodStart.plusYears(1).minusDays(1);
-            case SEMI_ANNUALLY -> periodStart.plusYears(1).minusDays(1);
+            case SEMI_ANNUALLY -> periodStart.plusMonths(6).minusDays(1);
         };
     }
 
     /**
-     * Berechnet das Fälligkeitsdatum (meist Ende der Periode + optional Zahlungsfrist)
+     * Berechnet den Start der nächsten Periode
      */
-    private LocalDate calculateDueDate(LocalDate periodEnd, BillingCycle billingCycle) {
-        // Standard: Fällig am Ende der Periode
-        // Optional: + Zahlungsfrist (z.B. 14 Tage)
-        return periodEnd; // oder periodEnd.plusDays(14) für Zahlungsfrist
+    private LocalDate calculateNextPeriodStart(LocalDate currentPeriodStart, BillingCycle billingCycle) {
+        return switch (billingCycle) {
+            case MONTHLY -> currentPeriodStart.plusMonths(1);
+            case QUARTERLY -> currentPeriodStart.plusMonths(3);
+            case ANNUALLY -> currentPeriodStart.plusYears(1);
+            case SEMI_ANNUALLY -> currentPeriodStart.plusMonths(6);
+        };
     }
 
+    /**
+     * Erstellt zusätzliche Fälligkeitspläne für ein bestehendes Abonnement
+     */
+    @Transactional
+    public void generateAdditionalDueSchedules(UUID subscriptionId, int additionalMonths) {
+        Subscription subscription = subscriptionRepository.findById(subscriptionId)
+                .orElseThrow(() -> new IllegalArgumentException("Subscription not found"));
+
+        // Finde die letzte bestehende Fälligkeit
+        Optional<DueSchedule> lastSchedule = dueScheduleRepository
+                .findBySubscriptionIdOrderByPeriodEndDesc(subscriptionId)
+                .stream()
+                .findFirst();
+
+        LocalDate nextPeriodStart;
+        if (lastSchedule.isPresent()) {
+            // Starte nach der letzten Periode
+            nextPeriodStart = lastSchedule.get().getPeriodEnd().plusDays(1);
+        } else {
+            // Falls keine Fälligkeiten vorhanden, starte am Abo-Beginn
+            nextPeriodStart = subscription.getStartDate();
+        }
+
+        logger.info("Generating {} additional due schedules for subscription {} starting from {}",
+                additionalMonths, subscription.getSubscriptionNumber(), nextPeriodStart);
+
+        createDueSchedulesFromDate(subscription, nextPeriodStart, additionalMonths);
+    }
+
+    /**
+     * Hilfsmethode zum Erstellen von Fälligkeitsplänen ab einem bestimmten Datum
+     */
+    private void createDueSchedulesFromDate(Subscription subscription, LocalDate startDate, int months) {
+        List<DueSchedule> schedules = new ArrayList<>();
+        LocalDate currentPeriodStart = startDate;
+        LocalDate subscriptionEnd = subscription.getEndDate();
+
+        for (int i = 0; i < months; i++) {
+            if (currentPeriodStart.isAfter(subscriptionEnd)) {
+                break;
+            }
+
+            LocalDate periodEnd = calculatePeriodEnd(currentPeriodStart, subscription.getBillingCycle());
+            if (periodEnd.isAfter(subscriptionEnd)) {
+                periodEnd = subscriptionEnd;
+            }
+
+            DueSchedule schedule = new DueSchedule();
+            schedule.setDueNumber(numberGeneratorService.generateDueNumber());
+            schedule.setSubscription(subscription);
+            schedule.setPeriodStart(currentPeriodStart);
+            schedule.setPeriodEnd(periodEnd);
+            schedule.setDueDate(currentPeriodStart);
+            schedule.setStatus(subscription.getSubscriptionStatus() == SubscriptionStatus.ACTIVE ?
+                    DueStatus.ACTIVE : DueStatus.PAUSED);
+
+            schedules.add(schedule);
+            currentPeriodStart = calculateNextPeriodStart(currentPeriodStart, subscription.getBillingCycle());
+        }
+
+        dueScheduleRepository.saveAll(schedules);
+        logger.info("Created {} additional due schedules", schedules.size());
+    }
 
     @Transactional
     public Subscription updateSubscriptionFromDto(SubscriptionDto dto) {
         Subscription subscription = subscriptionRepository.findById(dto.getId())
                 .orElseThrow(() -> new IllegalArgumentException("Subscription not found"));
-        return saveFromDto(subscription, dto);
+
+        // Bei Status-Änderungen auch die Fälligkeiten anpassen
+        SubscriptionStatus oldStatus = subscription.getSubscriptionStatus();
+        Subscription updated = saveFromDto(subscription, dto);
+
+        // Wenn Status geändert wurde, auch die offenen Fälligkeiten anpassen
+        if (oldStatus != updated.getSubscriptionStatus()) {
+            updateDueScheduleStatusForSubscription(updated.getId(), updated.getSubscriptionStatus());
+        }
+
+        return updated;
+    }
+
+    /**
+     * Aktualisiert den Status aller offenen Fälligkeiten eines Abonnements
+     */
+    private void updateDueScheduleStatusForSubscription(UUID subscriptionId, SubscriptionStatus subscriptionStatus) {
+        List<DueSchedule> activeDueSchedules = dueScheduleRepository
+                .findBySubscriptionIdAndStatus(subscriptionId, DueStatus.ACTIVE);
+
+        for (DueSchedule schedule : activeDueSchedules) {
+            if (subscriptionStatus == SubscriptionStatus.ACTIVE) {
+                schedule.setStatus(DueStatus.ACTIVE);
+            } else if (subscriptionStatus == SubscriptionStatus.PAUSED) {
+                schedule.setStatus(DueStatus.PAUSED);
+            } else if (subscriptionStatus == SubscriptionStatus.CANCELLED) {
+                // Stornierte Abos: Fälligkeiten pausieren (nicht löschen)
+                schedule.setStatus(DueStatus.SUSPENDED);
+            }
+        }
+
+        dueScheduleRepository.saveAll(activeDueSchedules);
+        logger.info("Updated {} due schedules to match subscription status {}",
+                activeDueSchedules.size(), subscriptionStatus);
     }
 
     private Subscription saveFromDto(Subscription subscription, SubscriptionDto dto) {
@@ -252,7 +398,12 @@ public class SubscriptionService {
         Subscription s = subscriptionRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Subscription not found"));
         s.setSubscriptionStatus(SubscriptionStatus.ACTIVE);
-        return subscriptionRepository.save(s);
+        Subscription saved = subscriptionRepository.save(s);
+
+        // Fälligkeiten reaktivieren
+        updateDueScheduleStatusForSubscription(id, SubscriptionStatus.ACTIVE);
+
+        return saved;
     }
 
     @Transactional
@@ -261,7 +412,12 @@ public class SubscriptionService {
                 .orElseThrow(() -> new IllegalArgumentException("Subscription not found"));
         s.setSubscriptionStatus(SubscriptionStatus.CANCELLED);
         if (cancellationDate != null) s.setEndDate(cancellationDate);
-        return subscriptionRepository.save(s);
+        Subscription saved = subscriptionRepository.save(s);
+
+        // Fälligkeiten suspendieren
+        updateDueScheduleStatusForSubscription(id, SubscriptionStatus.CANCELLED);
+
+        return saved;
     }
 
     @Transactional
@@ -269,7 +425,12 @@ public class SubscriptionService {
         Subscription s = subscriptionRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Subscription not found"));
         s.setSubscriptionStatus(SubscriptionStatus.PAUSED);
-        return subscriptionRepository.save(s);
+        Subscription saved = subscriptionRepository.save(s);
+
+        // Fälligkeiten pausieren
+        updateDueScheduleStatusForSubscription(id, SubscriptionStatus.PAUSED);
+
+        return saved;
     }
 
     @Transactional
@@ -278,7 +439,12 @@ public class SubscriptionService {
                 .orElseThrow(() -> new IllegalArgumentException("Subscription not found"));
         s.setEndDate(newEndDate);
         s.setSubscriptionStatus(SubscriptionStatus.ACTIVE);
-        return subscriptionRepository.save(s);
+        Subscription saved = subscriptionRepository.save(s);
+
+        // Fälligkeiten reaktivieren
+        updateDueScheduleStatusForSubscription(id, SubscriptionStatus.ACTIVE);
+
+        return saved;
     }
 
     // ================= DELETE =================
@@ -290,22 +456,26 @@ public class SubscriptionService {
                         "Subscription not found with ID: " + id
                 ));
 
-        // Prüfen, ob offene Fälligkeiten existieren
-        boolean hasOpenPaymentSchedules = subscription.getPaymentSchedules().stream()
-                .anyMatch(ps -> ps.getStatus() == DueStatus.ACTIVE);
+        // Prüfen, ob bereits abgerechnete Fälligkeiten existieren (COMPLETED)
+        long completedSchedules = dueScheduleRepository
+                .countBySubscriptionIdAndStatus(id, DueStatus.COMPLETED);
 
-        System.out.println(hasOpenPaymentSchedules);
-
-        if (hasOpenPaymentSchedules) {
+        if (completedSchedules > 0) {
             throw new ResponseStatusException(
                     HttpStatus.CONFLICT,
-                    "Cannot delete subscription with open payment schedules (id=" + id + ")"
+                    "Cannot delete subscription with completed billing schedules (id=" + id + ")"
             );
         }
 
+        // Alle offenen Fälligkeiten löschen
+        List<DueSchedule> openSchedules = dueScheduleRepository.findBySubscriptionId(id);
+        dueScheduleRepository.deleteAll(openSchedules);
+
+        logger.info("Deleted {} due schedules for subscription {}",
+                openSchedules.size(), subscription.getSubscriptionNumber());
+
         subscriptionRepository.delete(subscription);
     }
-
 
     // ================= SubscriptionNumber Generator =================
     private String generateSubscriptionNumber() {

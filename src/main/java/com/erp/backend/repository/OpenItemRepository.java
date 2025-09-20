@@ -124,4 +124,51 @@ public interface OpenItemRepository extends JpaRepository<OpenItem, UUID> {
 
     @Query("SELECT COUNT(oi) FROM OpenItem oi WHERE oi.dueDate < :currentDate AND oi.status IN ('OPEN', 'PARTIALLY_PAID', 'OVERDUE')")
     long countOverdueItems(@Param("currentDate") LocalDate currentDate);
+
+    /**
+     * Findet OpenItems nach Status und Fälligkeitsdatum vor einem bestimmten Datum
+     */
+    List<OpenItem> findByStatusAndDueDateBefore(OpenItem.OpenItemStatus status, LocalDate date);
+
+    /**
+     * Findet OpenItems nach Status und Fälligkeitsdatum nach einem bestimmten Datum
+     */
+    List<OpenItem> findByStatusAndDueDateAfter(OpenItem.OpenItemStatus status, LocalDate date);
+
+    /**
+     * Summiert Beträge nach Status
+     */
+    @Query("SELECT COALESCE(SUM(oi.amount), 0) FROM OpenItem oi WHERE oi.status = :status")
+    BigDecimal sumAmountByStatus(@Param("status") OpenItem.OpenItemStatus status);
+
+    /**
+     * Summiert verbleibende Beträge nach Status
+     */
+//    @Query("SELECT COALESCE(SUM(oi.remainingAmount), 0) FROM OpenItem oi WHERE oi.status = :status")
+//    BigDecimal sumRemainingAmountByStatus(@Param("status") OpenItem.OpenItemStatus status);
+
+    /**
+     * Findet alle überfälligen OpenItems (OPEN Status aber Fälligkeitsdatum überschritten)
+     */
+    @Query("SELECT oi FROM OpenItem oi WHERE oi.status = 'OPEN' AND oi.dueDate < :date")
+    List<OpenItem> findOverdueOpenItems(@Param("date") LocalDate date);
+
+    /**
+     * Zählt überfällige OpenItems
+     */
+    @Query("SELECT COUNT(oi) FROM OpenItem oi WHERE oi.status = 'OPEN' AND oi.dueDate < :date")
+    long countOverdueOpenItems(@Param("date") LocalDate date);
+
+    /**
+     * Findet OpenItems eines Kunden
+     */
+    @Query("SELECT oi FROM OpenItem oi WHERE oi.invoice.customer.id = :customerId")
+    List<OpenItem> findByCustomerId(@Param("customerId") Long customerId);
+
+    /**
+     * Findet offene OpenItems eines Kunden
+     */
+    @Query("SELECT oi FROM OpenItem oi WHERE oi.invoice.customer.id = :customerId AND oi.status IN ('OPEN', 'OVERDUE', 'PARTIALLY_PAID')")
+    List<OpenItem> findOpenItemsByCustomerId(@Param("customerId") Long customerId);
+
 }

@@ -3,13 +3,13 @@ package com.erp.backend.service;
 import com.erp.backend.domain.DueSchedule;
 import com.erp.backend.domain.DueStatus;
 import com.erp.backend.domain.Subscription;
+import com.erp.backend.domain.SubscriptionStatus;
 import com.erp.backend.dto.DueScheduleDto;
 import com.erp.backend.dto.DueScheduleStatisticsDto;
 import com.erp.backend.exception.ResourceNotFoundException;
 import com.erp.backend.mapper.DueScheduleMapper;
 import com.erp.backend.repository.DueScheduleRepository;
 import com.erp.backend.repository.SubscriptionRepository;
-import com.erp.backend.service.NumberGeneratorService;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,16 +18,19 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 /**
- * Service für DueSchedule-Verwaltung.
+ * Service für DueSchedule-Verwaltung mit strikten Workflow-Regeln.
  *
- * Korrigierte Architektur:
- * - DueSchedule = nur Terminplanung (Datum, Periode, Status)
- * - Keine Beträge oder Zahlungsinformationen
- * - Preise kommen aus der zugehörigen Subscription
- * - Zahlungen werden über Invoice/OpenItem abgewickelt
+ * WICHTIGE WORKFLOW-REGELN:
+ * 1. DueSchedules werden NUR beim Abo-Erstellen automatisch generiert
+ * 2. DueSchedules enthalten NUR Termine und Status - KEINE Beträge
+ * 3. Status COMPLETED darf NUR vom InvoiceBatchService gesetzt werden
+ * 4. Wenn Status auf COMPLETED gesetzt wird, MÜSSEN Rechnung und OpenItem existieren
+ * 5. Benutzer können nur zwischen ACTIVE/PAUSED wechseln
+ * 6. Manuelle Erstellung nur für Nachkorrekturen
  */
 @Service
 @Transactional
@@ -50,61 +53,9 @@ public class DueScheduleService {
         this.numberGeneratorService = numberGeneratorService;
     }
 
-    /**
-     * Erstellt einen neuen Fälligkeitsplan (nur Termine, keine Beträge).
-     */
-    public DueScheduleDto createDueSchedule(DueScheduleDto dto) {
-        validateDueSchedule(dto);
-
-        Subscription subscription = subscriptionRepository.findById(dto.getSubscriptionId())
-                .orElseThrow(() -> new ResourceNotFoundException("Abo " + dto.getSubscriptionId() + " nicht gefunden"));
-
-        // Prüfen, ob sich die Perioden überschneiden
-        validateNoPeriodOverlap(subscription.getId(), dto.getPeriodStart(), dto.getPeriodEnd(), null);
-
-        DueSchedule entity = dueScheduleMapper.toEntity(dto);
-        entity.setSubscription(subscription);
-
-        // Fälligkeitsnummer generieren, falls nicht gesetzt
-        if (entity.getDueNumber() == null || entity.getDueNumber().isEmpty()) {
-            entity.setDueNumber(numberGeneratorService.generateDueNumber());
-        }
-
-        // Standardstatus setzen
-        if (entity.getStatus() == null) {
-            entity.setStatus(DueStatus.ACTIVE);
-        }
-
-        // Keine Beträge setzen - die kommen beim Rechnungslauf aus der Subscription!
-
-        DueSchedule saved = dueScheduleRepository.save(entity);
-        logger.info("Created due schedule: id={}, dueNumber={}, dueDate={}, subscription={}",
-                saved.getId(), saved.getDueNumber(), saved.getDueDate(), saved.getSubscription().getId());
-
-        return dueScheduleMapper.toDto(saved);
-    }
-
-    /**
-     * Aktualisiert einen bestehenden Fälligkeitsplan.
-     */
-    public DueScheduleDto updateDueSchedule(UUID id, DueScheduleDto dto) {
-        DueSchedule existing = dueScheduleRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Fälligkeit " + id + " nicht gefunden"));
-
-        // Validierung: Keine Überschneidung der Perioden (außer mit sich selbst)
-        validateNoPeriodOverlap(existing.getSubscription().getId(), dto.getPeriodStart(), dto.getPeriodEnd(), id);
-
-        // Nur Termine und Status aktualisieren - keine Beträge!
-        existing.setDueDate(dto.getDueDate());
-        existing.setPeriodStart(dto.getPeriodStart());
-        existing.setPeriodEnd(dto.getPeriodEnd());
-        existing.setStatus(dto.getStatus());
-
-        DueSchedule updated = dueScheduleRepository.save(existing);
-        logger.info("Updated due schedule: id={}, status={}", updated.getId(), updated.getStatus());
-
-        return dueScheduleMapper.toDto(updated);
-    }
+    // ===============================================================================================
+    // ABFRAGE-METHODEN (READ-ONLY)
+    // ===============================================================================================
 
     /**
      * Holt alle Fälligkeiten eines Abos.
@@ -129,8 +80,8 @@ public class DueScheduleService {
     }
 
     /**
-     * Holt überfällige Fälligkeiten (fällig und noch aktiv).
-     * Diese müssen noch abgerechnet werden.
+     * Holt überfällige UND noch nicht abgerechnete Fälligkeiten.
+     * Diese sind für den Rechnungslauf relevant.
      */
     @Transactional(readOnly = true)
     public List<DueScheduleDto> getOverdueDueSchedules() {
@@ -142,12 +93,12 @@ public class DueScheduleService {
     }
 
     /**
-     * Holt Fälligkeiten für heute.
+     * Holt Fälligkeiten für heute (noch nicht abgerechnet).
      */
     @Transactional(readOnly = true)
     public List<DueScheduleDto> getDueTodaySchedules() {
         LocalDate today = LocalDate.now();
-        return dueScheduleRepository.findByDueDate(today)
+        return dueScheduleRepository.findByStatusAndDueDate(DueStatus.ACTIVE, today)
                 .stream()
                 .map(dueScheduleMapper::toDto)
                 .toList();
@@ -160,14 +111,40 @@ public class DueScheduleService {
     public List<DueScheduleDto> getUpcomingDueSchedules(int days) {
         LocalDate today = LocalDate.now();
         LocalDate endDate = today.plusDays(days);
-        return dueScheduleRepository.findByDueDateBetween(today, endDate)
+        return dueScheduleRepository.findByStatusAndDueDateBetween(DueStatus.ACTIVE, today, endDate)
                 .stream()
                 .map(dueScheduleMapper::toDto)
                 .toList();
     }
 
     /**
-     * Holt Fälligkeiten in einem Zeitraum.
+     * Holt ALLE Fälligkeiten die zur Abrechnung bereit sind.
+     * Das sind alle AKTIVEN Fälligkeiten bis zum Stichtag (inkl. überfällige).
+     *
+     * DIESE METHODE WIRD VOM RECHNUNGSLAUF VERWENDET!
+     */
+    @Transactional(readOnly = true)
+    public List<DueScheduleDto> getDueSchedulesReadyForBilling(LocalDate billingDate) {
+        if (billingDate == null) {
+            billingDate = LocalDate.now();
+        }
+
+        return dueScheduleRepository.findByStatusAndDueDateLessThanEqual(DueStatus.ACTIVE, billingDate)
+                .stream()
+                .map(dueScheduleMapper::toDto)
+                .toList();
+    }
+
+    /**
+     * Holt alle Fälligkeiten die zur Abrechnung bereit sind (bis heute).
+     */
+    @Transactional(readOnly = true)
+    public List<DueScheduleDto> getDueSchedulesReadyForBilling() {
+        return getDueSchedulesReadyForBilling(LocalDate.now());
+    }
+
+    /**
+     * Holt Fälligkeiten in einem Zeitraum (alle Status).
      */
     @Transactional(readOnly = true)
     public List<DueScheduleDto> getDueSchedulesByPeriod(LocalDate start, LocalDate end) {
@@ -189,125 +166,7 @@ public class DueScheduleService {
     }
 
     /**
-     * Ändert den Status einer Fälligkeit.
-     */
-    public DueScheduleDto changeStatus(UUID id, DueStatus newStatus) {
-        DueSchedule dueSchedule = dueScheduleRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Fälligkeit " + id + " nicht gefunden"));
-
-        DueStatus oldStatus = dueSchedule.getStatus();
-        dueSchedule.setStatus(newStatus);
-
-        DueSchedule updated = dueScheduleRepository.save(dueSchedule);
-
-        logger.info("Changed due schedule status: id={}, oldStatus={}, newStatus={}",
-                updated.getId(), oldStatus, newStatus);
-
-        return dueScheduleMapper.toDto(updated);
-    }
-
-    /**
-     * Markiert eine Fälligkeit als abgerechnet (COMPLETED).
-     * Wird vom Rechnungslauf aufgerufen.
-     */
-    public DueScheduleDto markAsCompleted(UUID id) {
-        return changeStatus(id, DueStatus.COMPLETED);
-    }
-
-    /**
-     * Pausiert eine Fälligkeit.
-     */
-    public DueScheduleDto pauseDueSchedule(UUID id) {
-        return changeStatus(id, DueStatus.PAUSED);
-    }
-
-    /**
-     * Reaktiviert eine pausierte Fälligkeit.
-     */
-    public DueScheduleDto resumeDueSchedule(UUID id) {
-        return changeStatus(id, DueStatus.ACTIVE);
-    }
-
-    /**
-     * Löscht eine Fälligkeit.
-     */
-    public void deleteDueSchedule(UUID id) {
-        DueSchedule dueSchedule = dueScheduleRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Fälligkeit " + id + " nicht gefunden"));
-
-
-        dueScheduleRepository.delete(dueSchedule);
-        logger.info("Deleted due schedule: id={}", id);
-    }
-
-    /**
-     * Statistiken für Dashboard (Anzahl nach Status).
-     */
-    @Transactional(readOnly = true)
-    public DueScheduleStatisticsDto getDueScheduleStatistics() {
-        long active = dueScheduleRepository.countByStatus(DueStatus.ACTIVE);
-        long paused = dueScheduleRepository.countByStatus(DueStatus.PAUSED);
-        long suspended = dueScheduleRepository.countByStatus(DueStatus.SUSPENDED);
-        long completed = dueScheduleRepository.countByStatus(DueStatus.COMPLETED);
-
-        //return new DueScheduleStatisticsDto(active, paused, suspended, completed);
-        return null;
-    }
-
-    /**
-     * Fälligkeitspläne für ein Abonnement automatisch generieren (nur Termine).
-     */
-    /**
-     * Fälligkeitspläne für ein Abonnement automatisch generieren (nur Termine).
-     */
-    public List<DueScheduleDto> generateDueSchedulesForSubscription(UUID subscriptionId, int months) {
-        Subscription subscription = subscriptionRepository.findById(subscriptionId)
-                .orElseThrow(() -> new ResourceNotFoundException("Abo " + subscriptionId + " nicht gefunden"));
-
-        // Startdatum: letzter Plan oder Abo-Start
-        LocalDate startDate = getLastDueDateForSubscription(subscriptionId);
-        if (startDate == null) {
-            startDate = subscription.getStartDate();
-        } else {
-            startDate = startDate.plusMonths(1); // Nach letzter Fälligkeit
-        }
-
-        List<DueScheduleDto> generated = new java.util.ArrayList<>();
-
-        for (int i = 0; i < months; i++) {
-            LocalDate periodStart = startDate.plusMonths(i);
-            LocalDate periodEnd = periodStart.plusMonths(1).minusDays(1);
-            LocalDate dueDate = periodStart; // Fällig am ersten Tag der Periode
-
-            DueScheduleDto dto = new DueScheduleDto();
-            dto.setSubscriptionId(subscriptionId);
-            dto.setPeriodStart(periodStart);
-            dto.setPeriodEnd(periodEnd);
-            dto.setDueDate(dueDate);
-            dto.setStatus(DueStatus.ACTIVE);
-
-            generated.add(createDueSchedule(dto));
-        }
-
-        logger.info("Generated {} due schedules for subscription {}", months, subscriptionId);
-        return generated;
-    }
-
-    /**
-     * Holt alle Fälligkeiten die zur Abrechnung bereit sind.
-     * (Status ACTIVE und Datum in der Vergangenheit oder heute)
-     */
-    @Transactional(readOnly = true)
-    public List<DueScheduleDto> getDueSchedulesReadyForBilling() {
-        LocalDate today = LocalDate.now();
-        return dueScheduleRepository.findByStatusAndDueDateLessThanEqual(DueStatus.ACTIVE, today)
-                .stream()
-                .map(dueScheduleMapper::toDto)
-                .toList();
-    }
-
-    /**
-     * Holt alle Fälligkeiten.
+     * Holt alle Fälligkeiten (für Admin-Übersicht).
      */
     @Transactional(readOnly = true)
     public List<DueScheduleDto> getAllDueSchedules() {
@@ -338,19 +197,324 @@ public class DueScheduleService {
     }
 
     /**
-     * Holt das letzte Fälligkeitsdatum für ein Abonnement.
+     * Statistiken für Dashboard.
      */
-    private LocalDate getLastDueDateForSubscription(UUID subscriptionId) {
-        return dueScheduleRepository.findBySubscriptionIdOrderByDueDateDesc(subscriptionId)
-                .stream()
-                .findFirst()
-                .map(DueSchedule::getDueDate)
-                .orElse(null);
+    @Transactional(readOnly = true)
+    public DueScheduleStatisticsDto getDueScheduleStatistics() {
+        long active = dueScheduleRepository.countByStatus(DueStatus.ACTIVE);
+        long paused = dueScheduleRepository.countByStatus(DueStatus.PAUSED);
+        long suspended = dueScheduleRepository.countByStatus(DueStatus.SUSPENDED);
+        long completed = dueScheduleRepository.countByStatus(DueStatus.COMPLETED);
+
+        // Überfällige aktive Fälligkeiten
+        LocalDate today = LocalDate.now();
+        long overdue = dueScheduleRepository.countByStatusAndDueDateBefore(DueStatus.ACTIVE, today);
+
+        return null;//new DueScheduleStatisticsDto(active, paused, suspended, completed, overdue);
     }
 
-    // ---------------------------------------------------------
-    // Validierungsmethoden
-    // ---------------------------------------------------------
+    // ===============================================================================================
+    // BENUTZER-ACTIONS (Beschränkt auf ACTIVE/PAUSED)
+    // ===============================================================================================
+
+    /**
+     * Pausiert eine Fälligkeit (nur ACTIVE -> PAUSED erlaubt).
+     * COMPLETED Fälligkeiten können NICHT mehr geändert werden!
+     */
+    public DueScheduleDto pauseDueSchedule(UUID id) {
+        DueSchedule dueSchedule = dueScheduleRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Fälligkeit " + id + " nicht gefunden"));
+
+        if (dueSchedule.getStatus() == DueStatus.COMPLETED) {
+            throw new IllegalStateException("Abgerechnete Fälligkeiten können nicht pausiert werden (ID: " + id + ")");
+        }
+
+        if (dueSchedule.getStatus() != DueStatus.ACTIVE) {
+            throw new IllegalStateException("Nur aktive Fälligkeiten können pausiert werden (Status: " + dueSchedule.getStatus() + ")");
+        }
+
+        dueSchedule.setStatus(DueStatus.PAUSED);
+        DueSchedule updated = dueScheduleRepository.save(dueSchedule);
+
+        logger.info("Paused due schedule: id={}, dueNumber={}", updated.getId(), updated.getDueNumber());
+        return dueScheduleMapper.toDto(updated);
+    }
+
+    /**
+     * Reaktiviert eine pausierte Fälligkeit (nur PAUSED -> ACTIVE erlaubt).
+     */
+    public DueScheduleDto resumeDueSchedule(UUID id) {
+        DueSchedule dueSchedule = dueScheduleRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Fälligkeit " + id + " nicht gefunden"));
+
+        if (dueSchedule.getStatus() == DueStatus.COMPLETED) {
+            throw new IllegalStateException("Abgerechnete Fälligkeiten können nicht reaktiviert werden (ID: " + id + ")");
+        }
+
+        if (dueSchedule.getStatus() != DueStatus.PAUSED) {
+            throw new IllegalStateException("Nur pausierte Fälligkeiten können reaktiviert werden (Status: " + dueSchedule.getStatus() + ")");
+        }
+
+        dueSchedule.setStatus(DueStatus.ACTIVE);
+        DueSchedule updated = dueScheduleRepository.save(dueSchedule);
+
+        logger.info("Resumed due schedule: id={}, dueNumber={}", updated.getId(), updated.getDueNumber());
+        return dueScheduleMapper.toDto(updated);
+    }
+
+    // ===============================================================================================
+    // SYSTEM-METHODEN (Nur für InvoiceBatchService und Admin)
+    // ===============================================================================================
+
+    /**
+     * Markiert eine Fälligkeit als abgerechnet (COMPLETED).
+     *
+     * KRITISCH: Diese Methode darf NUR vom InvoiceBatchService aufgerufen werden!
+     * Sie setzt automatisch auch die invoiceId und invoiceBatchId.
+     *
+     * @param id Fälligkeits-ID
+     * @param invoiceId Rechnung die für diese Fälligkeit erstellt wurde
+     * @param invoiceBatchId Batch-ID des Rechnungslaufs
+     * @return Aktualisierte Fälligkeit
+     */
+    @Transactional
+    public DueScheduleDto markAsCompleted(UUID id, UUID invoiceId, String invoiceBatchId) {
+        DueSchedule dueSchedule = dueScheduleRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Fälligkeit " + id + " nicht gefunden"));
+
+        if (dueSchedule.getStatus() == DueStatus.COMPLETED) {
+            logger.warn("Due schedule {} is already completed - skipping", id);
+            return dueScheduleMapper.toDto(dueSchedule);
+        }
+
+        if (dueSchedule.getStatus() != DueStatus.ACTIVE) {
+            throw new IllegalStateException("Nur aktive Fälligkeiten können als abgerechnet markiert werden (Status: " + dueSchedule.getStatus() + ")");
+        }
+
+        // Status und Verknüpfungen setzen
+        dueSchedule.setStatus(DueStatus.COMPLETED);
+        dueSchedule.setInvoiceId(invoiceId);
+        dueSchedule.setInvoiceBatchId(invoiceBatchId);
+
+        DueSchedule updated = dueScheduleRepository.save(dueSchedule);
+
+        logger.info("Marked due schedule as completed: id={}, dueNumber={}, invoiceId={}, batchId={}",
+                updated.getId(), updated.getDueNumber(), invoiceId, invoiceBatchId);
+
+        return dueScheduleMapper.toDto(updated);
+    }
+
+    /**
+     * Überladene Methode für Rückwärtskompatibilität.
+     * DEPRECATED: Verwenden Sie die Variante mit invoiceId und batchId!
+     */
+    @Deprecated
+    public DueScheduleDto markAsCompleted(UUID id) {
+        logger.warn("DEPRECATED: markAsCompleted ohne invoiceId aufgerufen für DueSchedule {}", id);
+        return markAsCompleted(id, null, null);
+    }
+
+    /**
+     * Rollback einer abgerechneten Fälligkeit zurück auf ACTIVE.
+     *
+     * KRITISCH: Nur für Fehlerkorrekturen! Normalerweise sollten abgerechnete
+     * Fälligkeiten NIEMALS zurückgesetzt werden.
+     *
+     * @param id Fälligkeits-ID
+     * @param reason Grund für den Rollback (für Audit-Log)
+     * @return Zurückgesetzte Fälligkeit
+     */
+    @Transactional
+    public DueScheduleDto rollbackCompleted(UUID id, String reason) {
+        DueSchedule dueSchedule = dueScheduleRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Fälligkeit " + id + " nicht gefunden"));
+
+        if (dueSchedule.getStatus() != DueStatus.COMPLETED) {
+            throw new IllegalStateException("Nur abgerechnete Fälligkeiten können zurückgesetzt werden (Status: " + dueSchedule.getStatus() + ")");
+        }
+
+        // WARNUNG loggen
+        logger.warn("ROLLBACK: Resetting completed due schedule {} to ACTIVE. Reason: {}", id, reason);
+
+        // Status zurücksetzen
+        dueSchedule.setStatus(DueStatus.ACTIVE);
+        dueSchedule.setInvoiceId(null);
+        dueSchedule.setInvoiceBatchId(null);
+
+        DueSchedule updated = dueScheduleRepository.save(dueSchedule);
+        return dueScheduleMapper.toDto(updated);
+    }
+
+    // ===============================================================================================
+    // MANUELLE ERSTELLUNG (Nur für Nachkorrekturen)
+    // ===============================================================================================
+
+    /**
+     * Erstellt eine neue Fälligkeit manuell.
+     *
+     * HINWEIS: Normalerweise werden Fälligkeiten automatisch beim Abo-Erstellen generiert.
+     * Diese Methode ist nur für Nachkorrekturen oder spezielle Fälle gedacht.
+     */
+    public DueScheduleDto createDueSchedule(DueScheduleDto dto) {
+        validateDueSchedule(dto);
+
+        Subscription subscription = subscriptionRepository.findById(dto.getSubscriptionId())
+                .orElseThrow(() -> new ResourceNotFoundException("Abo " + dto.getSubscriptionId() + " nicht gefunden"));
+
+        // Prüfen, ob sich die Perioden überschneiden
+        validateNoPeriodOverlap(subscription.getId(), dto.getPeriodStart(), dto.getPeriodEnd(), null);
+
+        DueSchedule entity = dueScheduleMapper.toEntity(dto);
+        entity.setSubscription(subscription);
+
+        // Fälligkeitsnummer generieren, falls nicht gesetzt
+        if (entity.getDueNumber() == null || entity.getDueNumber().isEmpty()) {
+            entity.setDueNumber(numberGeneratorService.generateDueNumber());
+        }
+
+        // Standardstatus setzen (niemals COMPLETED bei manueller Erstellung!)
+        if (entity.getStatus() == null || entity.getStatus() == DueStatus.COMPLETED) {
+            entity.setStatus(DueStatus.ACTIVE);
+        }
+
+        // Keine Beträge, invoiceId oder batchId bei manueller Erstellung!
+        entity.setInvoiceId(null);
+        entity.setInvoiceBatchId(null);
+
+        DueSchedule saved = dueScheduleRepository.save(entity);
+
+        logger.info("Manually created due schedule: id={}, dueNumber={}, dueDate={}, subscription={}",
+                saved.getId(), saved.getDueNumber(), saved.getDueDate(), saved.getSubscription().getId());
+
+        return dueScheduleMapper.toDto(saved);
+    }
+
+    /**
+     * Aktualisiert eine bestehende Fälligkeit.
+     *
+     * EINSCHRÄNKUNGEN:
+     * - COMPLETED Fälligkeiten können NICHT geändert werden
+     * - invoiceId und batchId können nicht manuell gesetzt werden
+     */
+    public DueScheduleDto updateDueSchedule(UUID id, DueScheduleDto dto) {
+        DueSchedule existing = dueScheduleRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Fälligkeit " + id + " nicht gefunden"));
+
+        if (existing.getStatus() == DueStatus.COMPLETED) {
+            throw new IllegalStateException("Abgerechnete Fälligkeiten können nicht bearbeitet werden (ID: " + id + ")");
+        }
+
+        // Validierung: Keine Überschneidung der Perioden (außer mit sich selbst)
+        validateNoPeriodOverlap(existing.getSubscription().getId(), dto.getPeriodStart(), dto.getPeriodEnd(), id);
+
+        // Nur Termine und Status aktualisieren - keine Beträge oder Verknüpfungen!
+        existing.setDueDate(dto.getDueDate());
+        existing.setPeriodStart(dto.getPeriodStart());
+        existing.setPeriodEnd(dto.getPeriodEnd());
+
+        // Status nur zwischen ACTIVE/PAUSED wechseln lassen
+        if (dto.getStatus() == DueStatus.COMPLETED) {
+            throw new IllegalArgumentException("Status COMPLETED kann nicht manuell gesetzt werden");
+        }
+        if (dto.getStatus() != null) {
+            existing.setStatus(dto.getStatus());
+        }
+
+        DueSchedule updated = dueScheduleRepository.save(existing);
+
+        logger.info("Updated due schedule: id={}, status={}, dueDate={}",
+                updated.getId(), updated.getStatus(), updated.getDueDate());
+
+        return dueScheduleMapper.toDto(updated);
+    }
+
+    /**
+     * Löscht eine Fälligkeit.
+     *
+     * EINSCHRÄNKUNGEN:
+     * - COMPLETED Fälligkeiten können NICHT gelöscht werden
+     * - Nur leere Fälligkeiten ohne Rechnungsverknüpfung
+     */
+    public void deleteDueSchedule(UUID id) {
+        DueSchedule dueSchedule = dueScheduleRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Fälligkeit " + id + " nicht gefunden"));
+
+        if (dueSchedule.getStatus() == DueStatus.COMPLETED) {
+            throw new IllegalStateException("Abgerechnete Fälligkeiten können nicht gelöscht werden (ID: " + id + ")");
+        }
+
+        if (dueSchedule.getInvoiceId() != null) {
+            throw new IllegalStateException("Fälligkeiten mit Rechnungsverknüpfung können nicht gelöscht werden (ID: " + id + ")");
+        }
+
+        dueScheduleRepository.delete(dueSchedule);
+        logger.info("Deleted due schedule: id={}, dueNumber={}", id, dueSchedule.getDueNumber());
+    }
+
+    // ===============================================================================================
+    // BULK-OPERATIONEN
+    // ===============================================================================================
+
+    /**
+     * Generiert zusätzliche Fälligkeitspläne für ein bestehendes Abonnement.
+     *
+     * HINWEIS: Normalerweise sollte dies nicht nötig sein, da Fälligkeiten
+     * automatisch beim Abo-Erstellen für 12 Monate generiert werden.
+     */
+    public List<DueScheduleDto> generateAdditionalDueSchedules(UUID subscriptionId, int additionalMonths) {
+        Subscription subscription = subscriptionRepository.findById(subscriptionId)
+                .orElseThrow(() -> new ResourceNotFoundException("Abo " + subscriptionId + " nicht gefunden"));
+
+        if (subscription.getSubscriptionStatus() != SubscriptionStatus.ACTIVE) {
+            throw new IllegalStateException("Zusätzliche Fälligkeiten können nur für aktive Abonnements erstellt werden");
+        }
+
+        // Finde die letzte bestehende Fälligkeit
+        Optional<DueSchedule> lastSchedule = dueScheduleRepository
+                .findBySubscriptionIdOrderByPeriodEndDesc(subscriptionId)
+                .stream()
+                .findFirst();
+
+        LocalDate nextPeriodStart;
+        if (lastSchedule.isPresent()) {
+            nextPeriodStart = lastSchedule.get().getPeriodEnd().plusDays(1);
+        } else {
+            nextPeriodStart = subscription.getStartDate();
+        }
+
+        List<DueScheduleDto> generated = new java.util.ArrayList<>();
+        LocalDate subscriptionEnd = subscription.getEndDate();
+
+        for (int i = 0; i < additionalMonths; i++) {
+            if (nextPeriodStart.isAfter(subscriptionEnd)) {
+                break;
+            }
+
+            LocalDate periodEnd = nextPeriodStart.plusMonths(1).minusDays(1);
+            if (periodEnd.isAfter(subscriptionEnd)) {
+                periodEnd = subscriptionEnd;
+            }
+
+            DueScheduleDto dto = new DueScheduleDto();
+            dto.setSubscriptionId(subscriptionId);
+            dto.setPeriodStart(nextPeriodStart);
+            dto.setPeriodEnd(periodEnd);
+            dto.setDueDate(nextPeriodStart);
+            dto.setStatus(DueStatus.ACTIVE);
+
+            generated.add(createDueSchedule(dto));
+            nextPeriodStart = periodEnd.plusDays(1);
+        }
+
+        logger.info("Generated {} additional due schedules for subscription {}",
+                generated.size(), subscriptionId);
+
+        return generated;
+    }
+
+    // ===============================================================================================
+    // VALIDIERUNGS-METHODEN
+    // ===============================================================================================
 
     private void validateDueSchedule(DueScheduleDto dto) {
         if (dto.getSubscriptionId() == null) {
@@ -364,6 +528,9 @@ public class DueScheduleService {
         }
         if (dto.getDueDate() == null) {
             throw new IllegalArgumentException("Fälligkeit muss ein Fälligkeitsdatum haben");
+        }
+        if (dto.getStatus() == DueStatus.COMPLETED) {
+            throw new IllegalArgumentException("Status COMPLETED kann nicht manuell gesetzt werden");
         }
     }
 

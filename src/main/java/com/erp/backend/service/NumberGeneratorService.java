@@ -62,6 +62,16 @@ public class NumberGeneratorService {
     }
 
     /**
+     * Generiert eine eindeutige Vorgangsnummer
+     * Format: VG-YYYYMMDD-XXXXX
+     */
+    public String generateVorgangsnummer() {
+        String datePart = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyyMMdd"));
+        String sequencePart = String.format("%05d", System.currentTimeMillis() % 100000);
+        return "VG-" + datePart + "-" + sequencePart;
+    }
+
+    /**
      * Generiert eine Referenznummer für Zahlungen
      * Format: PAY-YYYYMMDD-NNNNNN
      */

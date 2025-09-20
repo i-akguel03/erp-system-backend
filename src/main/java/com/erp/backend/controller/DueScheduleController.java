@@ -164,8 +164,9 @@ public class DueScheduleController {
     public ResponseEntity<List<DueScheduleDto>> generateDueSchedulesForSubscription(
             @PathVariable UUID subscriptionId,
             @RequestParam int months) {
-        List<DueScheduleDto> generatedSchedules = dueScheduleService.generateDueSchedulesForSubscription(subscriptionId, months);
-        return ResponseEntity.status(HttpStatus.CREATED).body(generatedSchedules);
+//        List<DueScheduleDto> generatedSchedules = dueScheduleService.generateDueSchedulesForSubscription(subscriptionId, months);
+//        return ResponseEntity.status(HttpStatus.CREATED).body(generatedSchedules);
+        return  ResponseEntity.ok(null);
     }
 
     /**
