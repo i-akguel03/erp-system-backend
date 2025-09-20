@@ -1,17 +1,21 @@
+// ===============================================================================================
+// 4. INVOICE FACTORY (Rechnung-Erstellung)
+// ===============================================================================================
+
 package com.erp.backend.service;
 
 import com.erp.backend.domain.*;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.List;
 
 /**
- * Factory für die Erzeugung von Rechnungen und den zugehörigen offenen Posten (OpenItems).
+ * Factory für Invoice-Erstellung.
+ * Verantwortlich für: Rechnung-Assembly, Business-Rules für Invoice
  */
-@Component
+@Service
 public class InvoiceFactory {
 
     private final InvoiceNumberGeneratorService invoiceNumberGenerator;
@@ -20,99 +24,113 @@ public class InvoiceFactory {
         this.invoiceNumberGenerator = invoiceNumberGenerator;
     }
 
-    /**
-     * Erstellt eine Invoice inkl. InvoiceItems aus einer Liste von DueSchedules.
-     *
-     * @param subscription   Abonnement/Subscription
-     * @param dueSchedules   Liste der offenen Fälligkeiten
-     * @param billingRunDate Datum des Rechnungslaufs
-     * @return fertige Invoice
-     */
-    public Invoice createInvoice(Subscription subscription,
-                                 List<DueSchedule> dueSchedules,
-                                 LocalDate billingRunDate) {
+    public Invoice createInvoiceForDueSchedule(DueSchedule dueSchedule, LocalDate billingDate,
+                                               String batchId, boolean isOverdue) {
 
+        Subscription subscription = dueSchedule.getSubscription();
         Customer customer = subscription.getContract().getCustomer();
 
         Invoice invoice = new Invoice();
         invoice.setInvoiceNumber(invoiceNumberGenerator.generateInvoiceNumber());
         invoice.setCustomer(customer);
-        invoice.setInvoiceDate(billingRunDate);
-        invoice.setStatus(Invoice.InvoiceStatus.DRAFT);
+        invoice.setSubscription(subscription);
         invoice.setBillingAddress(customer.getBillingAddress());
+        invoice.setInvoiceDate(billingDate);
+        invoice.setDueDate(billingDate.plusDays(14));
+        invoice.setStatus(Invoice.InvoiceStatus.ACTIVE);
         invoice.setInvoiceType(Invoice.InvoiceType.AUTO_GENERATED);
+        invoice.setInvoiceBatchId(batchId);
+        invoice.setPaymentTerms("Zahlbar innerhalb von 14 Tagen");
+        invoice.setTaxRate(BigDecimal.valueOf(19));
 
-        // Für jede DueSchedule ein InvoiceItem erzeugen
-        for (DueSchedule dueSchedule : dueSchedules) {
-            InvoiceItem item = createInvoiceItemFromDueSchedule(dueSchedule, invoice);
-            invoice.addInvoiceItem(item);
-        }
-
-        // Gesamtsummen berechnen
+        // Invoice Item erstellen
+        InvoiceItem item = createInvoiceItem(dueSchedule, isOverdue);
+        invoice.addInvoiceItem(item);
         invoice.calculateTotals();
+
+        // Notizen
+        invoice.setNotes(createInvoiceNotes(dueSchedule, billingDate, isOverdue));
 
         return invoice;
     }
 
-    /**
-     * Erstellt ein InvoiceItem aus einer DueSchedule.
-     *
-     * @param dueSchedule DueSchedule
-     * @param invoice     Zugehörige Invoice
-     * @return InvoiceItem
-     */
-    private InvoiceItem createInvoiceItemFromDueSchedule(DueSchedule dueSchedule, Invoice invoice) {
+    private InvoiceItem createInvoiceItem(DueSchedule dueSchedule, boolean isOverdue) {
+        Subscription subscription = dueSchedule.getSubscription();
+
         InvoiceItem item = new InvoiceItem();
-        item.setInvoice(invoice);
-
-        String description = createDescriptionForPeriod(
-                dueSchedule.getSubscription(),
-                dueSchedule.getPeriodStart(),
-                dueSchedule.getPeriodEnd()
-        );
-
-        item.setDescription(description);
+        item.setDescription(createItemDescription(subscription, dueSchedule, isOverdue));
         item.setQuantity(BigDecimal.ONE);
-        //item.setUnitPrice(dueSchedule.get());
-        item.calculateLineTotal();
+        item.setUnitPrice(getPrice(subscription));
+        item.setItemType(InvoiceItem.InvoiceItemType.SUBSCRIPTION);
+        item.setTaxRate(BigDecimal.valueOf(19));
+        item.setPeriodStart(dueSchedule.getPeriodStart());
+        item.setPeriodEnd(dueSchedule.getPeriodEnd());
 
+        if (subscription.getProduct() != null) {
+            item.setProductCode(subscription.getProduct().getProductNumber());
+            item.setProductName(subscription.getProduct().getName());
+        } else {
+            item.setProductName(subscription.getProductName());
+        }
+
+        item.calculateLineTotal();
         return item;
     }
 
-    /**
-     * Erstellt die Beschreibung für die InvoiceItem-Position (Produktname + Zeitraum).
-     */
-    private String createDescriptionForPeriod(Subscription subscription,
-                                              LocalDate periodStart,
-                                              LocalDate periodEnd) {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy");
-
-        String subscriptionName = subscription.getProduct() != null ?
-                subscription.getProduct().getName() : "Abonnement";
-
-        if (periodEnd != null) {
-            return String.format("%s für Zeitraum %s - %s",
-                    subscriptionName,
-                    periodStart.format(formatter),
-                    periodEnd.format(formatter));
-        } else {
-            return String.format("%s ab %s",
-                    subscriptionName,
-                    periodStart.format(formatter));
+    private BigDecimal getPrice(Subscription subscription) {
+        if (subscription.getMonthlyPrice() != null &&
+                subscription.getMonthlyPrice().compareTo(BigDecimal.ZERO) > 0) {
+            return subscription.getMonthlyPrice();
         }
+
+        if (subscription.getProduct() != null &&
+                subscription.getProduct().getPrice() != null &&
+                subscription.getProduct().getPrice().compareTo(BigDecimal.ZERO) > 0) {
+            return subscription.getProduct().getPrice();
+        }
+
+        return BigDecimal.ZERO;
     }
 
-    /**
-     * Erzeugt einen OpenItem aus einem InvoiceItem.
-     * Wird vom InvoiceBatchService verwendet.
-     */
-    public OpenItem createOpenItem(Invoice invoice, InvoiceItem item) {
-        OpenItem openItem = new OpenItem();
-        openItem.setInvoice(invoice);
-        openItem.setDescription(item.getDescription());
-        openItem.setAmount(item.getLineTotal());
-        openItem.setDueDate(invoice.getDueDate());
-        openItem.setStatus(OpenItem.OpenItemStatus.OPEN);
-        return openItem;
+    private String createItemDescription(Subscription subscription, DueSchedule dueSchedule, boolean isOverdue) {
+        String productName = subscription.getProductName() != null ?
+                subscription.getProductName() :
+                (subscription.getProduct() != null ? subscription.getProduct().getName() : "Abonnement");
+
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy");
+        String baseDescription = String.format("%s für Periode %s bis %s",
+                productName,
+                dueSchedule.getPeriodStart().format(formatter),
+                dueSchedule.getPeriodEnd().format(formatter));
+
+        if (isOverdue) {
+            return String.format("%s ⚠ ÜBERFÄLLIG seit %s ⚠",
+                    baseDescription, dueSchedule.getDueDate().format(formatter));
+        }
+
+        return baseDescription;
+    }
+
+    private String createInvoiceNotes(DueSchedule dueSchedule, LocalDate billingDate, boolean isOverdue) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy");
+
+        String template = isOverdue ?
+                "Automatisch erstellt am %s für ÜBERFÄLLIGE Fälligkeit %s (ursprünglich fällig: %s, Periode: %s bis %s)" :
+                "Automatisch erstellt am %s für Fälligkeit %s (Periode: %s bis %s)";
+
+        if (isOverdue) {
+            return String.format(template,
+                    billingDate.format(formatter),
+                    dueSchedule.getDueNumber(),
+                    dueSchedule.getDueDate().format(formatter),
+                    dueSchedule.getPeriodStart().format(formatter),
+                    dueSchedule.getPeriodEnd().format(formatter));
+        } else {
+            return String.format(template,
+                    billingDate.format(formatter),
+                    dueSchedule.getDueNumber(),
+                    dueSchedule.getPeriodStart().format(formatter),
+                    dueSchedule.getPeriodEnd().format(formatter));
+        }
     }
 }

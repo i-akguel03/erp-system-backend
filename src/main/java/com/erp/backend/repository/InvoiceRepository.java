@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
@@ -47,8 +48,6 @@ public interface InvoiceRepository extends JpaRepository<Invoice, UUID> {
     @Query("SELECT i FROM Invoice i LEFT JOIN FETCH i.invoiceItems WHERE i.customer = :customer ORDER BY i.invoiceDate DESC")
     List<Invoice> findByCustomer(@Param("customer") Customer customer);
 
-    @Query("SELECT i FROM Invoice i LEFT JOIN FETCH i.invoiceItems WHERE i.status = :status ORDER BY i.invoiceDate DESC")
-    List<Invoice> findByStatus(@Param("status") Invoice.InvoiceStatus status);
     /**
      * Findet überfällige Rechnungen
      */
@@ -66,4 +65,35 @@ public interface InvoiceRepository extends JpaRepository<Invoice, UUID> {
 
     @Query("SELECT i FROM Invoice i WHERE i.id NOT IN (SELECT DISTINCT oi.invoice.id FROM OpenItem oi WHERE oi.invoice IS NOT NULL)")
     List<Invoice> findInvoicesWithoutOpenItems();
+
+
+    /**
+     * Findet die letzten 5 Invoices nach Rechnungsdatum
+     */
+    List<Invoice> findTop5ByOrderByInvoiceDateDesc();
+
+    /**
+     * Alternative nach Erstellungsdatum
+     */
+    @Query("SELECT i FROM Invoice i ORDER BY i.createdAt DESC")
+    List<Invoice> findTop5ByOrderByCreatedAtDesc();
+
+    /**
+     * Summiert Gesamtbeträge nach Status
+     */
+    @Query("SELECT COALESCE(SUM(i.totalAmount), 0) FROM Invoice i WHERE i.status = :status")
+    BigDecimal sumTotalAmountByStatus(@Param("status") Invoice.InvoiceStatus status);
+
+    /**
+     * Findet Invoices eines bestimmten Kunden
+     */
+    @Query("SELECT i FROM Invoice i WHERE i.customer.id = :customerId")
+    List<Invoice> findByCustomerId(@Param("customerId") Long customerId);
+
+    /**
+     * Findet Invoices mit bestimmtem Status
+     */
+    @Query("SELECT i FROM Invoice i WHERE i.status = :status")
+    List<Invoice> findByStatus(@Param("status") Invoice.InvoiceStatus status);
+
 }
