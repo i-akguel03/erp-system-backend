@@ -124,6 +124,7 @@ public class MasterDataInitializer {
         // Standard Test-Benutzer erstellen
         userDetailsService.createUserSafe("admin", "admin", Role.ROLE_ADMIN);
         userDetailsService.createUserSafe("a", "a", Role.ROLE_ADMIN);
+        userDetailsService.createUserSafe("string", "string", Role.ROLE_ADMIN);
         userDetailsService.createUserSafe("user", "user", Role.ROLE_USER);
 
         logger.debug("✓ Test-Benutzer erstellt");

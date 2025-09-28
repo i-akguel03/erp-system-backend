@@ -1,12 +1,10 @@
-// ===============================================================================================
-// CONTROLLER FÜR VORGÄNGE
-// ===============================================================================================
-
 package com.erp.backend.controller;
 
 import com.erp.backend.domain.Vorgang;
 import com.erp.backend.domain.VorgangStatus;
 import com.erp.backend.domain.VorgangTyp;
+import com.erp.backend.dto.VorgangDTO;
+import com.erp.backend.mapper.VorgangMapper;
 import com.erp.backend.service.VorgangService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -15,32 +13,46 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/vorgaenge")
 public class VorgangController {
 
     private final VorgangService vorgangService;
+    private final VorgangMapper vorgangMapper;
 
-    public VorgangController(VorgangService vorgangService) {
+    public VorgangController(VorgangService vorgangService, VorgangMapper vorgangMapper) {
         this.vorgangService = vorgangService;
+        this.vorgangMapper = vorgangMapper;
     }
 
     /**
      * Alle Vorgänge paginiert
      */
     @GetMapping
-    public ResponseEntity<Page<Vorgang>> getAllVorgaenge(Pageable pageable) {
+    public ResponseEntity<Page<VorgangDTO>> getAllVorgaenge(Pageable pageable) {
         Page<Vorgang> vorgaenge = vorgangService.findAllePaginated(pageable);
-        return ResponseEntity.ok(vorgaenge);
+        Page<VorgangDTO> vorgaengeDTO = vorgaenge.map(vorgangMapper::toDTO);
+        return ResponseEntity.ok(vorgaengeDTO);
+    }
+
+    @GetMapping("/all")
+    public ResponseEntity<List<VorgangDTO>> getAllVorgaengeOhnePaging() {
+        List<Vorgang> vorgaenge = vorgangService.findAlleWithoutPaginated();
+        List<VorgangDTO> vorgaengeDTO = vorgaenge.stream()
+                .map(vorgangMapper::toDTO)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(vorgaengeDTO);
     }
 
     /**
      * Einzelnen Vorgang abrufen
      */
     @GetMapping("/{id}")
-    public ResponseEntity<Vorgang> getVorgang(@PathVariable UUID id) {
+    public ResponseEntity<VorgangDTO> getVorgang(@PathVariable UUID id) {
         return vorgangService.findById(id)
+                .map(vorgangMapper::toDTO)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
@@ -49,36 +61,48 @@ public class VorgangController {
      * Vorgänge nach Typ
      */
     @GetMapping("/typ/{typ}")
-    public ResponseEntity<List<Vorgang>> getVorgaengeByTyp(@PathVariable VorgangTyp typ) {
+    public ResponseEntity<List<VorgangDTO>> getVorgaengeByTyp(@PathVariable VorgangTyp typ) {
         List<Vorgang> vorgaenge = vorgangService.findByTyp(typ);
-        return ResponseEntity.ok(vorgaenge);
+        List<VorgangDTO> vorgaengeDTO = vorgaenge.stream()
+                .map(vorgangMapper::toDTO)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(vorgaengeDTO);
     }
 
     /**
      * Vorgänge nach Status
      */
     @GetMapping("/status/{status}")
-    public ResponseEntity<List<Vorgang>> getVorgaengeByStatus(@PathVariable VorgangStatus status) {
+    public ResponseEntity<List<VorgangDTO>> getVorgaengeByStatus(@PathVariable VorgangStatus status) {
         List<Vorgang> vorgaenge = vorgangService.findByStatus(status);
-        return ResponseEntity.ok(vorgaenge);
+        List<VorgangDTO> vorgaengeDTO = vorgaenge.stream()
+                .map(vorgangMapper::toDTO)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(vorgaengeDTO);
     }
 
     /**
      * Aktuell laufende Vorgänge
      */
     @GetMapping("/laufend")
-    public ResponseEntity<List<Vorgang>> getLaufendeVorgaenge() {
+    public ResponseEntity<List<VorgangDTO>> getLaufendeVorgaenge() {
         List<Vorgang> laufende = vorgangService.findLaufendeVorgaenge();
-        return ResponseEntity.ok(laufende);
+        List<VorgangDTO> laufendeDTO = laufende.stream()
+                .map(vorgangMapper::toDTO)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(laufendeDTO);
     }
 
     /**
      * Rechnungsläufe der letzten X Tage
      */
     @GetMapping("/rechnungslaeufe")
-    public ResponseEntity<List<Vorgang>> getRecentRechnungslaeufe(@RequestParam(defaultValue = "30") int tage) {
+    public ResponseEntity<List<VorgangDTO>> getRecentRechnungslaeufe(@RequestParam(defaultValue = "30") int tage) {
         List<Vorgang> rechnungslaeufe = vorgangService.findRecentRechnungslaeufe(tage);
-        return ResponseEntity.ok(rechnungslaeufe);
+        List<VorgangDTO> rechnungslaeufeDTO = rechnungslaeufe.stream()
+                .map(vorgangMapper::toDTO)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(rechnungslaeufeDTO);
     }
 
     /**
@@ -94,9 +118,12 @@ public class VorgangController {
      * Langlaufende Vorgänge (mehr als X Minuten)
      */
     @GetMapping("/langlaufend")
-    public ResponseEntity<List<Vorgang>> getLanglaufendeVorgaenge(@RequestParam(defaultValue = "60") int minuten) {
+    public ResponseEntity<List<VorgangDTO>> getLanglaufendeVorgaenge(@RequestParam(defaultValue = "60") int minuten) {
         List<Vorgang> langlaufende = vorgangService.findLanglaufendeVorgaenge(minuten);
-        return ResponseEntity.ok(langlaufende);
+        List<VorgangDTO> langlaufendeDTO = langlaufende.stream()
+                .map(vorgangMapper::toDTO)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(langlaufendeDTO);
     }
 
     /**
@@ -110,18 +137,6 @@ public class VorgangController {
         } catch (Exception e) {
             return ResponseEntity.badRequest().body("Fehler beim Abbrechen: " + e.getMessage());
         }
-    }
-
-    /**
-     * Alte Vorgänge bereinigen
-     */
-    @DeleteMapping("/bereinigen")
-    public ResponseEntity<String> bereinigeAlteVorgaenge(
-            @RequestParam(defaultValue = "90") int tageAlt,
-            @RequestParam(defaultValue = "true") boolean nurErfolgreiche) {
-
-        int geloescht = 0; //vorgangService.bereinigeAlteVorgaenge(tageAlt, nurErfolgreiche);
-        return ResponseEntity.ok(String.format("✓ %d alte Vorgänge gelöscht (älter als %d Tage)", geloescht, tageAlt));
     }
 
     /**

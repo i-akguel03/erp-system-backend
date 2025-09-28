@@ -2,6 +2,7 @@ package com.erp.backend.repository;
 
 import com.erp.backend.domain.Invoice;
 import com.erp.backend.domain.Customer;
+import com.erp.backend.domain.Subscription;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -37,6 +38,30 @@ public interface InvoiceRepository extends JpaRepository<Invoice, UUID> {
     /**
      * Findet Rechnungen nach Status
      */
+
+    /**
+     * Findet alle Rechnungen einer Subscription mit bestimmtem Status
+     */
+    List<Invoice> findBySubscriptionAndStatus(Subscription subscription, Invoice.InvoiceStatus status);
+
+    /**
+     * Alternative mit Subscription-ID (falls bevorzugt)
+     */
+    @Query("SELECT i FROM Invoice i WHERE i.subscription.id = :subscriptionId AND i.status = :status")
+    List<Invoice> findBySubscriptionIdAndStatus(@Param("subscriptionId") UUID subscriptionId,
+                                                @Param("status") Invoice.InvoiceStatus status);
+
+    /**
+     * Findet alle Rechnungen einer Subscription
+     */
+    List<Invoice> findBySubscription(Subscription subscription);
+
+    /**
+     * Zählt offene Rechnungen einer Subscription
+     */
+    @Query("SELECT COUNT(i) FROM Invoice i WHERE i.subscription = :subscription AND i.status = :status")
+    long countBySubscriptionAndStatus(@Param("subscription") Subscription subscription,
+                                      @Param("status") Invoice.InvoiceStatus status);
 
 
     @Query("SELECT i FROM Invoice i LEFT JOIN FETCH i.invoiceItems LEFT JOIN FETCH i.customer ORDER BY i.invoiceDate DESC")

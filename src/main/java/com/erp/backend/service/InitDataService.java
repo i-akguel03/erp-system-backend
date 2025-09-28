@@ -31,7 +31,7 @@ import java.util.Random;
  */
 @Service
 @ConditionalOnProperty(name = "app.init.enabled", havingValue = "true")
-public class InitDataService implements ApplicationRunner {
+public class InitDataService  {
 
     private static final Logger logger = LoggerFactory.getLogger(InitDataService.class);
 
@@ -227,24 +227,24 @@ public class InitDataService implements ApplicationRunner {
         this.userDetailsService = userDetailsService;
     }
 
-    @Override
-    public void run(ApplicationArguments args) throws Exception {
-        if (!autoRunOnStartup) {
-            logger.info("Auto-run-on-startup is disabled. Skipping automatic data initialization.");
-            logger.info("Use REST endpoints at /api/init/* for manual initialization.");
-            return;
-        }
 
-        logger.info("🚀 Starting automatic data initialization with FULL mode and ALL-ACTIVE standard...");
-
-        try {
-            // Standard: Alle Entitäten auf ACTIVE
-            initData(InitMode.FULL, LocalDate.now(), InitConfig.allActive());
-            logger.info("✅ Data initialization completed successfully - ALL entities set to ACTIVE by default");
-        } catch (Exception e) {
-            logger.error("❌ Data initialization failed", e);
-        }
-    }
+//    public void run(ApplicationArguments args) throws Exception {
+//        if (!autoRunOnStartup) {
+//            logger.info("Auto-run-on-startup is disabled. Skipping automatic data initialization.");
+//            logger.info("Use REST endpoints at /api/init/* for manual initialization.");
+//            return;
+//        }
+//
+//        logger.info("🚀 Starting automatic data initialization with FULL mode and ALL-ACTIVE standard...");
+//
+//        try {
+//            // Standard: Alle Entitäten auf ACTIVE
+//            initData(InitMode.FULL, LocalDate.now(), InitConfig.allActive());
+//            logger.info("✅ Data initialization completed successfully - ALL entities set to ACTIVE by default");
+//        } catch (Exception e) {
+//            logger.error("❌ Data initialization failed", e);
+//        }
+//    }
 
     // ===============================================================================================
     // HAUPT-INITIALISIERUNGS-METHODEN

@@ -1,5 +1,6 @@
 package com.erp.backend.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -115,23 +116,33 @@ public class Vorgang {
     @Column(columnDefinition = "TEXT")
     private String metadaten;
 
+// Vorgang Entity - Anpassung für JSON-Serialisierung
+// Fügen Sie diese Annotationen zu den OneToMany-Beziehungen in Ihrer Vorgang-Klasse hinzu:
+
     /**
      * Verknüpfte Rechnungen
      */
     @OneToMany(mappedBy = "vorgang", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JsonIgnore  // Verhindert zirkuläre Referenzen
     private List<Invoice> rechnungen = new ArrayList<>();
 
     /**
      * Verknüpfte OpenItems
      */
     @OneToMany(mappedBy = "vorgang", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JsonIgnore  // Verhindert zirkuläre Referenzen
     private List<OpenItem> openItems = new ArrayList<>();
 
     /**
      * Verknüpfte DueSchedules
      */
     @OneToMany(mappedBy = "vorgang", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JsonIgnore  // Verhindert zirkuläre Referenzen
     private List<DueSchedule> dueSchedules = new ArrayList<>();
+
+// Alternative: JsonManagedReference verwenden
+// @JsonManagedReference("vorgang-rechnungen")
+// private List<Invoice> rechnungen = new ArrayList<>();
 
     // ===============================================================================================
     // KONSTRUKTOREN

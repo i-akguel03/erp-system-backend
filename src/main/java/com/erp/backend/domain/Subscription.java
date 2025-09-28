@@ -72,6 +72,9 @@ public class Subscription {
     @OneToMany(mappedBy = "subscription", fetch = FetchType.LAZY)
     private List<DueSchedule> paymentSchedules = new ArrayList<>();
 
+    @OneToMany(mappedBy = "subscription", fetch = FetchType.LAZY)
+    private List<DueSchedule> openItems = new ArrayList<>();
+
     public Subscription() {
     }
 
@@ -235,5 +238,13 @@ public class Subscription {
 
     public void setDeleted(boolean deleted) {
         this.deleted = deleted;
+    }
+
+    public List<DueSchedule> getOpenItems() {
+        return openItems;
+    }
+
+    public void setOpenItems(List<DueSchedule> openItems) {
+        this.openItems = openItems;
     }
 }

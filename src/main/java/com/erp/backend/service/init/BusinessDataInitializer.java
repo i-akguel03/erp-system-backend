@@ -1,11 +1,13 @@
 package com.erp.backend.service.init;
 
 import com.erp.backend.domain.*;
+import com.erp.backend.dto.SubscriptionDto;
 import com.erp.backend.repository.ContractRepository;
 import com.erp.backend.repository.CustomerRepository;
 import com.erp.backend.repository.ProductRepository;
 import com.erp.backend.repository.SubscriptionRepository;
 import com.erp.backend.service.NumberGeneratorService;
+import com.erp.backend.service.SubscriptionService;
 import com.erp.backend.service.VorgangService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,6 +37,7 @@ public class BusinessDataInitializer {
     // Repository-Dependencies
     private final ContractRepository contractRepository;
     private final SubscriptionRepository subscriptionRepository;
+    private final SubscriptionService subscriptionService;
     private final CustomerRepository customerRepository;
     private final ProductRepository productRepository;
 
@@ -48,13 +51,14 @@ public class BusinessDataInitializer {
      * KONSTRUKTOR mit Dependency Injection
      */
     public BusinessDataInitializer(ContractRepository contractRepository,
-                                   SubscriptionRepository subscriptionRepository,
+                                   SubscriptionRepository subscriptionRepository, SubscriptionService subscriptionService,
                                    CustomerRepository customerRepository,
                                    ProductRepository productRepository,
                                    NumberGeneratorService numberGeneratorService,
                                    VorgangService vorgangService) {
         this.contractRepository = contractRepository;
         this.subscriptionRepository = subscriptionRepository;
+        this.subscriptionService = subscriptionService;
         this.customerRepository = customerRepository;
         this.productRepository = productRepository;
         this.numberGeneratorService = numberGeneratorService;
@@ -195,50 +199,63 @@ public class BusinessDataInitializer {
 
             LocalDate subscriptionStart = contract.getStartDate().plusDays(random.nextInt(30));
 
-            Subscription subscription = new Subscription(
-                    product.getName(),
-                    product.getPrice() != null ? product.getPrice() : BigDecimal.ZERO,
-                    subscriptionStart,
-                    contract
-            );
+            // SubscriptionDto für den Service erstellen
+            SubscriptionDto subscriptionDto = new SubscriptionDto();
 
-            subscription.setProduct(product);
-            subscription.setSubscriptionNumber(numberGeneratorService.generateSubscriptionNumber());
-            subscription.setDescription("Monatliches Abonnement für " + product.getName());
+            // Grunddaten setzen
+            subscriptionDto.setContractId(contract.getId());
+            subscriptionDto.setProductId(product.getId());
+            subscriptionDto.setProductName(product.getName());
+            subscriptionDto.setMonthlyPrice(product.getPrice() != null ? product.getPrice() : BigDecimal.ZERO);
+            subscriptionDto.setStartDate(subscriptionStart);
+            subscriptionDto.setDescription("Monatliches Abonnement für " + product.getName());
 
             // Zufälligen Abrechnungszyklus setzen
-            BillingCycle[] cycles = BillingCycle.values();
-            subscription.setBillingCycle(cycles[random.nextInt(cycles.length)]);
-            subscription.setAutoRenewal(random.nextBoolean());
+//            BillingCycle[] cycles = BillingCycle.values();
+//            subscriptionDto.setBillingCycle(cycles[random.nextInt(cycles.length)]);
+//            subscriptionDto.setAutoRenewal(random.nextBoolean());
+
+            subscriptionDto.setBillingCycle(BillingCycle.MONTHLY);
+            subscriptionDto.setAutoRenewal(true);
 
             // Status basierend auf Konfiguration UND Contract-Status setzen
             double randomValue = random.nextDouble();
 
             if (contract.getContractStatus() == ContractStatus.TERMINATED) {
                 // Wenn Contract beendet ist, muss Subscription auch beendet/storniert sein
-                subscription.setSubscriptionStatus(SubscriptionStatus.CANCELLED);
-                subscription.setEndDate(contract.getEndDate());
+                subscriptionDto.setSubscriptionStatus(SubscriptionStatus.CANCELLED);
+                subscriptionDto.setEndDate(contract.getEndDate());
                 cancelledCount++;
             } else {
                 // Contract ist aktiv - verwende Konfiguration
                 if (randomValue < config.getActiveSubscriptionRatio()) {
-                    subscription.setSubscriptionStatus(SubscriptionStatus.ACTIVE);
+                    subscriptionDto.setSubscriptionStatus(SubscriptionStatus.ACTIVE);
                     activeCount++;
                 } else if (randomValue < config.getActiveSubscriptionRatio() + config.getCancelledSubscriptionRatio()) {
-                    subscription.setSubscriptionStatus(SubscriptionStatus.CANCELLED);
-                    subscription.setEndDate(subscriptionStart.plusDays(random.nextInt(200)));
+                    subscriptionDto.setSubscriptionStatus(SubscriptionStatus.CANCELLED);
+                    subscriptionDto.setEndDate(subscriptionStart.plusDays(random.nextInt(200)));
                     cancelledCount++;
                 } else {
-                    subscription.setSubscriptionStatus(SubscriptionStatus.PAUSED);
+                    subscriptionDto.setSubscriptionStatus(SubscriptionStatus.PAUSED);
                     pausedCount++;
                 }
             }
 
-            subscriptionRepository.save(subscription);
+            // SubscriptionService verwenden - erstellt automatisch Fälligkeitspläne!
+            try {
+                subscriptionService.createSubscriptionFromDto(subscriptionDto);
+                logger.debug("Subscription {} für Contract {} erstellt",
+                        subscriptionDto.getProductName(), contract.getContractNumber());
+            } catch (Exception e) {
+                logger.error("Fehler beim Erstellen der Subscription für Contract {}: {}",
+                        contract.getContractNumber(), e.getMessage());
+            }
         }
 
         logger.info("✓ {} Abonnements erstellt: {} ACTIVE, {} CANCELLED, {} PAUSED",
                 numberOfSubscriptions, activeCount, cancelledCount, pausedCount);
+        logger.info("✓ Fälligkeitspläne wurden automatisch für alle Abonnements erstellt");
+
         return numberOfSubscriptions;
     }
 }

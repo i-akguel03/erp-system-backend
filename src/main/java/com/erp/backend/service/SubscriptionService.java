@@ -2,9 +2,7 @@ package com.erp.backend.service;
 
 import com.erp.backend.domain.*;
 import com.erp.backend.dto.SubscriptionDto;
-import com.erp.backend.repository.ContractRepository;
-import com.erp.backend.repository.DueScheduleRepository;
-import com.erp.backend.repository.SubscriptionRepository;
+import com.erp.backend.repository.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -27,6 +25,8 @@ public class SubscriptionService {
 
     private final SubscriptionRepository subscriptionRepository;
     private final ContractRepository contractRepository;
+    private final OpenItemRepository openItemRepository;
+    private final InvoiceRepository invoiceRepository;
     private final DueScheduleRepository dueScheduleRepository;
     private final NumberGeneratorService numberGeneratorService;
 
@@ -35,11 +35,13 @@ public class SubscriptionService {
     private int defaultDueMonths;
 
     public SubscriptionService(SubscriptionRepository subscriptionRepository,
-                               ContractRepository contractRepository,
+                               ContractRepository contractRepository, OpenItemRepository openItemRepository, InvoiceRepository invoiceRepository,
                                DueScheduleRepository dueScheduleRepository,
                                NumberGeneratorService numberGeneratorService) {
         this.subscriptionRepository = subscriptionRepository;
         this.contractRepository = contractRepository;
+        this.openItemRepository = openItemRepository;
+        this.invoiceRepository = invoiceRepository;
         this.dueScheduleRepository = dueScheduleRepository;
         this.numberGeneratorService = numberGeneratorService;
     }
@@ -408,16 +410,42 @@ public class SubscriptionService {
 
     @Transactional
     public Subscription cancelSubscription(UUID id, LocalDate cancellationDate) {
-        Subscription s = subscriptionRepository.findById(id)
+        logger.info("Starting subscription cancellation for id={}", id);
+
+        Subscription subscription = subscriptionRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Subscription not found"));
-        s.setSubscriptionStatus(SubscriptionStatus.CANCELLED);
-        if (cancellationDate != null) s.setEndDate(cancellationDate);
-        Subscription saved = subscriptionRepository.save(s);
 
-        // Fälligkeiten suspendieren
+        // 1. Subscription stornieren
+        subscription.setSubscriptionStatus(SubscriptionStatus.CANCELLED);
+        if (cancellationDate != null) {
+            subscription.setEndDate(cancellationDate);
+        }
+        Subscription savedSubscription = subscriptionRepository.save(subscription);
+
+        // 2. Fälligkeitspläne stornieren
         updateDueScheduleStatusForSubscription(id, SubscriptionStatus.CANCELLED);
+        logger.info("Due schedules cancelled for subscription id={}", id);
 
-        return saved;
+        // 3. Offene Rechnungen stornieren
+        List<Invoice> openInvoices = invoiceRepository.findBySubscriptionAndStatus(subscription, Invoice.InvoiceStatus.ACTIVE);
+        for (Invoice invoice : openInvoices) {
+            invoice.setStatus( Invoice.InvoiceStatus.CANCELLED);
+            //invoice.setCancellationDate(cancellationDate); // Falls Invoice ein cancellationDate-Feld hat
+            invoiceRepository.save(invoice);
+        }
+        logger.info("Cancelled {} open invoices for subscription id={}", openInvoices.size(), id);
+
+        // 4. Offene Posten stornieren
+        List<OpenItem> openItems = openItemRepository.findBySubscriptionAndStatus(subscription, OpenItem.OpenItemStatus.OPEN);
+        for (OpenItem item : openItems) {
+            item.setStatus(OpenItem.OpenItemStatus.CANCELLED);
+            //item.setCancellationDate(cancellationDate); // Falls OpenItem ein cancellationDate-Feld hat
+            openItemRepository.save(item);
+        }
+        logger.info("Cancelled {} open items for subscription id={}", openItems.size(), id);
+
+        logger.info("Subscription cancellation completed for id={}", id);
+        return savedSubscription;
     }
 
     @Transactional

@@ -78,10 +78,6 @@ public class Invoice {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
-    // ===================================================
-    // Erweiterte Felder für bessere Verwaltung
-    // ===================================================
-
     /** Batch-ID, falls Rechnung im Stapel erstellt wurde */
     @Column(name = "invoice_batch_id")
     private String invoiceBatchId;
@@ -101,7 +97,7 @@ public class Invoice {
     private List<Invoice> creditNotes = new ArrayList<>();
 
     // ===================================================
-    // Beziehungen
+    // Beziehungen - KORRIGIERT
     // ===================================================
 
     /** Kunde der Rechnung */
@@ -109,14 +105,19 @@ public class Invoice {
     @JoinColumn(name = "customer_id", nullable = false)
     private Customer customer;
 
+    /** WICHTIG: Direkte subscription_id Spalte für bessere Performance und Abfragen */
+    @Column(name = "subscription_id")
+    private UUID subscriptionId;
+
+    /** Subscription-Beziehung (optional für Lazy Loading) */
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "subscription_id", insertable = false, updatable = false)
+    private Subscription subscription;
+
     /** Rechnungsadresse (kann von Kundenadresse abweichen) */
     @ManyToOne
     @JoinColumn(name = "billing_address_id")
     private Address billingAddress;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "subscription_id")
-    private Subscription subscription;
 
     /** Positionen der Rechnung */
     @OneToMany(mappedBy = "invoice", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
@@ -126,24 +127,10 @@ public class Invoice {
     @OneToMany(mappedBy = "invoice", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<OpenItem> openItems = new ArrayList<>();
 
-    /**
-     * Verknüpfung zum Vorgang, der diese Rechnung erstellt hat
-     */
+    /** Verknüpfung zum Vorgang, der diese Rechnung erstellt hat */
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "vorgang_id")
     private Vorgang vorgang;
-
-    // Getter und Setter
-    public Vorgang getVorgang() { return vorgang; }
-    public void setVorgang(Vorgang vorgang) { this.vorgang = vorgang; }
-
-    public Subscription getSubscription() {
-        return subscription;
-    }
-
-    public void setSubscription(Subscription subscription) {
-        this.subscription = subscription;
-    }
 
     // ===================================================
     // Enums
@@ -331,6 +318,21 @@ public class Invoice {
     public List<OpenItem> getOpenItems() { return openItems; }
     public void setOpenItems(List<OpenItem> openItems) { this.openItems = openItems; }
 
+    public Vorgang getVorgang() { return vorgang; }
+    public void setVorgang(Vorgang vorgang) { this.vorgang = vorgang; }
+
+    public UUID getSubscriptionId() { return subscriptionId; }
+    public void setSubscriptionId(UUID subscriptionId) { this.subscriptionId = subscriptionId; }
+
+    public Subscription getSubscription() { return subscription; }
+    public void setSubscription(Subscription subscription) {
+        this.subscription = subscription;
+        // Automatisch subscription_id setzen bei Beziehung
+        if (subscription != null) {
+            this.subscriptionId = subscription.getId();
+        }
+    }
+
     @Override
     public String toString() {
         return "Invoice{" +
@@ -341,6 +343,7 @@ public class Invoice {
                 ", status=" + status +
                 ", invoiceType=" + invoiceType +
                 ", totalAmount=" + totalAmount +
+                ", subscriptionId=" + subscriptionId +
                 ", customer=" + (customer != null ? customer.getCustomerNumber() : null) +
                 ", batchId='" + invoiceBatchId + '\'' +
                 '}';

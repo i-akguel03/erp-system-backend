@@ -14,7 +14,7 @@ import java.util.UUID;
  *
  * Zentrale Entität für Zahlungsmanagement:
  * - Verwaltet offene Beträge aus Rechnungen
- * - Tracked Zahlungen und Zahlungsstatus
+ * - Tracks Zahlungen und Zahlungsstatus
  * - Ermöglicht Teilzahlungen
  * - Berechnet ausstehende Beträge
  */
@@ -90,7 +90,18 @@ public class OpenItem {
     @Column(name = "reminder_count")
     private Integer reminderCount = 0;
 
-    // In der OpenItem-Klasse hinzufügen:
+    // ===================================================
+    // KORRIGIERT: Subscription Beziehung mit direkter ID
+    // ===================================================
+
+    /** WICHTIG: Direkte subscription_id Spalte für NOT NULL Constraint */
+    @Column(name = "subscription_id", nullable = false)
+    private UUID subscriptionId;
+
+    /** Subscription-Beziehung (optional für Lazy Loading) */
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "subscription_id", insertable = false, updatable = false)
+    private Subscription subscription;
 
     /**
      * Verknüpfung zum Vorgang, der diesen OpenItem erstellt hat
@@ -99,9 +110,29 @@ public class OpenItem {
     @JoinColumn(name = "vorgang_id")
     private Vorgang vorgang;
 
-    // Getter und Setter
+    // ===================================================
+    // Getter und Setter - KORRIGIERT
+    // ===================================================
+
     public Vorgang getVorgang() { return vorgang; }
     public void setVorgang(Vorgang vorgang) { this.vorgang = vorgang; }
+
+    public UUID getSubscriptionId() { return subscriptionId; }
+
+    /** KRITISCH: Korrekte Implementierung der setSubscriptionId */
+    public void setSubscriptionId(UUID subscriptionId) {
+        this.subscriptionId = subscriptionId;
+    }
+
+    public Subscription getSubscription() { return subscription; }
+
+    public void setSubscription(Subscription subscription) {
+        this.subscription = subscription;
+        // Automatisch subscription_id setzen bei Beziehung
+        if (subscription != null) {
+            this.subscriptionId = subscription.getId();
+        }
+    }
 
     // ===================================================
     // Enums
@@ -333,6 +364,7 @@ public class OpenItem {
                 ", outstandingAmount=" + getOutstandingAmount() +
                 ", dueDate=" + dueDate +
                 ", status=" + status +
+                ", subscriptionId=" + subscriptionId +
                 ", overdue=" + isOverdue() +
                 ", reminderCount=" + reminderCount +
                 '}';

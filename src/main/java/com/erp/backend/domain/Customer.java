@@ -8,15 +8,19 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+/**
+ * Customer repräsentiert einen Kunden mit optionalen Adressen (Wohn-, Rechnungs-, Lieferadresse).
+ * Soft-Delete wird durch @SQLDelete realisiert.
+ */
 @Entity
 @Table(name = "customers")
 @SQLDelete(sql = "UPDATE customers SET deleted = true WHERE id = ?")
-@SQLRestriction("deleted = false")
+@SQLRestriction("deleted = false") // Soft-Delete: Nur nicht gelöschte Kunden werden standardmäßig geladen
 public class Customer {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    private UUID id;
+    private UUID id; // Primärschlüssel als UUID
 
     @Column(name = "customer_number", unique = true)
     private String customerNumber;
@@ -35,21 +39,31 @@ public class Customer {
     @Column(nullable = false)
     private boolean deleted = false;
 
-    // Beziehungen zu Address-Entitäten
-    @ManyToOne
+    // --- Adress-Referenzen ---
+    // ManyToOne: Mehrere Kunden können dieselbe Adresse verwenden (z. B. bei Sammelrechnungen)
+
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "residential_address_id")
     private Address residentialAddress;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "billing_address_id")
     private Address billingAddress;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "shipping_address_id")
     private Address shippingAddress;
 
-    public Customer() {
-    }
+    // --- Verträge (1 Kunde -> viele Contracts) ---
+    @OneToMany(
+            mappedBy = "customer",
+            cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE},
+            fetch = FetchType.LAZY
+    )
+    private List<Contract> contracts = new ArrayList<>();
+
+    // ---- Konstruktoren ----
+    public Customer() {}
 
     public Customer(UUID id) {
         this.id = id;
@@ -62,96 +76,46 @@ public class Customer {
         this.tel = tel;
     }
 
-    // Getter & Setter
+    // ---- Getter & Setter ----
+    public UUID getId() { return id; }
+    public void setId(UUID id) { this.id = id; }
 
-    public UUID getId() {
-        return id;
-    }
+    public String getCustomerNumber() { return customerNumber; }
+    public void setCustomerNumber(String customerNumber) { this.customerNumber = customerNumber; }
 
-    public void setId(UUID id) {
-        this.id = id;
-    }
+    public String getFirstName() { return firstName; }
+    public void setFirstName(String firstName) { this.firstName = firstName; }
 
-    public String getCustomerNumber() {
-        return customerNumber;
-    }
+    public String getLastName() { return lastName; }
+    public void setLastName(String lastName) { this.lastName = lastName; }
 
-    public void setCustomerNumber(String customerNumber) {
-        this.customerNumber = customerNumber;
-    }
+    public String getEmail() { return email; }
+    public void setEmail(String email) { this.email = email; }
 
-    public String getFirstName() {
-        return firstName;
-    }
+    public String getTel() { return tel; }
+    public void setTel(String tel) { this.tel = tel; }
 
-    public void setFirstName(String firstName) {
-        this.firstName = firstName;
-    }
+    public Address getBillingAddress() { return billingAddress; }
+    public void setBillingAddress(Address billingAddress) { this.billingAddress = billingAddress; }
 
-    public String getLastName() {
-        return lastName;
-    }
+    public Address getShippingAddress() { return shippingAddress; }
+    public void setShippingAddress(Address shippingAddress) { this.shippingAddress = shippingAddress; }
 
-    public void setLastName(String lastName) {
-        this.lastName = lastName;
-    }
+    public Address getResidentialAddress() { return residentialAddress; }
+    public void setResidentialAddress(Address residentialAddress) { this.residentialAddress = residentialAddress; }
 
-    public String getEmail() {
-        return email;
-    }
+    public List<Contract> getContracts() { return contracts; }
+    public void setContracts(List<Contract> contracts) { this.contracts = contracts; }
 
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    public String getTel() {
-        return tel;
-    }
-
-    public void setTel(String tel) {
-        this.tel = tel;
-    }
-
-    public Address getBillingAddress() {
-        return billingAddress;
-    }
-
-    public void setBillingAddress(Address billingAddress) {
-        this.billingAddress = billingAddress;
-    }
-
-    public Address getShippingAddress() {
-        return shippingAddress;
-    }
-
-    public void setShippingAddress(Address shippingAddress) {
-        this.shippingAddress = shippingAddress;
-    }
-
-    public Address getResidentialAddress() {
-        return residentialAddress;
-    }
-
-    public void setResidentialAddress(Address residentialAddress) {
-        this.residentialAddress = residentialAddress;
-    }
-
-    @OneToMany(mappedBy = "customer", cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE}, fetch = FetchType.LAZY)
-    private List<Contract> contracts = new ArrayList<>();
-
-    public List<Contract> getContracts() {
-        return contracts;
-    }
-
-    public void setContracts(List<Contract> contracts) {
-        this.contracts = contracts;
-    }
-
-    // Hilfsmethode zum Hinzufügen eines Vertrags
     public void addContract(Contract contract) {
         contracts.add(contract);
         contract.setCustomer(this);
     }
+
+    public boolean isDeleted() { return deleted; }
+    public void setDeleted(boolean deleted) { this.deleted = deleted; }
+
+    public String getName() { return firstName + " " + lastName; }
 
     @Override
     public String toString() {
@@ -166,17 +130,5 @@ public class Customer {
                 ", shippingAddress=" + shippingAddress +
                 ", residentialAddress=" + residentialAddress +
                 '}';
-    }
-
-    public String getName() {
-        return this.getFirstName() + ' ' + this.getLastName();
-    }
-
-    public boolean isDeleted() {
-        return deleted;
-    }
-
-    public void setDeleted(boolean deleted) {
-        this.deleted = deleted;
     }
 }

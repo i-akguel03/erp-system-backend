@@ -2,6 +2,7 @@ package com.erp.backend.repository;
 
 import com.erp.backend.domain.OpenItem;
 import com.erp.backend.domain.Invoice;
+import com.erp.backend.domain.Subscription;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -170,5 +171,37 @@ public interface OpenItemRepository extends JpaRepository<OpenItem, UUID> {
      */
     @Query("SELECT oi FROM OpenItem oi WHERE oi.invoice.customer.id = :customerId AND oi.status IN ('OPEN', 'OVERDUE', 'PARTIALLY_PAID')")
     List<OpenItem> findOpenItemsByCustomerId(@Param("customerId") Long customerId);
+
+    /**
+     * Findet alle offenen Posten einer Subscription mit bestimmtem Status
+     */
+    List<OpenItem> findBySubscriptionAndStatus(Subscription subscription, OpenItem.OpenItemStatus status);
+
+    /**
+     * Alternative mit Subscription-ID
+     */
+    @Query("SELECT oi FROM OpenItem oi WHERE oi.subscription.id = :subscriptionId AND oi.status = :status")
+    List<OpenItem> findBySubscriptionIdAndStatus(@Param("subscriptionId") UUID subscriptionId,
+                                                 @Param("status") OpenItem.OpenItemStatus status);
+
+    /**
+     * Findet alle offenen Posten einer Subscription
+     */
+    List<OpenItem> findBySubscription(Subscription subscription);
+
+    /**
+     * Zählt offene Posten einer Subscription
+     */
+    @Query("SELECT COUNT(oi) FROM OpenItem oi WHERE oi.subscription = :subscription AND oi.status = :status")
+    long countBySubscriptionAndStatus(@Param("subscription") Subscription subscription,
+                                      @Param("status") OpenItem.OpenItemStatus status);
+
+    /**
+     * Findet alle offenen Posten mit Gesamtsumme
+     */
+    @Query("SELECT oi, SUM(oi.amount) FROM OpenItem oi WHERE oi.subscription = :subscription AND oi.status = :status GROUP BY oi")
+    List<Object[]> findBySubscriptionAndStatusWithSum(@Param("subscription") Subscription subscription,
+                                                      @Param("status") OpenItem.OpenItemStatus status);
+
 
 }

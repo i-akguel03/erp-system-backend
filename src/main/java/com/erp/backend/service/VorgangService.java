@@ -255,6 +255,11 @@ public class VorgangService {
         return vorgangRepository.findAllByOrderByStartZeitpunktDesc(pageable);
     }
 
+    @Transactional(readOnly = true)
+    public List<Vorgang> findAlleWithoutPaginated() {
+        return vorgangRepository.findAll();
+    }
+
     // ===============================================================================================
     // STATISTIK-METHODEN
     // ===============================================================================================

@@ -1,7 +1,3 @@
-// ===============================================================================================
-// 5. OPENITEM FACTORY (OpenItem-Erstellung)
-// ===============================================================================================
-
 package com.erp.backend.service;
 
 import com.erp.backend.domain.Invoice;
@@ -19,8 +15,18 @@ import java.time.LocalDate;
 public class OpenItemFactory {
 
     public OpenItem createOpenItemForInvoice(Invoice invoice, boolean wasOverdue) {
+        // VALIDIERUNG: Invoice muss subscription_id haben
+        if (invoice.getSubscriptionId() == null) {
+            throw new IllegalArgumentException("Invoice muss eine subscription_id haben für OpenItem-Erstellung: "
+                    + invoice.getInvoiceNumber());
+        }
+
         OpenItem openItem = new OpenItem();
         openItem.setInvoice(invoice);
+
+        // KRITISCH: subscription_id aus der Invoice übernehmen
+        openItem.setSubscriptionId(invoice.getSubscriptionId());
+
         openItem.setDescription(String.format("Offener Posten für Rechnung %s%s",
                 invoice.getInvoiceNumber(),
                 wasOverdue ? " (aus überfälliger Fälligkeit)" : ""));

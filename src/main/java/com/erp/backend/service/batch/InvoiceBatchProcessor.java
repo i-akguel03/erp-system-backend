@@ -1,7 +1,3 @@
-// ===============================================================================================
-// 3. INVOICE BATCH PROCESSOR (Kern-Verarbeitung)
-// ===============================================================================================
-
 package com.erp.backend.service.batch;
 
 import com.erp.backend.domain.*;
@@ -81,9 +77,20 @@ public class InvoiceBatchProcessor {
 
         boolean isOverdue = dueSchedule.getDueDate().isBefore(billingDate);
 
+        // WICHTIG: Subscription aus DueSchedule holen
+        Subscription subscription = dueSchedule.getSubscription();
+        if (subscription == null) {
+            throw new IllegalStateException("DueSchedule " + dueSchedule.getDueNumber() +
+                    " hat keine Subscription zugeordnet");
+        }
+
         // 1. Rechnung erstellen
         Invoice invoice = invoiceFactory.createInvoiceForDueSchedule(dueSchedule, billingDate, batchId, isOverdue);
         invoice.setVorgang(vorgang);
+
+        // KRITISCH: subscription_id explizit setzen
+        invoice.setSubscriptionId(subscription.getId());
+
         Invoice savedInvoice = invoiceRepository.save(invoice);
         resultBuilder.addCreatedInvoice(savedInvoice);
 
@@ -92,17 +99,18 @@ public class InvoiceBatchProcessor {
         dueSchedule.setVorgang(vorgang);
         resultBuilder.addProcessedDueSchedule(dueSchedule);
 
-        // 3. OpenItem erstellen
+        // 3. OpenItem erstellen - jetzt mit korrekter subscription_id
         OpenItem openItem = openItemFactory.createOpenItemForInvoice(savedInvoice, isOverdue);
         openItem.setVorgang(vorgang);
+
         OpenItem savedOpenItem = openItemRepository.save(openItem);
         resultBuilder.addCreatedOpenItem(savedOpenItem);
 
         // Success-Logging
         String status = isOverdue ? "ÜBERFÄLLIG" : "AKTUELL";
-        logger.info("✓ {} ({}) → {} (%.2f€) → OpenItem {}",
+        logger.info("✓ {} ({}) → {} (%.2f€) → OpenItem {} (subscription: {})",
                 dueSchedule.getDueNumber(), status, savedInvoice.getInvoiceNumber(),
-                savedInvoice.getTotalAmount(), savedOpenItem.getId());
+                savedInvoice.getTotalAmount(), savedOpenItem.getId(), subscription.getId());
     }
 
     private void handleProcessingError(DueSchedule dueSchedule, Exception e,

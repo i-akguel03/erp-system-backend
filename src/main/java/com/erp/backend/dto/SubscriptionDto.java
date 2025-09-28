@@ -22,6 +22,9 @@ public class SubscriptionDto {
 
     private String productName;
 
+    private String description;
+
+
     private LocalDate startDate;
     private LocalDate endDate;
     private BillingCycle billingCycle;
@@ -62,4 +65,12 @@ public class SubscriptionDto {
 
     public UUID getContractId() { return contractId; }
     public void setContractId(UUID contractId) { this.contractId = contractId; }
+
+    public void setDescription(String s) {
+        this.description = s;
+    }
+
+    public String getDescription() {
+        return description;
+    }
 }

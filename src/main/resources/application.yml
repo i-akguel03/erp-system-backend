@@ -88,4 +88,4 @@ app:
   init:
     enabled: true                # Init Service aktivieren
     create-test-data: true       # Testdaten erstellen
-    auto-run-on-startup: true    # Automatisch beim Start ausführen
+    auto-run-on-startup: false    # Automatisch beim Start ausführen
