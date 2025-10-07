@@ -1,6 +1,7 @@
 package com.erp.backend.controller;
 
 import com.erp.backend.domain.DueSchedule;
+import com.erp.backend.dto.InvoiceBatchPreviewDTO;
 import com.erp.backend.service.*;
 import com.erp.backend.service.batch.*;
 import com.erp.backend.service.batch.InvoiceBatchResult;
@@ -73,7 +74,8 @@ public class InvoiceBatchController {
                     .map(ds -> getEstimatedPrice(ds))
                     .reduce(BigDecimal.ZERO, BigDecimal::add);
 
-            InvoiceBatchPreview preview = new InvoiceBatchPreview(analysis, estimatedTotal);
+            // DTO zurückgeben statt der Entity-Version
+            InvoiceBatchPreviewDTO preview = new InvoiceBatchPreviewDTO(analysis, estimatedTotal);
             return ResponseEntity.ok(preview);
 
         } catch (Exception e) {
