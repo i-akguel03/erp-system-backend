@@ -3,14 +3,16 @@
 Ein **funktionsfähiges ERP-System** mit Kunden-, Produkt- und Vertragsverwaltung.  
 Entwickelt als **Portfolio-Projekt** mit modernen Technologien: **Spring Boot**, **Angular 20**, **Bootstrap 5** und **PostgreSQL**.
 
----
 
-## 🎯 Live Demo & Code
+
+# 🎯 Live Demo & Code
 
 🌐 **[Live Demo](https://erp-system-frontend-tan.vercel.app/)** - Vercel Deployment  
 📚 **[API Dokumentation](https://erp-system-backend-yo8w.onrender.com/swagger-ui/index.html)** - Interaktive Swagger UI
 
-> **Demo Login:** `demo@test.com` / `password123` (falls verfügbar)
+> **Demo Login:** `a` / `a` 
+>
+> 
 
 
 ---
