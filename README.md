@@ -35,7 +35,7 @@ Entwickelt als **Portfolio-Projekt** mit modernen Technologien: **Spring Boot**,
 
 ## ✅ Was ich entwickelt habe
 
-### Kernnfunktionen (100% funktionsfähig)
+### Kernnfunktionen
 - **🔐 JWT Authentifizierung** - Sicheres Login/Register mit Token-Management
 - **👥 Kundenverwaltung** - Erstellen, Lesen, Bearbeiten, Löschen mit Adressverknüpfung
 - **📦 Produktkatalog** - Dynamische Produktverwaltung mit Kategorien  
@@ -50,41 +50,6 @@ Entwickelt als **Portfolio-Projekt** mit modernen Technologien: **Spring Boot**,
 - **Frontend:** Angular 20, TypeScript, Bootstrap 5, Reactive Forms
 - **Datenbank:** PostgreSQL mit korrekten Beziehungen und Constraints
 - **Deployment:** Automatisierte CI/CD über Git (Render + Vercel)
-
----
-
-## 🧠 Problemlösung & Geschäftslogik
-
-### Praxisnahe Szenarien, die ich gelöst habe
-
-**Problem:** Wie verhindert man Dateninkonsistenz?
-```java
-@PreRemove
-public void checkActiveContracts() {
-    if (hasActiveContracts()) {
-        throw new BusinessException("Kunde mit aktiven Verträgen kann nicht gelöscht werden");
-    }
-}
-```
-
-**Problem:** Wie generiert man automatische Zahlungspläne?
-```typescript
-generateDueSchedule(contract: Contract): DueSchedule[] {
-  const schedules = [];
-  for (let i = 0; i < contract.duration; i++) {
-    schedules.push({
-      dueDate: addMonths(contract.startDate, i),
-      amount: contract.monthlyFee
-    });
-  }
-  return schedules;
-}
-```
-
-**Problem:** Wie handhabt man Authentifizierung app-weit?
-- JWT-Interceptor fügt automatisch Token zu Requests hinzu
-- Route Guards schützen vor unbefugtem Zugriff
-- Token-Refresh-Logik verhindert Session-Timeouts
 
 ---
 
@@ -108,10 +73,6 @@ generateDueSchedule(contract: Contract): DueSchedule[] {
 - **Reactive Forms** für komplexe Validierung
 
 
-### Warum Bootstrap statt Material?
-- **Schnellere Entwicklung** mit Utility Classes
-- **Kleinere Bundle-Größe** für bessere Performance
-- **Mehr anpassbar** für einzigartige Designs
 
 ---
 
@@ -136,42 +97,16 @@ git push origin main
 
 ## 📈 Nächste Entwicklungsphase
 
-### Aktuell in Planung (Ehrliche Roadmap)
+### Aktuell in Planung
 - **📄 Rechnungsgenerierung** - PDF-Erstellung aus Verträgen
 - **🔄 Batch-Verarbeitung** - Monatliche Abrechnungsautomatisierung  
 - **📊 Basis-Analytics** - Kunden- und Umsatzmetriken
 - **🧪 Test-Suite** - Unit- und Integrationstests
 - **📝 Audit-Logging** - Verfolgung von Benutzeraktionen für Compliance
 
-*Diese Features stellen realistische nächste Schritte für Geschäftswert dar.*
 
 ---
 
-## 💡 Was dieses Projekt zeigt
-
-
-
-
-
-
-
-
-### Für Junior Fullstack Positionen
-- **Vollständiger Entwicklungszyklus** von Datenbank bis UI
-- **Moderner Tech-Stack** mit neuesten Versionen
-- **Production Deployment** Erfahrung
-- **Geschäftslogik** Verständnis
-- **Clean Code** Praktiken
-
-### Bewiesene technische Fähigkeiten
-- RESTful API Design und Consumption
-- Datenbankbeziehungen und Constraints  
-- Frontend State Management
-- Authentifizierung und Autorisierung
-- Responsive Webentwicklung
-- Versionskontrolle und Deployment
-
----
 
 ## 🛠️ Lokale Entwicklung
 
@@ -201,7 +136,7 @@ Swagger: http://localhost:8080/swagger-ui.html
 
 ---
 
-## 📝 Technische Details & Metriken
+## 📝 Technische Details
 
 **Backend Architektur:** 5+ Service Classes mit Enterprise-Patterns  
 **API Endpoints:** 25+ RESTful Endpunkte mit vollständigen CRUD-Operationen  
@@ -209,7 +144,6 @@ Swagger: http://localhost:8080/swagger-ui.html
 **Business Logic:** 500+ Lines komplexer Geschäftslogik pro Service  
 **Frontend Komponenten:** 15+ wiederverwendbare Angular Komponenten  
 **Code Coverage:** Unit Tests für kritische Business Logic geplant  
-**Entwicklungszeit:** ~8 Wochen Teilzeit-Entwicklung (inkl. Dokumentation)  
 
 ### Implementierte Design Patterns
 - **Repository Pattern** - Datenzugriff-Abstraktion
