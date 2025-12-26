@@ -1,7 +1,9 @@
-# ERP System – Fullstack Developer Portfolio
+# ERP System – Fullstack Web Application
 
-Ein **funktionsfähiges ERP-System** mit Kunden-, Produkt- und Vertragsverwaltung.  
-Entwickelt als **Portfolio-Projekt** mit modernen Technologien: **Spring Boot**, **Angular 20**, **Bootstrap 5** und **PostgreSQL**.
+Produktionsnahes **ERP-System** zur Verwaltung von Kunden, Produkten, Verträgen
+und Abonnements inkl. Zahlungslogik.
+
+**Tech Stack:** Java · Spring Boot · Spring Security (JWT) · Angular 20 · PostgreSQL · Docker
 
 
 
@@ -16,6 +18,30 @@ Entwickelt als **Portfolio-Projekt** mit modernen Technologien: **Spring Boot**,
 
 
 ---
+
+### Kernnfunktionen
+- **🔐 JWT Authentifizierung** - Sicheres Login/Register mit Token-Management
+- **👥 Kundenverwaltung** - Erstellen, Lesen, Bearbeiten, Löschen mit Adressverknüpfung
+- **📦 Produktkatalog** - Dynamische Produktverwaltung mit Kategorien  
+- **📋 Vertragssystem** - Verknüpfung von Kunden und Produkten mit Abo-Logik
+- **⏰ Fälligkeitspläne** - Automatische Generierung von Zahlungsplänen
+- **🛡️ Geschäftsvalidierung** - Verhindert Löschen von Kunden mit aktiven Verträgen
+- **📖 REST API** - OpenAPI/Swagger Dokumentation
+- **📱 Responsive UI** - Mobile-first Bootstrap 5 Design
+
+---
+
+## 🏗️ Architektur
+- **Controller – Service – Repository** Trennung
+- **DTO Pattern** für API-Schichten
+- **Service Layer** für Geschäftslogik
+- **Sauberes Domänenmodell**
+  (Customer → Contract → Subscription → PaymentSchedule)
+
+
+
+---
+
 
 ## 📸 Anwendungs-Screenshots
 
@@ -33,125 +59,51 @@ Entwickelt als **Portfolio-Projekt** mit modernen Technologien: **Spring Boot**,
 
 ---
 
-## ✅ Was ich entwickelt habe
+## 🚀 Deployment & CI/CD
 
-### Kernnfunktionen
-- **🔐 JWT Authentifizierung** - Sicheres Login/Register mit Token-Management
-- **👥 Kundenverwaltung** - Erstellen, Lesen, Bearbeiten, Löschen mit Adressverknüpfung
-- **📦 Produktkatalog** - Dynamische Produktverwaltung mit Kategorien  
-- **📋 Vertragssystem** - Verknüpfung von Kunden und Produkten mit Abo-Logik
-- **⏰ Fälligkeitspläne** - Automatische Generierung von Zahlungsplänen
-- **🛡️ Geschäftsvalidierung** - Verhindert Löschen von Kunden mit aktiven Verträgen
-- **📖 REST API** - OpenAPI/Swagger Dokumentation
-- **📱 Responsive UI** - Mobile-first Bootstrap 5 Design
+- **Backend:** Render
+- **Node.js 18+** Vercel
+- **Automatisches Deployment** bei Push auf main
 
-### Technische Umsetzung
-- **Backend:** Spring Boot 3, Spring Security (JWT), JPA/Hibernate
-- **Frontend:** Angular 20, TypeScript, Bootstrap 5, Reactive Forms
-- **Datenbank:** PostgreSQL mit korrekten Beziehungen und Constraints
-- **Deployment:** Automatisierte CI/CD über Git (Render + Vercel)
-
----
-
-## 🏗️ Architektur-Entscheidungen
-
-
-
-
-
-
-### Warum Spring Boot?
-- **Schnelle Entwicklung** durch Auto-Konfiguration
-- **Enterprise-ready** Security und Validierung
-- **Einfaches Testing** mit eingebautem Test-Framework
-
-
-
-### Warum Angular 20?
-- **Neueste Features** wie Standalone Components
-- **Typsicherheit** durch TypeScript
-- **Reactive Forms** für komplexe Validierung
-
-
-
----
-
-## 🚀 Entwicklungsprozess
-
-### Git Workflow & CI/CD
 ```bash
 git push origin main
-# → Löst automatisch aus:
-# → Backend Deployment zu Render
-# → Frontend Deployment zu Vercel
-# → Zero-Downtime Updates
+# → Backend & Frontend werden automatisch deployed
 ```
-
-### Code-Qualität
-- **Konsistente Namenskonventionen**
-- **Service Layer** Trennung
-- **DTO Pattern** für API-Antworten
-- **Error Handling** mit Custom Exceptions
-
----
-
-## 📈 Nächste Entwicklungsphase
-
-### Aktuell in Planung
-- **📄 Rechnungsgenerierung** - PDF-Erstellung aus Verträgen
-- **🔄 Batch-Verarbeitung** - Monatliche Abrechnungsautomatisierung  
-- **📊 Basis-Analytics** - Kunden- und Umsatzmetriken
-- **🧪 Test-Suite** - Unit- und Integrationstests
-- **📝 Audit-Logging** - Verfolgung von Benutzeraktionen für Compliance
-
 
 ---
 
 
 ## 🛠️ Lokale Entwicklung
 
-
-
-
-
-
 ### Voraussetzungen
-- Java 21 + Maven 3.9+
-- Node.js 18+ + Angular CLI
-- PostgreSQL 14+
+- **Java 21**
+- **Node.js 18+**
+- **PostgreSQL**
 
-### Quick Start
+### Start
 ```bash
 # Backend
 ./mvnw spring-boot:run
 
-# Frontend  
-cd frontend && npm install && ng serve
-
-# Zugriff
-Frontend: http://localhost:4200
-Backend: http://localhost:8080
-Swagger: http://localhost:8080/swagger-ui.html
+# Frontend
+cd frontend
+npm install
+ng serve
 ```
+- **Frontend: http://localhost:4200**
+- **Backend: http://localhost:8080**
+- **Swagger: http://localhost:8080/swagger-ui.html**
 
 ---
 
-## 📝 Technische Details
+## 🧭 Roadmap
 
-**Backend Architektur:** 5+ Service Classes mit Enterprise-Patterns  
-**API Endpoints:** 25+ RESTful Endpunkte mit vollständigen CRUD-Operationen  
-**Database Schema:** 6 Kern-Entitäten mit 15+ Beziehungen und Constraints  
-**Business Logic:** 500+ Lines komplexer Geschäftslogik pro Service  
-**Frontend Komponenten:** 15+ wiederverwendbare Angular Komponenten  
-**Code Coverage:** Unit Tests für kritische Business Logic geplant  
+- **📄 Rechnungsgenerierung** - PDF-Erstellung aus Verträgen
+- **🔄 Batch-Verarbeitung** - Monatliche Abrechnungsautomatisierung  
+- **📊 Basis-Analytics** - Kunden- und Umsatzmetriken
+- **🧪 Test-Suite** - Unit- und Integrationstests
+- **📝 Audit-Logging** - Verfolgung von Benutzeraktionen für Compliance
 
-### Implementierte Design Patterns
-- **Repository Pattern** - Datenzugriff-Abstraktion
-- **DTO Pattern** - API-Layer Datenkapselung  
-- **Service Layer Pattern** - Geschäftslogik-Trennung
-- **Builder Pattern** - Für komplexe Entity-Erstellung
-- **Strategy Pattern** - Für verschiedene Billing-Zyklen
-- **Observer Pattern** - Event-basierte Architektur (geplant)  
 
 ---
 
