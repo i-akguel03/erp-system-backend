@@ -2,6 +2,7 @@ HELP.md
 target/
 build-run.ps1
 logs
+.log
 
 # Secrets
 .env
