@@ -104,7 +104,7 @@ public class InvoiceFactory {
                 dueSchedule.getPeriodEnd().format(formatter));
 
         if (isOverdue) {
-            return String.format("%s ⚠ ÜBERFÄLLIG seit %s ⚠",
+            return String.format("%s (überfällig seit %s)",
                     baseDescription, dueSchedule.getDueDate().format(formatter));
         }
 

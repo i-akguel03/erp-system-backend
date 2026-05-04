@@ -27,7 +27,7 @@ import java.util.UUID;
  * WICHTIGE WORKFLOW-REGELN:
  * 1. DueSchedules werden NUR beim Abo-Erstellen automatisch generiert
  * 2. DueSchedules enthalten NUR Termine und Status - KEINE Beträge
- * 3. Status COMPLETED darf NUR vom InvoiceBatchService gesetzt werden
+ * 3. Status COMPLETED darf NUR vom InvoiceBatchItemProcessor gesetzt werden
  * 4. Wenn Status auf COMPLETED gesetzt wird, MÜSSEN Rechnung und OpenItem existieren
  * 5. Benutzer können nur zwischen ACTIVE/PAUSED wechseln
  * 6. Manuelle Erstellung nur für Nachkorrekturen
@@ -263,13 +263,13 @@ public class DueScheduleService {
     }
 
     // ===============================================================================================
-    // SYSTEM-METHODEN (Nur für InvoiceBatchService und Admin)
+    // SYSTEM-METHODEN (Nur für InvoiceBatchItemProcessor und Admin)
     // ===============================================================================================
 
     /**
      * Markiert eine Fälligkeit als abgerechnet (COMPLETED).
      *
-     * KRITISCH: Diese Methode darf NUR vom InvoiceBatchService aufgerufen werden!
+     * KRITISCH: Diese Methode darf NUR vom InvoiceBatchItemProcessor aufgerufen werden!
      * Sie setzt automatisch auch die invoiceId und invoiceBatchId.
      *
      * @param id Fälligkeits-ID

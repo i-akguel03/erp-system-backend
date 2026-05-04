@@ -83,7 +83,7 @@ public class InvoiceBatchAnalyzer {
     public boolean canRunBillingBatch(LocalDate billingDate, boolean includeAllPreviousMonths) {
         long count = includeAllPreviousMonths ?
                 dueScheduleRepository.countByStatusAndDueDateLessThanEqual(DueStatus.ACTIVE, billingDate) :
-                dueScheduleRepository.countByStatusAndDueDateLessThanEqual(DueStatus.ACTIVE, billingDate);
+                dueScheduleRepository.countByStatusAndDueDate(DueStatus.ACTIVE, billingDate);
         return count > 0;
     }
 }

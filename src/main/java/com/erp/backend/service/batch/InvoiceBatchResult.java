@@ -158,13 +158,4 @@ public class InvoiceBatchResult {
         }
     }
 
-    // Legacy constructor for backward compatibility
-    @Deprecated
-    public static InvoiceBatchResult createLegacy(int createdInvoices, int processedDueSchedules,
-                                                  BigDecimal totalAmount, String message) {
-        return new Builder()
-                .withMessage(message)
-                .addAmount(totalAmount)
-                .build();
-    }
 }

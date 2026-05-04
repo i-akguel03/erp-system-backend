@@ -3,6 +3,8 @@ package com.erp.backend.service.init;
 import com.erp.backend.domain.*;
 import com.erp.backend.repository.*;
 import com.erp.backend.service.*;
+import com.erp.backend.service.batch.InvoiceBatchOrchestrator;
+import com.erp.backend.service.batch.InvoiceBatchResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -40,7 +42,7 @@ public class BillingDataInitializer {
     private final VorgangService vorgangService;
     private final NumberGeneratorService numberGeneratorService;
     private final InvoiceService invoiceService;
-    private final InvoiceBatchService invoiceBatchService;
+    private final InvoiceBatchOrchestrator invoiceBatchOrchestrator;
 
     private final Random random = new Random();
 
@@ -56,7 +58,7 @@ public class BillingDataInitializer {
                                   VorgangService vorgangService,
                                   NumberGeneratorService numberGeneratorService,
                                   InvoiceService invoiceService,
-                                  InvoiceBatchService invoiceBatchService) {
+                                  InvoiceBatchOrchestrator invoiceBatchOrchestrator) {
         this.subscriptionRepository = subscriptionRepository;
         this.dueScheduleRepository = dueScheduleRepository;
         this.invoiceRepository = invoiceRepository;
@@ -66,7 +68,7 @@ public class BillingDataInitializer {
         this.vorgangService = vorgangService;
         this.numberGeneratorService = numberGeneratorService;
         this.invoiceService = invoiceService;
-        this.invoiceBatchService = invoiceBatchService;
+        this.invoiceBatchOrchestrator = invoiceBatchOrchestrator;
     }
 
     /**
@@ -420,7 +422,7 @@ public class BillingDataInitializer {
             logger.info("  - OpenItems: {}", openItemsBefore);
 
             // Rechnungslauf durchführen
-            InvoiceBatchService.InvoiceBatchResult result = invoiceBatchService.runInvoiceBatch(billingDate);
+            InvoiceBatchResult result = invoiceBatchOrchestrator.runInvoiceBatch(billingDate);
 
             // Status NACH dem Rechnungslauf
             long activeDueSchedulesAfter = dueScheduleRepository.countByStatus(DueStatus.ACTIVE);

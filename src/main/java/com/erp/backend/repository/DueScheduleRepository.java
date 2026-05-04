@@ -117,6 +117,9 @@ public interface DueScheduleRepository extends JpaRepository<DueSchedule, UUID> 
     /** Zählt Fälligkeiten nach Status und DueDate < billingDate */
     long countByStatusAndDueDateBefore(DueStatus status, LocalDate dueDate);
 
+    /** Zählt Fälligkeiten nach Status und exaktem DueDate */
+    long countByStatusAndDueDate(DueStatus status, LocalDate dueDate);
+
     /** Zählt aktive Fälligkeiten bis zu einem bestimmten Datum (alternative Query-Methode) */
     @Query("SELECT COUNT(ds) FROM DueSchedule ds WHERE ds.status = :status AND ds.dueDate <= :dueDate")
     long countSchedulesForBilling(@Param("status") DueStatus status, @Param("dueDate") LocalDate dueDate);
@@ -193,7 +196,7 @@ public interface DueScheduleRepository extends JpaRepository<DueSchedule, UUID> 
     /** Holt Fälligkeiten eines Abos nach bestimmtem Status (für updateDueScheduleStatusForSubscription) */
     List<DueSchedule> findBySubscriptionIdAndStatus(UUID subscriptionId, DueStatus status);
 
-// === Invoice/Batch-Verknüpfungen (für InvoiceBatchService) ===
+// === Invoice/Batch-Verknüpfungen (für InvoiceBatchItemProcessor) ===
 
     /** Holt alle Fälligkeiten eines bestimmten Rechnungslaufs */
     List<DueSchedule> findByInvoiceBatchId(String invoiceBatchId);
