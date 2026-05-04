@@ -48,14 +48,14 @@ spring:
   # ===============================
   security:
     user:
-      name: ${SPRING_USER:erp}           # Default Benutzer lokal
-      password: ${SPRING_PASSWORD:erp}   # Default Passwort lokal
+      name: ${SPRING_USER}           # Default Benutzer lokal
+      password: ${SPRING_PASSWORD}   # Default Passwort lokal
 
 # =========================================
 # JWT CONFIG
 # =========================================
 jwt:
-  secret: ${JWT_SECRET:meinSehrSicheresGeheimnis123456789}  # Default lokal
+  secret: ${JWT_SECRET}  # Default lokal
   expiration: 86400000  # Millisekunden (1 Tag)
   issuer: erp-backend
 
