@@ -3,11 +3,15 @@ package com.erp.backend.service;
 import com.erp.backend.domain.Address;
 import com.erp.backend.domain.ContractStatus;
 import com.erp.backend.domain.Customer;
+import com.erp.backend.exception.BusinessLogicException;
+import com.erp.backend.exception.DuplicateResourceException;
+import com.erp.backend.exception.ResourceNotFoundException;
 import com.erp.backend.repository.AddressRepository;
 import com.erp.backend.repository.CustomerRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -15,10 +19,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Random;
 import java.util.UUID;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.web.server.ResponseStatusException;
 
 @Service
 @Transactional
@@ -141,11 +141,11 @@ public class CustomerService {
 
     public Customer updateCustomer(Customer customer) {
         if (customer.getId() == null) {
-            throw new IllegalArgumentException("Customer ID cannot be null for update");
+            throw new BusinessLogicException("Kunden-ID darf für ein Update nicht null sein");
         }
 
         Customer existingCustomer = customerRepository.findById(customer.getId())
-                .orElseThrow(() -> new IllegalArgumentException("Customer not found with ID: " + customer.getId()));
+                .orElseThrow(() -> new ResourceNotFoundException("Kunde nicht gefunden mit ID: " + customer.getId()));
 
         // Email-Eindeutigkeit prüfen (außer bei gleichem Kunden)
         if (!existingCustomer.getEmail().equals(customer.getEmail())) {
@@ -167,20 +167,13 @@ public class CustomerService {
 
     public void deleteCustomerById(UUID id) {
         Customer customer = customerRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(
-                        HttpStatus.NOT_FOUND,
-                        "Customer not found with ID: " + id
-                ));
+                .orElseThrow(() -> new ResourceNotFoundException("Kunde nicht gefunden mit ID: " + id));
 
-        // Prüfen, ob aktive Verträge vorhanden sind
         boolean hasActiveContracts = customer.getContracts().stream()
-                .anyMatch(contract -> contract.getContractStatus().equals(ContractStatus.ACTIVE)); // oder contract.getStatus().equals("ACTIVE")
+                .anyMatch(contract -> contract.getContractStatus().equals(ContractStatus.ACTIVE));
 
         if (hasActiveContracts) {
-            throw new ResponseStatusException(
-                    HttpStatus.CONFLICT,
-                    "Customer cannot be deleted because active contracts exist"
-            );
+            throw new BusinessLogicException("Kunde kann nicht gelöscht werden, da aktive Verträge existieren.");
         }
 
         // Soft Delete: Hibernate macht UPDATE ... SET deleted = true
@@ -211,13 +204,13 @@ public class CustomerService {
 
     private void validateCustomerForCreation(Customer customer) {
         if (customer.getFirstName() == null || customer.getFirstName().trim().isEmpty()) {
-            throw new IllegalArgumentException("First name is required");
+            throw new BusinessLogicException("Vorname ist erforderlich");
         }
         if (customer.getLastName() == null || customer.getLastName().trim().isEmpty()) {
-            throw new IllegalArgumentException("Last name is required");
+            throw new BusinessLogicException("Nachname ist erforderlich");
         }
         if (customer.getEmail() == null || customer.getEmail().trim().isEmpty()) {
-            throw new IllegalArgumentException("Email is required");
+            throw new BusinessLogicException("E-Mail ist erforderlich");
         }
 
         validateEmailUniqueness(customer.getEmail());
@@ -225,7 +218,7 @@ public class CustomerService {
 
     private void validateEmailUniqueness(String email) {
         if (customerRepository.existsByEmail(email)) {
-            throw new IllegalArgumentException("Customer with email already exists: " + email);
+            throw new DuplicateResourceException("Ein Kunde mit dieser E-Mail-Adresse existiert bereits: " + email);
         }
     }
 

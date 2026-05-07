@@ -1,6 +1,8 @@
 package com.erp.backend.service;
 
 import com.erp.backend.domain.*;
+import com.erp.backend.exception.BusinessLogicException;
+import com.erp.backend.exception.ResourceNotFoundException;
 import com.erp.backend.repository.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -149,7 +151,7 @@ public class InvoiceService {
     public Invoice updateInvoice(Invoice invoice) {
         // Prüfen ob Rechnung existiert
         if (invoice.getId() == null || !invoiceRepository.existsById(invoice.getId())) {
-            throw new IllegalArgumentException("Invoice not found for update: " + invoice.getId());
+            throw new ResourceNotFoundException("Rechnung nicht gefunden für Update: " + invoice.getId());
         }
 
         // Beträge neu berechnen
@@ -204,12 +206,11 @@ public class InvoiceService {
     public void deleteInvoice(UUID invoiceId) {
         // Rechnung laden
         Invoice invoice = invoiceRepository.findById(invoiceId)
-                .orElseThrow(() -> new IllegalArgumentException("Invoice not found: " + invoiceId));
+                .orElseThrow(() -> new ResourceNotFoundException("Rechnung nicht gefunden: " + invoiceId));
 
         // SICHERHEITSPRÜFUNG: Keine offenen Posten erlaubt
         if (hasOpenItems(invoice)) {
-            throw new IllegalStateException(
-                    "Invoice cannot be deleted - has open items. Cancel the invoice first.");
+            throw new BusinessLogicException("Rechnung kann nicht gelöscht werden - offene Posten vorhanden. Bitte zuerst stornieren.");
         }
 
         // SCHRITT 1: Alle zugehörigen OpenItems löschen (auch CANCELLED)
@@ -246,7 +247,7 @@ public class InvoiceService {
     @Transactional
     public Invoice changeStatus(UUID invoiceId, Invoice.InvoiceStatus newStatus) {
         Invoice invoice = invoiceRepository.findById(invoiceId)
-                .orElseThrow(() -> new IllegalArgumentException("Invoice not found: " + invoiceId));
+                .orElseThrow(() -> new ResourceNotFoundException("Rechnung nicht gefunden: " + invoiceId));
 
         Invoice.InvoiceStatus oldStatus = invoice.getStatus();
         invoice.setStatus(newStatus);
@@ -294,7 +295,7 @@ public class InvoiceService {
     public Invoice cancelInvoice(UUID invoiceId) {
         // Rechnung laden
         Invoice invoice = invoiceRepository.findById(invoiceId)
-                .orElseThrow(() -> new IllegalArgumentException("Invoice not found: " + invoiceId));
+                .orElseThrow(() -> new ResourceNotFoundException("Rechnung nicht gefunden: " + invoiceId));
 
         // SCHRITT 1: Rechnung auf CANCELLED setzen
         invoice.setStatus(Invoice.InvoiceStatus.CANCELLED);
@@ -437,7 +438,7 @@ public class InvoiceService {
     @Transactional
     public Invoice addInvoiceItem(UUID invoiceId, InvoiceItem item) {
         Invoice invoice = invoiceRepository.findById(invoiceId)
-                .orElseThrow(() -> new IllegalArgumentException("Invoice not found: " + invoiceId));
+                .orElseThrow(() -> new ResourceNotFoundException("Rechnung nicht gefunden: " + invoiceId));
 
         invoice.addInvoiceItem(item);
         return invoiceRepository.save(invoice);
@@ -453,7 +454,7 @@ public class InvoiceService {
     @Transactional
     public Invoice removeInvoiceItem(UUID invoiceId, UUID itemId) {
         Invoice invoice = invoiceRepository.findById(invoiceId)
-                .orElseThrow(() -> new IllegalArgumentException("Invoice not found: " + invoiceId));
+                .orElseThrow(() -> new ResourceNotFoundException("Rechnung nicht gefunden: " + invoiceId));
 
         InvoiceItem itemToRemove = invoice.getInvoiceItems().stream()
                 .filter(item -> Objects.equals(item.getId(), itemId))
@@ -519,7 +520,7 @@ public class InvoiceService {
     @Transactional
     public List<OpenItem> createOpenItemsForInvoice(UUID invoiceId) {
         Invoice invoice = invoiceRepository.findById(invoiceId)
-                .orElseThrow(() -> new IllegalArgumentException("Invoice not found: " + invoiceId));
+                .orElseThrow(() -> new ResourceNotFoundException("Rechnung nicht gefunden: " + invoiceId));
 
         // Warnung wenn bereits OpenItems existieren
         if (!invoice.getOpenItems().isEmpty()) {
@@ -549,7 +550,7 @@ public class InvoiceService {
     @Transactional(readOnly = true)
     public List<OpenItem> getOpenItemsForInvoice(UUID invoiceId) {
         Invoice invoice = invoiceRepository.findById(invoiceId)
-                .orElseThrow(() -> new IllegalArgumentException("Invoice not found: " + invoiceId));
+                .orElseThrow(() -> new ResourceNotFoundException("Rechnung nicht gefunden: " + invoiceId));
         return invoice.getOpenItems();
     }
 
@@ -663,16 +664,16 @@ public class InvoiceService {
      */
     private void validateInvoice(Invoice invoice) {
         if (invoice.getCustomer() == null || invoice.getCustomer().getId() == null) {
-            throw new IllegalArgumentException("Customer is required for invoice");
+            throw new BusinessLogicException("Kunde ist für eine Rechnung erforderlich");
         }
         if (!customerRepository.existsById(invoice.getCustomer().getId())) {
-            throw new IllegalArgumentException("Customer not found: " + invoice.getCustomer().getId());
+            throw new ResourceNotFoundException("Kunde nicht gefunden: " + invoice.getCustomer().getId());
         }
         if (invoice.getInvoiceDate() == null) {
-            throw new IllegalArgumentException("Invoice date is required");
+            throw new BusinessLogicException("Rechnungsdatum ist erforderlich");
         }
         if (invoice.getDueDate() == null) {
-            throw new IllegalArgumentException("Due date is required");
+            throw new BusinessLogicException("Fälligkeitsdatum ist erforderlich");
         }
     }
 

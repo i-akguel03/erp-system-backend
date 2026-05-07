@@ -6,6 +6,8 @@ import com.erp.backend.domain.Subscription;
 import com.erp.backend.domain.SubscriptionStatus;
 import com.erp.backend.dto.DueScheduleDto;
 import com.erp.backend.dto.DueScheduleStatisticsDto;
+import com.erp.backend.exception.BusinessLogicException;
+import com.erp.backend.exception.InvalidStatusTransitionException;
 import com.erp.backend.exception.ResourceNotFoundException;
 import com.erp.backend.mapper.DueScheduleMapper;
 import com.erp.backend.repository.DueScheduleRepository;
@@ -226,11 +228,11 @@ public class DueScheduleService {
                 .orElseThrow(() -> new ResourceNotFoundException("Fälligkeit " + id + " nicht gefunden"));
 
         if (dueSchedule.getStatus() == DueStatus.COMPLETED) {
-            throw new IllegalStateException("Abgerechnete Fälligkeiten können nicht pausiert werden (ID: " + id + ")");
+            throw new InvalidStatusTransitionException("Abgerechnete Fälligkeiten können nicht pausiert werden (ID: " + id + ")");
         }
 
         if (dueSchedule.getStatus() != DueStatus.ACTIVE) {
-            throw new IllegalStateException("Nur aktive Fälligkeiten können pausiert werden (Status: " + dueSchedule.getStatus() + ")");
+            throw new InvalidStatusTransitionException("Nur aktive Fälligkeiten können pausiert werden (Status: " + dueSchedule.getStatus() + ")");
         }
 
         dueSchedule.setStatus(DueStatus.PAUSED);
@@ -248,11 +250,11 @@ public class DueScheduleService {
                 .orElseThrow(() -> new ResourceNotFoundException("Fälligkeit " + id + " nicht gefunden"));
 
         if (dueSchedule.getStatus() == DueStatus.COMPLETED) {
-            throw new IllegalStateException("Abgerechnete Fälligkeiten können nicht reaktiviert werden (ID: " + id + ")");
+            throw new InvalidStatusTransitionException("Abgerechnete Fälligkeiten können nicht reaktiviert werden (ID: " + id + ")");
         }
 
         if (dueSchedule.getStatus() != DueStatus.PAUSED) {
-            throw new IllegalStateException("Nur pausierte Fälligkeiten können reaktiviert werden (Status: " + dueSchedule.getStatus() + ")");
+            throw new InvalidStatusTransitionException("Nur pausierte Fälligkeiten können reaktiviert werden (Status: " + dueSchedule.getStatus() + ")");
         }
 
         dueSchedule.setStatus(DueStatus.ACTIVE);
@@ -288,7 +290,7 @@ public class DueScheduleService {
         }
 
         if (dueSchedule.getStatus() != DueStatus.ACTIVE) {
-            throw new IllegalStateException("Nur aktive Fälligkeiten können als abgerechnet markiert werden (Status: " + dueSchedule.getStatus() + ")");
+            throw new InvalidStatusTransitionException("Nur aktive Fälligkeiten können als abgerechnet markiert werden (Status: " + dueSchedule.getStatus() + ")");
         }
 
         // Status und Verknüpfungen setzen
@@ -330,7 +332,7 @@ public class DueScheduleService {
                 .orElseThrow(() -> new ResourceNotFoundException("Fälligkeit " + id + " nicht gefunden"));
 
         if (dueSchedule.getStatus() != DueStatus.COMPLETED) {
-            throw new IllegalStateException("Nur abgerechnete Fälligkeiten können zurückgesetzt werden (Status: " + dueSchedule.getStatus() + ")");
+            throw new InvalidStatusTransitionException("Nur abgerechnete Fälligkeiten können zurückgesetzt werden (Status: " + dueSchedule.getStatus() + ")");
         }
 
         // WARNUNG loggen
@@ -401,20 +403,17 @@ public class DueScheduleService {
                 .orElseThrow(() -> new ResourceNotFoundException("Fälligkeit " + id + " nicht gefunden"));
 
         if (existing.getStatus() == DueStatus.COMPLETED) {
-            throw new IllegalStateException("Abgerechnete Fälligkeiten können nicht bearbeitet werden (ID: " + id + ")");
+            throw new InvalidStatusTransitionException("Abgerechnete Fälligkeiten können nicht bearbeitet werden (ID: " + id + ")");
         }
 
-        // Validierung: Keine Überschneidung der Perioden (außer mit sich selbst)
         validateNoPeriodOverlap(existing.getSubscription().getId(), dto.getPeriodStart(), dto.getPeriodEnd(), id);
 
-        // Nur Termine und Status aktualisieren - keine Beträge oder Verknüpfungen!
         existing.setDueDate(dto.getDueDate());
         existing.setPeriodStart(dto.getPeriodStart());
         existing.setPeriodEnd(dto.getPeriodEnd());
 
-        // Status nur zwischen ACTIVE/PAUSED wechseln lassen
         if (dto.getStatus() == DueStatus.COMPLETED) {
-            throw new IllegalArgumentException("Status COMPLETED kann nicht manuell gesetzt werden");
+            throw new BusinessLogicException("Status COMPLETED kann nicht manuell gesetzt werden");
         }
         if (dto.getStatus() != null) {
             existing.setStatus(dto.getStatus());
@@ -440,11 +439,11 @@ public class DueScheduleService {
                 .orElseThrow(() -> new ResourceNotFoundException("Fälligkeit " + id + " nicht gefunden"));
 
         if (dueSchedule.getStatus() == DueStatus.COMPLETED) {
-            throw new IllegalStateException("Abgerechnete Fälligkeiten können nicht gelöscht werden (ID: " + id + ")");
+            throw new BusinessLogicException("Abgerechnete Fälligkeiten können nicht gelöscht werden (ID: " + id + ")");
         }
 
         if (dueSchedule.getInvoiceId() != null) {
-            throw new IllegalStateException("Fälligkeiten mit Rechnungsverknüpfung können nicht gelöscht werden (ID: " + id + ")");
+            throw new BusinessLogicException("Fälligkeiten mit Rechnungsverknüpfung können nicht gelöscht werden (ID: " + id + ")");
         }
 
         dueScheduleRepository.delete(dueSchedule);
@@ -466,7 +465,7 @@ public class DueScheduleService {
                 .orElseThrow(() -> new ResourceNotFoundException("Abo " + subscriptionId + " nicht gefunden"));
 
         if (subscription.getSubscriptionStatus() != SubscriptionStatus.ACTIVE) {
-            throw new IllegalStateException("Zusätzliche Fälligkeiten können nur für aktive Abonnements erstellt werden");
+            throw new BusinessLogicException("Zusätzliche Fälligkeiten können nur für aktive Abonnements erstellt werden");
         }
 
         // Finde die letzte bestehende Fälligkeit
@@ -518,19 +517,19 @@ public class DueScheduleService {
 
     private void validateDueSchedule(DueScheduleDto dto) {
         if (dto.getSubscriptionId() == null) {
-            throw new IllegalArgumentException("Fälligkeit muss einem Abonnement zugeordnet sein");
+            throw new BusinessLogicException("Fälligkeit muss einem Abonnement zugeordnet sein");
         }
         if (dto.getPeriodStart() == null || dto.getPeriodEnd() == null) {
-            throw new IllegalArgumentException("Fälligkeit muss einen Start- und Endzeitraum haben");
+            throw new BusinessLogicException("Fälligkeit muss einen Start- und Endzeitraum haben");
         }
         if (dto.getPeriodEnd().isBefore(dto.getPeriodStart())) {
-            throw new IllegalArgumentException("Periodenende darf nicht vor Periodenstart liegen");
+            throw new BusinessLogicException("Periodenende darf nicht vor Periodenstart liegen");
         }
         if (dto.getDueDate() == null) {
-            throw new IllegalArgumentException("Fälligkeit muss ein Fälligkeitsdatum haben");
+            throw new BusinessLogicException("Fälligkeit muss ein Fälligkeitsdatum haben");
         }
         if (dto.getStatus() == DueStatus.COMPLETED) {
-            throw new IllegalArgumentException("Status COMPLETED kann nicht manuell gesetzt werden");
+            throw new BusinessLogicException("Status COMPLETED kann nicht manuell gesetzt werden");
         }
     }
 
@@ -538,17 +537,15 @@ public class DueScheduleService {
         List<DueSchedule> existingSchedules = dueScheduleRepository.findBySubscriptionId(subscriptionId);
 
         for (DueSchedule schedule : existingSchedules) {
-            // Sich selbst ausschließen bei Updates
             if (excludeId != null && schedule.getId().equals(excludeId)) {
                 continue;
             }
 
-            // Überschneidung prüfen
             boolean overlaps = !(end.isBefore(schedule.getPeriodStart()) ||
                     start.isAfter(schedule.getPeriodEnd()));
 
             if (overlaps) {
-                throw new IllegalArgumentException(
+                throw new BusinessLogicException(
                         String.format("Fälligkeit überschneidet sich mit bestehender Fälligkeit %s (%s bis %s)",
                                 schedule.getDueNumber(),
                                 schedule.getPeriodStart(),

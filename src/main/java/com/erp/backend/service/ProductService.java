@@ -1,6 +1,8 @@
 package com.erp.backend.service;
 
 import com.erp.backend.domain.Product;
+import com.erp.backend.exception.BusinessLogicException;
+import com.erp.backend.exception.ResourceNotFoundException;
 import com.erp.backend.repository.ProductRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -90,7 +92,7 @@ public class ProductService {
     public Product updateProduct(Product product) {
         validate(product);
         if (product.getId() == null || !repository.existsById(product.getId())) {
-            throw new IllegalArgumentException("Product not found for update");
+            throw new ResourceNotFoundException("Produkt nicht gefunden für Update");
         }
         Product saved = repository.save(product);
         logger.info("Updated product: id={}, productNumber={}, name={}, price={}",
@@ -108,7 +110,7 @@ public class ProductService {
 
     public void deleteProductById(UUID id) {
         if (!repository.existsById(id)) {
-            throw new IllegalArgumentException("Product not found with id=" + id);
+            throw new ResourceNotFoundException("Produkt nicht gefunden mit id=" + id);
         }
         repository.deleteById(id);
         logger.info("Deleted product with id={}", id);
@@ -116,10 +118,10 @@ public class ProductService {
 
     private void validate(Product product) {
         if (product.getName() == null || product.getName().isBlank()) {
-            throw new IllegalArgumentException("Product name must not be empty");
+            throw new BusinessLogicException("Produktname darf nicht leer sein");
         }
         if (product.getPrice() == null || product.getPrice().compareTo(BigDecimal.ZERO) < 0) {
-            throw new IllegalArgumentException("Product price must be >= 0");
+            throw new BusinessLogicException("Produktpreis muss >= 0 sein");
         }
     }
 

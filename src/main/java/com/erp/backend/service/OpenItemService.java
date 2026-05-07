@@ -1,6 +1,8 @@
 package com.erp.backend.service;
 
 import com.erp.backend.domain.*;
+import com.erp.backend.exception.BusinessLogicException;
+import com.erp.backend.exception.ResourceNotFoundException;
 import com.erp.backend.repository.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -64,7 +66,7 @@ public class OpenItemService {
     @Transactional
     public OpenItem updateOpenItem(OpenItem openItem) {
         if (openItem.getId() == null || !openItemRepository.existsById(openItem.getId())) {
-            throw new IllegalArgumentException("OpenItem not found for update: " + openItem.getId());
+            throw new ResourceNotFoundException("Offener Posten nicht gefunden für Update: " + openItem.getId());
         }
 
         OpenItem saved = openItemRepository.save(openItem);
@@ -96,11 +98,11 @@ public class OpenItemService {
     @Transactional
     public void deleteOpenItem(UUID openItemId) {
         OpenItem openItem = openItemRepository.findById(openItemId)
-                .orElseThrow(() -> new IllegalArgumentException("OpenItem not found: " + openItemId));
+                .orElseThrow(() -> new ResourceNotFoundException("Offener Posten nicht gefunden: " + openItemId));
 
         if (openItem.getStatus() == OpenItem.OpenItemStatus.PAID ||
                 openItem.getStatus() == OpenItem.OpenItemStatus.PARTIALLY_PAID) {
-            throw new IllegalStateException("Cannot delete OpenItem with payments");
+            throw new BusinessLogicException("Offener Posten mit Zahlungen kann nicht gelöscht werden");
         }
 
         openItemRepository.deleteById(openItemId);
@@ -195,7 +197,7 @@ public class OpenItemService {
     @Transactional(readOnly = true)
     public List<OpenItem> getOpenItemsByCustomer(UUID customerId) {
         if (!customerRepository.existsById(customerId)) {
-            throw new IllegalArgumentException("Customer not found: " + customerId);
+            throw new ResourceNotFoundException("Kunde nicht gefunden: " + customerId);
         }
         return openItemRepository.findByCustomerId(customerId);
     }
@@ -203,7 +205,7 @@ public class OpenItemService {
     @Transactional(readOnly = true)
     public List<OpenItem> getOpenOpenItemsByCustomer(UUID customerId) {
         if (!customerRepository.existsById(customerId)) {
-            throw new IllegalArgumentException("Customer not found: " + customerId);
+            throw new ResourceNotFoundException("Kunde nicht gefunden: " + customerId);
         }
         return openItemRepository.findOpenItemsByCustomerId(customerId);
     }
@@ -211,7 +213,7 @@ public class OpenItemService {
     @Transactional(readOnly = true)
     public List<OpenItem> getOpenItemsByInvoice(UUID invoiceId) {
         if (!invoiceRepository.existsById(invoiceId)) {
-            throw new IllegalArgumentException("Invoice not found: " + invoiceId);
+            throw new ResourceNotFoundException("Rechnung nicht gefunden: " + invoiceId);
         }
         return openItemRepository.findByInvoiceId(invoiceId);
     }
@@ -309,19 +311,19 @@ public class OpenItemService {
 
     private void validateOpenItem(OpenItem openItem) {
         if (openItem.getInvoice() == null || openItem.getInvoice().getId() == null) {
-            throw new IllegalArgumentException("Invoice is required for OpenItem");
+            throw new BusinessLogicException("Rechnung ist für einen offenen Posten erforderlich");
         }
         if (!invoiceRepository.existsById(openItem.getInvoice().getId())) {
-            throw new IllegalArgumentException("Invoice not found: " + openItem.getInvoice().getId());
+            throw new ResourceNotFoundException("Rechnung nicht gefunden: " + openItem.getInvoice().getId());
         }
         if (openItem.getAmount() == null || openItem.getAmount().compareTo(BigDecimal.ZERO) <= 0) {
-            throw new IllegalArgumentException("Amount must be positive");
+            throw new BusinessLogicException("Betrag muss positiv sein");
         }
         if (openItem.getDueDate() == null) {
-            throw new IllegalArgumentException("Due date is required");
+            throw new BusinessLogicException("Fälligkeitsdatum ist erforderlich");
         }
         if (openItem.getDescription() == null || openItem.getDescription().trim().isEmpty()) {
-            throw new IllegalArgumentException("Description is required");
+            throw new BusinessLogicException("Beschreibung ist erforderlich");
         }
     }
 

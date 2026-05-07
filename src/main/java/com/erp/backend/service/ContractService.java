@@ -4,11 +4,14 @@ import com.erp.backend.domain.Contract;
 import com.erp.backend.domain.ContractStatus;
 import com.erp.backend.domain.Customer;
 import com.erp.backend.domain.SubscriptionStatus;
+import com.erp.backend.exception.BusinessLogicException;
+import com.erp.backend.exception.ResourceNotFoundException;
 import com.erp.backend.repository.ContractRepository;
 import com.erp.backend.repository.CustomerRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -17,10 +20,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Random;
 import java.util.UUID;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.web.server.ResponseStatusException;
 
 @Service
 @Transactional
@@ -158,8 +157,8 @@ public class ContractService {
         logger.info("Contract ID: {}", contract.getId());
         logger.info("Contract Title: {}", contract.getContractTitle());
 
-        if(contract.getId() == null) throw new IllegalArgumentException("Contract ID cannot be null for update");
-        if(!contractRepository.existsById(contract.getId())) throw new IllegalArgumentException("Contract not found with ID: " + contract.getId());
+        if(contract.getId() == null) throw new BusinessLogicException("Vertrags-ID darf für ein Update nicht null sein");
+        if(!contractRepository.existsById(contract.getId())) throw new ResourceNotFoundException("Vertrag nicht gefunden mit ID: " + contract.getId());
 
         // Existierenden Vertrag laden
         Contract existing = contractRepository.findById(contract.getId()).get();
@@ -184,7 +183,7 @@ public class ContractService {
             logger.info("Lade neuen Customer mit ID: {}", newCustomerId);
 
             Customer newCustomer = customerRepository.findById(newCustomerId)
-                    .orElseThrow(() -> new IllegalArgumentException("Customer not found with ID: " + newCustomerId));
+                    .orElseThrow(() -> new ResourceNotFoundException("Kunde nicht gefunden mit ID: " + newCustomerId));
 
             logger.info("Neuer Customer geladen: {} {}", newCustomer.getFirstName(), newCustomer.getLastName());
             contract.setCustomer(newCustomer);
@@ -210,20 +209,13 @@ public class ContractService {
 
     public void deleteContract(UUID id) {
         Contract contract = contractRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(
-                        HttpStatus.NOT_FOUND,
-                        "Contract not found with ID: " + id
-                ));
+                .orElseThrow(() -> new ResourceNotFoundException("Vertrag nicht gefunden mit ID: " + id));
 
-        // Prüfen, ob aktive Subscriptions existieren
         boolean hasActiveSubscriptions = contract.getSubscriptions().stream()
                 .anyMatch(sub -> sub.getSubscriptionStatus().equals(SubscriptionStatus.ACTIVE));
 
         if (hasActiveSubscriptions) {
-            throw new ResponseStatusException(
-                    HttpStatus.CONFLICT,
-                    "Cannot delete contract with active subscriptions (id=" + id + ")"
-            );
+            throw new BusinessLogicException("Vertrag kann nicht gelöscht werden, da aktive Abonnements existieren (id=" + id + ")");
         }
 
         // Soft delete durchführen
@@ -288,14 +280,14 @@ public class ContractService {
     // --- Private Hilfsmethoden ---
     private Contract getContractForStatusUpdate(UUID contractId) {
         return contractRepository.findById(contractId)
-                .orElseThrow(() -> new IllegalArgumentException("Contract not found with ID: " + contractId));
+                .orElseThrow(() -> new ResourceNotFoundException("Vertrag nicht gefunden mit ID: " + contractId));
     }
 
     private void validateContractForCreation(Contract contract) {
-        if(contract.getContractTitle() == null || contract.getContractTitle().trim().isEmpty()) throw new IllegalArgumentException("Contract title is required");
-        if(contract.getStartDate() == null) throw new IllegalArgumentException("Start date is required");
-        if(contract.getCustomer() == null || contract.getCustomer().getId() == null) throw new IllegalArgumentException("Customer is required");
-        if(!customerRepository.existsById(contract.getCustomer().getId())) throw new IllegalArgumentException("Customer not found with ID: " + contract.getCustomer().getId());
+        if(contract.getContractTitle() == null || contract.getContractTitle().trim().isEmpty()) throw new BusinessLogicException("Vertragstitel ist erforderlich");
+        if(contract.getStartDate() == null) throw new BusinessLogicException("Startdatum ist erforderlich");
+        if(contract.getCustomer() == null || contract.getCustomer().getId() == null) throw new BusinessLogicException("Kunde ist erforderlich");
+        if(!customerRepository.existsById(contract.getCustomer().getId())) throw new ResourceNotFoundException("Kunde nicht gefunden mit ID: " + contract.getCustomer().getId());
     }
 
     private String generateContractNumber() {

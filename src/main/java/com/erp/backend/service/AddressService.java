@@ -1,12 +1,12 @@
 package com.erp.backend.service;
 
 import com.erp.backend.domain.Address;
+import com.erp.backend.exception.BusinessLogicException;
+import com.erp.backend.exception.ResourceNotFoundException;
 import com.erp.backend.repository.AddressRepository;
 import com.erp.backend.repository.CustomerRepository;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.Optional;
@@ -45,20 +45,13 @@ public class AddressService {
     public void deleteById(Long id) {
         // Prüfen, ob die Adresse existiert
         Address address = addressRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(
-                        HttpStatus.NOT_FOUND,
-                        "Address not found with ID: " + id
-                ));
+                .orElseThrow(() -> new ResourceNotFoundException("Adresse nicht gefunden mit ID: " + id));
 
-        // Prüfen, ob die Adresse noch von Customers verwendet wird
         long customerCount = customerRepository.countByResidentialAddress(address);
 
         if (customerCount > 0) {
             logger.warn("Cannot delete address with id={} - still used by {} customer(s)", id, customerCount);
-            throw new ResponseStatusException(
-                    HttpStatus.CONFLICT,
-                    "Cannot delete address - still used by " + customerCount + " customer(s)"
-            );
+            throw new BusinessLogicException("Adresse kann nicht gelöscht werden - wird von " + customerCount + " Kunden verwendet");
         }
 
         // Adresse kann sicher gelöscht werden
@@ -72,26 +65,18 @@ public class AddressService {
     public void deleteByIdDetailed(Long id) {
         // Prüfen, ob die Adresse existiert
         Address address = addressRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(
-                        HttpStatus.NOT_FOUND,
-                        "Address not found with ID: " + id
-                ));
+                .orElseThrow(() -> new ResourceNotFoundException("Adresse nicht gefunden mit ID: " + id));
 
-        // Alle Customers finden, die diese Adresse verwenden
         var customersUsingAddress = customerRepository.findByResidentialAddress(address);
 
         if (!customersUsingAddress.isEmpty()) {
-            // Detaillierte Fehlermeldung mit Customer-Namen
             String customerNames = customersUsingAddress.stream()
                     .map(customer -> customer.getFirstName() + " " + customer.getLastName() + " (ID: " + customer.getId() + ")")
                     .reduce((a, b) -> a + ", " + b)
                     .orElse("");
 
             logger.warn("Cannot delete address with id={} - used by customers: {}", id, customerNames);
-            throw new ResponseStatusException(
-                    HttpStatus.CONFLICT,
-                    "Cannot delete address - still used by customers: " + customerNames
-            );
+            throw new BusinessLogicException("Adresse kann nicht gelöscht werden - wird verwendet von: " + customerNames);
         }
 
         // Adresse kann sicher gelöscht werden

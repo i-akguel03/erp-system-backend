@@ -2,16 +2,16 @@ package com.erp.backend.service;
 
 import com.erp.backend.domain.*;
 import com.erp.backend.dto.SubscriptionDto;
+import com.erp.backend.exception.BusinessLogicException;
+import com.erp.backend.exception.ResourceNotFoundException;
 import com.erp.backend.repository.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -479,20 +479,13 @@ public class SubscriptionService {
     @Transactional
     public void deleteSubscription(UUID id) {
         Subscription subscription = subscriptionRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(
-                        HttpStatus.NOT_FOUND,
-                        "Subscription not found with ID: " + id
-                ));
+                .orElseThrow(() -> new ResourceNotFoundException("Abonnement nicht gefunden mit ID: " + id));
 
-        // Prüfen, ob bereits abgerechnete Fälligkeiten existieren (COMPLETED)
         long completedSchedules = dueScheduleRepository
                 .countBySubscriptionIdAndStatus(id, DueStatus.COMPLETED);
 
         if (completedSchedules > 0) {
-            throw new ResponseStatusException(
-                    HttpStatus.CONFLICT,
-                    "Cannot delete subscription with completed billing schedules (id=" + id + ")"
-            );
+            throw new BusinessLogicException("Abonnement kann nicht gelöscht werden - bereits abgerechnete Fälligkeiten vorhanden (id=" + id + ")");
         }
 
         // Alle offenen Fälligkeiten löschen
