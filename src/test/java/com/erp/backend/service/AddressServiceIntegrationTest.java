@@ -3,6 +3,8 @@ package com.erp.backend.service;
 import com.erp.backend.BaseIntegrationTest;
 import com.erp.backend.domain.Address;
 import com.erp.backend.domain.Customer;
+import com.erp.backend.exception.BusinessLogicException;
+import com.erp.backend.exception.ResourceNotFoundException;
 import com.erp.backend.repository.AddressRepository;
 import com.erp.backend.repository.CustomerRepository;
 import com.erp.backend.service.init.InitDataOrchestrator;
@@ -11,7 +13,6 @@ import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.web.server.ResponseStatusException;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -77,7 +78,7 @@ class AddressServiceTest extends BaseIntegrationTest {
 
         // When & Then
         assertThat(addressService.isAddressInUse(address.getId())).isTrue();
-        assertThrows(ResponseStatusException.class,
+        assertThrows(BusinessLogicException.class,
                 () -> addressService.deleteById(address.getId()));
         assertThat(addressRepository.count()).isOne();
     }
@@ -127,7 +128,7 @@ class AddressServiceTest extends BaseIntegrationTest {
     void shouldHandleNonExistentAddressGracefully() {
         // When & Then
         assertThat(addressService.findById(999L)).isEmpty();
-        assertThrows(ResponseStatusException.class,
+        assertThrows(ResourceNotFoundException.class,
                 () -> addressService.deleteById(999L));
     }
 
