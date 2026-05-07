@@ -3,6 +3,7 @@ package com.erp.backend.controller;
 import com.erp.backend.domain.Customer;
 import com.erp.backend.dto.CustomerDto;
 import com.erp.backend.service.CustomerService;
+import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
@@ -104,13 +105,13 @@ public class CustomerController {
     }
 
     @PostMapping
-    public ResponseEntity<CustomerDto> createCustomer(@RequestBody Customer customer) {
+    public ResponseEntity<CustomerDto> createCustomer(@Valid @RequestBody Customer customer) {
         Customer created = service.createCustomer(customer);
         return ResponseEntity.status(HttpStatus.CREATED).body(CustomerDto.fromEntity(created));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<CustomerDto> updateCustomer(@PathVariable UUID id, @RequestBody Customer updated) {
+    public ResponseEntity<CustomerDto> updateCustomer(@PathVariable UUID id, @Valid @RequestBody Customer updated) {
         return service.getCustomerById(id)
                 .map(existing -> {
                     existing.setFirstName(updated.getFirstName());

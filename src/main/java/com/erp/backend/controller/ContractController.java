@@ -7,6 +7,7 @@ import com.erp.backend.mapper.ContractMapper;
 import com.erp.backend.service.ContractService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -161,14 +162,14 @@ public class ContractController {
     }
 
     @PostMapping
-    public ResponseEntity<ContractDTO> createContract(@RequestBody ContractDTO dto) {
+    public ResponseEntity<ContractDTO> createContract(@Valid @RequestBody ContractDTO dto) {
         Contract created = service.createContract(ContractMapper.toEntity(dto));
         return ResponseEntity.status(HttpStatus.CREATED).body(ContractMapper.toDTO(created));
     }
 
 
     @PutMapping("/{id}")
-    public ResponseEntity<ContractDTO> updateContract(@PathVariable UUID id, @RequestBody ContractDTO dto) {
+    public ResponseEntity<ContractDTO> updateContract(@PathVariable UUID id, @Valid @RequestBody ContractDTO dto) {
         logger.info("=== CONTROLLER UPDATE DEBUG ===");
         logger.info("PUT /api/contracts/{} - Updating contract", id);
         logger.info("DTO Customer ID: {}", dto.getCustomerId());

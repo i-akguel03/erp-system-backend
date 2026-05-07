@@ -137,7 +137,7 @@ public class SubscriptionController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<?> updateSubscription(@PathVariable UUID id, @RequestBody SubscriptionDto dto) {
+    public ResponseEntity<?> updateSubscription(@PathVariable UUID id, @Valid @RequestBody SubscriptionDto dto) {
         try {
             dto.setId(id);
             Subscription updated = service.updateSubscriptionFromDto(dto);

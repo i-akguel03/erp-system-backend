@@ -6,6 +6,7 @@ import com.erp.backend.dto.AuthResponse;
 import com.erp.backend.dto.RefreshRequest;
 import com.erp.backend.dto.RegisterRequest;
 import com.erp.backend.service.UserDetailsServiceImpl;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -45,7 +46,7 @@ public class AuthController {
      * Antwort: AccessToken + RefreshToken
      */
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody AuthRequest request) {
+    public ResponseEntity<?> login(@Valid @RequestBody AuthRequest request) {
         // Authentifizierung über AuthenticationManager
         Authentication auth = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword())
@@ -67,7 +68,7 @@ public class AuthController {
      * Erwartet: JSON mit { "username": "...", "password": "..." }
      */
     @PostMapping("/register")
-    public ResponseEntity<?> register(@RequestBody RegisterRequest request) {
+    public ResponseEntity<?> register(@Valid @RequestBody RegisterRequest request) {
         // prüfen, ob User schon existiert
         if (((UserDetailsServiceImpl) userDetailsService)
                 .userExists(request.getUsername())) {

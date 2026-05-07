@@ -1,6 +1,8 @@
 package com.erp.backend.domain;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
 
@@ -25,12 +27,15 @@ public class Customer {
     @Column(name = "customer_number", unique = true)
     private String customerNumber;
 
+    @NotBlank(message = "Vorname darf nicht leer sein")
     @Column(name = "first_name", nullable = false)
     private String firstName;
 
+    @NotBlank(message = "Nachname darf nicht leer sein")
     @Column(name = "last_name", nullable = false)
     private String lastName;
 
+    @Email(message = "Ungültige E-Mail-Adresse")
     @Column(unique = true)
     private String email;
 

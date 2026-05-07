@@ -3,6 +3,7 @@ package com.erp.backend.controller;
 import com.erp.backend.domain.Address;
 import com.erp.backend.dto.AddressDTO;
 import com.erp.backend.service.AddressService;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -55,13 +56,13 @@ public class AddressController {
     }
 
     @PostMapping
-    public ResponseEntity<AddressDTO> create(@RequestBody AddressDTO dto) {
+    public ResponseEntity<AddressDTO> create(@Valid @RequestBody AddressDTO dto) {
         Address saved = service.save(fromDTO(dto));
         return ResponseEntity.ok(toDTO(saved));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Address> update(@PathVariable Long id, @RequestBody AddressDTO dto) {
+    public ResponseEntity<Address> update(@PathVariable Long id, @Valid @RequestBody AddressDTO dto) {
         Optional<Address> existing = service.findById(id);
         if (existing.isEmpty()) {
             return ResponseEntity.notFound().build();

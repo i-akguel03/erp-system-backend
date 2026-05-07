@@ -1,6 +1,8 @@
 package com.erp.backend.dto;
 
 import com.erp.backend.domain.ContractStatus;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -10,14 +12,19 @@ public class ContractDTO {
 
     private UUID id;
     private String contractNumber;
-    private String contractTitle;   // exakt wie im Entity
+
+    @NotBlank(message = "Vertragstitel darf nicht leer sein")
+    private String contractTitle;
+
+    @NotNull(message = "Startdatum darf nicht null sein")
     private LocalDate startDate;
     private LocalDate endDate;
     private ContractStatus contractStatus;
     private String notes;
 
-    private UUID customerId; // nur die ID, nicht das ganze Customer-Objekt
-    private List<UUID> subscriptionIds; // nur IDs, keine ganzen Objekte (optional)
+    @NotNull(message = "Kunden-ID darf nicht null sein")
+    private UUID customerId;
+    private List<UUID> subscriptionIds;
 
     // --- Getter & Setter ---
 

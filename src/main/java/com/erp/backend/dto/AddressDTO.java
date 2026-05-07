@@ -1,10 +1,20 @@
 package com.erp.backend.dto;
 
+import jakarta.validation.constraints.NotBlank;
+
 public class AddressDTO {
     private Long id;
+
+    @NotBlank(message = "Straße darf nicht leer sein")
     private String street;
+
+    @NotBlank(message = "Postleitzahl darf nicht leer sein")
     private String postalCode;
+
+    @NotBlank(message = "Stadt darf nicht leer sein")
     private String city;
+
+    @NotBlank(message = "Land darf nicht leer sein")
     private String country;
 
     public AddressDTO() {}
