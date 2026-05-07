@@ -1,11 +1,12 @@
 package com.erp.backend.controller;
 
 import com.erp.backend.config.JwtUtil;
+import com.erp.backend.config.TokenBlacklistService;
 import com.erp.backend.dto.AuthRequest;
 import com.erp.backend.dto.AuthResponse;
-import com.erp.backend.dto.RefreshRequest;
 import com.erp.backend.dto.RegisterRequest;
 import com.erp.backend.service.UserDetailsServiceImpl;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,106 +17,120 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.HashMap;
 import java.util.Map;
 
-/**
- * Controller für Authentifizierung (Login, Registration, Refresh).
- * Alle Endpunkte liegen unter /auth/**
- */
 @RestController
 @RequestMapping("/auth")
-@CrossOrigin // Erlaubt CORS für diese Endpoints
+@CrossOrigin
 public class AuthController {
 
-    private final AuthenticationManager authenticationManager; // kümmert sich um Login
-    private final UserDetailsService userDetailsService;       // lädt Benutzer (impl. = UserDetailsServiceImpl)
-    private final JwtUtil jwtUtil;                             // erzeugt und prüft Tokens
+    private final AuthenticationManager authenticationManager;
+    private final UserDetailsService userDetailsService;
+    private final JwtUtil jwtUtil;
+    private final TokenBlacklistService tokenBlacklistService;
 
     public AuthController(AuthenticationManager authenticationManager,
                           UserDetailsService userDetailsService,
-                          JwtUtil jwtUtil) {
+                          JwtUtil jwtUtil,
+                          TokenBlacklistService tokenBlacklistService) {
         this.authenticationManager = authenticationManager;
         this.userDetailsService = userDetailsService;
         this.jwtUtil = jwtUtil;
+        this.tokenBlacklistService = tokenBlacklistService;
     }
 
-    /**
-     * Login-Endpoint.
-     * Erwartet: JSON mit { "username": "...", "password": "..." }
-     * Antwort: AccessToken + RefreshToken
-     */
     @PostMapping("/login")
     public ResponseEntity<?> login(@Valid @RequestBody AuthRequest request) {
-        // Authentifizierung über AuthenticationManager
         Authentication auth = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword())
         );
 
-        // Principal (UserDetails) aus der Authentication holen
         UserDetails user = (UserDetails) auth.getPrincipal();
-
-        // Tokens generieren
-        String accessToken = jwtUtil.generateAccessToken(user);
+        String accessToken  = jwtUtil.generateAccessToken(user);
         String refreshToken = jwtUtil.generateRefreshToken(user);
 
-        // Antwort zurückgeben (DTO)
         return ResponseEntity.ok(new AuthResponse(accessToken, refreshToken));
     }
 
-    /**
-     * Registrierung neuer User.
-     * Erwartet: JSON mit { "username": "...", "password": "..." }
-     */
     @PostMapping("/register")
     public ResponseEntity<?> register(@Valid @RequestBody RegisterRequest request) {
-        // prüfen, ob User schon existiert
-        if (((UserDetailsServiceImpl) userDetailsService)
-                .userExists(request.getUsername())) {
+        if (((UserDetailsServiceImpl) userDetailsService).userExists(request.getUsername())) {
             return ResponseEntity.status(HttpStatus.CONFLICT).body("User already exists");
         }
-
-        // neuen User anlegen
         ((UserDetailsServiceImpl) userDetailsService).createUser(request.getUsername(), request.getPassword());
         return ResponseEntity.status(HttpStatus.CREATED).body("User registered");
     }
 
     /**
-     * Refresh-Endpoint: erzeugt ein neues Access-Token anhand des Refresh-Tokens.
-     * Erwartet: JSON mit { "refreshToken": "..." }
+     * Logout: Invalidiert das aktuelle Access-Token sofort.
+     * Das Token wird in die Blacklist eingetragen bis es natürlich abläuft.
+     */
+    @PostMapping("/logout")
+    public ResponseEntity<?> logout(HttpServletRequest request) {
+        String authHeader = request.getHeader("Authorization");
+
+        if (authHeader != null && authHeader.startsWith("Bearer ")) {
+            String token = authHeader.substring(7);
+            try {
+                String jti = jwtUtil.extractJti(token);
+                tokenBlacklistService.blacklist(jti, jwtUtil.extractExpiration(token));
+            } catch (Exception e) {
+                // Ungültiges Token beim Logout → trotzdem 200 zurückgeben
+            }
+        }
+
+        return ResponseEntity.ok(Map.of("message", "Erfolgreich abgemeldet"));
+    }
+
+    /**
+     * Refresh: Erzeugt neue Tokens anhand eines gültigen Refresh-Tokens.
+     * Das alte Refresh-Token wird dabei invalidiert (Rotation).
      */
     @PostMapping("/refresh")
     public ResponseEntity<?> refreshToken(@RequestBody Map<String, String> request) {
         String refreshToken = request.get("refreshToken");
 
+        if (refreshToken == null || refreshToken.isBlank()) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(Map.of("error", "refreshToken fehlt"));
+        }
+
         try {
-            // prüfen, ob Refresh-Token gültig ist
-            if (jwtUtil.isTokenValid(refreshToken)) {
-                String username = jwtUtil.extractUsername(refreshToken);
-
-                // User laden
-                UserDetails userDetails = userDetailsService.loadUserByUsername(username);
-
-                // Neue Tokens generieren
-                String newAccessToken = jwtUtil.generateAccessToken(userDetails);
-                String newRefreshToken = jwtUtil.generateRefreshToken(userDetails);
-
-                // Antwort-Map bauen
-                Map<String, Object> response = new HashMap<>();
-                response.put("accessToken", newAccessToken);
-                response.put("refreshToken", newRefreshToken);
-                response.put("expiresIn", jwtUtil.getAccessTokenValidity());
-
-                return ResponseEntity.ok(response);
-            } else {
-                // Refresh-Token ungültig
+            if (!jwtUtil.isTokenValid(refreshToken)) {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                        .body(Map.of("error", "Invalid refresh token"));
+                        .body(Map.of("error", "Refresh-Token ungültig oder abgelaufen"));
             }
+
+            // Nur echte Refresh-Tokens akzeptieren
+            if (!jwtUtil.isRefreshToken(refreshToken)) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                        .body(Map.of("error", "Kein gültiges Refresh-Token"));
+            }
+
+            // Altes Refresh-Token sofort invalidieren (Token Rotation)
+            String oldJti = jwtUtil.extractJti(refreshToken);
+            if (tokenBlacklistService.isBlacklisted(oldJti)) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                        .body(Map.of("error", "Refresh-Token wurde bereits verwendet"));
+            }
+            tokenBlacklistService.blacklist(oldJti, jwtUtil.extractExpiration(refreshToken));
+
+            // Neue Tokens ausstellen
+            String username = jwtUtil.extractUsername(refreshToken);
+            UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+
+            String newAccessToken  = jwtUtil.generateAccessToken(userDetails);
+            String newRefreshToken = jwtUtil.generateRefreshToken(userDetails);
+
+            return ResponseEntity.ok(Map.of(
+                    "accessToken",  newAccessToken,
+                    "refreshToken", newRefreshToken,
+                    "expiresIn",    jwtUtil.getAccessTokenValidity()
+            ));
+
         } catch (Exception e) {
-            // Fehler beim Refresh
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(Map.of("error", "Token refresh failed"));
+                    .body(Map.of("error", "Token-Refresh fehlgeschlagen"));
         }
     }
 }

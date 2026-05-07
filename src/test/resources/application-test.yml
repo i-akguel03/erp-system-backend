@@ -39,6 +39,8 @@ logging:
 # JWT CONFIG
 # =========================================
 jwt:
-  secret: meinSehrSicheresGeheimnisWelchesLangGenugIst123456789 # Default lokal
-  expiration: 86400000  # Millisekunden (1 Tag)
-  issuer: erp-backend
+  secret: TestSecretKeyFuerJunitTestsMinimal32ZeichenLang!
+  access-token:
+    expiration: 900000
+  refresh-token:
+    expiration: 604800000

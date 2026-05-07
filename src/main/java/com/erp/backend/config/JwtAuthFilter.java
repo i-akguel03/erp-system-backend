@@ -1,10 +1,11 @@
 package com.erp.backend.config;
 
-// Importiert die benötigten Klassen
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -13,63 +14,71 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 
-/**
- * JwtAuthFilter ist ein Filter, der bei jeder HTTP-Anfrage aufgerufen wird.
- * Er prüft, ob im Header ein gültiges JWT-Token vorhanden ist.
- * Falls ja, authentifiziert er den Benutzer in Spring Security.
- */
 public class JwtAuthFilter extends OncePerRequestFilter {
 
-    private final JwtUtil jwtUtil; // Hilfsklasse für Token-Operationen (z. B. extrahieren, validieren)
-    private final UserDetailsService userDetailsService; // Zum Laden von User-Details aus der DB
+    private static final Logger logger = LoggerFactory.getLogger(JwtAuthFilter.class);
 
-    // Konstruktor-Injection: Spring gibt automatisch die Abhängigkeiten rein
-    public JwtAuthFilter(UserDetailsService userDetailsService, JwtUtil jwtUtil) {
+    private final JwtUtil jwtUtil;
+    private final UserDetailsService userDetailsService;
+    private final TokenBlacklistService tokenBlacklistService;
+
+    public JwtAuthFilter(UserDetailsService userDetailsService,
+                         JwtUtil jwtUtil,
+                         TokenBlacklistService tokenBlacklistService) {
         this.userDetailsService = userDetailsService;
         this.jwtUtil = jwtUtil;
+        this.tokenBlacklistService = tokenBlacklistService;
     }
 
-    /**
-     * Diese Methode wird bei jeder eingehenden HTTP-Request aufgerufen.
-     * Sie prüft, ob ein JWT im "Authorization"-Header vorhanden und gültig ist.
-     */
     @Override
     protected void doFilterInternal(HttpServletRequest request,
                                     HttpServletResponse response,
                                     FilterChain filterChain) throws ServletException, IOException {
 
-        // Lese den Wert des Authorization-Headers (z. B. "Bearer abc123...")
         final String authHeader = request.getHeader("Authorization");
 
-        // Wenn kein Header vorhanden ist oder er nicht mit "Bearer " anfängt -> weiter im Filter-Chain
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            filterChain.doFilter(request, response); // Request geht ungeprüft weiter
-            return; // Methode beenden
+            filterChain.doFilter(request, response);
+            return;
         }
 
-        // Schneidet "Bearer " ab, sodass nur das Token übrig bleibt
         final String token = authHeader.substring(7);
 
-        // Extrahiert den Username aus dem Token (steht normalerweise im "sub"-Claim des JWT)
-        final String username = jwtUtil.extractUsername(token);
-
-        // Wenn ein Username da ist und noch niemand im SecurityContext authentifiziert ist
-        if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-            // Lade die UserDetails (z. B. Rollen, Passwort-Hash) aus der DB
-            UserDetails user = userDetailsService.loadUserByUsername(username);
-
-            // Prüfe, ob das Token wirklich gültig ist (z. B. Signatur + Ablaufdatum)
-            if (jwtUtil.isTokenValid(token, user)) {
-                // Erstellt ein Authentication-Objekt für Spring Security
-                UsernamePasswordAuthenticationToken auth =
-                        new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities());
-
-                // Setzt die Authentifizierung in den SecurityContext
-                SecurityContextHolder.getContext().setAuthentication(auth);
+        try {
+            // 1. Token-Typ: nur Access-Tokens für API-Requests akzeptieren
+            if (!jwtUtil.isAccessToken(token)) {
+                logger.warn("Abgelehnter Request: Refresh-Token als Access-Token verwendet");
+                filterChain.doFilter(request, response);
+                return;
             }
+
+            // 2. JTI extrahieren und gegen Blacklist prüfen
+            String jti = jwtUtil.extractJti(token);
+            if (tokenBlacklistService.isBlacklisted(jti)) {
+                logger.warn("Abgelehnter Request: Token wurde invalidiert (jti={})", jti);
+                filterChain.doFilter(request, response);
+                return;
+            }
+
+            // 3. Username extrahieren und User authentifizieren
+            String username = jwtUtil.extractUsername(token);
+
+            if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+                UserDetails user = userDetailsService.loadUserByUsername(username);
+
+                if (jwtUtil.isTokenValid(token, user)) {
+                    UsernamePasswordAuthenticationToken auth =
+                            new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities());
+                    SecurityContextHolder.getContext().setAuthentication(auth);
+                }
+            }
+
+        } catch (Exception e) {
+            // Ungültiges/manipuliertes Token → Request geht unauthentifiziert weiter
+            // Spring Security gibt dann 401 zurück
+            logger.debug("JWT-Verarbeitung fehlgeschlagen: {}", e.getMessage());
         }
 
-        // Gebe die Anfrage im Filter-Chain weiter, damit Controller/Endpoints aufgerufen werden können
         filterChain.doFilter(request, response);
     }
 }

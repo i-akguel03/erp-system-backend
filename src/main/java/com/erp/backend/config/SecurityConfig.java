@@ -31,13 +31,15 @@ import java.util.List;
 @Configuration
 public class SecurityConfig {
 
-    private final JwtUtil jwtUtil; // Hilfsklasse für JWT-Operationen
-    private final UserRepository userRepository; // Repository für User (aus DB)
+    private final JwtUtil jwtUtil;
+    private final UserRepository userRepository;
+    private final TokenBlacklistService tokenBlacklistService;
 
-    // Konstruktor-Injection
-    public SecurityConfig(JwtUtil jwtUtil, UserRepository userRepository) {
+    public SecurityConfig(JwtUtil jwtUtil, UserRepository userRepository,
+                          TokenBlacklistService tokenBlacklistService) {
         this.jwtUtil = jwtUtil;
         this.userRepository = userRepository;
+        this.tokenBlacklistService = tokenBlacklistService;
     }
 
     // Bean für Passwortverschlüsselung
@@ -62,10 +64,9 @@ public class SecurityConfig {
         return new ProviderManager(provider); // AuthenticationManager mit Provider
     }
 
-    // Bean für unseren JWT-Filter
     @Bean
     public JwtAuthFilter jwtAuthFilter(UserDetailsServiceImpl userDetailsService) {
-        return new JwtAuthFilter(userDetailsService, jwtUtil);
+        return new JwtAuthFilter(userDetailsService, jwtUtil, tokenBlacklistService);
     }
 
     /**
