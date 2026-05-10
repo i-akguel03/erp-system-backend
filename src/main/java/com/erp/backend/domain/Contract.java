@@ -9,6 +9,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.time.LocalDateTime;
 
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 @Entity
@@ -54,6 +55,13 @@ public class Contract {
     // One-to-Many Beziehung zu Abos
     @OneToMany(mappedBy = "contract", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, fetch = FetchType.LAZY)
     private List<Subscription> subscriptions = new ArrayList<>();
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "renewal_vorgang_id")
+    private Vorgang renewalVorgang;
+
+    @Column(name = "last_renewed_at")
+    private LocalDateTime lastRenewedAt;
 
     public Contract() {
     }
@@ -156,6 +164,22 @@ public class Contract {
 
     public void setSubscriptions(List<Subscription> subscriptions) {
         this.subscriptions = subscriptions;
+    }
+
+    public Vorgang getRenewalVorgang() {
+        return renewalVorgang;
+    }
+
+    public void setRenewalVorgang(Vorgang renewalVorgang) {
+        this.renewalVorgang = renewalVorgang;
+    }
+
+    public LocalDateTime getLastRenewedAt() {
+        return lastRenewedAt;
+    }
+
+    public void setLastRenewedAt(LocalDateTime lastRenewedAt) {
+        this.lastRenewedAt = lastRenewedAt;
     }
 
     @Override

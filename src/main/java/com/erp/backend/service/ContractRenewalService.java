@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -80,6 +81,8 @@ public class ContractRenewalService {
             if (contract.getContractStatus() == ContractStatus.EXPIRED) {
                 contract.setContractStatus(ContractStatus.ACTIVE);
             }
+            contract.setRenewalVorgang(vorgang);
+            contract.setLastRenewedAt(LocalDateTime.now());
             contractRepository.save(contract);
 
             int subscriptionsRenewed = 0;

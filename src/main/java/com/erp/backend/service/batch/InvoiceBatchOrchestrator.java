@@ -5,12 +5,10 @@ import com.erp.backend.service.VorgangService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 
 @Service
-@Transactional
 public class InvoiceBatchOrchestrator {
 
     private static final Logger logger = LoggerFactory.getLogger(InvoiceBatchOrchestrator.class);
@@ -35,7 +33,6 @@ public class InvoiceBatchOrchestrator {
         return runInvoiceBatch(billingDate, includeAllPreviousMonths, null);
     }
 
-    @Transactional
     public InvoiceBatchResult runInvoiceBatch(LocalDate billingDate, boolean includeAllPreviousMonths, String benutzer) {
         Vorgang vorgang = startVorgang(billingDate, includeAllPreviousMonths, benutzer);
 
@@ -82,7 +79,7 @@ public class InvoiceBatchOrchestrator {
         String metadaten = String.format(
                 "{\"billingDate\":\"%s\",\"batchId\":\"%s\",\"monthsProcessed\":%d}",
                 analysis.getBillingDate(), result.getBatchId(), analysis.getMonthCount());
-        vorgang.setMetadaten(metadaten);
+        vorgangService.updateMetadaten(vorgang.getId(), metadaten);
 
         if (result.hasErrors()) {
             String errorSummary = String.join("; ",

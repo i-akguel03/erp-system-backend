@@ -1,9 +1,15 @@
 package com.erp.backend.controller;
 
+import com.erp.backend.domain.Contract;
+import com.erp.backend.domain.Invoice;
 import com.erp.backend.domain.Vorgang;
 import com.erp.backend.domain.VorgangStatus;
 import com.erp.backend.domain.VorgangTyp;
+import com.erp.backend.dto.ContractDTO;
+import com.erp.backend.dto.InvoiceDTO;
 import com.erp.backend.dto.VorgangDTO;
+import com.erp.backend.mapper.ContractMapper;
+import com.erp.backend.mapper.InvoiceMapper;
 import com.erp.backend.mapper.VorgangMapper;
 import com.erp.backend.service.VorgangService;
 import org.springframework.data.domain.Page;
@@ -124,6 +130,38 @@ public class VorgangController {
                 .map(vorgangMapper::toDTO)
                 .collect(Collectors.toList());
         return ResponseEntity.ok(langlaufendeDTO);
+    }
+
+    /**
+     * Alle Rechnungen eines Rechnungslauf-Vorgangs
+     */
+    @GetMapping("/{id}/rechnungen")
+    public ResponseEntity<List<InvoiceDTO>> getRechnungenByVorgang(@PathVariable UUID id) {
+        try {
+            List<Invoice> rechnungen = vorgangService.findRechnungenByVorgangId(id);
+            List<InvoiceDTO> dtos = rechnungen.stream()
+                    .map(InvoiceMapper::toDTO)
+                    .collect(Collectors.toList());
+            return ResponseEntity.ok(dtos);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    /**
+     * Alle verlängerten Verträge eines Verlängerungslauf-Vorgangs
+     */
+    @GetMapping("/{id}/vertraege")
+    public ResponseEntity<List<ContractDTO>> getVertraegeByVorgang(@PathVariable UUID id) {
+        try {
+            List<Contract> vertraege = vorgangService.findVertraegeByVorgangId(id);
+            List<ContractDTO> dtos = vertraege.stream()
+                    .map(ContractMapper::toDTO)
+                    .collect(Collectors.toList());
+            return ResponseEntity.ok(dtos);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.notFound().build();
+        }
     }
 
     /**

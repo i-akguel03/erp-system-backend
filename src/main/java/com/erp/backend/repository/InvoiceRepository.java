@@ -35,6 +35,9 @@ public interface InvoiceRepository extends JpaRepository<Invoice, UUID> {
      */
     List<Invoice> findByCustomerOrderByInvoiceDateDesc(Customer customer);
 
+    @Query("SELECT i FROM Invoice i LEFT JOIN FETCH i.invoiceItems LEFT JOIN FETCH i.customer WHERE i.vorgang.id = :vorgangId ORDER BY i.invoiceDate ASC")
+    List<Invoice> findByVorgangId(@Param("vorgangId") UUID vorgangId);
+
     /**
      * Findet Rechnungen nach Status
      */

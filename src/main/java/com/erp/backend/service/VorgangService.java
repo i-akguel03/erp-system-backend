@@ -5,6 +5,8 @@
 package com.erp.backend.service;
 
 import com.erp.backend.domain.*;
+import com.erp.backend.repository.ContractRepository;
+import com.erp.backend.repository.InvoiceRepository;
 import com.erp.backend.repository.VorgangRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,11 +29,17 @@ public class VorgangService {
 
     private final VorgangRepository vorgangRepository;
     private final NumberGeneratorService numberGeneratorService;
+    private final InvoiceRepository invoiceRepository;
+    private final ContractRepository contractRepository;
 
     public VorgangService(VorgangRepository vorgangRepository,
-                          NumberGeneratorService numberGeneratorService) {
+                          NumberGeneratorService numberGeneratorService,
+                          InvoiceRepository invoiceRepository,
+                          ContractRepository contractRepository) {
         this.vorgangRepository = vorgangRepository;
         this.numberGeneratorService = numberGeneratorService;
+        this.invoiceRepository = invoiceRepository;
+        this.contractRepository = contractRepository;
     }
 
     // ===============================================================================================
@@ -123,6 +131,13 @@ public class VorgangService {
 
         logger.error("Vorgang mit Fehler abgeschlossen: {} - {}",
                 vorgang.getVorgangsnummer(), fehlerDetails);
+    }
+
+    public void updateMetadaten(UUID vorgangId, String metadaten) {
+        vorgangRepository.findById(vorgangId).ifPresent(v -> {
+            v.setMetadaten(metadaten);
+            vorgangRepository.save(v);
+        });
     }
 
     /**
@@ -280,6 +295,22 @@ public class VorgangService {
 
         return new VorgangStatistik(gesamt, laufend, erfolgreich, fehler,
                 rechnungslaeufeLetzte30Tage, statusStats, typStats);
+    }
+
+    @Transactional(readOnly = true)
+    public List<Invoice> findRechnungenByVorgangId(UUID vorgangId) {
+        if (!vorgangRepository.existsById(vorgangId)) {
+            throw new IllegalArgumentException("Vorgang nicht gefunden: " + vorgangId);
+        }
+        return invoiceRepository.findByVorgangId(vorgangId);
+    }
+
+    @Transactional(readOnly = true)
+    public List<Contract> findVertraegeByVorgangId(UUID vorgangId) {
+        if (!vorgangRepository.existsById(vorgangId)) {
+            throw new IllegalArgumentException("Vorgang nicht gefunden: " + vorgangId);
+        }
+        return contractRepository.findByRenewalVorgangId(vorgangId);
     }
 
     @Transactional(readOnly = true)

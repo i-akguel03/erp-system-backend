@@ -92,6 +92,9 @@ public interface ContractRepository extends JpaRepository<Contract, UUID> {
            "AND (c.endDate IS NULL OR c.endDate <= :threshold)")
     List<Contract> findRenewableContracts(@Param("threshold") LocalDate threshold);
 
+    @Query("SELECT c FROM Contract c JOIN FETCH c.customer WHERE c.renewalVorgang.id = :vorgangId ORDER BY c.contractNumber ASC")
+    List<Contract> findByRenewalVorgangId(@Param("vorgangId") UUID vorgangId);
+
     /**
      * Findet die letzten 5 Contracts nach Erstellungsdatum
      */
