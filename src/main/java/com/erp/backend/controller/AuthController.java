@@ -66,7 +66,8 @@ public class AuthController {
      * Das Token wird in die Blacklist eingetragen bis es natürlich abläuft.
      */
     @PostMapping("/logout")
-    public ResponseEntity<?> logout(HttpServletRequest request) {
+    public ResponseEntity<?> logout(HttpServletRequest request,
+                                    @RequestBody(required = false) Map<String, String> body) {
         String authHeader = request.getHeader("Authorization");
 
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
@@ -76,6 +77,18 @@ public class AuthController {
                 tokenBlacklistService.blacklist(jti, jwtUtil.extractExpiration(token));
             } catch (Exception e) {
                 // Ungültiges Token beim Logout → trotzdem 200 zurückgeben
+            }
+        }
+
+        if (body != null && body.containsKey("refreshToken")) {
+            String refreshToken = body.get("refreshToken");
+            try {
+                if (jwtUtil.isRefreshToken(refreshToken)) {
+                    String jti = jwtUtil.extractJti(refreshToken);
+                    tokenBlacklistService.blacklist(jti, jwtUtil.extractExpiration(refreshToken));
+                }
+            } catch (Exception e) {
+                // Ungültiges Refresh-Token beim Logout → ignorieren
             }
         }
 
