@@ -230,7 +230,22 @@ public class ContractController {
         Contract reinstated = service.reinstateContract(id);
         return ResponseEntity.ok(ContractMapper.toDTO(reinstated));
     }
-com
+
+    @PostMapping("/{id}/renew")
+    public ResponseEntity<ContractRenewalResult> renewContract(
+            @PathVariable UUID id,
+            @RequestBody(required = false) ContractRenewalRequest request,
+            @RequestParam(required = false) String benutzer) {
+        ContractRenewalResult result = renewalService.renewContract(
+                id, request != null ? request : new ContractRenewalRequest(), benutzer);
+        return ResponseEntity.ok(result);
+    }
+
+    @PostMapping("/renewal-run")
+    public ResponseEntity<RenewalBatchResult> runRenewalBatch() {
+        RenewalBatchResult result = renewalService.runRenewalBatch();
+        return ResponseEntity.ok(result);
+    }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteContract(@PathVariable UUID id) {

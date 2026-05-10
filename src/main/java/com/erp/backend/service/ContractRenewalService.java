@@ -27,6 +27,7 @@ public class ContractRenewalService {
     private final ContractRepository contractRepository;
     private final SubscriptionRepository subscriptionRepository;
     private final SubscriptionService subscriptionService;
+    private final VorgangService vorgangService;
 
     @Value("${app.renewal.default-extension-months:12}")
     private int defaultExtensionMonths;
@@ -36,19 +37,20 @@ public class ContractRenewalService {
 
     public ContractRenewalService(ContractRepository contractRepository,
                                    SubscriptionRepository subscriptionRepository,
-                                   SubscriptionService subscriptionService) {
+                                   SubscriptionService subscriptionService,
+                                   VorgangService vorgangService) {
         this.contractRepository = contractRepository;
         this.subscriptionRepository = subscriptionRepository;
         this.subscriptionService = subscriptionService;
+        this.vorgangService = vorgangService;
     }
 
     /**
      * Verlängert einen einzelnen Vertrag und alle Abonnements mit autoRenewal=true.
-     * Funktioniert für ACTIVE, EXPIRED, SUSPENDED und TERMINATED Verträge.
-     * CANCELLED Verträge können nicht verlängert werden.
+     * Legt einen Vorgang an, der Ergebnis und Statistik festhält.
      */
     @Transactional
-    public ContractRenewalResult renewContract(UUID contractId, ContractRenewalRequest request) {
+    public ContractRenewalResult renewContract(UUID contractId, ContractRenewalRequest request, String benutzer) {
         Contract contract = contractRepository.findById(contractId)
                 .orElseThrow(() -> new ResourceNotFoundException("Vertrag nicht gefunden: " + contractId));
 
@@ -65,48 +67,70 @@ public class ContractRenewalService {
                     "Neues Enddatum (" + newEndDate + ") muss nach dem aktuellen Enddatum liegen.");
         }
 
-        contract.setEndDate(newEndDate);
-        if (contract.getContractStatus() == ContractStatus.EXPIRED) {
-            contract.setContractStatus(ContractStatus.ACTIVE);
+        Vorgang vorgang = vorgangService.starteVorgang(
+                VorgangTyp.VERTRAGSERNEUERUNG,
+                "Vertragsverlängerung: " + contract.getContractNumber(),
+                "Verlängerung von " + oldEndDate + " bis " + newEndDate,
+                benutzer != null ? benutzer : "MANUELL",
+                false
+        );
+
+        try {
+            contract.setEndDate(newEndDate);
+            if (contract.getContractStatus() == ContractStatus.EXPIRED) {
+                contract.setContractStatus(ContractStatus.ACTIVE);
+            }
+            contractRepository.save(contract);
+
+            int subscriptionsRenewed = 0;
+            int dueSchedulesCreated = 0;
+
+            List<Subscription> subscriptions = subscriptionRepository.findByContract(contract);
+            for (Subscription sub : subscriptions) {
+                if (!Boolean.TRUE.equals(sub.getAutoRenewal())) continue;
+                if (sub.getSubscriptionStatus() == SubscriptionStatus.CANCELLED) continue;
+
+                sub.setEndDate(newEndDate);
+                if (sub.getSubscriptionStatus() == SubscriptionStatus.EXPIRED) {
+                    sub.setSubscriptionStatus(SubscriptionStatus.ACTIVE);
+                }
+                subscriptionRepository.save(sub);
+
+                int created = subscriptionService.generateDueSchedulesUntilDate(sub.getId(), newEndDate);
+                dueSchedulesCreated += created;
+                subscriptionsRenewed++;
+
+                logger.info("Subscription {} verlängert, {} neue Fälligkeitspläne",
+                        sub.getSubscriptionNumber(), created);
+            }
+
+            vorgangService.vorgangErfolgreichAbschliessen(
+                    vorgang.getId(),
+                    subscriptionsRenewed,
+                    subscriptionsRenewed,
+                    0,
+                    null
+            );
+
+            logger.info("Vertrag {} verlängert: {} -> {} | Vorgang {}",
+                    contract.getContractNumber(), oldEndDate, newEndDate, vorgang.getVorgangsnummer());
+
+            ContractRenewalResult result = new ContractRenewalResult(
+                    contractId, contract.getContractNumber(), contract.getContractTitle(),
+                    oldEndDate, newEndDate, subscriptionsRenewed, dueSchedulesCreated, true, null);
+            result.setVorgangId(vorgang.getId());
+            result.setVorgangsnummer(vorgang.getVorgangsnummer());
+            return result;
+
+        } catch (Exception e) {
+            vorgangService.vorgangMitFehlerAbschliessen(vorgang.getId(), e.getMessage());
+            throw e;
         }
-        contractRepository.save(contract);
-        logger.info("Contract {} verlängert: {} -> {}", contract.getContractNumber(), oldEndDate, newEndDate);
-
-        int subscriptionsRenewed = 0;
-        int dueSchedulesCreated = 0;
-
-        List<Subscription> subscriptions = subscriptionRepository.findByContract(contract);
-        for (Subscription sub : subscriptions) {
-            if (!Boolean.TRUE.equals(sub.getAutoRenewal())) {
-                continue;
-            }
-            if (sub.getSubscriptionStatus() == SubscriptionStatus.CANCELLED) {
-                continue;
-            }
-
-            sub.setEndDate(newEndDate);
-            if (sub.getSubscriptionStatus() == SubscriptionStatus.EXPIRED) {
-                sub.setSubscriptionStatus(SubscriptionStatus.ACTIVE);
-            }
-            subscriptionRepository.save(sub);
-
-            int created = subscriptionService.generateDueSchedulesUntilDate(sub.getId(), newEndDate);
-            dueSchedulesCreated += created;
-            subscriptionsRenewed++;
-
-            logger.info("Subscription {} verlängert, {} neue Fälligkeitspläne erstellt",
-                    sub.getSubscriptionNumber(), created);
-        }
-
-        return new ContractRenewalResult(
-                contractId, contract.getContractNumber(), contract.getContractTitle(),
-                oldEndDate, newEndDate, subscriptionsRenewed, dueSchedulesCreated, true, null);
     }
 
     /**
-     * Verlängerungslauf: Verlängert alle Verträge mit renewable=true,
-     * deren Enddatum bereits abgelaufen ist oder innerhalb der nächsten
-     * app.renewal.batch-lookahead-days Tage liegt.
+     * Verlängerungslauf: verarbeitet alle renewable=true Verträge, die ablaufen oder bereits abgelaufen sind.
+     * Legt einen übergreifenden Vorgang mit Gesamtstatistik sowie pro Vertrag einen Einzelvorgang an.
      */
     @Transactional
     public RenewalBatchResult runRenewalBatch() {
@@ -114,7 +138,15 @@ public class ContractRenewalService {
         LocalDate threshold = today.plusDays(batchLookaheadDays);
 
         List<Contract> candidates = contractRepository.findRenewableContracts(threshold);
-        logger.info("Verlängerungslauf gestartet: {} Verträge gefunden (threshold={})", candidates.size(), threshold);
+        logger.info("Verlängerungslauf gestartet: {} Verträge (threshold={})", candidates.size(), threshold);
+
+        Vorgang batchVorgang = vorgangService.starteVorgang(
+                VorgangTyp.VERTRAGSERNEUERUNG,
+                "Verlängerungslauf",
+                "Automatischer Verlängerungslauf für " + candidates.size() + " Verträge",
+                "SYSTEM",
+                true
+        );
 
         List<ContractRenewalResult> results = new ArrayList<>();
         int successful = 0;
@@ -128,21 +160,36 @@ public class ContractRenewalService {
                         : today;
                 request.setNewEndDate(baseDate.plusMonths(defaultExtensionMonths));
 
-                ContractRenewalResult result = renewContract(contract.getId(), request);
+                ContractRenewalResult result = renewContract(contract.getId(), request, "SYSTEM");
                 results.add(result);
                 successful++;
             } catch (Exception e) {
                 logger.error("Fehler bei Verlängerung von Vertrag {}: {}",
                         contract.getContractNumber(), e.getMessage());
-                results.add(ContractRenewalResult.failure(
+                ContractRenewalResult failure = ContractRenewalResult.failure(
                         contract.getId(), contract.getContractNumber(),
-                        contract.getContractTitle(), e.getMessage()));
+                        contract.getContractTitle(), e.getMessage());
+                results.add(failure);
                 failed++;
             }
         }
 
-        logger.info("Verlängerungslauf abgeschlossen: {} erfolgreich, {} fehlgeschlagen", successful, failed);
-        return new RenewalBatchResult(candidates.size(), successful, failed, today, results);
+        vorgangService.vorgangErfolgreichAbschliessen(
+                batchVorgang.getId(),
+                candidates.size(),
+                successful,
+                failed,
+                null
+        );
+
+        logger.info("Verlängerungslauf abgeschlossen: {} erfolgreich, {} fehlgeschlagen | Vorgang {}",
+                successful, failed, batchVorgang.getVorgangsnummer());
+
+        RenewalBatchResult batchResult = new RenewalBatchResult(
+                candidates.size(), successful, failed, today, results);
+        batchResult.setVorgangId(batchVorgang.getId());
+        batchResult.setVorgangsnummer(batchVorgang.getVorgangsnummer());
+        return batchResult;
     }
 
     private LocalDate resolveNewEndDate(LocalDate currentEndDate, ContractRenewalRequest request) {

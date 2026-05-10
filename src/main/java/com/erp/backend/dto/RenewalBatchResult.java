@@ -2,6 +2,7 @@ package com.erp.backend.dto;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.UUID;
 
 public class RenewalBatchResult {
 
@@ -10,6 +11,8 @@ public class RenewalBatchResult {
     private int failed;
     private LocalDate batchDate;
     private List<ContractRenewalResult> results;
+    private UUID vorgangId;
+    private String vorgangsnummer;
 
     public RenewalBatchResult() {
     }
@@ -37,4 +40,10 @@ public class RenewalBatchResult {
 
     public List<ContractRenewalResult> getResults() { return results; }
     public void setResults(List<ContractRenewalResult> results) { this.results = results; }
+
+    public UUID getVorgangId() { return vorgangId; }
+    public void setVorgangId(UUID vorgangId) { this.vorgangId = vorgangId; }
+
+    public String getVorgangsnummer() { return vorgangsnummer; }
+    public void setVorgangsnummer(String vorgangsnummer) { this.vorgangsnummer = vorgangsnummer; }
 }

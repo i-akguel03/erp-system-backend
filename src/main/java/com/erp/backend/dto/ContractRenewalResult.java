@@ -14,6 +14,8 @@ public class ContractRenewalResult {
     private int dueSchedulesCreated;
     private boolean success;
     private String errorMessage;
+    private UUID vorgangId;
+    private String vorgangsnummer;
 
     public ContractRenewalResult() {
     }
@@ -65,4 +67,10 @@ public class ContractRenewalResult {
 
     public String getErrorMessage() { return errorMessage; }
     public void setErrorMessage(String errorMessage) { this.errorMessage = errorMessage; }
+
+    public UUID getVorgangId() { return vorgangId; }
+    public void setVorgangId(UUID vorgangId) { this.vorgangId = vorgangId; }
+
+    public String getVorgangsnummer() { return vorgangsnummer; }
+    public void setVorgangsnummer(String vorgangsnummer) { this.vorgangsnummer = vorgangsnummer; }
 }

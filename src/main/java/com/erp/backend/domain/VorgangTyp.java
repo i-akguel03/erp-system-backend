@@ -23,6 +23,7 @@ public enum VorgangTyp {
     VALIDIERUNG("Datenvalidierung und -prüfung"),
     STORNO("Stornierung von Geschäftsvorgängen"),
     ARCHIVIERUNG("Archivierung alter Daten"),
+    VERTRAGSERNEUERUNG("Verlängerung von Verträgen und Abonnements"),
     SONSTIGE("Sonstige Vorgänge");
 
     private final String beschreibung;
