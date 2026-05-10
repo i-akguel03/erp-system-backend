@@ -5,6 +5,7 @@ import com.erp.backend.dto.InvoiceBatchPreviewDTO;
 import com.erp.backend.service.*;
 import com.erp.backend.service.batch.*;
 import com.erp.backend.service.batch.InvoiceBatchResult;
+import com.erp.backend.util.SecurityUtils;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -33,7 +34,8 @@ public class InvoiceBatchController {
             @RequestParam(defaultValue = "false") boolean exactDateOnly) {
         try {
             boolean includeAllPreviousMonths = !exactDateOnly;
-            InvoiceBatchResult result = orchestrator.runInvoiceBatch(billingDate, includeAllPreviousMonths);
+            InvoiceBatchResult result = orchestrator.runInvoiceBatch(billingDate, includeAllPreviousMonths,
+                    SecurityUtils.getCurrentUsername());
             return ResponseEntity.ok(result);
         } catch (Exception e) {
             return ResponseEntity.internalServerError()
@@ -49,7 +51,8 @@ public class InvoiceBatchController {
             @RequestParam(defaultValue = "false") boolean exactDateOnly) {
         try {
             boolean includeAllPreviousMonths = !exactDateOnly;
-            InvoiceBatchResult result = orchestrator.runInvoiceBatch(LocalDate.now(), includeAllPreviousMonths);
+            InvoiceBatchResult result = orchestrator.runInvoiceBatch(LocalDate.now(), includeAllPreviousMonths,
+                    SecurityUtils.getCurrentUsername());
             return ResponseEntity.ok(result);
         } catch (Exception e) {
             return ResponseEntity.internalServerError()

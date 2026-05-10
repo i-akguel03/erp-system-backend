@@ -9,6 +9,7 @@ import com.erp.backend.dto.RenewalBatchResult;
 import com.erp.backend.mapper.ContractMapper;
 import com.erp.backend.service.ContractRenewalService;
 import com.erp.backend.service.ContractService;
+import com.erp.backend.util.SecurityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import jakarta.validation.Valid;
@@ -234,16 +235,16 @@ public class ContractController {
     @PostMapping("/{id}/renew")
     public ResponseEntity<ContractRenewalResult> renewContract(
             @PathVariable UUID id,
-            @RequestBody(required = false) ContractRenewalRequest request,
-            @RequestParam(required = false) String benutzer) {
+            @RequestBody(required = false) ContractRenewalRequest request) {
         ContractRenewalResult result = renewalService.renewContract(
-                id, request != null ? request : new ContractRenewalRequest(), benutzer);
+                id, request != null ? request : new ContractRenewalRequest(),
+                SecurityUtils.getCurrentUsernameOrSystem());
         return ResponseEntity.ok(result);
     }
 
     @PostMapping("/renewal-run")
     public ResponseEntity<RenewalBatchResult> runRenewalBatch() {
-        RenewalBatchResult result = renewalService.runRenewalBatch();
+        RenewalBatchResult result = renewalService.runRenewalBatch(SecurityUtils.getCurrentUsernameOrSystem());
         return ResponseEntity.ok(result);
     }
 

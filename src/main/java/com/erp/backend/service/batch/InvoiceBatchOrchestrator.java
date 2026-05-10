@@ -28,12 +28,16 @@ public class InvoiceBatchOrchestrator {
     }
 
     public InvoiceBatchResult runInvoiceBatch(LocalDate billingDate) {
-        return runInvoiceBatch(billingDate, true);
+        return runInvoiceBatch(billingDate, true, null);
+    }
+
+    public InvoiceBatchResult runInvoiceBatch(LocalDate billingDate, boolean includeAllPreviousMonths) {
+        return runInvoiceBatch(billingDate, includeAllPreviousMonths, null);
     }
 
     @Transactional
-    public InvoiceBatchResult runInvoiceBatch(LocalDate billingDate, boolean includeAllPreviousMonths) {
-        Vorgang vorgang = startVorgang(billingDate, includeAllPreviousMonths);
+    public InvoiceBatchResult runInvoiceBatch(LocalDate billingDate, boolean includeAllPreviousMonths, String benutzer) {
+        Vorgang vorgang = startVorgang(billingDate, includeAllPreviousMonths, benutzer);
 
         try {
             InvoiceBatchAnalysis analysis = analyzer.analyzeBillingScope(billingDate, includeAllPreviousMonths);
@@ -57,13 +61,15 @@ public class InvoiceBatchOrchestrator {
         }
     }
 
-    private Vorgang startVorgang(LocalDate billingDate, boolean includeAllPreviousMonths) {
+    private Vorgang startVorgang(LocalDate billingDate, boolean includeAllPreviousMonths, String benutzer) {
         String titel = String.format("Rechnungslauf zum %s (%s)",
                 billingDate,
                 includeAllPreviousMonths ? "alle offenen Monate" : "nur exakter Stichtag");
 
-        Vorgang vorgang = vorgangService.starteAutomatischenVorgang(VorgangTyp.RECHNUNGSLAUF, titel);
-        vorgang.setBeschreibung(String.format("Automatischer Rechnungslauf mit Stichtag %s", billingDate));
+        String ausgeloestVon = benutzer != null ? benutzer : "SYSTEM";
+        boolean automatisch = benutzer == null;
+        Vorgang vorgang = vorgangService.starteVorgang(VorgangTyp.RECHNUNGSLAUF, titel, null, ausgeloestVon, automatisch);
+        vorgang.setBeschreibung(String.format("Rechnungslauf mit Stichtag %s", billingDate));
 
         logger.info("==================== RECHNUNGSLAUF START ====================");
         logger.info("Vorgang: {} - {}", vorgang.getVorgangsnummer(), titel);

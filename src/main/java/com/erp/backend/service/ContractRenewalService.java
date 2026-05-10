@@ -134,18 +134,24 @@ public class ContractRenewalService {
      */
     @Transactional
     public RenewalBatchResult runRenewalBatch() {
+        return runRenewalBatch("SYSTEM");
+    }
+
+    @Transactional
+    public RenewalBatchResult runRenewalBatch(String benutzer) {
         LocalDate today = LocalDate.now();
         LocalDate threshold = today.plusDays(batchLookaheadDays);
 
         List<Contract> candidates = contractRepository.findRenewableContracts(threshold);
         logger.info("Verlängerungslauf gestartet: {} Verträge (threshold={})", candidates.size(), threshold);
 
+        boolean automatisch = "SYSTEM".equals(benutzer);
         Vorgang batchVorgang = vorgangService.starteVorgang(
                 VorgangTyp.VERTRAGSERNEUERUNG,
                 "Verlängerungslauf",
-                "Automatischer Verlängerungslauf für " + candidates.size() + " Verträge",
-                "SYSTEM",
-                true
+                "Verlängerungslauf für " + candidates.size() + " Verträge",
+                benutzer,
+                automatisch
         );
 
         List<ContractRenewalResult> results = new ArrayList<>();
