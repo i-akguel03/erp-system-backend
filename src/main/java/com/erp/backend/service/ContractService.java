@@ -198,15 +198,8 @@ public class ContractService {
             logger.info("Neuer Customer geladen: {} {}", newCustomer.getFirstName(), newCustomer.getLastName());
             contract.setCustomer(newCustomer);
 
-            // Vergleich für Log
             if (!existing.getCustomer().getId().equals(newCustomer.getId())) {
-                logger.info("Customer geändert von {} {} zu {} {}",
-                        existing.getCustomer().getFirstName(),
-                        existing.getCustomer().getLastName(),
-                        newCustomer.getFirstName(),
-                        newCustomer.getLastName());
-            } else {
-                logger.info("Customer bleibt unverändert");
+                throw new BusinessLogicException("Der Kunde eines Vertrags kann nachträglich nicht geändert werden.");
             }
         }
 
