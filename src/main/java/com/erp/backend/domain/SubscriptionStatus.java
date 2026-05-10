@@ -21,7 +21,7 @@ public enum SubscriptionStatus {
             EnumSet.noneOf(Ref.class)), // final
 
     EXPIRED("Abgelaufen",
-            EnumSet.noneOf(Ref.class)); // final
+            EnumSet.of(Ref.ACTIVE)); // Verlängerung erlaubt
 
     private final String displayName;
     private final Set<Ref> allowed;

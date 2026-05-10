@@ -23,7 +23,7 @@ public enum ContractStatus {
             EnumSet.noneOf(ContractStatusRef.class)), // final – keine Übergänge
 
     EXPIRED("Abgelaufen",
-            EnumSet.noneOf(ContractStatusRef.class)); // final – keine Übergänge
+            EnumSet.of(ContractStatusRef.ACTIVE)); // Verlängerung erlaubt
 
     private final String displayName;
 

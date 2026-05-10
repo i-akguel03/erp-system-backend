@@ -488,7 +488,66 @@ public class SubscriptionService {
         s.setSubscriptionStatus(SubscriptionStatus.ACTIVE);
         Subscription saved = subscriptionRepository.save(s);
         updateDueScheduleStatusForSubscription(id, SubscriptionStatus.ACTIVE);
+        generateDueSchedulesUntilDate(id, newEndDate);
         return saved;
+    }
+
+    /**
+     * Erzeugt Fälligkeitspläne ab dem Ende des letzten vorhandenen Plans bis zum angegebenen Datum.
+     * Wird bei Verlängerungen aufgerufen.
+     *
+     * @return Anzahl der neu erstellten Fälligkeitspläne
+     */
+    @Transactional
+    public int generateDueSchedulesUntilDate(UUID subscriptionId, LocalDate newEndDate) {
+        Subscription subscription = subscriptionRepository.findById(subscriptionId)
+                .orElseThrow(() -> new IllegalArgumentException("Subscription not found: " + subscriptionId));
+
+        Optional<DueSchedule> lastSchedule = dueScheduleRepository
+                .findBySubscriptionIdOrderByPeriodEndDesc(subscriptionId)
+                .stream()
+                .findFirst();
+
+        LocalDate nextStart;
+        if (lastSchedule.isPresent()) {
+            nextStart = lastSchedule.get().getPeriodEnd().plusDays(1);
+        } else {
+            nextStart = subscription.getStartDate();
+        }
+
+        if (!nextStart.isBefore(newEndDate)) {
+            logger.info("No new due schedules needed for subscription {} (nextStart={} >= newEndDate={})",
+                    subscription.getSubscriptionNumber(), nextStart, newEndDate);
+            return 0;
+        }
+
+        List<DueSchedule> schedules = new ArrayList<>();
+        LocalDate currentPeriodStart = nextStart;
+
+        while (!currentPeriodStart.isAfter(newEndDate)) {
+            LocalDate periodEnd = calculatePeriodEnd(currentPeriodStart, subscription.getBillingCycle());
+            if (periodEnd.isAfter(newEndDate)) {
+                periodEnd = newEndDate;
+            }
+
+            DueSchedule schedule = new DueSchedule();
+            schedule.setDueNumber(numberGeneratorService.generateDueNumber());
+            schedule.setSubscription(subscription);
+            schedule.setPeriodStart(currentPeriodStart);
+            schedule.setPeriodEnd(periodEnd);
+            schedule.setDueDate(currentPeriodStart);
+            schedule.setStatus(subscription.getSubscriptionStatus() == SubscriptionStatus.ACTIVE
+                    ? DueStatus.ACTIVE : DueStatus.PAUSED);
+
+            schedules.add(schedule);
+            currentPeriodStart = calculateNextPeriodStart(currentPeriodStart, subscription.getBillingCycle());
+        }
+
+        dueScheduleRepository.saveAll(schedules);
+        logger.info("Generated {} new due schedules for subscription {} until {}",
+                schedules.size(), subscription.getSubscriptionNumber(), newEndDate);
+
+        return schedules.size();
     }
 
     // ================= DELETE =================

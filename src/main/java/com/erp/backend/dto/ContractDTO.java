@@ -25,6 +25,7 @@ public class ContractDTO {
     @NotNull(message = "Kunden-ID darf nicht null sein")
     private UUID customerId;
     private List<UUID> subscriptionIds;
+    private boolean renewable = false;
 
     // --- Getter & Setter ---
 
@@ -98,5 +99,13 @@ public class ContractDTO {
 
     public void setSubscriptionIds(List<UUID> subscriptionIds) {
         this.subscriptionIds = subscriptionIds;
+    }
+
+    public boolean isRenewable() {
+        return renewable;
+    }
+
+    public void setRenewable(boolean renewable) {
+        this.renewable = renewable;
     }
 }

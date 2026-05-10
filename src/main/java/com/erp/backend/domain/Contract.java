@@ -36,6 +36,9 @@ public class Contract {
     @Column(nullable = false)
     private boolean deleted = false;
 
+    @Column(name = "renewable", nullable = false)
+    private boolean renewable = false;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "contract_status")
     private ContractStatus contractStatus;
@@ -71,6 +74,14 @@ public class Contract {
     public void removeSubscription(Subscription subscription) {
         subscriptions.remove(subscription);
         subscription.setContract(null);
+    }
+
+    public boolean isRenewable() {
+        return renewable;
+    }
+
+    public void setRenewable(boolean renewable) {
+        this.renewable = renewable;
     }
 
     // Getter & Setter

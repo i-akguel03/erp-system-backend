@@ -19,6 +19,8 @@ public class ContractMapper {
         dto.setContractStatus(contract.getContractStatus());
         dto.setNotes(contract.getNotes());
 
+        dto.setRenewable(contract.isRenewable());
+
         if (contract.getCustomer() != null) {
             dto.setCustomerId(contract.getCustomer().getId());
         }
@@ -44,6 +46,7 @@ public class ContractMapper {
         contract.setEndDate(dto.getEndDate());
         contract.setContractStatus(dto.getContractStatus());
         contract.setNotes(dto.getNotes());
+        contract.setRenewable(dto.isRenewable());
         contract.setCustomer(customer);
 
         return contract;
@@ -59,6 +62,7 @@ public class ContractMapper {
         contract.setEndDate(dto.getEndDate());
         contract.setContractStatus(dto.getContractStatus());
         contract.setNotes(dto.getNotes());
+        contract.setRenewable(dto.isRenewable());
 
         // WICHTIG: Customer-Stub mit ID erstellen, wenn customerId vorhanden
         if (dto.getCustomerId() != null) {

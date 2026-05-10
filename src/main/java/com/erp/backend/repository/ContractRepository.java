@@ -83,6 +83,16 @@ public interface ContractRepository extends JpaRepository<Contract, UUID> {
     long countByContractStatus(ContractStatus contractStatus);
 
     /**
+     * Findet verlängerbare Verträge: renewable=true, Status ACTIVE oder EXPIRED,
+     * Enddatum liegt in der Vergangenheit oder innerhalb der nächsten `days` Tage.
+     */
+    @Query("SELECT c FROM Contract c JOIN FETCH c.customer " +
+           "WHERE c.renewable = true " +
+           "AND c.contractStatus IN ('ACTIVE', 'EXPIRED') " +
+           "AND (c.endDate IS NULL OR c.endDate <= :threshold)")
+    List<Contract> findRenewableContracts(@Param("threshold") LocalDate threshold);
+
+    /**
      * Findet die letzten 5 Contracts nach Erstellungsdatum
      */
     @Query("SELECT c FROM Contract c JOIN FETCH c.customer ORDER BY c.startDate DESC")

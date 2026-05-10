@@ -3,7 +3,11 @@ package com.erp.backend.controller;
 import com.erp.backend.domain.Contract;
 import com.erp.backend.domain.ContractStatus;
 import com.erp.backend.dto.ContractDTO;
+import com.erp.backend.dto.ContractRenewalRequest;
+import com.erp.backend.dto.ContractRenewalResult;
+import com.erp.backend.dto.RenewalBatchResult;
 import com.erp.backend.mapper.ContractMapper;
+import com.erp.backend.service.ContractRenewalService;
 import com.erp.backend.service.ContractService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,9 +34,11 @@ public class ContractController {
     private static final Logger logger = LoggerFactory.getLogger(ContractController.class);
 
     private final ContractService service;
+    private final ContractRenewalService renewalService;
 
-    public ContractController(ContractService service) {
+    public ContractController(ContractService service, ContractRenewalService renewalService) {
         this.service = service;
+        this.renewalService = renewalService;
     }
 
     @PostMapping("/init")
@@ -224,6 +230,7 @@ public class ContractController {
         Contract reinstated = service.reinstateContract(id);
         return ResponseEntity.ok(ContractMapper.toDTO(reinstated));
     }
+com
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteContract(@PathVariable UUID id) {

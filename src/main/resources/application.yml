@@ -91,3 +91,6 @@ app:
     enabled: true                # Init Service aktivieren
     create-test-data: true       # Testdaten erstellen
     auto-run-on-startup: false    # Automatisch beim Start ausführen
+  renewal:
+    default-extension-months: 12  # Verlängerungsdauer im Batch-Lauf
+    batch-lookahead-days: 30      # Vorlauf: Verträge die in X Tagen ablaufen werden verlängert
