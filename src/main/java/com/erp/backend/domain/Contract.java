@@ -36,7 +36,7 @@ public class Contract {
     @Column(nullable = false)
     private boolean deleted = false;
 
-    @Column(name = "renewable", nullable = false)
+    @Column(name = "renewable", nullable = false, columnDefinition = "boolean default false")
     private boolean renewable = false;
 
     @Enumerated(EnumType.STRING)
