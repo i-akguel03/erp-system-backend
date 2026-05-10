@@ -213,6 +213,18 @@ public class ContractController {
         return ResponseEntity.ok(ContractMapper.toDTO(suspended));
     }
 
+    @PatchMapping("/{id}/cancel")
+    public ResponseEntity<ContractDTO> cancelContract(@PathVariable UUID id) {
+        Contract cancelled = service.cancelContract(id);
+        return ResponseEntity.ok(ContractMapper.toDTO(cancelled));
+    }
+
+    @PatchMapping("/{id}/reinstate")
+    public ResponseEntity<ContractDTO> reinstateContract(@PathVariable UUID id) {
+        Contract reinstated = service.reinstateContract(id);
+        return ResponseEntity.ok(ContractMapper.toDTO(reinstated));
+    }
+
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteContract(@PathVariable UUID id) {
         service.deleteContract(id);

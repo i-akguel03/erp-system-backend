@@ -641,7 +641,7 @@ public class InitDataService  {
                     subscription.setEndDate(subscriptionStart.plusDays(random.nextInt(200)));
                     cancelledCount++;
                 } else {
-                    subscription.setSubscriptionStatus(SubscriptionStatus.PAUSED);
+                    subscription.setSubscriptionStatus(SubscriptionStatus.SUSPENDED);
                     pausedCount++;
                 }
             }
@@ -1075,7 +1075,7 @@ public class InitDataService  {
         long totalSubscriptions = subscriptionRepository.count();
         long activeSubscriptions = subscriptionRepository.countBySubscriptionStatus(SubscriptionStatus.ACTIVE);
         long cancelledSubscriptions = subscriptionRepository.countBySubscriptionStatus(SubscriptionStatus.CANCELLED);
-        long pausedSubscriptions = subscriptionRepository.countBySubscriptionStatus(SubscriptionStatus.PAUSED);
+        long pausedSubscriptions = subscriptionRepository.countBySubscriptionStatus(SubscriptionStatus.SUSPENDED);
         logger.info("  - Abonnements gesamt: {} ({}% ACTIVE, {}% CANCELLED, {}% PAUSED)", totalSubscriptions,
                 totalSubscriptions > 0 ? (activeSubscriptions * 100 / totalSubscriptions) : 0,
                 totalSubscriptions > 0 ? (cancelledSubscriptions * 100 / totalSubscriptions) : 0,

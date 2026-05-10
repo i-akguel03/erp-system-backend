@@ -3,6 +3,7 @@ package com.erp.backend.service;
 import com.erp.backend.domain.*;
 import com.erp.backend.dto.SubscriptionDto;
 import com.erp.backend.exception.BusinessLogicException;
+import com.erp.backend.exception.InvalidStatusTransitionException;
 import com.erp.backend.exception.ResourceNotFoundException;
 import com.erp.backend.repository.*;
 import org.slf4j.Logger;
@@ -337,6 +338,12 @@ public class SubscriptionService {
         Subscription subscription = subscriptionRepository.findById(dto.getId())
                 .orElseThrow(() -> new IllegalArgumentException("Subscription not found"));
 
+        if (subscription.getSubscriptionStatus().isEditLocked()) {
+            throw new InvalidStatusTransitionException(
+                    "Abonnement kann nicht bearbeitet werden – Status ist final: "
+                            + subscription.getSubscriptionStatus().getDisplayName());
+        }
+
         // Bei Status-Änderungen auch die Fälligkeiten anpassen
         SubscriptionStatus oldStatus = subscription.getSubscriptionStatus();
         Subscription updated = saveFromDto(subscription, dto);
@@ -359,10 +366,11 @@ public class SubscriptionService {
         for (DueSchedule schedule : activeDueSchedules) {
             if (subscriptionStatus == SubscriptionStatus.ACTIVE) {
                 schedule.setStatus(DueStatus.ACTIVE);
-            } else if (subscriptionStatus == SubscriptionStatus.PAUSED) {
+            } else if (subscriptionStatus == SubscriptionStatus.SUSPENDED) {
                 schedule.setStatus(DueStatus.PAUSED);
-            } else if (subscriptionStatus == SubscriptionStatus.CANCELLED) {
-                // Stornierte Abos: Fälligkeiten pausieren (nicht löschen)
+            } else if (subscriptionStatus == SubscriptionStatus.TERMINATED
+                    || subscriptionStatus == SubscriptionStatus.CANCELLED
+                    || subscriptionStatus == SubscriptionStatus.EXPIRED) {
                 schedule.setStatus(DueStatus.SUSPENDED);
             }
         }
@@ -397,49 +405,73 @@ public class SubscriptionService {
     // ================= PATCH Actions =================
     @Transactional
     public Subscription activateSubscription(UUID id) {
-        Subscription s = subscriptionRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Subscription not found"));
+        Subscription s = getForStatusUpdate(id);
+        validateTransition(s, SubscriptionStatus.ACTIVE);
         s.setSubscriptionStatus(SubscriptionStatus.ACTIVE);
         Subscription saved = subscriptionRepository.save(s);
-
-        // Fälligkeiten reaktivieren
         updateDueScheduleStatusForSubscription(id, SubscriptionStatus.ACTIVE);
-
         return saved;
     }
 
     @Transactional
+    public Subscription suspendSubscription(UUID id) {
+        Subscription s = getForStatusUpdate(id);
+        validateTransition(s, SubscriptionStatus.SUSPENDED);
+        s.setSubscriptionStatus(SubscriptionStatus.SUSPENDED);
+        Subscription saved = subscriptionRepository.save(s);
+        updateDueScheduleStatusForSubscription(id, SubscriptionStatus.SUSPENDED);
+        return saved;
+    }
+
+    /** Kündigt das Abonnement – umkehrbar über reinstateSubscription(). */
+    @Transactional
+    public Subscription terminateSubscription(UUID id, LocalDate terminationDate) {
+        Subscription s = getForStatusUpdate(id);
+        validateTransition(s, SubscriptionStatus.TERMINATED);
+        s.setSubscriptionStatus(SubscriptionStatus.TERMINATED);
+        if (terminationDate != null) s.setEndDate(terminationDate);
+        Subscription saved = subscriptionRepository.save(s);
+        updateDueScheduleStatusForSubscription(id, SubscriptionStatus.TERMINATED);
+        return saved;
+    }
+
+    /** Hebt eine Kündigung auf: TERMINATED → ACTIVE. */
+    @Transactional
+    public Subscription reinstateSubscription(UUID id) {
+        Subscription s = getForStatusUpdate(id);
+        validateTransition(s, SubscriptionStatus.ACTIVE);
+        s.setSubscriptionStatus(SubscriptionStatus.ACTIVE);
+        s.setEndDate(null);
+        Subscription saved = subscriptionRepository.save(s);
+        updateDueScheduleStatusForSubscription(id, SubscriptionStatus.ACTIVE);
+        return saved;
+    }
+
+    /** Storniert das Abonnement final – inklusive Rechnungen und offener Posten. */
+    @Transactional
     public Subscription cancelSubscription(UUID id, LocalDate cancellationDate) {
         logger.info("Starting subscription cancellation for id={}", id);
 
-        Subscription subscription = subscriptionRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Subscription not found"));
+        Subscription subscription = getForStatusUpdate(id);
+        validateTransition(subscription, SubscriptionStatus.CANCELLED);
 
-        // 1. Subscription stornieren
         subscription.setSubscriptionStatus(SubscriptionStatus.CANCELLED);
-        if (cancellationDate != null) {
-            subscription.setEndDate(cancellationDate);
-        }
+        if (cancellationDate != null) subscription.setEndDate(cancellationDate);
         Subscription savedSubscription = subscriptionRepository.save(subscription);
 
-        // 2. Fälligkeitspläne stornieren
         updateDueScheduleStatusForSubscription(id, SubscriptionStatus.CANCELLED);
-        logger.info("Due schedules cancelled for subscription id={}", id);
+        logger.info("Due schedules suspended for subscription id={}", id);
 
-        // 3. Offene Rechnungen stornieren
         List<Invoice> openInvoices = invoiceRepository.findBySubscriptionAndStatus(subscription, Invoice.InvoiceStatus.ACTIVE);
         for (Invoice invoice : openInvoices) {
-            invoice.setStatus( Invoice.InvoiceStatus.CANCELLED);
-            //invoice.setCancellationDate(cancellationDate); // Falls Invoice ein cancellationDate-Feld hat
+            invoice.setStatus(Invoice.InvoiceStatus.CANCELLED);
             invoiceRepository.save(invoice);
         }
         logger.info("Cancelled {} open invoices for subscription id={}", openInvoices.size(), id);
 
-        // 4. Offene Posten stornieren
         List<OpenItem> openItems = openItemRepository.findBySubscriptionAndStatus(subscription, OpenItem.OpenItemStatus.OPEN);
         for (OpenItem item : openItems) {
             item.setStatus(OpenItem.OpenItemStatus.CANCELLED);
-            //item.setCancellationDate(cancellationDate); // Falls OpenItem ein cancellationDate-Feld hat
             openItemRepository.save(item);
         }
         logger.info("Cancelled {} open items for subscription id={}", openItems.size(), id);
@@ -449,29 +481,13 @@ public class SubscriptionService {
     }
 
     @Transactional
-    public Subscription pauseSubscription(UUID id) {
-        Subscription s = subscriptionRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Subscription not found"));
-        s.setSubscriptionStatus(SubscriptionStatus.PAUSED);
-        Subscription saved = subscriptionRepository.save(s);
-
-        // Fälligkeiten pausieren
-        updateDueScheduleStatusForSubscription(id, SubscriptionStatus.PAUSED);
-
-        return saved;
-    }
-
-    @Transactional
     public Subscription renewSubscription(UUID id, LocalDate newEndDate) {
-        Subscription s = subscriptionRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Subscription not found"));
+        Subscription s = getForStatusUpdate(id);
+        validateTransition(s, SubscriptionStatus.ACTIVE);
         s.setEndDate(newEndDate);
         s.setSubscriptionStatus(SubscriptionStatus.ACTIVE);
         Subscription saved = subscriptionRepository.save(s);
-
-        // Fälligkeiten reaktivieren
         updateDueScheduleStatusForSubscription(id, SubscriptionStatus.ACTIVE);
-
         return saved;
     }
 
@@ -496,6 +512,21 @@ public class SubscriptionService {
                 openSchedules.size(), subscription.getSubscriptionNumber());
 
         subscriptionRepository.delete(subscription);
+    }
+
+    // ================= Private Hilfsmethoden =================
+    private void validateTransition(Subscription subscription, SubscriptionStatus target) {
+        SubscriptionStatus current = subscription.getSubscriptionStatus();
+        if (!current.canTransitionTo(target)) {
+            throw new InvalidStatusTransitionException(String.format(
+                    "Statuswechsel von '%s' nach '%s' ist nicht erlaubt.",
+                    current.getDisplayName(), target.getDisplayName()));
+        }
+    }
+
+    private Subscription getForStatusUpdate(UUID id) {
+        return subscriptionRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Abonnement nicht gefunden mit ID: " + id));
     }
 
     // ================= SubscriptionNumber Generator =================

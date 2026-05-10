@@ -3,6 +3,7 @@ package com.erp.backend.controller;
 import com.erp.backend.domain.Subscription;
 import com.erp.backend.domain.SubscriptionStatus;
 import com.erp.backend.dto.SubscriptionDto;
+import com.erp.backend.exception.InvalidStatusTransitionException;
 import com.erp.backend.service.SubscriptionService;
 import jakarta.validation.Valid;
 import org.slf4j.Logger;
@@ -152,10 +153,38 @@ public class SubscriptionController {
     @PatchMapping("/{id}/activate")
     public ResponseEntity<?> activateSubscription(@PathVariable UUID id) {
         try {
-            Subscription activated = service.activateSubscription(id);
-            return ResponseEntity.ok(service.toDto(activated));
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("error", "Internal server error"));
+            return ResponseEntity.ok(service.toDto(service.activateSubscription(id)));
+        } catch (InvalidStatusTransitionException e) {
+            return ResponseEntity.unprocessableEntity().body(Map.of("error", e.getMessage()));
+        }
+    }
+
+    @PatchMapping("/{id}/suspend")
+    public ResponseEntity<?> suspendSubscription(@PathVariable UUID id) {
+        try {
+            return ResponseEntity.ok(service.toDto(service.suspendSubscription(id)));
+        } catch (InvalidStatusTransitionException e) {
+            return ResponseEntity.unprocessableEntity().body(Map.of("error", e.getMessage()));
+        }
+    }
+
+    @PatchMapping("/{id}/terminate")
+    public ResponseEntity<?> terminateSubscription(
+            @PathVariable UUID id,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate terminationDate) {
+        try {
+            return ResponseEntity.ok(service.toDto(service.terminateSubscription(id, terminationDate)));
+        } catch (InvalidStatusTransitionException e) {
+            return ResponseEntity.unprocessableEntity().body(Map.of("error", e.getMessage()));
+        }
+    }
+
+    @PatchMapping("/{id}/reinstate")
+    public ResponseEntity<?> reinstateSubscription(@PathVariable UUID id) {
+        try {
+            return ResponseEntity.ok(service.toDto(service.reinstateSubscription(id)));
+        } catch (InvalidStatusTransitionException e) {
+            return ResponseEntity.unprocessableEntity().body(Map.of("error", e.getMessage()));
         }
     }
 
@@ -164,20 +193,9 @@ public class SubscriptionController {
             @PathVariable UUID id,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate cancellationDate) {
         try {
-            Subscription cancelled = service.cancelSubscription(id, cancellationDate);
-            return ResponseEntity.ok(service.toDto(cancelled));
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("error", "Internal server error"));
-        }
-    }
-
-    @PatchMapping("/{id}/pause")
-    public ResponseEntity<?> pauseSubscription(@PathVariable UUID id) {
-        try {
-            Subscription paused = service.pauseSubscription(id);
-            return ResponseEntity.ok(service.toDto(paused));
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("error", "Internal server error"));
+            return ResponseEntity.ok(service.toDto(service.cancelSubscription(id, cancellationDate)));
+        } catch (InvalidStatusTransitionException e) {
+            return ResponseEntity.unprocessableEntity().body(Map.of("error", e.getMessage()));
         }
     }
 
@@ -186,10 +204,9 @@ public class SubscriptionController {
             @PathVariable UUID id,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate newEndDate) {
         try {
-            Subscription renewed = service.renewSubscription(id, newEndDate);
-            return ResponseEntity.ok(service.toDto(renewed));
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("error", "Internal server error"));
+            return ResponseEntity.ok(service.toDto(service.renewSubscription(id, newEndDate)));
+        } catch (InvalidStatusTransitionException e) {
+            return ResponseEntity.unprocessableEntity().body(Map.of("error", e.getMessage()));
         }
     }
 

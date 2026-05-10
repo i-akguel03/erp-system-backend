@@ -111,13 +111,13 @@ public class DataStatusReporter {
         if (totalSubscriptions > 0) {
             long activeSubscriptions = subscriptionRepository.countBySubscriptionStatus(SubscriptionStatus.ACTIVE);
             long cancelledSubscriptions = subscriptionRepository.countBySubscriptionStatus(SubscriptionStatus.CANCELLED);
-            long pausedSubscriptions = subscriptionRepository.countBySubscriptionStatus(SubscriptionStatus.PAUSED);
+            long suspendedSubscriptions = subscriptionRepository.countBySubscriptionStatus(SubscriptionStatus.SUSPENDED);
 
-            logger.info("  - Abonnements gesamt: {} ({}% ACTIVE, {}% CANCELLED, {}% PAUSED)",
+            logger.info("  - Abonnements gesamt: {} ({}% ACTIVE, {}% CANCELLED, {}% SUSPENDED)",
                     totalSubscriptions,
                     calculatePercentage(activeSubscriptions, totalSubscriptions),
                     calculatePercentage(cancelledSubscriptions, totalSubscriptions),
-                    calculatePercentage(pausedSubscriptions, totalSubscriptions));
+                    calculatePercentage(suspendedSubscriptions, totalSubscriptions));
         } else {
             logger.info("  - Abonnements gesamt: 0");
         }

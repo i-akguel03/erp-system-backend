@@ -236,7 +236,7 @@ public class BusinessDataInitializer {
                     subscriptionDto.setEndDate(subscriptionStart.plusDays(random.nextInt(200)));
                     cancelledCount++;
                 } else {
-                    subscriptionDto.setSubscriptionStatus(SubscriptionStatus.PAUSED);
+                    subscriptionDto.setSubscriptionStatus(SubscriptionStatus.SUSPENDED);
                     pausedCount++;
                 }
             }

@@ -5,6 +5,7 @@ import com.erp.backend.domain.ContractStatus;
 import com.erp.backend.domain.Customer;
 import com.erp.backend.domain.SubscriptionStatus;
 import com.erp.backend.exception.BusinessLogicException;
+import com.erp.backend.exception.InvalidStatusTransitionException;
 import com.erp.backend.exception.ResourceNotFoundException;
 import com.erp.backend.repository.ContractRepository;
 import com.erp.backend.repository.CustomerRepository;
@@ -53,8 +54,12 @@ public class ContractService {
                     randomCustomer
             );
             contract.setId(null); // ID von DB generieren lassen
-            contract.setContractStatus(ContractStatus.values()[random.nextInt(ContractStatus.values().length)]);
-            if(contract.getContractStatus() == ContractStatus.TERMINATED) {
+            ContractStatus[] testStatuses = {ContractStatus.DRAFT, ContractStatus.ACTIVE, ContractStatus.SUSPENDED,
+                                               ContractStatus.TERMINATED, ContractStatus.CANCELLED, ContractStatus.EXPIRED};
+            contract.setContractStatus(testStatuses[random.nextInt(testStatuses.length)]);
+            if(contract.getContractStatus() == ContractStatus.TERMINATED
+                    || contract.getContractStatus() == ContractStatus.CANCELLED
+                    || contract.getContractStatus() == ContractStatus.EXPIRED) {
                 contract.setEndDate(startDate.plusMonths(random.nextInt(12) + 1));
             }
             contract.setContractNumber(generateContractNumber());
@@ -162,6 +167,11 @@ public class ContractService {
 
         // Existierenden Vertrag laden
         Contract existing = contractRepository.findById(contract.getId()).get();
+
+        if (existing.getContractStatus().isEditLocked()) {
+            throw new InvalidStatusTransitionException(
+                    "Vertrag kann nicht bearbeitet werden – Status ist final: " + existing.getContractStatus().getDisplayName());
+        }
         logger.info("Existing Customer ID: {}", existing.getCustomer().getId());
         logger.info("Existing Customer Name: {} {}", existing.getCustomer().getFirstName(), existing.getCustomer().getLastName());
 
@@ -228,6 +238,7 @@ public class ContractService {
     // --- Statusänderungen nur mit contractId ---
     public Contract activateContract(UUID contractId) {
         Contract contract = getContractForStatusUpdate(contractId);
+        validateTransition(contract, ContractStatus.ACTIVE);
         contract.setContractStatus(ContractStatus.ACTIVE);
         if(contract.getStartDate() == null) contract.setStartDate(LocalDate.now());
         return contractRepository.save(contract);
@@ -236,48 +247,79 @@ public class ContractService {
     @Transactional
     public Contract suspendContract(UUID contractId) {
         Contract contract = getContractForStatusUpdate(contractId);
-
-        // Contract auf SUSPENDED setzen
+        validateTransition(contract, ContractStatus.SUSPENDED);
         contract.setContractStatus(ContractStatus.SUSPENDED);
 
-        // Alle aktiven Subscriptions ebenfalls suspendieren
         if (contract.getSubscriptions() != null) {
             contract.getSubscriptions().forEach(subscription -> {
-                if (subscription.getSubscriptionStatus().equals(SubscriptionStatus.ACTIVE)) { // nur aktive Subscriptions
-                    subscription.setSubscriptionStatus(SubscriptionStatus.CANCELLED); // oder active = false
+                if (subscription.getSubscriptionStatus().equals(SubscriptionStatus.ACTIVE)) {
+                    subscription.setSubscriptionStatus(SubscriptionStatus.CANCELLED);
                 }
             });
         }
 
-        // Änderungen speichern (Contract + Subscriptions)
         return contractRepository.save(contract);
     }
-
 
     @Transactional
     public Contract terminateContract(UUID contractId, LocalDate terminationDate) {
         Contract contract = getContractForStatusUpdate(contractId);
-
-        // Contract terminieren
+        validateTransition(contract, ContractStatus.TERMINATED);
         contract.setContractStatus(ContractStatus.TERMINATED);
         contract.setEndDate(terminationDate != null ? terminationDate : LocalDate.now());
 
-        // Alle Subscriptions/Abo unter diesem Contract terminieren
         if (contract.getSubscriptions() != null) {
             contract.getSubscriptions().forEach(subscription -> {
-                if (subscription.getSubscriptionStatus().equals(SubscriptionStatus.ACTIVE)) { // nur aktive Subscriptions
-                    subscription.setSubscriptionStatus(SubscriptionStatus.CANCELLED); // oder active = false
+                if (subscription.getSubscriptionStatus().equals(SubscriptionStatus.ACTIVE)) {
+                    subscription.setSubscriptionStatus(SubscriptionStatus.CANCELLED);
                     subscription.setEndDate(contract.getEndDate());
                 }
             });
         }
 
-        // Änderungen speichern (Contract + Subscriptions)
+        return contractRepository.save(contract);
+    }
+
+    @Transactional
+    public Contract cancelContract(UUID contractId) {
+        Contract contract = getContractForStatusUpdate(contractId);
+        validateTransition(contract, ContractStatus.CANCELLED);
+        contract.setContractStatus(ContractStatus.CANCELLED);
+        contract.setEndDate(LocalDate.now());
+
+        if (contract.getSubscriptions() != null) {
+            contract.getSubscriptions().forEach(subscription -> {
+                if (subscription.getSubscriptionStatus().equals(SubscriptionStatus.ACTIVE)) {
+                    subscription.setSubscriptionStatus(SubscriptionStatus.CANCELLED);
+                    subscription.setEndDate(contract.getEndDate());
+                }
+            });
+        }
+
+        return contractRepository.save(contract);
+    }
+
+    /** Hebt eine Kündigung auf: TERMINATED → ACTIVE */
+    @Transactional
+    public Contract reinstateContract(UUID contractId) {
+        Contract contract = getContractForStatusUpdate(contractId);
+        validateTransition(contract, ContractStatus.ACTIVE);
+        contract.setContractStatus(ContractStatus.ACTIVE);
+        contract.setEndDate(null);
         return contractRepository.save(contract);
     }
 
 
     // --- Private Hilfsmethoden ---
+    private void validateTransition(Contract contract, ContractStatus target) {
+        ContractStatus current = contract.getContractStatus();
+        if (!current.canTransitionTo(target)) {
+            throw new InvalidStatusTransitionException(String.format(
+                    "Statuswechsel von '%s' nach '%s' ist nicht erlaubt.",
+                    current.getDisplayName(), target.getDisplayName()));
+        }
+    }
+
     private Contract getContractForStatusUpdate(UUID contractId) {
         return contractRepository.findById(contractId)
                 .orElseThrow(() -> new ResourceNotFoundException("Vertrag nicht gefunden mit ID: " + contractId));
