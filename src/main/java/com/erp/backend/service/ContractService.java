@@ -172,6 +172,17 @@ public class ContractService {
             throw new InvalidStatusTransitionException(
                     "Vertrag kann nicht bearbeitet werden – Status ist final: " + existing.getContractStatus().getDisplayName());
         }
+
+        // Statusänderungen sind nur über die dedizierten PATCH-Endpunkte erlaubt
+        if (contract.getContractStatus() != null
+                && contract.getContractStatus() != existing.getContractStatus()) {
+            throw new InvalidStatusTransitionException(
+                    "Statusänderungen sind über diesen Endpunkt nicht erlaubt. " +
+                    "Bitte die dedizierten Endpunkte verwenden (z. B. /activate, /suspend, /terminate).");
+        }
+
+        // Status immer vom bestehenden Vertrag übernehmen
+        contract.setContractStatus(existing.getContractStatus());
         logger.info("Existing Customer ID: {}", existing.getCustomer().getId());
         logger.info("Existing Customer Name: {} {}", existing.getCustomer().getFirstName(), existing.getCustomer().getLastName());
 

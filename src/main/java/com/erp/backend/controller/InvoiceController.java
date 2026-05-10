@@ -8,6 +8,7 @@ import com.erp.backend.service.InvoiceService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.*;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -82,6 +83,7 @@ public class InvoiceController {
      *
      * @return Liste von InvoiceDTOs (+ Pagination-Headers falls aktiviert)
      */
+    @PreAuthorize("hasAnyRole('ADMIN', 'USER', 'INVOICES_READ')")
     @GetMapping
     public ResponseEntity<List<InvoiceDTO>> getAllInvoices(
             @RequestParam(defaultValue = "false") boolean paginated,
@@ -137,6 +139,7 @@ public class InvoiceController {
      * @param subscriptionIds Liste von Subscription-IDs
      * @return Liste von InvoiceDTOs
      */
+    @PreAuthorize("hasAnyRole('ADMIN', 'USER', 'INVOICES_READ')")
     @GetMapping("/by-subscriptions")
     public ResponseEntity<List<InvoiceDTO>> getInvoicesBySubscriptionIds(
             @RequestParam List<UUID> subscriptionIds) {
@@ -170,6 +173,7 @@ public class InvoiceController {
      * @param id Die Rechnungs-ID
      * @return InvoiceDTO oder 404
      */
+    @PreAuthorize("hasAnyRole('ADMIN', 'USER', 'INVOICES_READ')")
     @GetMapping("/{id}")
     public ResponseEntity<InvoiceDTO> getInvoiceById(@PathVariable UUID id) {
         logger.info("GET /api/invoices/{} - Fetching single invoice", id);
@@ -200,6 +204,7 @@ public class InvoiceController {
      * @param dto Die Rechnungsdaten als DTO
      * @return Die erstellte Rechnung (201 CREATED)
      */
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping
     public ResponseEntity<InvoiceDTO> createInvoice(@RequestBody InvoiceDTO dto) {
         logger.info("POST /api/invoices - Creating new invoice for customer {}", dto.getCustomerId());
@@ -236,6 +241,7 @@ public class InvoiceController {
      * @param dto Die aktualisierten Rechnungsdaten
      * @return Die aktualisierte Rechnung (200 OK)
      */
+    @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/{id}")
     public ResponseEntity<InvoiceDTO> updateInvoice(@PathVariable UUID id, @RequestBody InvoiceDTO dto) {
         logger.info("PUT /api/invoices/{} - Updating invoice", id);
@@ -274,6 +280,7 @@ public class InvoiceController {
      * @param id Die Rechnungs-ID
      * @return 204 NO CONTENT bei Erfolg
      */
+    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteInvoice(@PathVariable UUID id) {
         logger.info("DELETE /api/invoices/{} - Deleting invoice", id);
@@ -311,6 +318,7 @@ public class InvoiceController {
      * @param id Die Rechnungs-ID
      * @return Die stornierte Rechnung (200 OK)
      */
+    @PreAuthorize("hasRole('ADMIN')")
     @PatchMapping("/{id}/cancel")
     public ResponseEntity<InvoiceDTO> cancelInvoice(@PathVariable UUID id) {
         logger.info("PATCH /api/invoices/{}/cancel - Cancelling invoice", id);
@@ -340,6 +348,7 @@ public class InvoiceController {
      * @param id Die Rechnungs-ID
      * @return Die aktualisierte Rechnung (200 OK)
      */
+    @PreAuthorize("hasRole('ADMIN')")
     @PatchMapping("/{id}/send")
     public ResponseEntity<InvoiceDTO> sendInvoice(@PathVariable UUID id) {
         logger.info("PATCH /api/invoices/{}/send - Sending invoice", id);
@@ -375,6 +384,7 @@ public class InvoiceController {
      * @param status Der neue Status
      * @return Die aktualisierte Rechnung (200 OK)
      */
+    @PreAuthorize("hasRole('ADMIN')")
     @PatchMapping("/{id}/status")
     public ResponseEntity<InvoiceDTO> changeStatus(
             @PathVariable UUID id,
@@ -418,6 +428,7 @@ public class InvoiceController {
      * @param itemDTO Die Item-Daten
      * @return Die aktualisierte Rechnung mit neuem Item (200 OK)
      */
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/{id}/items")
     public ResponseEntity<InvoiceDTO> addItem(
             @PathVariable UUID id,
@@ -460,6 +471,7 @@ public class InvoiceController {
      * @param itemId Die Item-ID
      * @return Die aktualisierte Rechnung ohne das Item (200 OK)
      */
+    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}/items/{itemId}")
     public ResponseEntity<InvoiceDTO> removeItem(
             @PathVariable UUID id,
@@ -496,6 +508,7 @@ public class InvoiceController {
      * @param customerId Die Kunden-ID
      * @return Liste von InvoiceDTOs
      */
+    @PreAuthorize("hasAnyRole('ADMIN', 'USER', 'INVOICES_READ')")
     @GetMapping("/customer/{customerId}")
     public ResponseEntity<List<InvoiceDTO>> getInvoicesByCustomer(@PathVariable UUID customerId) {
         logger.info("GET /api/invoices/customer/{} - Fetching invoices for customer", customerId);
@@ -528,6 +541,7 @@ public class InvoiceController {
      * @param status Der gewünschte Status
      * @return Liste von InvoiceDTOs
      */
+    @PreAuthorize("hasAnyRole('ADMIN', 'USER', 'INVOICES_READ')")
     @GetMapping("/status/{status}")
     public ResponseEntity<List<InvoiceDTO>> getInvoicesByStatus(
             @PathVariable Invoice.InvoiceStatus status) {
@@ -561,6 +575,7 @@ public class InvoiceController {
      * @param end Enddatum (inklusive)
      * @return Liste von InvoiceDTOs
      */
+    @PreAuthorize("hasAnyRole('ADMIN', 'USER', 'INVOICES_READ')")
     @GetMapping("/date-range")
     public ResponseEntity<List<InvoiceDTO>> getInvoicesByDateRange(
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate start,

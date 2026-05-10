@@ -7,6 +7,7 @@ import com.erp.backend.service.OpenItemService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.*;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -20,6 +21,7 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/api/openitems")
 @CrossOrigin
+@PreAuthorize("hasAnyRole('ADMIN', 'USER', 'OPEN_ITEMS_READ')")
 public class OpenItemController {
 
     private static final Logger logger = LoggerFactory.getLogger(OpenItemController.class);
@@ -74,6 +76,7 @@ public class OpenItemController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping
     public ResponseEntity<OpenItemDTO> createOpenItem(@RequestBody OpenItemDTO dto) {
         OpenItem openItem = new OpenItem();
@@ -89,6 +92,7 @@ public class OpenItemController {
         return ResponseEntity.status(HttpStatus.CREATED).body(OpenItemMapper.toDTO(created));
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/{id}")
     public ResponseEntity<OpenItemDTO> updateOpenItem(@PathVariable UUID id, @RequestBody OpenItemDTO dto) {
         OpenItem openItem = new OpenItem();
@@ -106,6 +110,7 @@ public class OpenItemController {
         return ResponseEntity.ok(OpenItemMapper.toDTO(updated));
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteOpenItem(@PathVariable UUID id) {
         openItemService.deleteOpenItem(id);
@@ -116,6 +121,7 @@ public class OpenItemController {
     // 2. Zahlungslogik
     // ==============================
 
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/{id}/payments")
     public ResponseEntity<OpenItemDTO> recordPayment(
             @PathVariable UUID id,
@@ -127,6 +133,7 @@ public class OpenItemController {
         return ResponseEntity.ok(OpenItemMapper.toDTO(updated));
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}/payments")
     public ResponseEntity<OpenItemDTO> reversePayment(
             @PathVariable UUID id,
@@ -136,6 +143,7 @@ public class OpenItemController {
         return ResponseEntity.ok(OpenItemMapper.toDTO(updated));
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @PatchMapping("/{id}/cancel")
     public ResponseEntity<OpenItemDTO> cancelOpenItem(@PathVariable UUID id) {
         OpenItem updated = openItemService.cancelOpenItem(id);
@@ -146,6 +154,7 @@ public class OpenItemController {
     // 3. Status Management
     // ==============================
 
+    @PreAuthorize("hasRole('ADMIN')")
     @PatchMapping("/update-overdue")
     public ResponseEntity<Void> updateOverdueStatus() {
         openItemService.updateOverdueStatus();
@@ -257,6 +266,7 @@ public class OpenItemController {
     // 5. Reminder Management
     // ==============================
 
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/{id}/reminders")
     public ResponseEntity<OpenItemDTO> addReminder(@PathVariable UUID id) {
         OpenItem updated = openItemService.addReminder(id);
@@ -319,6 +329,7 @@ public class OpenItemController {
     // 7. Bulk Operations
     // ==============================
 
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/bulk/create-for-invoices")
     public ResponseEntity<List<OpenItemDTO>> createOpenItemsForInvoices(
             @RequestBody List<UUID> invoiceIds) {

@@ -8,12 +8,14 @@ import com.erp.backend.service.init.DataManagementUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 
 @RestController
 @RequestMapping("/api/init")
+@PreAuthorize("hasRole('ADMIN')")
 public class InitController {
 
     @Autowired

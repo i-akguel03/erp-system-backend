@@ -5,6 +5,7 @@ import com.erp.backend.domain.Payment;
 import com.erp.backend.service.OrderService;
 import com.erp.backend.service.PaymentService;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -22,11 +23,13 @@ public class PaymentController {
         this.orderService = orderService;
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN', 'USER', 'PAYMENTS_READ')")
     @GetMapping
     public List<Payment> getAllPayments() {
         return paymentService.getAllPayments();
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN', 'USER', 'PAYMENTS_READ')")
     @GetMapping("/{id}")
     public ResponseEntity<Payment> getPaymentById(@PathVariable Long id) {
         return paymentService.getPaymentById(id)
@@ -34,6 +37,7 @@ public class PaymentController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping
     public ResponseEntity<Payment> createPayment(@RequestBody Payment payment) {
         if (payment.getOrder() != null && payment.getOrder().getId() != null) {
@@ -48,6 +52,7 @@ public class PaymentController {
         return ResponseEntity.ok(created);
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/{id}")
     public ResponseEntity<Payment> updatePayment(@PathVariable Long id, @RequestBody Payment updated) {
         return paymentService.getPaymentById(id)
@@ -65,6 +70,7 @@ public class PaymentController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deletePayment(@PathVariable Long id) {
         paymentService.deletePaymentById(id);

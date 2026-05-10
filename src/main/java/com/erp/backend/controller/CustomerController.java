@@ -12,6 +12,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -31,12 +32,14 @@ public class CustomerController {
         this.service = service;
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/init")
     public ResponseEntity<String> initTestCustomers() {
         service.initTestCustomers();
         return ResponseEntity.ok("20 Testkunden wurden erstellt.");
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN', 'USER', 'CUSTOMERS_READ')")
     @GetMapping
     public ResponseEntity<List<CustomerDto>> getAllCustomers(
             @RequestParam(defaultValue = "false") boolean paginated,
@@ -60,6 +63,7 @@ public class CustomerController {
         }
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN', 'USER', 'CUSTOMERS_READ')")
     @GetMapping("/{id}")
     public ResponseEntity<CustomerDto> getCustomerById(@PathVariable UUID id) {
         return service.getCustomerById(id)
@@ -68,6 +72,7 @@ public class CustomerController {
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN', 'USER', 'CUSTOMERS_READ')")
     @GetMapping("/by-email/{email}")
     public ResponseEntity<CustomerDto> getCustomerByEmail(@PathVariable String email) {
         return service.getCustomerByEmail(email)
@@ -76,6 +81,7 @@ public class CustomerController {
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN', 'USER', 'CUSTOMERS_READ')")
     @GetMapping("/by-number/{customerNumber}")
     public ResponseEntity<CustomerDto> getCustomerByNumber(@PathVariable String customerNumber) {
         return service.getCustomerByCustomerNumber(customerNumber)
@@ -84,6 +90,7 @@ public class CustomerController {
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN', 'USER', 'CUSTOMERS_READ')")
     @GetMapping("/search")
     public ResponseEntity<List<CustomerDto>> searchCustomers(@RequestParam String q) {
         List<CustomerDto> dtos = service.searchCustomersByName(q).stream()
@@ -92,17 +99,20 @@ public class CustomerController {
         return ResponseEntity.ok(dtos);
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN', 'USER', 'CUSTOMERS_READ')")
     @GetMapping("/count")
     public ResponseEntity<Long> getCustomerCount() {
         return ResponseEntity.ok(service.getTotalCustomerCount());
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping
     public ResponseEntity<CustomerDto> createCustomer(@Valid @RequestBody Customer customer) {
         Customer created = service.createCustomer(customer);
         return ResponseEntity.status(HttpStatus.CREATED).body(CustomerDto.fromEntity(created));
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/{id}")
     public ResponseEntity<CustomerDto> updateCustomer(@PathVariable UUID id, @Valid @RequestBody Customer updated) {
         return service.getCustomerById(id)
@@ -123,12 +133,14 @@ public class CustomerController {
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteCustomer(@PathVariable UUID id) {
         service.deleteCustomerById(id);
         return ResponseEntity.noContent().build();
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/{id}/validate-email")
     public ResponseEntity<Boolean> validateEmail(@PathVariable UUID id, @RequestParam String email) {
         boolean exists = service.existsByEmail(email);

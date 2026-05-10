@@ -15,6 +15,7 @@ import com.erp.backend.service.VorgangService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -36,6 +37,7 @@ public class VorgangController {
     /**
      * Alle Vorgänge paginiert
      */
+    @PreAuthorize("hasAnyRole('ADMIN', 'USER', 'VORGANGS_READ')")
     @GetMapping
     public ResponseEntity<Page<VorgangDTO>> getAllVorgaenge(Pageable pageable) {
         Page<Vorgang> vorgaenge = vorgangService.findAllePaginated(pageable);
@@ -43,6 +45,7 @@ public class VorgangController {
         return ResponseEntity.ok(vorgaengeDTO);
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN', 'USER', 'VORGANGS_READ')")
     @GetMapping("/all")
     public ResponseEntity<List<VorgangDTO>> getAllVorgaengeOhnePaging() {
         List<Vorgang> vorgaenge = vorgangService.findAlleWithoutPaginated();
@@ -55,6 +58,7 @@ public class VorgangController {
     /**
      * Einzelnen Vorgang abrufen
      */
+    @PreAuthorize("hasAnyRole('ADMIN', 'USER', 'VORGANGS_READ')")
     @GetMapping("/{id}")
     public ResponseEntity<VorgangDTO> getVorgang(@PathVariable UUID id) {
         return vorgangService.findById(id)
@@ -66,6 +70,7 @@ public class VorgangController {
     /**
      * Vorgänge nach Typ
      */
+    @PreAuthorize("hasAnyRole('ADMIN', 'USER', 'VORGANGS_READ')")
     @GetMapping("/typ/{typ}")
     public ResponseEntity<List<VorgangDTO>> getVorgaengeByTyp(@PathVariable VorgangTyp typ) {
         List<Vorgang> vorgaenge = vorgangService.findByTyp(typ);
@@ -78,6 +83,7 @@ public class VorgangController {
     /**
      * Vorgänge nach Status
      */
+    @PreAuthorize("hasAnyRole('ADMIN', 'USER', 'VORGANGS_READ')")
     @GetMapping("/status/{status}")
     public ResponseEntity<List<VorgangDTO>> getVorgaengeByStatus(@PathVariable VorgangStatus status) {
         List<Vorgang> vorgaenge = vorgangService.findByStatus(status);
@@ -90,6 +96,7 @@ public class VorgangController {
     /**
      * Aktuell laufende Vorgänge
      */
+    @PreAuthorize("hasAnyRole('ADMIN', 'USER', 'VORGANGS_READ')")
     @GetMapping("/laufend")
     public ResponseEntity<List<VorgangDTO>> getLaufendeVorgaenge() {
         List<Vorgang> laufende = vorgangService.findLaufendeVorgaenge();
@@ -102,6 +109,7 @@ public class VorgangController {
     /**
      * Rechnungsläufe der letzten X Tage
      */
+    @PreAuthorize("hasAnyRole('ADMIN', 'USER', 'VORGANGS_READ')")
     @GetMapping("/rechnungslaeufe")
     public ResponseEntity<List<VorgangDTO>> getRecentRechnungslaeufe(@RequestParam(defaultValue = "30") int tage) {
         List<Vorgang> rechnungslaeufe = vorgangService.findRecentRechnungslaeufe(tage);
@@ -114,6 +122,7 @@ public class VorgangController {
     /**
      * Vorgang-Statistiken
      */
+    @PreAuthorize("hasAnyRole('ADMIN', 'USER', 'VORGANGS_READ')")
     @GetMapping("/statistiken")
     public ResponseEntity<VorgangService.VorgangStatistik> getVorgangStatistiken() {
         VorgangService.VorgangStatistik stats = vorgangService.getVorgangStatistik();
@@ -123,6 +132,7 @@ public class VorgangController {
     /**
      * Langlaufende Vorgänge (mehr als X Minuten)
      */
+    @PreAuthorize("hasAnyRole('ADMIN', 'USER', 'VORGANGS_READ')")
     @GetMapping("/langlaufend")
     public ResponseEntity<List<VorgangDTO>> getLanglaufendeVorgaenge(@RequestParam(defaultValue = "60") int minuten) {
         List<Vorgang> langlaufende = vorgangService.findLanglaufendeVorgaenge(minuten);
@@ -135,6 +145,7 @@ public class VorgangController {
     /**
      * Alle Rechnungen eines Rechnungslauf-Vorgangs
      */
+    @PreAuthorize("hasAnyRole('ADMIN', 'USER', 'VORGANGS_READ')")
     @GetMapping("/{id}/rechnungen")
     public ResponseEntity<List<InvoiceDTO>> getRechnungenByVorgang(@PathVariable UUID id) {
         try {
@@ -151,6 +162,7 @@ public class VorgangController {
     /**
      * Alle verlängerten Verträge eines Verlängerungslauf-Vorgangs
      */
+    @PreAuthorize("hasAnyRole('ADMIN', 'USER', 'VORGANGS_READ')")
     @GetMapping("/{id}/vertraege")
     public ResponseEntity<List<ContractDTO>> getVertraegeByVorgang(@PathVariable UUID id) {
         try {
@@ -167,6 +179,7 @@ public class VorgangController {
     /**
      * Vorgang manuell abbrechen
      */
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/{id}/abbrechen")
     public ResponseEntity<String> vorgangAbbrechen(@PathVariable UUID id, @RequestParam String grund) {
         try {
@@ -180,6 +193,7 @@ public class VorgangController {
     /**
      * Hängengebliebene Vorgänge korrigieren
      */
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/korrigieren")
     public ResponseEntity<String> korrigiereHaengengebliebene(@RequestParam(defaultValue = "24") int stundenSchwellwert) {
         int korrigiert = vorgangService.korrigiereHaengengebliebeneVorgaenge(stundenSchwellwert);

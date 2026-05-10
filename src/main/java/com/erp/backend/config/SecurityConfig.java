@@ -4,6 +4,7 @@ import com.erp.backend.repository.UserRepository;
 import com.erp.backend.service.UserDetailsServiceImpl;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
@@ -29,6 +30,7 @@ import java.util.List;
  * - Konfiguriert CORS für Frontend-Requests
  */
 @Configuration
+@EnableMethodSecurity
 public class SecurityConfig {
 
     private final JwtUtil jwtUtil;

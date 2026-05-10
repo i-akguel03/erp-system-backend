@@ -8,6 +8,7 @@ import com.erp.backend.service.batch.InvoiceBatchResult;
 import com.erp.backend.util.SecurityUtils;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
@@ -28,6 +29,7 @@ public class InvoiceBatchController {
     /**
      * Standard-Rechnungslauf: Alle offenen Monate
      */
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/batch/run")
     public ResponseEntity<?> runInvoiceBatch(
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate billingDate,
@@ -46,6 +48,7 @@ public class InvoiceBatchController {
     /**
      * Rechnungslauf für heute
      */
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/batch/run-today")
     public ResponseEntity<?> runInvoiceBatchToday(
             @RequestParam(defaultValue = "false") boolean exactDateOnly) {
@@ -63,6 +66,7 @@ public class InvoiceBatchController {
     /**
      * Vorschau eines geplanten Rechnungslaufs
      */
+    @PreAuthorize("hasAnyRole('ADMIN', 'USER', 'INVOICES_READ')")
     @GetMapping("/batch/preview")
     public ResponseEntity<?> previewInvoiceBatch(
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate billingDate,
@@ -90,6 +94,7 @@ public class InvoiceBatchController {
     /**
      * Prüft ob Rechnungslauf möglich ist
      */
+    @PreAuthorize("hasAnyRole('ADMIN', 'USER', 'INVOICES_READ')")
     @GetMapping("/batch/can-run")
     public ResponseEntity<?> canRunInvoiceBatch(
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate billingDate,

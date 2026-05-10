@@ -5,6 +5,7 @@ import com.erp.backend.domain.Product;
 import com.erp.backend.service.InventoryService;
 import com.erp.backend.service.ProductService;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -22,11 +23,13 @@ public class InventoryController {
         this.productService = productService;
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN', 'USER', 'INVENTORY_READ')")
     @GetMapping
     public List<InventoryItem> getAllInventoryItems() {
         return inventoryService.getAllInventoryItems();
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN', 'USER', 'INVENTORY_READ')")
     @GetMapping("/{id}")
     public ResponseEntity<InventoryItem> getInventoryItemById(@PathVariable Long id) {
         return inventoryService.getInventoryItemById(id)
@@ -34,6 +37,7 @@ public class InventoryController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping
     public ResponseEntity<InventoryItem> createInventoryItem(@RequestBody InventoryItem item) {
         // Produkt aus DB laden
@@ -45,6 +49,7 @@ public class InventoryController {
         return ResponseEntity.ok(created);
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/{id}")
     public ResponseEntity<InventoryItem> updateInventoryItem(@PathVariable Long id, @RequestBody InventoryItem updated) {
         return inventoryService.getInventoryItemById(id)
@@ -61,6 +66,7 @@ public class InventoryController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteInventoryItem(@PathVariable Long id) {
         inventoryService.deleteInventoryItemById(id);

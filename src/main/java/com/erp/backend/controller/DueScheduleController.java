@@ -8,6 +8,7 @@ import com.erp.backend.service.DueScheduleService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
@@ -25,6 +26,7 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/api/due-schedules")
 @CrossOrigin(origins = "*")
+@PreAuthorize("hasAnyRole('ADMIN', 'USER', 'DUE_SCHEDULES_READ')")
 public class DueScheduleController {
 
     @Autowired
@@ -56,6 +58,7 @@ public class DueScheduleController {
     /**
      * Neuen Fälligkeitsplan erstellen.
      */
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping
     public ResponseEntity<DueScheduleDto> createDueSchedule(@RequestBody DueScheduleDto dueScheduleDto) {
         DueScheduleDto createdDueSchedule = dueScheduleService.createDueSchedule(dueScheduleDto);
@@ -65,6 +68,7 @@ public class DueScheduleController {
     /**
      * Fälligkeitsplan aktualisieren.
      */
+    @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/{id}")
     public ResponseEntity<DueScheduleDto> updateDueSchedule(
             @PathVariable UUID id,
@@ -76,6 +80,7 @@ public class DueScheduleController {
     /**
      * Fälligkeitsplan löschen.
      */
+    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteDueSchedule(@PathVariable UUID id) {
         dueScheduleService.deleteDueSchedule(id);
@@ -160,6 +165,7 @@ public class DueScheduleController {
     /**
      * Automatische Generierung von Fälligkeitsplänen für ein Abonnement.
      */
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/subscription/{subscriptionId}/generate")
     public ResponseEntity<List<DueScheduleDto>> generateDueSchedulesForSubscription(
             @PathVariable UUID subscriptionId,

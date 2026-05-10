@@ -5,6 +5,7 @@ import com.erp.backend.service.ProductService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.*;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -24,12 +25,14 @@ public class ProductController {
         this.service = service;
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/init")
     public ResponseEntity<String> initTestProducts() {
         service.initTestProducts();
         return ResponseEntity.ok("15 Testprodukte wurden erstellt.");
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN', 'USER', 'PRODUCTS_READ')")
     @GetMapping
     public ResponseEntity<List<Product>> getAllProducts(
             @RequestParam(defaultValue = "false") boolean paginated,
@@ -61,6 +64,7 @@ public class ProductController {
         }
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN', 'USER', 'PRODUCTS_READ')")
     @GetMapping("/{id}")
     public ResponseEntity<Product> getProductById(@PathVariable UUID id) {
         logger.info("GET /api/products/{} - Fetching product by ID", id);
@@ -75,6 +79,7 @@ public class ProductController {
                 });
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN', 'USER', 'PRODUCTS_READ')")
     @GetMapping("/by-number/{productNumber}")
     public ResponseEntity<Product> getProductByNumber(@PathVariable String productNumber) {
         logger.info("GET /api/products/by-number/{} - Fetching product by productNumber", productNumber);
@@ -89,6 +94,7 @@ public class ProductController {
                 });
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN', 'USER', 'PRODUCTS_READ')")
     @GetMapping("/search")
     public ResponseEntity<List<Product>> searchProducts(@RequestParam String q) {
         logger.info("GET /api/products/search?q={} - Searching products by name", q);
@@ -97,6 +103,7 @@ public class ProductController {
         return ResponseEntity.ok(products);
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN', 'USER', 'PRODUCTS_READ')")
     @GetMapping("/count")
     public ResponseEntity<Long> getProductCount() {
         logger.info("GET /api/products/count - Fetching product count");
@@ -105,6 +112,7 @@ public class ProductController {
         return ResponseEntity.ok(count);
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping
     public ResponseEntity<Product> createProduct(@RequestBody Product product) {
         logger.info("POST /api/products - Creating new product with name {}", product.getName());
@@ -122,6 +130,7 @@ public class ProductController {
         }
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/{id}")
     public ResponseEntity<Product> updateProduct(@PathVariable UUID id, @RequestBody Product updated) {
         logger.info("PUT /api/products/{} - Updating product", id);
@@ -156,6 +165,7 @@ public class ProductController {
         }
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteProduct(@PathVariable UUID id) {
         logger.info("DELETE /api/products/{} - Deleting product", id);

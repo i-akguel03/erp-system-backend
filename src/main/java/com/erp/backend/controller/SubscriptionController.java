@@ -9,6 +9,7 @@ import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.*;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -33,6 +34,7 @@ public class SubscriptionController {
     }
 
     // ================= GET =================
+    @PreAuthorize("hasAnyRole('ADMIN', 'USER', 'SUBSCRIPTIONS_READ')")
     @GetMapping
     public ResponseEntity<List<SubscriptionDto>> getAllSubscriptions(
             @RequestParam(defaultValue = "false") boolean paginated,
@@ -57,6 +59,7 @@ public class SubscriptionController {
         }
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN', 'USER', 'SUBSCRIPTIONS_READ')")
     @GetMapping("/{id}")
     public ResponseEntity<SubscriptionDto> getSubscriptionById(@PathVariable UUID id) {
         return service.getSubscriptionById(id)
@@ -65,6 +68,7 @@ public class SubscriptionController {
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN', 'USER', 'SUBSCRIPTIONS_READ')")
     @GetMapping("/by-number/{subscriptionNumber}")
     public ResponseEntity<SubscriptionDto> getSubscriptionByNumber(@PathVariable String subscriptionNumber) {
         return service.getSubscriptionByNumber(subscriptionNumber)
@@ -73,6 +77,7 @@ public class SubscriptionController {
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN', 'USER', 'SUBSCRIPTIONS_READ')")
     @GetMapping("/contract/{contractId}")
     public ResponseEntity<List<SubscriptionDto>> getSubscriptionsByContract(
             @PathVariable UUID contractId,
@@ -88,6 +93,7 @@ public class SubscriptionController {
         }
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN', 'USER', 'SUBSCRIPTIONS_READ')")
     @GetMapping("/customer/{customerId}")
     public ResponseEntity<List<SubscriptionDto>> getSubscriptionsByCustomer(
             @PathVariable UUID customerId,
@@ -103,6 +109,7 @@ public class SubscriptionController {
         }
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN', 'USER', 'SUBSCRIPTIONS_READ')")
     @GetMapping("/status/{status}")
     public ResponseEntity<List<SubscriptionDto>> getSubscriptionsByStatus(@PathVariable SubscriptionStatus status) {
         List<SubscriptionDto> dtos = service.getSubscriptionsByStatus(status)
@@ -110,11 +117,13 @@ public class SubscriptionController {
         return ResponseEntity.ok(dtos);
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN', 'USER', 'SUBSCRIPTIONS_READ')")
     @GetMapping("/revenue/total")
     public ResponseEntity<BigDecimal> getTotalActiveRevenue() {
         return ResponseEntity.ok(service.getTotalActiveRevenue());
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN', 'USER', 'SUBSCRIPTIONS_READ')")
     @GetMapping("/revenue/customer/{customerId}")
     public ResponseEntity<BigDecimal> getActiveRevenueByCustomer(@PathVariable UUID customerId) {
         try {
@@ -125,6 +134,7 @@ public class SubscriptionController {
     }
 
     // ================= POST / PUT / PATCH =================
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping
     public ResponseEntity<?> createSubscription(@Valid @RequestBody SubscriptionDto dto) {
         try {
@@ -137,6 +147,7 @@ public class SubscriptionController {
         }
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/{id}")
     public ResponseEntity<?> updateSubscription(@PathVariable UUID id, @Valid @RequestBody SubscriptionDto dto) {
         try {
@@ -150,6 +161,7 @@ public class SubscriptionController {
         }
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @PatchMapping("/{id}/activate")
     public ResponseEntity<?> activateSubscription(@PathVariable UUID id) {
         try {
@@ -159,6 +171,7 @@ public class SubscriptionController {
         }
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @PatchMapping("/{id}/suspend")
     public ResponseEntity<?> suspendSubscription(@PathVariable UUID id) {
         try {
@@ -168,6 +181,7 @@ public class SubscriptionController {
         }
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @PatchMapping("/{id}/terminate")
     public ResponseEntity<?> terminateSubscription(
             @PathVariable UUID id,
@@ -179,6 +193,7 @@ public class SubscriptionController {
         }
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @PatchMapping("/{id}/reinstate")
     public ResponseEntity<?> reinstateSubscription(@PathVariable UUID id) {
         try {
@@ -188,6 +203,7 @@ public class SubscriptionController {
         }
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @PatchMapping("/{id}/cancel")
     public ResponseEntity<?> cancelSubscription(
             @PathVariable UUID id,
@@ -199,6 +215,7 @@ public class SubscriptionController {
         }
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @PatchMapping("/{id}/renew")
     public ResponseEntity<?> renewSubscription(
             @PathVariable UUID id,
@@ -211,6 +228,7 @@ public class SubscriptionController {
     }
 
     // ================= DELETE =================
+    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteSubscription(@PathVariable UUID id) {
             service.deleteSubscription(id);

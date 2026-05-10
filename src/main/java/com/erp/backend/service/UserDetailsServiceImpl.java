@@ -8,6 +8,8 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -70,16 +72,29 @@ public class UserDetailsServiceImpl implements UserDetailsService {
         return userRepository.findByUsername(username).isPresent();
     }
 
-    // Neuen User erstellen (hier Standard: Admin)
     public UserEntity createUser(String username, String password) {
         UserEntity user = new UserEntity();
         user.setUsername(username);
-        user.setPassword(passwordEncoder.encode(password)); // Passwort sicher speichern
-
-        // Standardmäßig ADMIN-Rolle vergeben
-        user.addRole(Role.ROLE_ADMIN);
-
+        user.setPassword(passwordEncoder.encode(password));
+        user.addRole(Role.ROLE_USER);
         return userRepository.save(user);
+    }
+
+    public UserEntity updateRoles(String username, Set<Role> newRoles) {
+        UserEntity user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found: " + username));
+        user.setRoles(newRoles);
+        return userRepository.save(user);
+    }
+
+    public java.util.List<UserEntity> getAllUsers() {
+        return userRepository.findAll();
+    }
+
+    public void deleteUser(String username) {
+        UserEntity user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found: " + username));
+        userRepository.delete(user);
     }
 
     // Alternative sichere Methode: Rolle als Parameter übergeben
