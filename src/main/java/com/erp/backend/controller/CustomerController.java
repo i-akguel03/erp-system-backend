@@ -48,22 +48,15 @@ public class CustomerController {
         if (paginated) {
             Sort sort = Sort.by(Sort.Direction.fromString(sortDirection), sortBy);
             Pageable pageable = PageRequest.of(page, size, sort);
-            Page<Customer> customerPage = service.getAllCustomers(pageable);
-
-            List<CustomerDto> dtos = customerPage.getContent().stream()
-                    .map(CustomerDto::fromEntity)
-                    .toList();
+            Page<CustomerDto> customerPage = service.getAllCustomers(pageable);
 
             return ResponseEntity.ok()
                     .header("X-Total-Count", String.valueOf(customerPage.getTotalElements()))
                     .header("X-Total-Pages", String.valueOf(customerPage.getTotalPages()))
                     .header("X-Current-Page", String.valueOf(page))
-                    .body(dtos);
+                    .body(customerPage.getContent());
         } else {
-            List<CustomerDto> dtos = service.getAllCustomers().stream()
-                    .map(CustomerDto::fromEntity)
-                    .toList();
-            return ResponseEntity.ok(dtos);
+            return ResponseEntity.ok(service.getAllCustomers());
         }
     }
 

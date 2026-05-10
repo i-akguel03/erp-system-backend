@@ -1,8 +1,8 @@
 package com.erp.backend.service;
 
 import com.erp.backend.domain.Address;
-import com.erp.backend.domain.ContractStatus;
 import com.erp.backend.domain.Customer;
+import com.erp.backend.dto.CustomerDto;
 import com.erp.backend.exception.BusinessLogicException;
 import com.erp.backend.exception.DuplicateResourceException;
 import com.erp.backend.exception.ResourceNotFoundException;
@@ -74,18 +74,18 @@ public class CustomerService {
 
 
     @Transactional(readOnly = true)
-    public List<Customer> getAllCustomers() {
+    public List<CustomerDto> getAllCustomers() {
         List<Customer> customers = customerRepository.findAll();
         logger.info("Fetched {} customers", customers.size());
-        return customers;
+        return customers.stream().map(CustomerDto::fromEntity).toList();
     }
 
     @Transactional(readOnly = true)
-    public Page<Customer> getAllCustomers(Pageable pageable) {
+    public Page<CustomerDto> getAllCustomers(Pageable pageable) {
         Page<Customer> customers = customerRepository.findAll(pageable);
         logger.info("Fetched {} customers (page {}/{})",
                 customers.getNumberOfElements(), customers.getNumber() + 1, customers.getTotalPages());
-        return customers;
+        return customers.map(CustomerDto::fromEntity);
     }
 
     @Transactional(readOnly = true)
@@ -169,11 +169,9 @@ public class CustomerService {
         Customer customer = customerRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Kunde nicht gefunden mit ID: " + id));
 
-        boolean hasActiveContracts = customer.getContracts().stream()
-                .anyMatch(contract -> contract.getContractStatus().equals(ContractStatus.ACTIVE));
-
-        if (hasActiveContracts) {
-            throw new BusinessLogicException("Kunde kann nicht gelöscht werden, da aktive Verträge existieren.");
+        if (!customer.getContracts().isEmpty()) {
+            throw new BusinessLogicException(
+                    "Kunde kann nicht gelöscht werden – es existieren noch " + customer.getContracts().size() + " Vertrag/Verträge.");
         }
 
         // Soft Delete: Hibernate macht UPDATE ... SET deleted = true

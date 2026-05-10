@@ -1,5 +1,6 @@
 package com.erp.backend.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import org.hibernate.annotations.SQLDelete;
@@ -32,8 +33,9 @@ public class Address {
     @Column(nullable = false)
     private String country;
 
+    @JsonIgnore
     @Column(nullable = false)
-    private boolean deleted = false; // Soft-Delete Flag
+    private boolean deleted = false;
 
     public Address() {
         // Standard-Konstruktor für JPA

@@ -2,6 +2,7 @@ package com.erp.backend.dto;
 
 import com.erp.backend.domain.Address;
 import com.erp.backend.domain.Customer;
+import jakarta.persistence.EntityNotFoundException;
 
 import java.util.UUID;
 
@@ -26,10 +27,24 @@ public class CustomerDto {
         dto.setLastName(c.getLastName());
         dto.setEmail(c.getEmail());
         dto.setTel(c.getTel());
-        dto.setResidentialAddress(c.getResidentialAddress());
-        dto.setBillingAddress(c.getBillingAddress());
-        dto.setShippingAddress(c.getShippingAddress());
+        dto.setResidentialAddress(initAddress(c.getResidentialAddress()));
+        dto.setBillingAddress(initAddress(c.getBillingAddress()));
+        dto.setShippingAddress(initAddress(c.getShippingAddress()));
         return dto;
+    }
+
+    /**
+     * Initialisiert den Hibernate-Proxy innerhalb der Transaktion.
+     * Gibt null zurück wenn die Adresse soft-gelöscht wurde (veraltete FK-Referenz).
+     */
+    private static Address initAddress(Address address) {
+        if (address == null) return null;
+        try {
+            address.getStreet(); // erzwingt Proxy-Initialisierung
+            return address;
+        } catch (EntityNotFoundException e) {
+            return null;
+        }
     }
 
     // Getter & Setter

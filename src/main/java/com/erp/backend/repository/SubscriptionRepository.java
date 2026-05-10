@@ -82,6 +82,9 @@ public interface SubscriptionRepository extends JpaRepository<Subscription, UUID
 
     long countBySubscriptionStatus(SubscriptionStatus status);
 
+    @Query("SELECT COUNT(s) FROM Subscription s WHERE s.productId = :productId")
+    long countByProductId(@Param("productId") UUID productId);
+
     // ===============================================================================================
 // ERGÄNZUNGEN FÜR SubscriptionRepository
 // ===============================================================================================

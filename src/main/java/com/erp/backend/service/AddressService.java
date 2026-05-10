@@ -43,65 +43,38 @@ public class AddressService {
     }
 
     public void deleteById(Long id) {
-        // Prüfen, ob die Adresse existiert
         Address address = addressRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Adresse nicht gefunden mit ID: " + id));
 
-        long customerCount = customerRepository.countByResidentialAddress(address);
-
-        if (customerCount > 0) {
-            logger.warn("Cannot delete address with id={} - still used by {} customer(s)", id, customerCount);
-            throw new BusinessLogicException("Adresse kann nicht gelöscht werden - wird von " + customerCount + " Kunden verwendet");
+        long usageCount = countUsages(address);
+        if (usageCount > 0) {
+            logger.warn("Cannot delete address id={} – still referenced by {} customer(s)", id, usageCount);
+            throw new BusinessLogicException(
+                    "Adresse kann nicht gelöscht werden – wird noch von " + usageCount + " Kunden als Wohn-, Rechnungs- oder Lieferadresse verwendet.");
         }
 
-        // Adresse kann sicher gelöscht werden
         addressRepository.deleteById(id);
-        logger.info("Successfully deleted address with id={}", id);
+        logger.info("Deleted address id={}", id);
     }
 
-    /**
-     * Alternative Methode mit detaillierteren Informationen über verwendende Customers
-     */
-    public void deleteByIdDetailed(Long id) {
-        // Prüfen, ob die Adresse existiert
-        Address address = addressRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Adresse nicht gefunden mit ID: " + id));
-
-        var customersUsingAddress = customerRepository.findByResidentialAddress(address);
-
-        if (!customersUsingAddress.isEmpty()) {
-            String customerNames = customersUsingAddress.stream()
-                    .map(customer -> customer.getFirstName() + " " + customer.getLastName() + " (ID: " + customer.getId() + ")")
-                    .reduce((a, b) -> a + ", " + b)
-                    .orElse("");
-
-            logger.warn("Cannot delete address with id={} - used by customers: {}", id, customerNames);
-            throw new BusinessLogicException("Adresse kann nicht gelöscht werden - wird verwendet von: " + customerNames);
-        }
-
-        // Adresse kann sicher gelöscht werden
-        addressRepository.deleteById(id);
-        logger.info("Successfully deleted address with id={}", id);
-    }
-
-    /**
-     * Prüft, ob eine Adresse von Customers verwendet wird (ohne zu löschen)
-     */
     @Transactional(readOnly = true)
     public boolean isAddressInUse(Long id) {
         return addressRepository.findById(id)
-                .map(address -> customerRepository.countByResidentialAddress(address) > 0)
+                .map(address -> countUsages(address) > 0)
                 .orElse(false);
     }
 
-    /**
-     * Gibt die Anzahl der Customers zurück, die eine bestimmte Adresse verwenden
-     */
     @Transactional(readOnly = true)
     public long getUsageCount(Long id) {
         return addressRepository.findById(id)
-                .map(address -> customerRepository.countByResidentialAddress(address))
+                .map(this::countUsages)
                 .orElse(0L);
+    }
+
+    private long countUsages(Address address) {
+        return customerRepository.countByResidentialAddress(address)
+             + customerRepository.countByBillingAddress(address)
+             + customerRepository.countByShippingAddress(address);
     }
 
     public void initTestAddresses() {

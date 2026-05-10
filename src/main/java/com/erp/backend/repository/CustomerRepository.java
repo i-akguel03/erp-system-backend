@@ -24,10 +24,9 @@ public interface CustomerRepository extends JpaRepository<Customer, UUID> {
      * Zählt alle Customers, die eine bestimmte Adresse verwenden
      */
     long countByResidentialAddress(Address address);
+    long countByBillingAddress(Address address);
+    long countByShippingAddress(Address address);
 
-    /**
-     * Findet alle Customers, die eine bestimmte Adresse verwenden
-     */
     List<Customer> findByResidentialAddress(Address address);
 
 

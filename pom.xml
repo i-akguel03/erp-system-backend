@@ -176,6 +176,12 @@
 			<groupId>com.fasterxml.jackson.datatype</groupId>
 			<artifactId>jackson-datatype-jsr310</artifactId>
 		</dependency>
+
+		<!-- Hibernate 6 Proxys korrekt serialisieren (verhindert korrumpiertes JSON bei Lazy-Loading) -->
+		<dependency>
+			<groupId>com.fasterxml.jackson.datatype</groupId>
+			<artifactId>jackson-datatype-hibernate6</artifactId>
+		</dependency>
 	</dependencies>
 
 	<build>

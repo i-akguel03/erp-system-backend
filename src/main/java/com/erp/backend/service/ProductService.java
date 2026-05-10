@@ -4,6 +4,7 @@ import com.erp.backend.domain.Product;
 import com.erp.backend.exception.BusinessLogicException;
 import com.erp.backend.exception.ResourceNotFoundException;
 import com.erp.backend.repository.ProductRepository;
+import com.erp.backend.repository.SubscriptionRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -20,9 +21,11 @@ public class ProductService {
     private static final Logger logger = LoggerFactory.getLogger(ProductService.class);
 
     private final ProductRepository repository;
+    private final SubscriptionRepository subscriptionRepository;
 
-    public ProductService(ProductRepository repository) {
+    public ProductService(ProductRepository repository, SubscriptionRepository subscriptionRepository) {
         this.repository = repository;
+        this.subscriptionRepository = subscriptionRepository;
     }
 
     public void initTestProducts() {
@@ -111,6 +114,11 @@ public class ProductService {
     public void deleteProductById(UUID id) {
         if (!repository.existsById(id)) {
             throw new ResourceNotFoundException("Produkt nicht gefunden mit id=" + id);
+        }
+        long usageCount = subscriptionRepository.countByProductId(id);
+        if (usageCount > 0) {
+            throw new BusinessLogicException(
+                    "Produkt kann nicht gelöscht werden – wird noch in " + usageCount + " Abonnement(s) verwendet.");
         }
         repository.deleteById(id);
         logger.info("Deleted product with id={}", id);
