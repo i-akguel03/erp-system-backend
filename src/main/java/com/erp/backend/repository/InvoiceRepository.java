@@ -124,4 +124,24 @@ public interface InvoiceRepository extends JpaRepository<Invoice, UUID> {
     @Query("SELECT i FROM Invoice i WHERE i.status = :status")
     List<Invoice> findByStatus(@Param("status") Invoice.InvoiceStatus status);
 
+    /**
+     * Zählt Invoices mit Status aus einer Liste
+     */
+    long countByStatusIn(List<Invoice.InvoiceStatus> statuses);
+
+    /**
+     * Monatlicher Umsatz für ein Jahr (nicht-stornierte, nicht-Draft Rechnungen).
+     * Gibt Object[]{month, year, totalAmount, invoiceCount} zurück.
+     */
+    @Query("SELECT MONTH(i.invoiceDate), YEAR(i.invoiceDate), COALESCE(SUM(i.totalAmount), 0), COUNT(i) " +
+           "FROM Invoice i WHERE YEAR(i.invoiceDate) = :year AND i.status NOT IN ('CANCELLED', 'DRAFT') " +
+           "GROUP BY YEAR(i.invoiceDate), MONTH(i.invoiceDate) ORDER BY MONTH(i.invoiceDate)")
+    List<Object[]> findMonthlyRevenue(@Param("year") int year);
+
+    /**
+     * Gesamtumsatz für nicht-stornierte Rechnungen
+     */
+    @Query("SELECT COALESCE(SUM(i.totalAmount), 0) FROM Invoice i WHERE i.status NOT IN ('CANCELLED', 'DRAFT')")
+    BigDecimal sumTotalRevenue();
+
 }
