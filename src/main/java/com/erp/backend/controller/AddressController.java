@@ -4,6 +4,10 @@ import com.erp.backend.domain.Address;
 import com.erp.backend.dto.AddressDTO;
 import com.erp.backend.service.AddressService;
 import jakarta.validation.Valid;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -40,8 +44,25 @@ public class AddressController {
 
     @PreAuthorize("hasAnyRole('ADMIN', 'USER', 'ADDRESSES_READ')")
     @GetMapping
-    public List<AddressDTO> getAll() {
-        return service.findAll().stream().map(this::toDTO).collect(Collectors.toList());
+    public ResponseEntity<List<AddressDTO>> getAll(
+            @RequestParam(defaultValue = "false") boolean paginated,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size,
+            @RequestParam(defaultValue = "city") String sortBy,
+            @RequestParam(defaultValue = "ASC") String sortDirection) {
+
+        if (paginated) {
+            Sort sort = Sort.by(Sort.Direction.fromString(sortDirection), sortBy);
+            Pageable pageable = PageRequest.of(page, size, sort);
+            Page<Address> addressPage = service.findAll(pageable);
+            List<AddressDTO> dtos = addressPage.getContent().stream().map(this::toDTO).toList();
+            return ResponseEntity.ok()
+                    .header("X-Total-Count", String.valueOf(addressPage.getTotalElements()))
+                    .header("X-Total-Pages", String.valueOf(addressPage.getTotalPages()))
+                    .header("X-Current-Page", String.valueOf(page))
+                    .body(dtos);
+        }
+        return ResponseEntity.ok(service.findAll().stream().map(this::toDTO).collect(Collectors.toList()));
     }
 
     @PreAuthorize("hasAnyRole('ADMIN', 'USER', 'ADDRESSES_READ')")

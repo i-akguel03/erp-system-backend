@@ -1,5 +1,8 @@
 package com.erp.backend.dto;
 
+import jakarta.validation.constraints.DecimalMin;
+import jakarta.validation.constraints.NotNull;
+
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
@@ -8,7 +11,11 @@ import java.time.LocalDate;
  */
 public class PaymentDto {
 
+    @NotNull(message = "paidAmount darf nicht null sein")
+    @DecimalMin(value = "0.01", message = "paidAmount muss größer als 0 sein")
     private BigDecimal paidAmount;
+
+    @NotNull(message = "paidDate darf nicht null sein")
     private LocalDate paidDate;
     private String paymentMethod;
     private String paymentReference;

@@ -1,10 +1,14 @@
 package com.erp.backend.dto;
 
+import jakarta.validation.constraints.Positive;
+
 import java.time.LocalDate;
 
 public class ContractRenewalRequest {
 
     private LocalDate newEndDate;
+
+    @Positive(message = "extensionMonths muss eine positive Zahl sein")
     private Integer extensionMonths;
 
     public LocalDate getNewEndDate() {

@@ -5,6 +5,8 @@ import com.erp.backend.exception.BusinessLogicException;
 import com.erp.backend.exception.ResourceNotFoundException;
 import com.erp.backend.repository.AddressRepository;
 import com.erp.backend.repository.CustomerRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -35,6 +37,11 @@ public class AddressService {
     @Transactional(readOnly = true)
     public List<Address> findAll() {
         return addressRepository.findAll();
+    }
+
+    @Transactional(readOnly = true)
+    public Page<Address> findAll(Pageable pageable) {
+        return addressRepository.findAll(pageable);
     }
 
     @Transactional(readOnly = true)

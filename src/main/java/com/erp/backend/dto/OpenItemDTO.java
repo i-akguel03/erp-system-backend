@@ -1,5 +1,8 @@
 package com.erp.backend.dto;
 
+import jakarta.validation.constraints.DecimalMin;
+import jakarta.validation.constraints.NotNull;
+
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -7,10 +10,17 @@ import java.util.UUID;
 
 public class OpenItemDTO {
     private UUID id;
+
+    @NotNull(message = "invoiceId darf nicht null sein")
     private UUID invoiceId;
     private String invoiceNumber;
     private String description;
+
+    @NotNull(message = "amount darf nicht null sein")
+    @DecimalMin(value = "0.01", message = "amount muss größer als 0 sein")
     private BigDecimal amount;
+
+    @NotNull(message = "dueDate darf nicht null sein")
     private LocalDate dueDate;
     private String status;
     private BigDecimal paidAmount;

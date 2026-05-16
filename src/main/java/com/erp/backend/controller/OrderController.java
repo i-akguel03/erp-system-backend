@@ -2,6 +2,10 @@ package com.erp.backend.controller;
 
 import com.erp.backend.domain.Order;
 import com.erp.backend.service.OrderService;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -22,8 +26,24 @@ public class OrderController {
 
     @PreAuthorize("hasAnyRole('ADMIN', 'USER', 'ORDERS_READ')")
     @GetMapping
-    public List<Order> getAllOrders() {
-        return service.findAll();
+    public ResponseEntity<List<Order>> getAllOrders(
+            @RequestParam(defaultValue = "false") boolean paginated,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size,
+            @RequestParam(defaultValue = "orderDate") String sortBy,
+            @RequestParam(defaultValue = "DESC") String sortDirection) {
+
+        if (paginated) {
+            Sort sort = Sort.by(Sort.Direction.fromString(sortDirection), sortBy);
+            Pageable pageable = PageRequest.of(page, size, sort);
+            Page<Order> orderPage = service.findAll(pageable);
+            return ResponseEntity.ok()
+                    .header("X-Total-Count", String.valueOf(orderPage.getTotalElements()))
+                    .header("X-Total-Pages", String.valueOf(orderPage.getTotalPages()))
+                    .header("X-Current-Page", String.valueOf(page))
+                    .body(orderPage.getContent());
+        }
+        return ResponseEntity.ok(service.findAll());
     }
 
     @PreAuthorize("hasAnyRole('ADMIN', 'USER', 'ORDERS_READ')")

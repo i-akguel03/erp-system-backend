@@ -2,6 +2,8 @@ package com.erp.backend.service;
 
 import com.erp.backend.domain.InventoryItem;
 import com.erp.backend.repository.InventoryRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -18,6 +20,10 @@ public class InventoryService {
 
     public List<InventoryItem> getAllInventoryItems() {
         return repository.findAll();
+    }
+
+    public Page<InventoryItem> getAllInventoryItems(Pageable pageable) {
+        return repository.findAll(pageable);
     }
 
     public Optional<InventoryItem> getInventoryItemById(Long id) {

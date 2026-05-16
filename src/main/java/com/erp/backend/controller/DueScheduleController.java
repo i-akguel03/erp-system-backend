@@ -4,8 +4,13 @@ import com.erp.backend.domain.DueStatus;
 import com.erp.backend.dto.DueScheduleDto;
 import com.erp.backend.dto.DueScheduleStatisticsDto;
 import com.erp.backend.service.DueScheduleService;
+import jakarta.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -47,7 +52,23 @@ public class DueScheduleController {
      * Alle Fälligkeitspläne abrufen.
      */
     @GetMapping
-    public ResponseEntity<List<DueScheduleDto>> getAllDueSchedules() {
+    public ResponseEntity<List<DueScheduleDto>> getAllDueSchedules(
+            @RequestParam(defaultValue = "false") boolean paginated,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size,
+            @RequestParam(defaultValue = "dueDate") String sortBy,
+            @RequestParam(defaultValue = "ASC") String sortDirection) {
+
+        if (paginated) {
+            Sort sort = Sort.by(Sort.Direction.fromString(sortDirection), sortBy);
+            Pageable pageable = PageRequest.of(page, size, sort);
+            Page<DueScheduleDto> schedulePage = dueScheduleService.getAllDueSchedules(pageable);
+            return ResponseEntity.ok()
+                    .header("X-Total-Count", String.valueOf(schedulePage.getTotalElements()))
+                    .header("X-Total-Pages", String.valueOf(schedulePage.getTotalPages()))
+                    .header("X-Current-Page", String.valueOf(page))
+                    .body(schedulePage.getContent());
+        }
         List<DueScheduleDto> allSchedules = dueScheduleService.getAllDueSchedules();
         if (allSchedules.isEmpty()) {
             return ResponseEntity.noContent().build();
@@ -60,7 +81,7 @@ public class DueScheduleController {
      */
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping
-    public ResponseEntity<DueScheduleDto> createDueSchedule(@RequestBody DueScheduleDto dueScheduleDto) {
+    public ResponseEntity<DueScheduleDto> createDueSchedule(@Valid @RequestBody DueScheduleDto dueScheduleDto) {
         DueScheduleDto createdDueSchedule = dueScheduleService.createDueSchedule(dueScheduleDto);
         return ResponseEntity.status(HttpStatus.CREATED).body(createdDueSchedule);
     }
@@ -72,7 +93,7 @@ public class DueScheduleController {
     @PutMapping("/{id}")
     public ResponseEntity<DueScheduleDto> updateDueSchedule(
             @PathVariable UUID id,
-            @RequestBody DueScheduleDto dueScheduleDto) {
+            @Valid @RequestBody DueScheduleDto dueScheduleDto) {
         DueScheduleDto updatedDueSchedule = dueScheduleService.updateDueSchedule(id, dueScheduleDto);
         return ResponseEntity.ok(updatedDueSchedule);
     }

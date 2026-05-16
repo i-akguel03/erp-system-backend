@@ -1,6 +1,7 @@
 package com.erp.backend.dto;
 
 import com.erp.backend.domain.DueStatus;
+import jakarta.validation.constraints.NotNull;
 
 import java.time.LocalDate;
 import java.util.UUID;
@@ -15,11 +16,18 @@ public class DueScheduleDto {
 
     private UUID id;
     private String dueNumber;
+
+    @NotNull(message = "subscriptionId darf nicht null sein")
     private UUID subscriptionId;
     private String subscriptionNumber;
 
+    @NotNull(message = "dueDate darf nicht null sein")
     private LocalDate dueDate;
+
+    @NotNull(message = "periodStart darf nicht null sein")
     private LocalDate periodStart;
+
+    @NotNull(message = "periodEnd darf nicht null sein")
     private LocalDate periodEnd;
     private DueStatus status;
 

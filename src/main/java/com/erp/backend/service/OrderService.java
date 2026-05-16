@@ -4,6 +4,8 @@ import com.erp.backend.domain.Order;
 import com.erp.backend.repository.OrderRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -24,6 +26,10 @@ public class OrderService {
         List<Order> orders = repository.findAll();
         logger.info("Fetched {} orders", orders.size());
         return orders;
+    }
+
+    public Page<Order> findAll(Pageable pageable) {
+        return repository.findAll(pageable);
     }
 
     public Optional<Order> findById(Long id) {

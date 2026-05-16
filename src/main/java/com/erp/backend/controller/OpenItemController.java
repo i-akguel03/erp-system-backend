@@ -4,6 +4,7 @@ import com.erp.backend.domain.OpenItem;
 import com.erp.backend.dto.OpenItemDTO;
 import com.erp.backend.mapper.OpenItemMapper;
 import com.erp.backend.service.OpenItemService;
+import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.*;
@@ -78,7 +79,7 @@ public class OpenItemController {
 
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping
-    public ResponseEntity<OpenItemDTO> createOpenItem(@RequestBody OpenItemDTO dto) {
+    public ResponseEntity<OpenItemDTO> createOpenItem(@Valid @RequestBody OpenItemDTO dto) {
         OpenItem openItem = new OpenItem();
         com.erp.backend.domain.Invoice invoice = new com.erp.backend.domain.Invoice();
         invoice.setId(dto.getInvoiceId());
@@ -94,7 +95,7 @@ public class OpenItemController {
 
     @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/{id}")
-    public ResponseEntity<OpenItemDTO> updateOpenItem(@PathVariable UUID id, @RequestBody OpenItemDTO dto) {
+    public ResponseEntity<OpenItemDTO> updateOpenItem(@PathVariable UUID id, @Valid @RequestBody OpenItemDTO dto) {
         OpenItem openItem = new OpenItem();
         openItem.setId(id);
         openItem.setDescription(dto.getDescription());

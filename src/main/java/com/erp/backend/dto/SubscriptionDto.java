@@ -24,9 +24,11 @@ public class SubscriptionDto {
 
     private String description;
 
-
+    @NotNull(message = "startDate darf nicht null sein")
     private LocalDate startDate;
     private LocalDate endDate;
+
+    @NotNull(message = "billingCycle darf nicht null sein")
     private BillingCycle billingCycle;
     private SubscriptionStatus subscriptionStatus;
     private boolean autoRenewal;

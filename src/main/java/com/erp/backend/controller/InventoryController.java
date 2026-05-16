@@ -4,6 +4,10 @@ import com.erp.backend.domain.InventoryItem;
 import com.erp.backend.domain.Product;
 import com.erp.backend.service.InventoryService;
 import com.erp.backend.service.ProductService;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -25,8 +29,24 @@ public class InventoryController {
 
     @PreAuthorize("hasAnyRole('ADMIN', 'USER', 'INVENTORY_READ')")
     @GetMapping
-    public List<InventoryItem> getAllInventoryItems() {
-        return inventoryService.getAllInventoryItems();
+    public ResponseEntity<List<InventoryItem>> getAllInventoryItems(
+            @RequestParam(defaultValue = "false") boolean paginated,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size,
+            @RequestParam(defaultValue = "id") String sortBy,
+            @RequestParam(defaultValue = "ASC") String sortDirection) {
+
+        if (paginated) {
+            Sort sort = Sort.by(Sort.Direction.fromString(sortDirection), sortBy);
+            Pageable pageable = PageRequest.of(page, size, sort);
+            Page<InventoryItem> itemPage = inventoryService.getAllInventoryItems(pageable);
+            return ResponseEntity.ok()
+                    .header("X-Total-Count", String.valueOf(itemPage.getTotalElements()))
+                    .header("X-Total-Pages", String.valueOf(itemPage.getTotalPages()))
+                    .header("X-Current-Page", String.valueOf(page))
+                    .body(itemPage.getContent());
+        }
+        return ResponseEntity.ok(inventoryService.getAllInventoryItems());
     }
 
     @PreAuthorize("hasAnyRole('ADMIN', 'USER', 'INVENTORY_READ')")
