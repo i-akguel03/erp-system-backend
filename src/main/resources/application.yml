@@ -97,8 +97,9 @@ management:
   endpoint:
     health:
       show-details: always
-      mail:
-        enabled: false
+  health:
+    mail:
+      enabled: false
 
 
 # =========================================
