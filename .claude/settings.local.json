@@ -5,7 +5,9 @@
       "Bash(Get-ChildItem -Path \"C:\\\\Users\\\\ibrah\\\\Desktop\\\\ERP-Backend\\\\erp-system-backend\" -Recurse -Directory)",
       "Bash(Select-Object -ExpandProperty FullName)",
       "Bash(Sort-Object)",
-      "Bash(mvn compile *)"
+      "Bash(mvn compile *)",
+      "Bash(Get-ChildItem -Path . -Depth 2)",
+      "Bash(Select-Object FullName)"
     ]
   }
 }

@@ -3,6 +3,7 @@ package com.erp.backend.service.batch;
 import com.erp.backend.domain.*;
 import com.erp.backend.repository.InvoiceRepository;
 import com.erp.backend.repository.OpenItemRepository;
+import com.erp.backend.service.CustomerEmailService;
 import com.erp.backend.service.DueScheduleService;
 import com.erp.backend.service.InvoiceFactory;
 import com.erp.backend.service.OpenItemFactory;
@@ -28,17 +29,20 @@ public class InvoiceBatchItemProcessor {
     private final DueScheduleService dueScheduleService;
     private final InvoiceRepository invoiceRepository;
     private final OpenItemRepository openItemRepository;
+    private final CustomerEmailService customerEmailService;
 
     public InvoiceBatchItemProcessor(InvoiceFactory invoiceFactory,
                                      OpenItemFactory openItemFactory,
                                      DueScheduleService dueScheduleService,
                                      InvoiceRepository invoiceRepository,
-                                     OpenItemRepository openItemRepository) {
+                                     OpenItemRepository openItemRepository,
+                                     CustomerEmailService customerEmailService) {
         this.invoiceFactory = invoiceFactory;
         this.openItemFactory = openItemFactory;
         this.dueScheduleService = dueScheduleService;
         this.invoiceRepository = invoiceRepository;
         this.openItemRepository = openItemRepository;
+        this.customerEmailService = customerEmailService;
     }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
@@ -55,6 +59,7 @@ public class InvoiceBatchItemProcessor {
         invoice.setVorgang(vorgang);
         invoice.setSubscriptionId(subscription.getId());
         Invoice savedInvoice = invoiceRepository.save(invoice);
+        customerEmailService.sendInvoiceEmail(savedInvoice);
 
         dueScheduleService.markAsCompleted(dueSchedule.getId(), savedInvoice.getId(), batchId);
         dueSchedule.setVorgang(vorgang);

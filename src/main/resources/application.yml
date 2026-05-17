@@ -94,3 +94,31 @@ app:
   renewal:
     default-extension-months: 12  # Verlängerungsdauer im Batch-Lauf
     batch-lookahead-days: 30      # Vorlauf: Verträge die in X Tagen ablaufen werden verlängert
+  notifications:
+    email:
+      enabled: ${NOTIFICATION_EMAIL_ENABLED:false}
+      customer-emails-enabled: ${NOTIFICATION_CUSTOMER_EMAILS_ENABLED:false}
+      from: ${NOTIFICATION_EMAIL_FROM:noreply@erp.local}
+      admin-address: ${NOTIFICATION_ADMIN_EMAIL:admin@erp.local}
+    triggers:
+      overdue-enabled: ${NOTIFICATION_OVERDUE_ENABLED:true}
+      overdue-cron: ${NOTIFICATION_OVERDUE_CRON:0 0 8 * * *}
+      expiring-days: ${NOTIFICATION_EXPIRING_DAYS:30}
+      expiring-enabled: ${NOTIFICATION_EXPIRING_ENABLED:true}
+      invoice-batch-enabled: ${NOTIFICATION_BATCH_ENABLED:true}
+      new-entity-enabled: ${NOTIFICATION_NEW_ENTITY_ENABLED:true}
+
+# =========================================
+# SPRING MAIL (SMTP)
+# =========================================
+  mail:
+    host: ${SMTP_HOST:smtp.gmail.com}
+    port: ${SMTP_PORT:587}
+    username: ${SMTP_USERNAME:}
+    password: ${SMTP_PASSWORD:}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true

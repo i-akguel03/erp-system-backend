@@ -4,6 +4,7 @@ import com.erp.backend.domain.Contract;
 import com.erp.backend.domain.ContractStatus;
 import com.erp.backend.domain.Customer;
 import com.erp.backend.domain.SubscriptionStatus;
+import com.erp.backend.event.ContractCreatedEvent;
 import com.erp.backend.exception.BusinessLogicException;
 import com.erp.backend.exception.InvalidStatusTransitionException;
 import com.erp.backend.exception.ResourceNotFoundException;
@@ -11,6 +12,7 @@ import com.erp.backend.repository.ContractRepository;
 import com.erp.backend.repository.CustomerRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -30,10 +32,13 @@ public class ContractService {
 
     private final ContractRepository contractRepository;
     private final CustomerRepository customerRepository;
+    private final ApplicationEventPublisher eventPublisher;
 
-    public ContractService(ContractRepository contractRepository, CustomerRepository customerRepository) {
+    public ContractService(ContractRepository contractRepository, CustomerRepository customerRepository,
+                           ApplicationEventPublisher eventPublisher) {
         this.contractRepository = contractRepository;
         this.customerRepository = customerRepository;
+        this.eventPublisher = eventPublisher;
     }
 
     // --- Testdaten initialisieren ---
@@ -154,7 +159,9 @@ public class ContractService {
         contract.setId(null);
         if(contract.getContractStatus() == null) contract.setContractStatus(ContractStatus.ACTIVE);
         contract.setContractNumber(generateContractNumber());
-        return contractRepository.save(contract);
+        Contract saved = contractRepository.save(contract);
+        eventPublisher.publishEvent(new ContractCreatedEvent(this, saved));
+        return saved;
     }
 
     public Contract updateContract(Contract contract) {

@@ -2,6 +2,7 @@ package com.erp.backend.service;
 
 import com.erp.backend.domain.*;
 import com.erp.backend.dto.SubscriptionDto;
+import com.erp.backend.event.SubscriptionCreatedEvent;
 import com.erp.backend.exception.BusinessLogicException;
 import com.erp.backend.exception.InvalidStatusTransitionException;
 import com.erp.backend.exception.ResourceNotFoundException;
@@ -9,6 +10,7 @@ import com.erp.backend.repository.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -30,6 +32,7 @@ public class SubscriptionService {
     private final InvoiceRepository invoiceRepository;
     private final DueScheduleRepository dueScheduleRepository;
     private final NumberGeneratorService numberGeneratorService;
+    private final ApplicationEventPublisher eventPublisher;
 
     // Konfigurierbarer Default für Fälligkeitsmonate
     @Value("${app.billing.default-due-months:12}")
@@ -38,13 +41,15 @@ public class SubscriptionService {
     public SubscriptionService(SubscriptionRepository subscriptionRepository,
                                ContractRepository contractRepository, OpenItemRepository openItemRepository, InvoiceRepository invoiceRepository,
                                DueScheduleRepository dueScheduleRepository,
-                               NumberGeneratorService numberGeneratorService) {
+                               NumberGeneratorService numberGeneratorService,
+                               ApplicationEventPublisher eventPublisher) {
         this.subscriptionRepository = subscriptionRepository;
         this.contractRepository = contractRepository;
         this.openItemRepository = openItemRepository;
         this.invoiceRepository = invoiceRepository;
         this.dueScheduleRepository = dueScheduleRepository;
         this.numberGeneratorService = numberGeneratorService;
+        this.eventPublisher = eventPublisher;
     }
 
     // ================= DTO Mapping =================
@@ -399,7 +404,9 @@ public class SubscriptionService {
             subscription.setContract(null);
         }
 
-        return subscriptionRepository.save(subscription);
+        Subscription saved = subscriptionRepository.save(subscription);
+        eventPublisher.publishEvent(new SubscriptionCreatedEvent(this, saved));
+        return saved;
     }
 
     // ================= PATCH Actions =================

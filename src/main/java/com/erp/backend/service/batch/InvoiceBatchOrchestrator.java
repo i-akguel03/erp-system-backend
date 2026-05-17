@@ -1,9 +1,11 @@
 package com.erp.backend.service.batch;
 
 import com.erp.backend.domain.*;
+import com.erp.backend.event.InvoiceBatchCompletedEvent;
 import com.erp.backend.service.VorgangService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -16,13 +18,16 @@ public class InvoiceBatchOrchestrator {
     private final InvoiceBatchProcessor processor;
     private final InvoiceBatchAnalyzer analyzer;
     private final VorgangService vorgangService;
+    private final ApplicationEventPublisher eventPublisher;
 
     public InvoiceBatchOrchestrator(InvoiceBatchProcessor processor,
                                     InvoiceBatchAnalyzer analyzer,
-                                    VorgangService vorgangService) {
+                                    VorgangService vorgangService,
+                                    ApplicationEventPublisher eventPublisher) {
         this.processor = processor;
         this.analyzer = analyzer;
         this.vorgangService = vorgangService;
+        this.eventPublisher = eventPublisher;
     }
 
     public InvoiceBatchResult runInvoiceBatch(LocalDate billingDate) {
@@ -81,8 +86,9 @@ public class InvoiceBatchOrchestrator {
                 analysis.getBillingDate(), result.getBatchId(), analysis.getMonthCount());
         vorgangService.updateMetadaten(vorgang.getId(), metadaten);
 
+        String errorSummary = null;
         if (result.hasErrors()) {
-            String errorSummary = String.join("; ",
+            errorSummary = String.join("; ",
                     result.getErrors().subList(0, Math.min(3, result.getErrors().size())));
             vorgangService.vorgangMitFehlerAbschliessen(vorgang.getId(), errorSummary);
         } else {
@@ -93,6 +99,10 @@ public class InvoiceBatchOrchestrator {
                     0,
                     result.getTotalAmount());
         }
+
+        eventPublisher.publishEvent(new InvoiceBatchCompletedEvent(
+                this, vorgang.getVorgangsnummer(), result.getCreatedInvoices(),
+                result.hasErrors(), errorSummary));
 
         logger.info("Vorgang {} abgeschlossen: {}", vorgang.getVorgangsnummer(), result.getMessage());
         logger.info("Dauer: {} ms", vorgang.getDauerInMs());

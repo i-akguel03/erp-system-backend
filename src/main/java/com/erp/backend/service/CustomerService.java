@@ -3,6 +3,7 @@ package com.erp.backend.service;
 import com.erp.backend.domain.Address;
 import com.erp.backend.domain.Customer;
 import com.erp.backend.dto.CustomerDto;
+import com.erp.backend.event.CustomerCreatedEvent;
 import com.erp.backend.exception.BusinessLogicException;
 import com.erp.backend.exception.DuplicateResourceException;
 import com.erp.backend.exception.ResourceNotFoundException;
@@ -10,6 +11,7 @@ import com.erp.backend.repository.AddressRepository;
 import com.erp.backend.repository.CustomerRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -28,10 +30,13 @@ public class CustomerService {
 
     private final CustomerRepository customerRepository;
     private final AddressRepository addressRepository;
+    private final ApplicationEventPublisher eventPublisher;
 
-    public CustomerService(CustomerRepository customerRepository, AddressRepository addressRepository) {
+    public CustomerService(CustomerRepository customerRepository, AddressRepository addressRepository,
+                           ApplicationEventPublisher eventPublisher) {
         this.customerRepository = customerRepository;
         this.addressRepository = addressRepository;
+        this.eventPublisher = eventPublisher;
     }
 
     @Transactional
@@ -136,6 +141,7 @@ public class CustomerService {
         Customer saved = customerRepository.save(customer);
         logger.info("Created new customer: id={}, customerNumber={}, email={}",
                 saved.getId(), saved.getCustomerNumber(), saved.getEmail());
+        eventPublisher.publishEvent(new CustomerCreatedEvent(this, saved));
         return saved;
     }
 
