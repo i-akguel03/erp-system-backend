@@ -84,10 +84,24 @@ public class AuditService {
             Class<?> clazz = entity.getClass();
             while (clazz != null && clazz != Object.class) {
                 for (Field field : clazz.getDeclaredFields()) {
-                    if (isJpaRelation(field) || isTransient(field)) continue;
+                    if (isTransient(field)) continue;
                     field.setAccessible(true);
                     try {
-                        data.put(field.getName(), field.get(entity));
+                        if (isToOneRelation(field)) {
+                            // Nur die ID der referenzierten Entität speichern, kein EAGER-Loading
+                            Object related = field.get(entity);
+                            if (related != null) {
+                                try {
+                                    Object relatedId = related.getClass().getMethod("getId").invoke(related);
+                                    data.put(field.getName() + "Id", relatedId);
+                                } catch (Exception ignored) {}
+                            } else {
+                                data.put(field.getName() + "Id", null);
+                            }
+                        } else if (!isToManyRelation(field)) {
+                            data.put(field.getName(), field.get(entity));
+                        }
+                        // @OneToMany / @ManyToMany / @ElementCollection werden weiterhin übersprungen
                     } catch (Exception ignored) {}
                 }
                 clazz = clazz.getSuperclass();
@@ -98,12 +112,19 @@ public class AuditService {
         }
     }
 
-    private boolean isJpaRelation(Field field) {
+    private boolean isToOneRelation(Field field) {
         return field.isAnnotationPresent(ManyToOne.class)
-                || field.isAnnotationPresent(OneToMany.class)
+                || field.isAnnotationPresent(OneToOne.class);
+    }
+
+    private boolean isToManyRelation(Field field) {
+        return field.isAnnotationPresent(OneToMany.class)
                 || field.isAnnotationPresent(ManyToMany.class)
-                || field.isAnnotationPresent(OneToOne.class)
                 || field.isAnnotationPresent(ElementCollection.class);
+    }
+
+    private boolean isJpaRelation(Field field) {
+        return isToOneRelation(field) || isToManyRelation(field);
     }
 
     private boolean isTransient(Field field) {
