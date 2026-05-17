@@ -66,6 +66,15 @@ public class AddressController {
     }
 
     @PreAuthorize("hasAnyRole('ADMIN', 'USER', 'ADDRESSES_READ')")
+    @GetMapping("/search")
+    public ResponseEntity<List<AddressDTO>> search(@RequestParam String q) {
+        if (q == null || q.trim().length() < 2) {
+            return ResponseEntity.ok(List.of());
+        }
+        return ResponseEntity.ok(service.search(q.trim()).stream().map(this::toDTO).toList());
+    }
+
+    @PreAuthorize("hasAnyRole('ADMIN', 'USER', 'ADDRESSES_READ')")
     @GetMapping("/{id}")
     public ResponseEntity<AddressDTO> getById(@PathVariable Long id) {
         return service.findById(id)

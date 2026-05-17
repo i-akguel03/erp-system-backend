@@ -49,6 +49,11 @@ public class AddressService {
         return addressRepository.findById(id);
     }
 
+    @Transactional(readOnly = true)
+    public List<Address> search(String query) {
+        return addressRepository.searchByQuery(query.toLowerCase());
+    }
+
     public void deleteById(Long id) {
         Address address = addressRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Adresse nicht gefunden mit ID: " + id));
