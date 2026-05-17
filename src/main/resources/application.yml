@@ -51,6 +51,21 @@ spring:
       name: ${SPRING_USER}           # Default Benutzer lokal
       password: ${SPRING_PASSWORD}   # Default Passwort lokal
 
+  # ===============================
+  # SPRING MAIL (SMTP)
+  # ===============================
+  mail:
+    host: ${SMTP_HOST:smtp.gmail.com}
+    port: ${SMTP_PORT:587}
+    username: ${SMTP_USERNAME:}
+    password: ${SMTP_PASSWORD:}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+
 # =========================================
 # JWT CONFIG
 # =========================================
@@ -98,8 +113,8 @@ app:
     email:
       enabled: ${NOTIFICATION_EMAIL_ENABLED:false}
       customer-emails-enabled: ${NOTIFICATION_CUSTOMER_EMAILS_ENABLED:false}
-      from: ${NOTIFICATION_EMAIL_FROM:noreply@erp.local}
-      admin-address: ${NOTIFICATION_ADMIN_EMAIL:admin@erp.local}
+      from: ${NOTIFICATION_EMAIL_FROM:${SMTP_USERNAME:noreply@erp.local}}
+      admin-address: ${NOTIFICATION_ADMIN_EMAIL:${SMTP_USERNAME:admin@erp.local}}
     triggers:
       overdue-enabled: ${NOTIFICATION_OVERDUE_ENABLED:true}
       overdue-cron: ${NOTIFICATION_OVERDUE_CRON:0 0 8 * * *}
@@ -107,18 +122,3 @@ app:
       expiring-enabled: ${NOTIFICATION_EXPIRING_ENABLED:true}
       invoice-batch-enabled: ${NOTIFICATION_BATCH_ENABLED:true}
       new-entity-enabled: ${NOTIFICATION_NEW_ENTITY_ENABLED:true}
-
-# =========================================
-# SPRING MAIL (SMTP)
-# =========================================
-  mail:
-    host: ${SMTP_HOST:smtp.gmail.com}
-    port: ${SMTP_PORT:587}
-    username: ${SMTP_USERNAME:}
-    password: ${SMTP_PASSWORD:}
-    properties:
-      mail:
-        smtp:
-          auth: true
-          starttls:
-            enable: true
