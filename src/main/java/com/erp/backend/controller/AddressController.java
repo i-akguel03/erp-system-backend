@@ -13,7 +13,6 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @RestController
@@ -98,20 +97,13 @@ public class AddressController {
 
     @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/{id}")
-    public ResponseEntity<Address> update(@PathVariable Long id, @Valid @RequestBody AddressDTO dto) {
-        Optional<Address> existing = service.findById(id);
-        if (existing.isEmpty()) {
+    public ResponseEntity<AddressDTO> update(@PathVariable Long id, @Valid @RequestBody AddressDTO dto) {
+        try {
+            Address updated = service.updateAddress(id, dto);
+            return ResponseEntity.ok(toDTO(updated));
+        } catch (com.erp.backend.exception.ResourceNotFoundException e) {
             return ResponseEntity.notFound().build();
         }
-
-        Address addr = existing.get();
-        addr.setStreet(dto.getStreet());
-        addr.setPostalCode(dto.getPostalCode());
-        addr.setCity(dto.getCity());
-        addr.setCountry(dto.getCountry());
-
-        Address updated = service.save(addr);
-        return ResponseEntity.ok(updated);
     }
 
 

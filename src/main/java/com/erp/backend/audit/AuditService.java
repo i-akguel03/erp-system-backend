@@ -9,6 +9,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.lang.reflect.Field;
@@ -54,7 +55,7 @@ public class AuditService {
      * Lädt den aktuellen Zustand einer Entität aus der DB (vor der Änderung).
      * Wird in einer eigenen Read-Only-Transaktion ausgeführt, damit Lazy-Loading funktioniert.
      */
-    @Transactional(readOnly = true)
+    @Transactional(readOnly = true, propagation = Propagation.REQUIRES_NEW)
     public String loadOldValue(String entityType, Object entityId) {
         if (entityId == null) return null;
         try {

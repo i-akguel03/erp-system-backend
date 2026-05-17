@@ -1,6 +1,7 @@
 package com.erp.backend.service;
 
 import com.erp.backend.domain.Address;
+import com.erp.backend.dto.AddressDTO;
 import com.erp.backend.exception.BusinessLogicException;
 import com.erp.backend.exception.ResourceNotFoundException;
 import com.erp.backend.repository.AddressRepository;
@@ -52,6 +53,16 @@ public class AddressService {
     @Transactional(readOnly = true)
     public List<Address> search(String query) {
         return addressRepository.searchByQuery(query.toLowerCase());
+    }
+
+    public Address updateAddress(Long id, AddressDTO dto) {
+        Address addr = addressRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Adresse nicht gefunden mit ID: " + id));
+        addr.setStreet(dto.getStreet());
+        addr.setPostalCode(dto.getPostalCode());
+        addr.setCity(dto.getCity());
+        addr.setCountry(dto.getCountry());
+        return addressRepository.save(addr);
     }
 
     public void deleteById(Long id) {
