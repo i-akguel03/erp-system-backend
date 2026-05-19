@@ -29,7 +29,7 @@ spring:
   # ===============================
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: ${DDL_AUTO:update}
       # create, update, validate, none
     show-sql: true
     properties:
@@ -38,6 +38,9 @@ spring:
         jdbc:
           lob:
             non_contextual_creation: true
+          batch_size: 50
+        order_inserts: true
+        order_updates: true
     database-platform: org.hibernate.dialect.PostgreSQLDialect
     defer-datasource-initialization: true  # Wichtig für automatische Initialisierung
 
@@ -121,7 +124,7 @@ app:
   init:
     enabled: true                # Init Service aktivieren
     create-test-data: true       # Testdaten erstellen
-    auto-run-on-startup: false    # Automatisch beim Start ausführen
+    auto-run-on-startup: ${AUTO_RUN_ON_STARTUP:false}    # Automatisch beim Start ausführen
     delete-password: ${INIT_DELETE_PASSWORD}
   renewal:
     default-extension-months: 12  # Verlängerungsdauer im Batch-Lauf

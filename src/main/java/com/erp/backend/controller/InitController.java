@@ -41,45 +41,64 @@ public class InitController {
     // INITIALISIERUNG
     // ===============================================================================================
 
-    @Operation(summary = "Komplett-Init — alle Entitäten ACTIVE, Rechnungslauf heute")
+    @Operation(summary = "Komplett-Init — alle Entitäten ACTIVE, Rechnungslauf heute — erfordert Bestätigungspasswort")
     @PostMapping("/full")
-    public ResponseEntity<String> initFull() {
+    public ResponseEntity<String> initFull(@RequestParam String password) {
+        if (!deletePassword.equals(password)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Falsches Passwort");
+        }
         initDataOrchestrator.initializeData(InitMode.FULL, LocalDate.now(), InitConfig.allActive());
         return ResponseEntity.ok("Komplett-Init abgeschlossen (alles ACTIVE, Rechnungslauf heute)");
     }
 
-    @Operation(summary = "Komplett-Init mit Rechnungslauf zu bestimmtem Datum")
+    @Operation(summary = "Komplett-Init mit Rechnungslauf zu bestimmtem Datum — erfordert Bestätigungspasswort")
     @PostMapping("/full-with-billing")
     public ResponseEntity<String> initFullWithBilling(
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate billingDate) {
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate billingDate,
+            @RequestParam String password) {
+        if (!deletePassword.equals(password)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Falsches Passwort");
+        }
         initDataOrchestrator.initializeData(InitMode.FULL_WITH_BILLING, billingDate, InitConfig.allActive());
         return ResponseEntity.ok("Komplett-Init abgeschlossen (Rechnungslauf bis " + billingDate + ")");
     }
 
-    @Operation(summary = "Nur Stammdaten — Adressen, Kunden, Produkte, Lagerbestand")
+    @Operation(summary = "Nur Stammdaten — Adressen, Kunden, Produkte, Lagerbestand — erfordert Bestätigungspasswort")
     @PostMapping("/basic")
-    public ResponseEntity<String> initBasic() {
+    public ResponseEntity<String> initBasic(@RequestParam String password) {
+        if (!deletePassword.equals(password)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Falsches Passwort");
+        }
         initDataOrchestrator.initializeData(InitMode.BASIC, null, null);
         return ResponseEntity.ok("Stammdaten initialisiert (Adressen, Kunden, Produkte, Lagerbestand)");
     }
 
-    @Operation(summary = "Realistische Testdaten — gemischte Status (80% Verträge aktiv, 85% Abos aktiv)")
+    @Operation(summary = "Realistische Testdaten — gemischte Status (80% Verträge aktiv, 85% Abos aktiv) — erfordert Bestätigungspasswort")
     @PostMapping("/realistic")
-    public ResponseEntity<String> initRealistic() {
+    public ResponseEntity<String> initRealistic(@RequestParam String password) {
+        if (!deletePassword.equals(password)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Falsches Passwort");
+        }
         initDataOrchestrator.initRealisticTestData();
         return ResponseEntity.ok("Realistische Testdaten initialisiert (80% Verträge aktiv, 85% Abos aktiv)");
     }
 
-    @Operation(summary = "Development-Daten — viele aktive Daten (95% Verträge aktiv, 90% Abos aktiv)")
+    @Operation(summary = "Development-Daten — viele aktive Daten (95% Verträge aktiv, 90% Abos aktiv) — erfordert Bestätigungspasswort")
     @PostMapping("/development")
-    public ResponseEntity<String> initDevelopment() {
+    public ResponseEntity<String> initDevelopment(@RequestParam String password) {
+        if (!deletePassword.equals(password)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Falsches Passwort");
+        }
         initDataOrchestrator.initDevelopmentData();
         return ResponseEntity.ok("Development-Daten initialisiert (95% Verträge aktiv, 90% Abos aktiv)");
     }
 
-    @Operation(summary = "Demo-Daten — ausgewogene Verteilung für Präsentationen")
+    @Operation(summary = "Demo-Daten — ausgewogene Verteilung für Präsentationen — erfordert Bestätigungspasswort")
     @PostMapping("/demo")
-    public ResponseEntity<String> initDemo() {
+    public ResponseEntity<String> initDemo(@RequestParam String password) {
+        if (!deletePassword.equals(password)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Falsches Passwort");
+        }
         initDataOrchestrator.initializeData(InitMode.FULL, LocalDate.now().minusDays(5), InitConfig.demo());
         return ResponseEntity.ok("Demo-Daten initialisiert (Rechnungslauf vor 5 Tagen)");
     }
@@ -112,23 +131,32 @@ public class InitController {
     // STATUS & WARTUNG
     // ===============================================================================================
 
-    @Operation(summary = "Aktuellen Datenbestand in Logs ausgeben")
+    @Operation(summary = "Aktuellen Datenbestand in Logs ausgeben — erfordert Bestätigungspasswort")
     @GetMapping("/status")
-    public ResponseEntity<String> status() {
+    public ResponseEntity<String> status(@RequestParam String password) {
+        if (!deletePassword.equals(password)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Falsches Passwort");
+        }
         dataStatusReporter.logCurrentDataStatus();
         return ResponseEntity.ok("Datenbestand wurde in Logs ausgegeben");
     }
 
-    @Operation(summary = "Datenkonsistenz reparieren — fehlende OpenItems erstellen, Status synchronisieren")
+    @Operation(summary = "Datenkonsistenz reparieren — fehlende OpenItems erstellen, Status synchronisieren — erfordert Bestätigungspasswort")
     @PostMapping("/repair")
-    public ResponseEntity<String> repair() {
+    public ResponseEntity<String> repair(@RequestParam String password) {
+        if (!deletePassword.equals(password)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Falsches Passwort");
+        }
         dataManagementUtils.repairDataConsistency();
         return ResponseEntity.ok("Konsistenz-Reparatur abgeschlossen");
     }
 
-    @Operation(summary = "Routine-Wartung — überfällige Items aktualisieren, verwaiste Daten bereinigen")
+    @Operation(summary = "Routine-Wartung — überfällige Items aktualisieren, verwaiste Daten bereinigen — erfordert Bestätigungspasswort")
     @PostMapping("/maintenance")
-    public ResponseEntity<String> maintenance() {
+    public ResponseEntity<String> maintenance(@RequestParam String password) {
+        if (!deletePassword.equals(password)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Falsches Passwort");
+        }
         dataManagementUtils.performMaintenanceTasks();
         return ResponseEntity.ok("Wartungsaufgaben abgeschlossen");
     }
