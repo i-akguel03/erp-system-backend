@@ -101,6 +101,13 @@ management:
     mail:
       enabled: false
 
+# =========================================
+# SPRINGDOC / SWAGGER UI
+# =========================================
+springdoc:
+  swagger-ui:
+    persist-authorization: true   # Token bleibt nach Browser-Refresh gespeichert
+
 
 # =========================================
 # CUSTOM APP CONFIGURATION
