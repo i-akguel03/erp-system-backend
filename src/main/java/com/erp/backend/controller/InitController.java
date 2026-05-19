@@ -7,7 +7,9 @@ import com.erp.backend.service.init.InitDataOrchestrator;
 import com.erp.backend.service.init.InitMode;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -23,6 +25,9 @@ public class InitController {
     private final InitDataOrchestrator initDataOrchestrator;
     private final DataStatusReporter dataStatusReporter;
     private final DataManagementUtils dataManagementUtils;
+
+    @Value("${app.init.delete-password}")
+    private String deletePassword;
 
     public InitController(InitDataOrchestrator initDataOrchestrator,
                           DataStatusReporter dataStatusReporter,
@@ -83,16 +88,22 @@ public class InitController {
     // DATEN LÖSCHEN
     // ===============================================================================================
 
-    @Operation(summary = "Alle Daten löschen")
+    @Operation(summary = "Alle Daten löschen — erfordert Bestätigungspasswort")
     @DeleteMapping("/clear")
-    public ResponseEntity<String> clearAll() {
+    public ResponseEntity<String> clearAll(@RequestParam String password) {
+        if (!deletePassword.equals(password)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Falsches Passwort");
+        }
         dataManagementUtils.clearAllTestData();
         return ResponseEntity.ok("Alle Daten gelöscht");
     }
 
-    @Operation(summary = "Nur Geschäftsdaten löschen — Stammdaten (Kunden, Produkte, Adressen) bleiben erhalten")
+    @Operation(summary = "Nur Geschäftsdaten löschen — Stammdaten (Kunden, Produkte, Adressen) bleiben erhalten — erfordert Bestätigungspasswort")
     @DeleteMapping("/clear-business")
-    public ResponseEntity<String> clearBusiness() {
+    public ResponseEntity<String> clearBusiness(@RequestParam String password) {
+        if (!deletePassword.equals(password)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Falsches Passwort");
+        }
         dataManagementUtils.clearBusinessDataOnly();
         return ResponseEntity.ok("Geschäftsdaten gelöscht, Stammdaten erhalten");
     }

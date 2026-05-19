@@ -33,6 +33,9 @@ spring:
     properties:
       hibernate:
         format_sql: true
+        jdbc:
+          lob:
+            non_contextual_creation: true
     database-platform: org.hibernate.dialect.PostgreSQLDialect
     defer-datasource-initialization: true  # Wichtig für automatische Initialisierung
 
@@ -117,6 +120,7 @@ app:
     enabled: true                # Init Service aktivieren
     create-test-data: true       # Testdaten erstellen
     auto-run-on-startup: false    # Automatisch beim Start ausführen
+    delete-password: ${INIT_DELETE_PASSWORD}
   renewal:
     default-extension-months: 12  # Verlängerungsdauer im Batch-Lauf
     batch-lookahead-days: 30      # Vorlauf: Verträge die in X Tagen ablaufen werden verlängert
