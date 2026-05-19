@@ -124,6 +124,13 @@ public class MasterDataInitializer {
     }
 
     /**
+     * ÖFFENTLICHE METHODE: Nur Benutzer (neu) anlegen — wird nach clearAllTestData aufgerufen
+     */
+    public void initializeUsersOnly() {
+        initializeUsers();
+    }
+
+    /**
      * PRIVATE METHODE: Benutzer für Login erstellen
      */
     private void initializeUsers() {

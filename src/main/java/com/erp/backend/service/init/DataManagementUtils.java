@@ -86,9 +86,11 @@ public class DataManagementUtils {
      * Service-Dependencies für erweiterte Funktionalitäten:
      * - VorgangService:        Audit-Trail und Transaktionsmanagement
      * - DataStatusReporter:    Status-Reporting und Konsistenzprüfungen
+     * - MasterDataInitializer: Benutzer nach Löschung neu anlegen
      */
     private final VorgangService vorgangService;
     private final DataStatusReporter dataStatusReporter;
+    private final MasterDataInitializer masterDataInitializer;
 
     // =====================================================================================
     // KONSTRUKTOR UND DEPENDENCY INJECTION
@@ -124,7 +126,8 @@ public class DataManagementUtils {
                                ProductRepository productRepository,
                                AddressRepository addressRepository,
                                VorgangService vorgangService,
-                               DataStatusReporter dataStatusReporter) {
+                               DataStatusReporter dataStatusReporter,
+                               MasterDataInitializer masterDataInitializer) {
         this.openItemRepository = openItemRepository;
         this.invoiceRepository = invoiceRepository;
         this.dueScheduleRepository = dueScheduleRepository;
@@ -135,6 +138,7 @@ public class DataManagementUtils {
         this.addressRepository = addressRepository;
         this.vorgangService = vorgangService;
         this.dataStatusReporter = dataStatusReporter;
+        this.masterDataInitializer = masterDataInitializer;
     }
 
     // =====================================================================================
@@ -197,6 +201,11 @@ public class DataManagementUtils {
             totalDeleted += deleteAllProducts("Vollständiger Reset");
             totalDeleted += deleteAllCustomers("Vollständiger Reset");
             totalDeleted += deleteAllAddresses("Vollständiger Reset");
+
+            // STUFE 3: Standard-Benutzer neu anlegen
+            logger.info("   👤 Lege Standard-Benutzer neu an...");
+            masterDataInitializer.initializeUsersOnly();
+            logger.info("   ✅ Standard-Benutzer neu angelegt");
 
             // Erfolgsmeldung und Audit-Trail
             vorgangService.vorgangErfolgreichAbschliessen(
