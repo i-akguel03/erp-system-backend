@@ -68,7 +68,8 @@ public interface DueScheduleRepository extends JpaRepository<DueSchedule, UUID> 
     @Query("SELECT DISTINCT ds FROM DueSchedule ds " +
            "JOIN FETCH ds.subscription s " +
            "JOIN FETCH s.contract c " +
-           "JOIN FETCH c.customer " +
+           "JOIN FETCH c.customer cu " +
+           "LEFT JOIN FETCH cu.billingAddress " +
            "LEFT JOIN FETCH s.product " +
            "WHERE ds.status = :status AND ds.dueDate <= :dueDate")
     List<DueSchedule> findByStatusAndDueDateLessThanEqualForBatch(
@@ -78,7 +79,8 @@ public interface DueScheduleRepository extends JpaRepository<DueSchedule, UUID> 
     @Query("SELECT DISTINCT ds FROM DueSchedule ds " +
            "JOIN FETCH ds.subscription s " +
            "JOIN FETCH s.contract c " +
-           "JOIN FETCH c.customer " +
+           "JOIN FETCH c.customer cu " +
+           "LEFT JOIN FETCH cu.billingAddress " +
            "LEFT JOIN FETCH s.product " +
            "WHERE ds.status = :status AND ds.dueDate = :dueDate")
     List<DueSchedule> findByStatusAndDueDateForBatch(
