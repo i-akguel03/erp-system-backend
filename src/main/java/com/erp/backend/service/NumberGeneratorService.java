@@ -1,7 +1,5 @@
 package com.erp.backend.service;
 
-import com.erp.backend.repository.DueScheduleRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -11,29 +9,18 @@ import java.util.concurrent.atomic.AtomicLong;
 @Service
 public class NumberGeneratorService {
 
-    @Autowired
-    private DueScheduleRepository dueScheduleRepository;
-
+    // Seeded from current time so restarts start at a different position
+    private final AtomicLong dueCounter = new AtomicLong(System.currentTimeMillis() % 900_000 + 100_000);
     private final AtomicLong subscriptionCounter = new AtomicLong(1000);
-
 
     /**
      * Generiert eine eindeutige Fälligkeitsnummer
      * Format: DUE-YYYY-NNNNNN
      */
     public String generateDueNumber() {
-        String prefix = "DUE";
         String year = String.valueOf(LocalDate.now().getYear());
-        String randomPart;
-        String dueNumber;
-
-        do {
-            int number = (int) (Math.random() * 999999) + 1;
-            randomPart = String.format("%06d", number);
-            dueNumber = prefix + "-" + year + "-" + randomPart;
-        } while (dueScheduleRepository.findByDueNumber(dueNumber).isPresent());
-
-        return dueNumber;
+        long seq = dueCounter.getAndIncrement() % 1_000_000;
+        return String.format("DUE-%s-%06d", year, seq);
     }
 
     public String generateSubscriptionNumber() {
