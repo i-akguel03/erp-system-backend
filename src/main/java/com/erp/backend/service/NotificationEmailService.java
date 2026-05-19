@@ -7,6 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -24,6 +25,7 @@ public class NotificationEmailService {
         this.mailSender = mailSender;
     }
 
+    @Async
     public void sendIfEnabled(Notification notification) {
         if (!properties.getEmail().isEnabled()) return;
         if (mailSender == null) {
