@@ -3,6 +3,8 @@ package com.erp.backend.service.init;
 import com.erp.backend.domain.*;
 import com.erp.backend.repository.*;
 import com.erp.backend.service.VorgangService;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -66,12 +68,19 @@ public class DataManagementUtils {
      * - Products sind relativ unabhängig, werden aber von Subscriptions referenziert
      */
 
+    @PersistenceContext
+    private EntityManager entityManager;
+
     // Abhängige Entitäten (müssen zuerst gelöscht werden)
     private final OpenItemRepository openItemRepository;
     private final InvoiceRepository invoiceRepository;
     private final DueScheduleRepository dueScheduleRepository;
     private final SubscriptionRepository subscriptionRepository;
     private final ContractRepository contractRepository;
+    private final PaymentRepository paymentRepository;
+    private final OrderRepository orderRepository;
+    private final NotificationRepository notificationRepository;
+    private final InventoryRepository inventoryRepository;
 
     // Basis-Entitäten (können später gelöscht werden)
     private final CustomerRepository customerRepository;
@@ -122,6 +131,10 @@ public class DataManagementUtils {
                                DueScheduleRepository dueScheduleRepository,
                                SubscriptionRepository subscriptionRepository,
                                ContractRepository contractRepository,
+                               PaymentRepository paymentRepository,
+                               OrderRepository orderRepository,
+                               NotificationRepository notificationRepository,
+                               InventoryRepository inventoryRepository,
                                CustomerRepository customerRepository,
                                ProductRepository productRepository,
                                AddressRepository addressRepository,
@@ -133,6 +146,10 @@ public class DataManagementUtils {
         this.dueScheduleRepository = dueScheduleRepository;
         this.subscriptionRepository = subscriptionRepository;
         this.contractRepository = contractRepository;
+        this.paymentRepository = paymentRepository;
+        this.orderRepository = orderRepository;
+        this.notificationRepository = notificationRepository;
+        this.inventoryRepository = inventoryRepository;
         this.customerRepository = customerRepository;
         this.productRepository = productRepository;
         this.addressRepository = addressRepository;
@@ -190,14 +207,22 @@ public class DataManagementUtils {
             // Löschung in korrekter Abhängigkeitsreihenfolge durchführen
             int totalDeleted = 0;
 
-            // STUFE 1: Abhängige Geschäftsdaten löschen
+            // STUFE 1: Kindtabellen ohne eigenes Repository (via JPQL)
+            totalDeleted += deleteAllInvoiceItems();
+            totalDeleted += deleteAllOrderItems();
+
+            // STUFE 2: Abhängige Geschäftsdaten löschen
             totalDeleted += deleteAllOpenItems("Vollständiger Reset");
             totalDeleted += deleteAllInvoices("Vollständiger Reset");
+            totalDeleted += deleteAllNotifications("Vollständiger Reset");
+            totalDeleted += deleteAllPayments("Vollständiger Reset");
             totalDeleted += deleteAllDueSchedules("Vollständiger Reset");
             totalDeleted += deleteAllSubscriptions("Vollständiger Reset");
             totalDeleted += deleteAllContracts("Vollständiger Reset");
+            totalDeleted += deleteAllOrders("Vollständiger Reset");
 
-            // STUFE 2: Stammdaten löschen
+            // STUFE 3: Stammdaten löschen
+            totalDeleted += deleteAllInventory("Vollständiger Reset");
             totalDeleted += deleteAllProducts("Vollständiger Reset");
             totalDeleted += deleteAllCustomers("Vollständiger Reset");
             totalDeleted += deleteAllAddresses("Vollständiger Reset");
@@ -294,11 +319,16 @@ public class DataManagementUtils {
 
             // Nur Geschäftsdaten löschen
             int totalDeleted = 0;
+            totalDeleted += deleteAllInvoiceItems();
+            totalDeleted += deleteAllOrderItems();
             totalDeleted += deleteAllOpenItems("Partielle Bereinigung");
             totalDeleted += deleteAllInvoices("Partielle Bereinigung");
+            totalDeleted += deleteAllNotifications("Partielle Bereinigung");
+            totalDeleted += deleteAllPayments("Partielle Bereinigung");
             totalDeleted += deleteAllDueSchedules("Partielle Bereinigung");
             totalDeleted += deleteAllSubscriptions("Partielle Bereinigung");
             totalDeleted += deleteAllContracts("Partielle Bereinigung");
+            totalDeleted += deleteAllOrders("Partielle Bereinigung");
 
             // Erfolg dokumentieren
             vorgangService.vorgangErfolgreichAbschliessen(
@@ -662,6 +692,60 @@ public class DataManagementUtils {
             logger.debug("   ✅ {} Addresses gelöscht", count);
         } else {
             logger.debug("   ℹ️ Keine Addresses zum Löschen vorhanden");
+        }
+        return count;
+    }
+
+    private int deleteAllInvoiceItems() {
+        int count = ((Number) entityManager.createQuery("SELECT COUNT(ii) FROM InvoiceItem ii").getSingleResult()).intValue();
+        if (count > 0) {
+            logger.info("   🗑️ Lösche {} InvoiceItems...", count);
+            entityManager.createQuery("DELETE FROM InvoiceItem").executeUpdate();
+        }
+        return count;
+    }
+
+    private int deleteAllOrderItems() {
+        int count = ((Number) entityManager.createQuery("SELECT COUNT(oi) FROM OrderItem oi").getSingleResult()).intValue();
+        if (count > 0) {
+            logger.info("   🗑️ Lösche {} OrderItems...", count);
+            entityManager.createQuery("DELETE FROM OrderItem").executeUpdate();
+        }
+        return count;
+    }
+
+    private int deleteAllPayments(String context) {
+        int count = (int) paymentRepository.count();
+        if (count > 0) {
+            logger.info("   🗑️ Lösche {} Payments... (Kontext: {})", count, context);
+            paymentRepository.deleteAllInBatch();
+        }
+        return count;
+    }
+
+    private int deleteAllOrders(String context) {
+        int count = (int) orderRepository.count();
+        if (count > 0) {
+            logger.info("   🗑️ Lösche {} Orders... (Kontext: {})", count, context);
+            orderRepository.deleteAllInBatch();
+        }
+        return count;
+    }
+
+    private int deleteAllNotifications(String context) {
+        int count = (int) notificationRepository.count();
+        if (count > 0) {
+            logger.info("   🗑️ Lösche {} Notifications... (Kontext: {})", count, context);
+            notificationRepository.deleteAllInBatch();
+        }
+        return count;
+    }
+
+    private int deleteAllInventory(String context) {
+        int count = (int) inventoryRepository.count();
+        if (count > 0) {
+            logger.info("   🗑️ Lösche {} Inventory-Einträge... (Kontext: {})", count, context);
+            inventoryRepository.deleteAllInBatch();
         }
         return count;
     }
