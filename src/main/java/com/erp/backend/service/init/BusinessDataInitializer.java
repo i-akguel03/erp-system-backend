@@ -75,6 +75,7 @@ public class BusinessDataInitializer {
     /**
      * HAUPTMETHODE: Geschäftsdaten initialisieren
      */
+    @Transactional(propagation = org.springframework.transaction.annotation.Propagation.REQUIRES_NEW)
     public void initializeBusinessData(InitConfig config) {
         logger.info("Starte Geschäftsdaten-Initialisierung mit Konfiguration...");
         logger.info("Vertrag-Status: {:.0f}% ACTIVE, {:.0f}% TERMINATED",

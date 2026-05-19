@@ -207,7 +207,11 @@ public class InitDataOrchestrator implements ApplicationRunner {
         }
 
         logger.info("{} abgeschlossen ({}/{} Schritte erfolgreich)", mode, completed, total);
-        dataStatusReporter.logCurrentDataStatus();
+        try {
+            dataStatusReporter.logCurrentDataStatus();
+        } catch (Exception e) {
+            logger.warn("Status-Report nach Initialisierung fehlgeschlagen: {}", e.getMessage());
+        }
     }
 
     /**

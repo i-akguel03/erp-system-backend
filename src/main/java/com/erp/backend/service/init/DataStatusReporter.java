@@ -75,6 +75,7 @@ public class DataStatusReporter {
     /**
      * HAUPTMETHODE: Aktuellen Datenstatus ins Log ausgeben
      */
+    @Transactional(propagation = org.springframework.transaction.annotation.Propagation.REQUIRES_NEW, readOnly = true)
     public void logCurrentDataStatus() {
         logger.info("===========================================");
         logger.info("AKTUELLER DATENBESTAND");

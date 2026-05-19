@@ -78,6 +78,7 @@ public class MasterDataInitializer {
     /**
      * HAUPTMETHODE: Alle Stammdaten initialisieren
      */
+    @Transactional(propagation = org.springframework.transaction.annotation.Propagation.REQUIRES_NEW)
     public void initializeMasterData() {
         logger.info("Starte Stammdaten-Initialisierung...");
 
