@@ -1,9 +1,9 @@
 package com.erp.backend.repository;
 
 import com.erp.backend.domain.Payment;
+import com.erp.backend.domain.PaymentStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface PaymentRepository extends JpaRepository<Payment, Long> {
-    // Zusätzliche Abfragen, falls benötigt:
-    // List<Payment> findByCustomerId(Long customerId);
+    long countByStatus(PaymentStatus status);
 }

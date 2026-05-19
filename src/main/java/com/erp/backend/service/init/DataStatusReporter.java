@@ -3,6 +3,9 @@ package com.erp.backend.service.init;
 import com.erp.backend.domain.*;
 import com.erp.backend.repository.*;
 import com.erp.backend.service.InvoiceService;
+import com.erp.backend.repository.InventoryRepository;
+import com.erp.backend.repository.OrderRepository;
+import com.erp.backend.repository.PaymentRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -28,11 +31,14 @@ public class DataStatusReporter {
     private final AddressRepository addressRepository;
     private final CustomerRepository customerRepository;
     private final ProductRepository productRepository;
+    private final InventoryRepository inventoryRepository;
     private final ContractRepository contractRepository;
     private final SubscriptionRepository subscriptionRepository;
+    private final OrderRepository orderRepository;
     private final DueScheduleRepository dueScheduleRepository;
     private final InvoiceRepository invoiceRepository;
     private final OpenItemRepository openItemRepository;
+    private final PaymentRepository paymentRepository;
 
     // Service-Dependencies
     private final InvoiceService invoiceService;
@@ -43,20 +49,26 @@ public class DataStatusReporter {
     public DataStatusReporter(AddressRepository addressRepository,
                               CustomerRepository customerRepository,
                               ProductRepository productRepository,
+                              InventoryRepository inventoryRepository,
                               ContractRepository contractRepository,
                               SubscriptionRepository subscriptionRepository,
+                              OrderRepository orderRepository,
                               DueScheduleRepository dueScheduleRepository,
                               InvoiceRepository invoiceRepository,
                               OpenItemRepository openItemRepository,
+                              PaymentRepository paymentRepository,
                               InvoiceService invoiceService) {
         this.addressRepository = addressRepository;
         this.customerRepository = customerRepository;
         this.productRepository = productRepository;
+        this.inventoryRepository = inventoryRepository;
         this.contractRepository = contractRepository;
         this.subscriptionRepository = subscriptionRepository;
+        this.orderRepository = orderRepository;
         this.dueScheduleRepository = dueScheduleRepository;
         this.invoiceRepository = invoiceRepository;
         this.openItemRepository = openItemRepository;
+        this.paymentRepository = paymentRepository;
         this.invoiceService = invoiceService;
     }
 
@@ -84,6 +96,7 @@ public class DataStatusReporter {
         logger.info("  - Adressen: {}", addressRepository.count());
         logger.info("  - Kunden: {}", customerRepository.count());
         logger.info("  - Produkte: {}", productRepository.count());
+        logger.info("  - Lagerartikel: {}", inventoryRepository.count());
     }
 
     /**
@@ -105,6 +118,10 @@ public class DataStatusReporter {
         } else {
             logger.info("  - Verträge gesamt: 0");
         }
+
+        // Bestellungen
+        long totalOrders = orderRepository.count();
+        logger.info("  - Bestellungen: {}", totalOrders);
 
         // Abonnements
         long totalSubscriptions = subscriptionRepository.count();
@@ -204,6 +221,21 @@ public class DataStatusReporter {
             }
         } else {
             logger.info("  - Offene Posten: 0");
+        }
+
+        // Zahlungen
+        long totalPayments = paymentRepository.count();
+        if (totalPayments > 0) {
+            long paidPayments = paymentRepository.countByStatus(PaymentStatus.PAID);
+            long pendingPayments = paymentRepository.countByStatus(PaymentStatus.PENDING);
+            long failedPayments = paymentRepository.countByStatus(PaymentStatus.FAILED);
+            logger.info("  - Zahlungen: {} ({}% PAID, {}% PENDING, {}% FAILED)",
+                    totalPayments,
+                    calculatePercentage(paidPayments, totalPayments),
+                    calculatePercentage(pendingPayments, totalPayments),
+                    calculatePercentage(failedPayments, totalPayments));
+        } else {
+            logger.info("  - Zahlungen: 0");
         }
     }
 

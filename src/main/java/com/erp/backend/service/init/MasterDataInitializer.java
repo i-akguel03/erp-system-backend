@@ -12,6 +12,7 @@ import com.erp.backend.domain.*;
 import com.erp.backend.entity.Role;
 import com.erp.backend.repository.AddressRepository;
 import com.erp.backend.repository.CustomerRepository;
+import com.erp.backend.repository.InventoryRepository;
 import com.erp.backend.repository.ProductRepository;
 import com.erp.backend.service.NumberGeneratorService;
 import com.erp.backend.service.UserDetailsServiceImpl;
@@ -46,6 +47,7 @@ public class MasterDataInitializer {
     private final AddressRepository addressRepository;
     private final CustomerRepository customerRepository;
     private final ProductRepository productRepository;
+    private final InventoryRepository inventoryRepository;
 
     // Service-Dependencies
     private final NumberGeneratorService numberGeneratorService;
@@ -60,12 +62,14 @@ public class MasterDataInitializer {
     public MasterDataInitializer(AddressRepository addressRepository,
                                  CustomerRepository customerRepository,
                                  ProductRepository productRepository,
+                                 InventoryRepository inventoryRepository,
                                  NumberGeneratorService numberGeneratorService,
                                  UserDetailsServiceImpl userDetailsService,
                                  VorgangService vorgangService) {
         this.addressRepository = addressRepository;
         this.customerRepository = customerRepository;
         this.productRepository = productRepository;
+        this.inventoryRepository = inventoryRepository;
         this.numberGeneratorService = numberGeneratorService;
         this.userDetailsService = userDetailsService;
         this.vorgangService = vorgangService;
@@ -101,12 +105,16 @@ public class MasterDataInitializer {
             int productCount = initializeProducts();
             totalOperations++;
 
+            // 5. Lagerbestand initialisieren
+            int inventoryCount = initializeInventory();
+            totalOperations++;
+
             // Vorgang erfolgreich abschließen
             vorgangService.vorgangErfolgreichAbschliessen(vorgang.getId(),
                     totalOperations, totalOperations, 0, null);
 
-            logger.info("✓ Stammdaten-Initialisierung abgeschlossen: {} Adressen, {} Kunden, {} Produkte",
-                    addressCount, customerCount, productCount);
+            logger.info("✓ Stammdaten-Initialisierung abgeschlossen: {} Adressen, {} Kunden, {} Produkte, {} Lagerartikel",
+                    addressCount, customerCount, productCount, inventoryCount);
 
         } catch (Exception e) {
             logger.error("Fehler bei Stammdaten-Initialisierung", e);
@@ -281,5 +289,40 @@ public class MasterDataInitializer {
 
         logger.debug("✓ {} Produkte erstellt", products.length);
         return products.length;
+    }
+
+    /**
+     * PRIVATE METHODE: Lagerbestand initialisieren
+     *
+     * @return Anzahl erstellter Lagerartikel
+     */
+    private int initializeInventory() {
+        if (inventoryRepository.count() > 0) {
+            logger.info("Lagerbestand bereits vorhanden - überspringe Initialisierung");
+            return (int) inventoryRepository.count();
+        }
+
+        logger.info("Initialisiere Lagerbestand...");
+
+        List<Product> products = productRepository.findAll();
+        if (products.isEmpty()) {
+            logger.warn("Keine Produkte für Lagerbestand gefunden");
+            return 0;
+        }
+
+        int created = 0;
+        for (Product product : products) {
+            int quantity;
+            if ("Stück".equals(product.getUnit())) {
+                quantity = 5 + random.nextInt(46);     // Hardware: 5–50 Stück
+            } else {
+                quantity = 100 + random.nextInt(901);  // Software/Cloud-Lizenzen: 100–1000
+            }
+            inventoryRepository.save(new InventoryItem(product, quantity));
+            created++;
+        }
+
+        logger.debug("✓ {} Lagerartikel erstellt", created);
+        return created;
     }
 }

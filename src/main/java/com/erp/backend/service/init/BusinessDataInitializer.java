@@ -4,6 +4,7 @@ import com.erp.backend.domain.*;
 import com.erp.backend.dto.SubscriptionDto;
 import com.erp.backend.repository.ContractRepository;
 import com.erp.backend.repository.CustomerRepository;
+import com.erp.backend.repository.OrderRepository;
 import com.erp.backend.repository.ProductRepository;
 import com.erp.backend.repository.SubscriptionRepository;
 import com.erp.backend.service.NumberGeneratorService;
@@ -16,6 +17,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
@@ -40,6 +43,7 @@ public class BusinessDataInitializer {
     private final SubscriptionService subscriptionService;
     private final CustomerRepository customerRepository;
     private final ProductRepository productRepository;
+    private final OrderRepository orderRepository;
 
     // Service-Dependencies
     private final NumberGeneratorService numberGeneratorService;
@@ -51,9 +55,11 @@ public class BusinessDataInitializer {
      * KONSTRUKTOR mit Dependency Injection
      */
     public BusinessDataInitializer(ContractRepository contractRepository,
-                                   SubscriptionRepository subscriptionRepository, SubscriptionService subscriptionService,
+                                   SubscriptionRepository subscriptionRepository,
+                                   SubscriptionService subscriptionService,
                                    CustomerRepository customerRepository,
                                    ProductRepository productRepository,
+                                   OrderRepository orderRepository,
                                    NumberGeneratorService numberGeneratorService,
                                    VorgangService vorgangService) {
         this.contractRepository = contractRepository;
@@ -61,6 +67,7 @@ public class BusinessDataInitializer {
         this.subscriptionService = subscriptionService;
         this.customerRepository = customerRepository;
         this.productRepository = productRepository;
+        this.orderRepository = orderRepository;
         this.numberGeneratorService = numberGeneratorService;
         this.vorgangService = vorgangService;
     }
@@ -105,12 +112,22 @@ public class BusinessDataInitializer {
                 subscriptionCount = (int) subscriptionRepository.count();
             }
 
+            // 3. Bestellungen erstellen
+            int orderCount = 0;
+            if (orderRepository.count() == 0) {
+                orderCount = initializeOrders();
+                totalOperations++;
+            } else {
+                logger.info("Bestellungen bereits vorhanden - überspringe Initialisierung");
+                orderCount = (int) orderRepository.count();
+            }
+
             // Vorgang erfolgreich abschließen
             vorgangService.vorgangErfolgreichAbschliessen(vorgang.getId(),
                     totalOperations, totalOperations, 0, null);
 
-            logger.info("✓ Geschäftsdaten-Initialisierung abgeschlossen: {} Verträge, {} Abonnements",
-                    contractCount, subscriptionCount);
+            logger.info("✓ Geschäftsdaten-Initialisierung abgeschlossen: {} Verträge, {} Abonnements, {} Bestellungen",
+                    contractCount, subscriptionCount, orderCount);
 
         } catch (Exception e) {
             logger.error("✗ Fehler bei Geschäftsdaten-Initialisierung", e);
@@ -257,5 +274,54 @@ public class BusinessDataInitializer {
         logger.info("✓ Fälligkeitspläne wurden automatisch für alle Abonnements erstellt");
 
         return numberOfSubscriptions;
+    }
+
+    /**
+     * PRIVATE METHODE: Bestellungen initialisieren
+     */
+    private int initializeOrders() {
+        logger.info("Initialisiere Bestellungen...");
+
+        List<Customer> customers = customerRepository.findAll();
+        List<Product> products = productRepository.findAll();
+
+        if (customers.isEmpty() || products.isEmpty()) {
+            logger.warn("Keine Kunden oder Produkte für Bestellungen gefunden");
+            return 0;
+        }
+
+        final int numberOfOrders = 15;
+
+        for (int i = 0; i < numberOfOrders; i++) {
+            Customer customer = customers.get(random.nextInt(customers.size()));
+            LocalDateTime orderDate = LocalDateTime.now().minusDays(random.nextInt(180));
+
+            Order order = new Order();
+            order.setCustomer(customer);
+            order.setOrderDate(orderDate);
+            order.setTotalPrice(0.0);
+            Order savedOrder = orderRepository.save(order);
+
+            int itemCount = 1 + random.nextInt(3);
+            double totalPrice = 0.0;
+            List<OrderItem> items = new ArrayList<>();
+
+            for (int j = 0; j < itemCount; j++) {
+                Product product = products.get(random.nextInt(products.size()));
+                int quantity = 1 + random.nextInt(3);
+                double unitPrice = product.getPrice() != null ? product.getPrice().doubleValue() : 0.0;
+
+                OrderItem item = new OrderItem(savedOrder, product, quantity, unitPrice);
+                items.add(item);
+                totalPrice += unitPrice * quantity;
+            }
+
+            savedOrder.setItems(items);
+            savedOrder.setTotalPrice(totalPrice);
+            orderRepository.save(savedOrder);
+        }
+
+        logger.info("✓ {} Bestellungen erstellt", numberOfOrders);
+        return numberOfOrders;
     }
 }

@@ -5,6 +5,8 @@ import com.erp.backend.repository.*;
 import com.erp.backend.service.*;
 import com.erp.backend.service.batch.InvoiceBatchOrchestrator;
 import com.erp.backend.service.batch.InvoiceBatchResult;
+import com.erp.backend.repository.OrderRepository;
+import com.erp.backend.repository.PaymentRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -37,6 +39,8 @@ public class BillingDataInitializer {
     private final OpenItemRepository openItemRepository;
     private final CustomerRepository customerRepository;
     private final ProductRepository productRepository;
+    private final OrderRepository orderRepository;
+    private final PaymentRepository paymentRepository;
 
     // Service-Dependencies
     private final VorgangService vorgangService;
@@ -55,6 +59,8 @@ public class BillingDataInitializer {
                                   OpenItemRepository openItemRepository,
                                   CustomerRepository customerRepository,
                                   ProductRepository productRepository,
+                                  OrderRepository orderRepository,
+                                  PaymentRepository paymentRepository,
                                   VorgangService vorgangService,
                                   NumberGeneratorService numberGeneratorService,
                                   InvoiceService invoiceService,
@@ -65,6 +71,8 @@ public class BillingDataInitializer {
         this.openItemRepository = openItemRepository;
         this.customerRepository = customerRepository;
         this.productRepository = productRepository;
+        this.orderRepository = orderRepository;
+        this.paymentRepository = paymentRepository;
         this.vorgangService = vorgangService;
         this.numberGeneratorService = numberGeneratorService;
         this.invoiceService = invoiceService;
@@ -108,6 +116,10 @@ public class BillingDataInitializer {
                 }
             }
 
+            // 4. Zahlungen für Bestellungen initialisieren
+            int paymentsCreated = initializePayments();
+            totalOperations++;
+
             // Vorgang erfolgreich abschließen
             vorgangService.vorgangErfolgreichAbschliessen(vorgang.getId(),
                     totalOperations, totalOperations, 0, null);
@@ -116,6 +128,7 @@ public class BillingDataInitializer {
             logger.info("   - Fälligkeitspläne: {}", schedulesCreated);
             logger.info("   - Sample-Rechnungen: {}", invoicesCreated);
             logger.info("   - Sample-OpenItems: {}", openItemsCreated);
+            logger.info("   - Zahlungen: {}", paymentsCreated);
 
         } catch (Exception e) {
             logger.error("✗ Fehler bei Abrechnungsdaten-Initialisierung", e);
@@ -466,6 +479,50 @@ public class BillingDataInitializer {
             logger.error("KRITISCHER FEHLER beim Rechnungslauf: {}", e.getMessage(), e);
             throw new RuntimeException("Rechnungslauf fehlgeschlagen", e);
         }
+    }
+
+    /**
+     * PRIVATE METHODE: Zahlungen für Bestellungen initialisieren
+     */
+    private int initializePayments() {
+        if (paymentRepository.count() > 0) {
+            logger.info("Zahlungen bereits vorhanden - überspringe Initialisierung");
+            return (int) paymentRepository.count();
+        }
+
+        logger.info("Initialisiere Zahlungen...");
+
+        List<Order> orders = orderRepository.findAll();
+        if (orders.isEmpty()) {
+            logger.warn("Keine Bestellungen für Zahlungen gefunden");
+            return 0;
+        }
+
+        String[] methods = {"CREDIT_CARD", "PAYPAL", "BANK_TRANSFER", "SEPA"};
+        int paidCount = 0, pendingCount = 0, failedCount = 0;
+
+        for (Order order : orders) {
+            double randomValue = random.nextDouble();
+            PaymentStatus status;
+            if (randomValue < 0.6) {
+                status = PaymentStatus.PAID;
+                paidCount++;
+            } else if (randomValue < 0.9) {
+                status = PaymentStatus.PENDING;
+                pendingCount++;
+            } else {
+                status = PaymentStatus.FAILED;
+                failedCount++;
+            }
+
+            String method = methods[random.nextInt(methods.length)];
+            paymentRepository.save(new Payment(order, order.getTotalPrice(), method, status));
+        }
+
+        int created = (int) paymentRepository.count();
+        logger.info("✓ {} Zahlungen erstellt: {} PAID, {} PENDING, {} FAILED",
+                created, paidCount, pendingCount, failedCount);
+        return created;
     }
 
     /**

@@ -97,10 +97,12 @@ public class UserDetailsServiceImpl implements UserDetailsService {
         userRepository.delete(user);
     }
 
-    // Alternative sichere Methode: Rolle als Parameter übergeben
     public UserEntity createUserSafe(String username, String password, Role role) {
+        if (userRepository.findByUsername(username).isPresent()) {
+            return userRepository.findByUsername(username).get();
+        }
         UserEntity user = new UserEntity(username, passwordEncoder.encode(password));
-        user.addRole(role != null ? role : Role.ROLE_USER); // Fallback: ROLE_USER
+        user.addRole(role != null ? role : Role.ROLE_USER);
         return userRepository.save(user);
     }
 }
