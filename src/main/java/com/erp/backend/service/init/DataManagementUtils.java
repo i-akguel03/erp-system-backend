@@ -553,7 +553,7 @@ public class DataManagementUtils {
         int count = (int) openItemRepository.count();
         if (count > 0) {
             logger.info("   🗑️ Lösche {} OpenItems... (Kontext: {})", count, context);
-            openItemRepository.deleteAll();
+            openItemRepository.deleteAllInBatch();
             logger.debug("   ✅ {} OpenItems gelöscht", count);
         } else {
             logger.debug("   ℹ️ Keine OpenItems zum Löschen vorhanden");
@@ -568,7 +568,7 @@ public class DataManagementUtils {
         int count = (int) invoiceRepository.count();
         if (count > 0) {
             logger.info("   🗑️ Lösche {} Invoices... (Kontext: {})", count, context);
-            invoiceRepository.deleteAll();
+            invoiceRepository.deleteAllInBatch();
             logger.debug("   ✅ {} Invoices gelöscht", count);
         } else {
             logger.debug("   ℹ️ Keine Invoices zum Löschen vorhanden");
@@ -583,7 +583,7 @@ public class DataManagementUtils {
         int count = (int) dueScheduleRepository.count();
         if (count > 0) {
             logger.info("   🗑️ Lösche {} DueSchedules... (Kontext: {})", count, context);
-            dueScheduleRepository.deleteAll();
+            dueScheduleRepository.deleteAllInBatch();
             logger.debug("   ✅ {} DueSchedules gelöscht", count);
         } else {
             logger.debug("   ℹ️ Keine DueSchedules zum Löschen vorhanden");
@@ -598,7 +598,7 @@ public class DataManagementUtils {
         int count = (int) subscriptionRepository.count();
         if (count > 0) {
             logger.info("   🗑️ Lösche {} Subscriptions... (Kontext: {})", count, context);
-            subscriptionRepository.deleteAll();
+            subscriptionRepository.deleteAllInBatch();
             logger.debug("   ✅ {} Subscriptions gelöscht", count);
         } else {
             logger.debug("   ℹ️ Keine Subscriptions zum Löschen vorhanden");
@@ -613,7 +613,7 @@ public class DataManagementUtils {
         int count = (int) contractRepository.count();
         if (count > 0) {
             logger.info("   🗑️ Lösche {} Contracts... (Kontext: {})", count, context);
-            contractRepository.deleteAll();
+            contractRepository.deleteAllInBatch();
             logger.debug("   ✅ {} Contracts gelöscht", count);
         } else {
             logger.debug("   ℹ️ Keine Contracts zum Löschen vorhanden");
@@ -628,7 +628,7 @@ public class DataManagementUtils {
         int count = (int) productRepository.count();
         if (count > 0) {
             logger.info("   🗑️ Lösche {} Products... (Kontext: {})", count, context);
-            productRepository.deleteAll();
+            productRepository.deleteAllInBatch();
             logger.debug("   ✅ {} Products gelöscht", count);
         } else {
             logger.debug("   ℹ️ Keine Products zum Löschen vorhanden");
@@ -643,7 +643,7 @@ public class DataManagementUtils {
         int count = (int) customerRepository.count();
         if (count > 0) {
             logger.info("   🗑️ Lösche {} Customers... (Kontext: {})", count, context);
-            customerRepository.deleteAll();
+            customerRepository.deleteAllInBatch();
             logger.debug("   ✅ {} Customers gelöscht", count);
         } else {
             logger.debug("   ℹ️ Keine Customers zum Löschen vorhanden");
@@ -658,7 +658,7 @@ public class DataManagementUtils {
         int count = (int) addressRepository.count();
         if (count > 0) {
             logger.info("   🗑️ Lösche {} Addresses... (Kontext: {})", count, context);
-            addressRepository.deleteAll();
+            addressRepository.deleteAllInBatch();
             logger.debug("   ✅ {} Addresses gelöscht", count);
         } else {
             logger.debug("   ℹ️ Keine Addresses zum Löschen vorhanden");
