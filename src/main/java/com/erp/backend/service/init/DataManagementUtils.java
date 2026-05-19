@@ -1,5 +1,6 @@
 package com.erp.backend.service.init;
 
+import com.erp.backend.audit.AuditLogRepository;
 import com.erp.backend.domain.*;
 import com.erp.backend.repository.*;
 import com.erp.backend.service.VorgangService;
@@ -101,6 +102,7 @@ public class DataManagementUtils {
     private final DataStatusReporter dataStatusReporter;
     private final MasterDataInitializer masterDataInitializer;
     private final com.erp.backend.repository.VorgangRepository vorgangRepository;
+    private final AuditLogRepository auditLogRepository;
 
     // =====================================================================================
     // KONSTRUKTOR UND DEPENDENCY INJECTION
@@ -142,7 +144,8 @@ public class DataManagementUtils {
                                VorgangService vorgangService,
                                DataStatusReporter dataStatusReporter,
                                MasterDataInitializer masterDataInitializer,
-                               com.erp.backend.repository.VorgangRepository vorgangRepository) {
+                               com.erp.backend.repository.VorgangRepository vorgangRepository,
+                               AuditLogRepository auditLogRepository) {
         this.openItemRepository = openItemRepository;
         this.invoiceRepository = invoiceRepository;
         this.dueScheduleRepository = dueScheduleRepository;
@@ -159,6 +162,7 @@ public class DataManagementUtils {
         this.dataStatusReporter = dataStatusReporter;
         this.masterDataInitializer = masterDataInitializer;
         this.vorgangRepository = vorgangRepository;
+        this.auditLogRepository = auditLogRepository;
     }
 
     // =====================================================================================
@@ -245,7 +249,8 @@ public class DataManagementUtils {
                     //String.format("Vollständiger Reset: %d Datensätze gelöscht", totalDeleted)
             );
 
-            // Vorgänge und verbleibende Notifications nach Abschluss des Audit-Vorgangs löschen
+            // AuditLogs, Vorgänge und verbleibende Notifications nach Abschluss des Audit-Vorgangs löschen
+            totalDeleted += deleteAllAuditLogs("Vollständiger Reset");
             totalDeleted += deleteAllVorgaenge("Vollständiger Reset");
             totalDeleted += deleteAllNotifications("Vollständiger Reset - Final");
 
@@ -347,7 +352,8 @@ public class DataManagementUtils {
                     //String.format("Partielle Bereinigung: %d Geschäftsdatensätze gelöscht", totalDeleted)
             );
 
-            // Vorgänge und verbleibende Notifications nach Abschluss des Audit-Vorgangs löschen
+            // AuditLogs, Vorgänge und verbleibende Notifications nach Abschluss des Audit-Vorgangs löschen
+            totalDeleted += deleteAllAuditLogs("Partielle Bereinigung");
             totalDeleted += deleteAllVorgaenge("Partielle Bereinigung");
             totalDeleted += deleteAllNotifications("Partielle Bereinigung - Final");
 
@@ -757,6 +763,15 @@ public class DataManagementUtils {
         if (count > 0) {
             logger.info("   🗑️ Lösche {} Inventory-Einträge... (Kontext: {})", count, context);
             inventoryRepository.deleteAllInBatch();
+        }
+        return count;
+    }
+
+    private int deleteAllAuditLogs(String context) {
+        int count = (int) auditLogRepository.count();
+        if (count > 0) {
+            logger.info("   🗑️ Lösche {} AuditLogs... (Kontext: {})", count, context);
+            auditLogRepository.deleteAllInBatch();
         }
         return count;
     }
