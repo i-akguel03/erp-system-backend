@@ -36,8 +36,8 @@ public class InvoiceBatchAnalyzer {
     public InvoiceBatchAnalysis analyzeBillingScope(LocalDate billingDate, boolean includeAllPreviousMonths) {
         // Fälligkeiten ermitteln
         List<DueSchedule> schedules = includeAllPreviousMonths ?
-                dueScheduleRepository.findByStatusAndDueDateLessThanEqual(DueStatus.ACTIVE, billingDate) :
-                dueScheduleRepository.findByStatusAndDueDate(DueStatus.ACTIVE, billingDate);
+                dueScheduleRepository.findByStatusAndDueDateLessThanEqualForBatch(DueStatus.ACTIVE, billingDate) :
+                dueScheduleRepository.findByStatusAndDueDateForBatch(DueStatus.ACTIVE, billingDate);
 
         // Analyse durchführen
         return createAnalysis(schedules, billingDate, includeAllPreviousMonths);

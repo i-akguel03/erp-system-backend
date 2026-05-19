@@ -65,6 +65,26 @@ public interface DueScheduleRepository extends JpaRepository<DueSchedule, UUID> 
 
     List<DueSchedule> findByStatusAndDueDateLessThanEqual(DueStatus status, LocalDate dueDate);
 
+    @Query("SELECT DISTINCT ds FROM DueSchedule ds " +
+           "JOIN FETCH ds.subscription s " +
+           "JOIN FETCH s.contract c " +
+           "JOIN FETCH c.customer " +
+           "LEFT JOIN FETCH s.product " +
+           "WHERE ds.status = :status AND ds.dueDate <= :dueDate")
+    List<DueSchedule> findByStatusAndDueDateLessThanEqualForBatch(
+            @Param("status") DueStatus status,
+            @Param("dueDate") LocalDate dueDate);
+
+    @Query("SELECT DISTINCT ds FROM DueSchedule ds " +
+           "JOIN FETCH ds.subscription s " +
+           "JOIN FETCH s.contract c " +
+           "JOIN FETCH c.customer " +
+           "LEFT JOIN FETCH s.product " +
+           "WHERE ds.status = :status AND ds.dueDate = :dueDate")
+    List<DueSchedule> findByStatusAndDueDateForBatch(
+            @Param("status") DueStatus status,
+            @Param("dueDate") LocalDate dueDate);
+
     @Query("SELECT ds FROM DueSchedule ds WHERE ds.dueDate < :currentDate AND ds.status = 'ACTIVE'")
     List<DueSchedule> findOverdueSchedules(@Param("currentDate") LocalDate currentDate);
 
