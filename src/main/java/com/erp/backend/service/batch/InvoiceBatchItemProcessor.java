@@ -1,12 +1,15 @@
 package com.erp.backend.service.batch;
 
 import com.erp.backend.domain.*;
+import com.erp.backend.repository.DueScheduleRepository;
 import com.erp.backend.repository.InvoiceRepository;
 import com.erp.backend.repository.OpenItemRepository;
 import com.erp.backend.service.CustomerEmailService;
 import com.erp.backend.service.DueScheduleService;
 import com.erp.backend.service.InvoiceFactory;
 import com.erp.backend.service.OpenItemFactory;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -14,6 +17,7 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.util.UUID;
 
 /**
  * Verarbeitet eine einzelne Fälligkeit in einer eigenen Transaktion (REQUIRES_NEW).
@@ -24,6 +28,10 @@ public class InvoiceBatchItemProcessor {
 
     private static final Logger logger = LoggerFactory.getLogger(InvoiceBatchItemProcessor.class);
 
+    @PersistenceContext
+    private EntityManager entityManager;
+
+    private final DueScheduleRepository dueScheduleRepository;
     private final InvoiceFactory invoiceFactory;
     private final OpenItemFactory openItemFactory;
     private final DueScheduleService dueScheduleService;
@@ -31,12 +39,14 @@ public class InvoiceBatchItemProcessor {
     private final OpenItemRepository openItemRepository;
     private final CustomerEmailService customerEmailService;
 
-    public InvoiceBatchItemProcessor(InvoiceFactory invoiceFactory,
+    public InvoiceBatchItemProcessor(DueScheduleRepository dueScheduleRepository,
+                                     InvoiceFactory invoiceFactory,
                                      OpenItemFactory openItemFactory,
                                      DueScheduleService dueScheduleService,
                                      InvoiceRepository invoiceRepository,
                                      OpenItemRepository openItemRepository,
                                      CustomerEmailService customerEmailService) {
+        this.dueScheduleRepository = dueScheduleRepository;
         this.invoiceFactory = invoiceFactory;
         this.openItemFactory = openItemFactory;
         this.dueScheduleService = dueScheduleService;
@@ -46,7 +56,15 @@ public class InvoiceBatchItemProcessor {
     }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    public ProcessedItem process(DueSchedule dueSchedule, LocalDate billingDate, String batchId, Vorgang vorgang) {
+    public ProcessedItem process(DueSchedule dueScheduleRef, LocalDate billingDate, String batchId, Vorgang vorgangRef) {
+        // Reload in this transaction so all lazy associations are managed — no detached-entity issues
+        UUID dueScheduleId = dueScheduleRef.getId();
+        DueSchedule dueSchedule = dueScheduleRepository.findById(dueScheduleId)
+                .orElseThrow(() -> new IllegalStateException("DueSchedule nicht gefunden: " + dueScheduleId));
+
+        // Get a managed Vorgang reference for FK assignment
+        Vorgang vorgang = entityManager.getReference(Vorgang.class, vorgangRef.getId());
+
         boolean isOverdue = dueSchedule.getDueDate().isBefore(billingDate);
 
         Subscription subscription = dueSchedule.getSubscription();
@@ -62,7 +80,6 @@ public class InvoiceBatchItemProcessor {
         customerEmailService.sendInvoiceEmail(savedInvoice);
 
         dueScheduleService.markAsCompleted(dueSchedule.getId(), savedInvoice.getId(), batchId);
-        dueSchedule.setVorgang(vorgang);
 
         OpenItem openItem = openItemFactory.createOpenItemForInvoice(savedInvoice, isOverdue);
         openItem.setVorgang(vorgang);
