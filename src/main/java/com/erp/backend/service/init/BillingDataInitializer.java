@@ -10,6 +10,7 @@ import com.erp.backend.repository.PaymentRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
@@ -82,6 +83,7 @@ public class BillingDataInitializer {
     /**
      * HAUPTMETHODE: Abrechnungsdaten initialisieren
      */
+    @Transactional(propagation = Propagation.NOT_SUPPORTED)
     public void initializeBillingData(InitConfig config, InitMode mode, LocalDate billingDate) {
         logger.info("Starte Abrechnungsdaten-Initialisierung... (Stichtag: {})", billingDate);
         logger.info("Modus: {}", mode.getDescription());
@@ -261,7 +263,9 @@ public class BillingDataInitializer {
                             .toList();
 
                     if (!customerSubscriptions.isEmpty()) {
-                        invoice.setSubscription(customerSubscriptions.get(random.nextInt(customerSubscriptions.size())));
+                        Subscription sub = customerSubscriptions.get(random.nextInt(customerSubscriptions.size()));
+                        invoice.setSubscription(sub);
+                        invoice.setSubscriptionId(sub.getId());
                     }
                 }
 
@@ -311,8 +315,11 @@ public class BillingDataInitializer {
                     invoice.addInvoiceItem(secondItem);
                 }
 
-                // Rechnung speichern
-                invoiceService.createInvoice(invoice);
+                // Rechnung direkt speichern (InvoiceService würde automatisch ein OpenItem erstellen,
+                // aber createSampleOpenItems() übernimmt das separat mit konfigurierbaren Statuses)
+                invoice.setInvoiceNumber(numberGeneratorService.generateInvoiceNumber());
+                invoice.calculateTotals();
+                invoiceRepository.save(invoice);
                 invoicesCreated++;
 
             } catch (Exception e) {
@@ -354,6 +361,10 @@ public class BillingDataInitializer {
                         "Sample-OpenItem für Rechnung " + invoice.getInvoiceNumber(),
                         invoice.getTotalAmount(),
                         invoice.getDueDate());
+
+                if (invoice.getSubscriptionId() != null) {
+                    openItem.setSubscriptionId(invoice.getSubscriptionId());
+                }
 
                 // Status basierend auf Konfiguration setzen
                 applyOpenItemConfig(openItem, config);
@@ -542,6 +553,10 @@ public class BillingDataInitializer {
                             "Nachträglich erstellter offener Posten für Rechnung " + invoice.getInvoiceNumber(),
                             invoice.getTotalAmount(),
                             invoice.getDueDate());
+
+                    if (invoice.getSubscriptionId() != null) {
+                        openItem.setSubscriptionId(invoice.getSubscriptionId());
+                    }
 
                     openItemRepository.save(openItem);
                     created++;

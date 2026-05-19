@@ -94,8 +94,7 @@ public class OpenItem {
     // KORRIGIERT: Subscription Beziehung mit direkter ID
     // ===================================================
 
-    /** WICHTIG: Direkte subscription_id Spalte für NOT NULL Constraint */
-    @Column(name = "subscription_id", nullable = false)
+    @Column(name = "subscription_id")
     private UUID subscriptionId;
 
     /** Subscription-Beziehung (optional für Lazy Loading) */
