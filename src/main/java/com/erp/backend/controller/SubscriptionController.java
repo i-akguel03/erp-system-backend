@@ -5,6 +5,8 @@ import com.erp.backend.domain.SubscriptionStatus;
 import com.erp.backend.dto.SubscriptionDto;
 import com.erp.backend.exception.InvalidStatusTransitionException;
 import com.erp.backend.service.SubscriptionService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,6 +25,7 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping("/api/subscriptions")
 @CrossOrigin
+@Tag(name = "Abonnements")
 public class SubscriptionController {
 
     private static final Logger logger = LoggerFactory.getLogger(SubscriptionController.class);
@@ -34,6 +37,7 @@ public class SubscriptionController {
     }
 
     // ================= GET =================
+    @Operation(summary = "Alle Abonnements abrufen — optional paginiert")
     @PreAuthorize("hasAnyRole('ADMIN', 'USER', 'SUBSCRIPTIONS_READ')")
     @GetMapping
     public ResponseEntity<List<SubscriptionDto>> getAllSubscriptions(
@@ -59,6 +63,7 @@ public class SubscriptionController {
         }
     }
 
+    @Operation(summary = "Abonnement nach ID abrufen")
     @PreAuthorize("hasAnyRole('ADMIN', 'USER', 'SUBSCRIPTIONS_READ')")
     @GetMapping("/{id}")
     public ResponseEntity<SubscriptionDto> getSubscriptionById(@PathVariable UUID id) {
@@ -68,6 +73,7 @@ public class SubscriptionController {
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
+    @Operation(summary = "Abonnement nach Nummer abrufen")
     @PreAuthorize("hasAnyRole('ADMIN', 'USER', 'SUBSCRIPTIONS_READ')")
     @GetMapping("/by-number/{subscriptionNumber}")
     public ResponseEntity<SubscriptionDto> getSubscriptionByNumber(@PathVariable String subscriptionNumber) {
@@ -77,6 +83,7 @@ public class SubscriptionController {
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
+    @Operation(summary = "Abonnements eines Vertrags abrufen")
     @PreAuthorize("hasAnyRole('ADMIN', 'USER', 'SUBSCRIPTIONS_READ')")
     @GetMapping("/contract/{contractId}")
     public ResponseEntity<List<SubscriptionDto>> getSubscriptionsByContract(
@@ -93,6 +100,7 @@ public class SubscriptionController {
         }
     }
 
+    @Operation(summary = "Abonnements eines Kunden abrufen")
     @PreAuthorize("hasAnyRole('ADMIN', 'USER', 'SUBSCRIPTIONS_READ')")
     @GetMapping("/customer/{customerId}")
     public ResponseEntity<List<SubscriptionDto>> getSubscriptionsByCustomer(
@@ -109,6 +117,7 @@ public class SubscriptionController {
         }
     }
 
+    @Operation(summary = "Abonnements nach Status filtern")
     @PreAuthorize("hasAnyRole('ADMIN', 'USER', 'SUBSCRIPTIONS_READ')")
     @GetMapping("/status/{status}")
     public ResponseEntity<List<SubscriptionDto>> getSubscriptionsByStatus(@PathVariable SubscriptionStatus status) {
@@ -117,12 +126,14 @@ public class SubscriptionController {
         return ResponseEntity.ok(dtos);
     }
 
+    @Operation(summary = "Gesamtumsatz aktiver Abonnements")
     @PreAuthorize("hasAnyRole('ADMIN', 'USER', 'SUBSCRIPTIONS_READ')")
     @GetMapping("/revenue/total")
     public ResponseEntity<BigDecimal> getTotalActiveRevenue() {
         return ResponseEntity.ok(service.getTotalActiveRevenue());
     }
 
+    @Operation(summary = "Umsatz aktiver Abonnements eines Kunden")
     @PreAuthorize("hasAnyRole('ADMIN', 'USER', 'SUBSCRIPTIONS_READ')")
     @GetMapping("/revenue/customer/{customerId}")
     public ResponseEntity<BigDecimal> getActiveRevenueByCustomer(@PathVariable UUID customerId) {
@@ -134,6 +145,7 @@ public class SubscriptionController {
     }
 
     // ================= POST / PUT / PATCH =================
+    @Operation(summary = "Neues Abonnement anlegen")
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping
     public ResponseEntity<?> createSubscription(@Valid @RequestBody SubscriptionDto dto) {
@@ -147,6 +159,7 @@ public class SubscriptionController {
         }
     }
 
+    @Operation(summary = "Abonnement aktualisieren")
     @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/{id}")
     public ResponseEntity<?> updateSubscription(@PathVariable UUID id, @Valid @RequestBody SubscriptionDto dto) {
@@ -161,6 +174,7 @@ public class SubscriptionController {
         }
     }
 
+    @Operation(summary = "Abonnement aktivieren")
     @PreAuthorize("hasRole('ADMIN')")
     @PatchMapping("/{id}/activate")
     public ResponseEntity<?> activateSubscription(@PathVariable UUID id) {
@@ -171,6 +185,7 @@ public class SubscriptionController {
         }
     }
 
+    @Operation(summary = "Abonnement aussetzen")
     @PreAuthorize("hasRole('ADMIN')")
     @PatchMapping("/{id}/suspend")
     public ResponseEntity<?> suspendSubscription(@PathVariable UUID id) {
@@ -181,6 +196,7 @@ public class SubscriptionController {
         }
     }
 
+    @Operation(summary = "Abonnement kündigen")
     @PreAuthorize("hasRole('ADMIN')")
     @PatchMapping("/{id}/terminate")
     public ResponseEntity<?> terminateSubscription(
@@ -193,6 +209,7 @@ public class SubscriptionController {
         }
     }
 
+    @Operation(summary = "Abonnement reaktivieren")
     @PreAuthorize("hasRole('ADMIN')")
     @PatchMapping("/{id}/reinstate")
     public ResponseEntity<?> reinstateSubscription(@PathVariable UUID id) {
@@ -203,6 +220,7 @@ public class SubscriptionController {
         }
     }
 
+    @Operation(summary = "Abonnement stornieren")
     @PreAuthorize("hasRole('ADMIN')")
     @PatchMapping("/{id}/cancel")
     public ResponseEntity<?> cancelSubscription(
@@ -215,6 +233,7 @@ public class SubscriptionController {
         }
     }
 
+    @Operation(summary = "Abonnement verlängern")
     @PreAuthorize("hasRole('ADMIN')")
     @PatchMapping("/{id}/renew")
     public ResponseEntity<?> renewSubscription(
@@ -228,6 +247,7 @@ public class SubscriptionController {
     }
 
     // ================= DELETE =================
+    @Operation(summary = "Abonnement löschen")
     @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteSubscription(@PathVariable UUID id) {

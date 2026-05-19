@@ -10,6 +10,8 @@ import com.erp.backend.mapper.ContractMapper;
 import com.erp.backend.service.ContractRenewalService;
 import com.erp.backend.service.ContractService;
 import com.erp.backend.util.SecurityUtils;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import jakarta.validation.Valid;
@@ -31,6 +33,7 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/api/contracts")
 @CrossOrigin
+@Tag(name = "Verträge")
 public class ContractController {
 
     private static final Logger logger = LoggerFactory.getLogger(ContractController.class);
@@ -43,6 +46,7 @@ public class ContractController {
         this.renewalService = renewalService;
     }
 
+    @Operation(summary = "Testverträge erstellen (nur Init)")
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/init")
     public ResponseEntity<String> initTestContracts() {
@@ -50,6 +54,7 @@ public class ContractController {
         return ResponseEntity.ok("15 Testverträge wurden erstellt.");
     }
 
+    @Operation(summary = "Alle Verträge abrufen — optional paginiert")
     @PreAuthorize("hasAnyRole('ADMIN', 'USER', 'CONTRACTS_READ')")
     @GetMapping
     public ResponseEntity<List<ContractDTO>> getAllContracts(
@@ -84,6 +89,7 @@ public class ContractController {
         }
     }
 
+    @Operation(summary = "Vertrag nach ID abrufen")
     @PreAuthorize("hasAnyRole('ADMIN', 'USER', 'CONTRACTS_READ')")
     @GetMapping("/{id}")
     public ResponseEntity<ContractDTO> getContractById(@PathVariable UUID id) {
@@ -99,6 +105,7 @@ public class ContractController {
                 });
     }
 
+    @Operation(summary = "Vertrag nach Vertragsnummer abrufen")
     @PreAuthorize("hasAnyRole('ADMIN', 'USER', 'CONTRACTS_READ')")
     @GetMapping("/by-number/{contractNumber}")
     public ResponseEntity<ContractDTO> getContractByNumber(@PathVariable String contractNumber) {
@@ -108,6 +115,7 @@ public class ContractController {
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
+    @Operation(summary = "Verträge eines Kunden abrufen")
     @PreAuthorize("hasAnyRole('ADMIN', 'USER', 'CONTRACTS_READ')")
     @GetMapping("/customer/{customerId}")
     public ResponseEntity<List<ContractDTO>> getContractsByCustomer(
@@ -123,6 +131,7 @@ public class ContractController {
         );
     }
 
+    @Operation(summary = "Verträge nach Status filtern")
     @PreAuthorize("hasAnyRole('ADMIN', 'USER', 'CONTRACTS_READ')")
     @GetMapping("/status/{status}")
     public ResponseEntity<List<ContractDTO>> getContractsByStatus(@PathVariable ContractStatus status) {
@@ -132,6 +141,7 @@ public class ContractController {
         );
     }
 
+    @Operation(summary = "Demnächst ablaufende Verträge")
     @PreAuthorize("hasAnyRole('ADMIN', 'USER', 'CONTRACTS_READ')")
     @GetMapping("/expiring")
     public ResponseEntity<List<ContractDTO>> getContractsExpiringInDays(
@@ -142,6 +152,7 @@ public class ContractController {
         );
     }
 
+    @Operation(summary = "Bereits abgelaufene Verträge")
     @PreAuthorize("hasAnyRole('ADMIN', 'USER', 'CONTRACTS_READ')")
     @GetMapping("/expired")
     public ResponseEntity<List<ContractDTO>> getExpiredContracts() {
@@ -151,6 +162,7 @@ public class ContractController {
         );
     }
 
+    @Operation(summary = "Verträge nach Titel suchen")
     @PreAuthorize("hasAnyRole('ADMIN', 'USER', 'CONTRACTS_READ')")
     @GetMapping("/search")
     public ResponseEntity<List<ContractDTO>> searchContracts(@RequestParam String q) {
@@ -160,6 +172,7 @@ public class ContractController {
         );
     }
 
+    @Operation(summary = "Verträge mit aktiven Abonnements")
     @PreAuthorize("hasAnyRole('ADMIN', 'USER', 'CONTRACTS_READ')")
     @GetMapping("/with-active-subscriptions")
     public ResponseEntity<List<ContractDTO>> getContractsWithActiveSubscriptions() {
@@ -169,18 +182,21 @@ public class ContractController {
         );
     }
 
+    @Operation(summary = "Gesamtanzahl Verträge")
     @PreAuthorize("hasAnyRole('ADMIN', 'USER', 'CONTRACTS_READ')")
     @GetMapping("/count")
     public ResponseEntity<Long> getContractCount() {
         return ResponseEntity.ok(service.getTotalContractCount());
     }
 
+    @Operation(summary = "Anzahl aktiver Verträge eines Kunden")
     @PreAuthorize("hasAnyRole('ADMIN', 'USER', 'CONTRACTS_READ')")
     @GetMapping("/customer/{customerId}/active-count")
     public ResponseEntity<Long> getActiveContractCountByCustomer(@PathVariable UUID customerId) {
         return ResponseEntity.ok(service.getActiveContractCountByCustomer(customerId));
     }
 
+    @Operation(summary = "Neuen Vertrag anlegen")
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping
     public ResponseEntity<ContractDTO> createContract(@Valid @RequestBody ContractDTO dto) {
@@ -189,6 +205,7 @@ public class ContractController {
     }
 
 
+    @Operation(summary = "Vertrag aktualisieren")
     @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/{id}")
     public ResponseEntity<ContractDTO> updateContract(@PathVariable UUID id, @Valid @RequestBody ContractDTO dto) {
@@ -215,6 +232,7 @@ public class ContractController {
         return ResponseEntity.ok(ContractMapper.toDTO(updated));
     }
 
+    @Operation(summary = "Vertrag aktivieren")
     @PreAuthorize("hasRole('ADMIN')")
     @PatchMapping("/{id}/activate")
     public ResponseEntity<ContractDTO> activateContract(@PathVariable UUID id) {
@@ -222,6 +240,7 @@ public class ContractController {
         return ResponseEntity.ok(ContractMapper.toDTO(activated));
     }
 
+    @Operation(summary = "Vertrag kündigen")
     @PreAuthorize("hasRole('ADMIN')")
     @PatchMapping("/{id}/terminate")
     public ResponseEntity<ContractDTO> terminateContract(
@@ -231,6 +250,7 @@ public class ContractController {
         return ResponseEntity.ok(ContractMapper.toDTO(terminated));
     }
 
+    @Operation(summary = "Vertrag aussetzen")
     @PreAuthorize("hasRole('ADMIN')")
     @PatchMapping("/{id}/suspend")
     public ResponseEntity<ContractDTO> suspendContract(@PathVariable UUID id) {
@@ -238,6 +258,7 @@ public class ContractController {
         return ResponseEntity.ok(ContractMapper.toDTO(suspended));
     }
 
+    @Operation(summary = "Vertrag stornieren")
     @PreAuthorize("hasRole('ADMIN')")
     @PatchMapping("/{id}/cancel")
     public ResponseEntity<ContractDTO> cancelContract(@PathVariable UUID id) {
@@ -245,6 +266,7 @@ public class ContractController {
         return ResponseEntity.ok(ContractMapper.toDTO(cancelled));
     }
 
+    @Operation(summary = "Vertrag reaktivieren")
     @PreAuthorize("hasRole('ADMIN')")
     @PatchMapping("/{id}/reinstate")
     public ResponseEntity<ContractDTO> reinstateContract(@PathVariable UUID id) {
@@ -252,6 +274,7 @@ public class ContractController {
         return ResponseEntity.ok(ContractMapper.toDTO(reinstated));
     }
 
+    @Operation(summary = "Vertrag verlängern")
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/{id}/renew")
     public ResponseEntity<ContractRenewalResult> renewContract(
@@ -263,6 +286,7 @@ public class ContractController {
         return ResponseEntity.ok(result);
     }
 
+    @Operation(summary = "Automatischen Verlängerungslauf starten")
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/renewal-run")
     public ResponseEntity<RenewalBatchResult> runRenewalBatch() {
@@ -270,6 +294,7 @@ public class ContractController {
         return ResponseEntity.ok(result);
     }
 
+    @Operation(summary = "Vertrag löschen")
     @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteContract(@PathVariable UUID id) {

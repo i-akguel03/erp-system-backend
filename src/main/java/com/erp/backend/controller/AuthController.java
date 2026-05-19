@@ -6,6 +6,11 @@ import com.erp.backend.dto.AuthRequest;
 import com.erp.backend.dto.AuthResponse;
 import com.erp.backend.dto.RegisterRequest;
 import com.erp.backend.service.UserDetailsServiceImpl;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
+import io.swagger.v3.oas.annotations.parameters.RequestBody;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -22,6 +27,7 @@ import java.util.Map;
 @RestController
 @RequestMapping("/auth")
 @CrossOrigin
+@Tag(name = "Authentication")
 public class AuthController {
 
     private final AuthenticationManager authenticationManager;
@@ -39,8 +45,15 @@ public class AuthController {
         this.tokenBlacklistService = tokenBlacklistService;
     }
 
+    @Operation(summary = "Login — gibt accessToken zurück")
+    @RequestBody(content = @Content(examples = {
+            @ExampleObject(name = "Admin",   value = """
+                    {"username": "string", "password": "stringst"}"""),
+            @ExampleObject(name = "User",    value = """
+                    {"username": "user",  "password": "user"}""")
+    }))
     @PostMapping("/login")
-    public ResponseEntity<?> login(@Valid @RequestBody AuthRequest request) {
+    public ResponseEntity<?> login(@Valid @org.springframework.web.bind.annotation.RequestBody AuthRequest request) {
         Authentication auth = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword())
         );
@@ -52,6 +65,7 @@ public class AuthController {
         return ResponseEntity.ok(new AuthResponse(accessToken, refreshToken));
     }
 
+    @Operation(summary = "Neuen Benutzer registrieren")
     @PostMapping("/register")
     public ResponseEntity<?> register(@Valid @RequestBody RegisterRequest request) {
         if (((UserDetailsServiceImpl) userDetailsService).userExists(request.getUsername())) {
@@ -61,10 +75,7 @@ public class AuthController {
         return ResponseEntity.status(HttpStatus.CREATED).body("User registered");
     }
 
-    /**
-     * Logout: Invalidiert das aktuelle Access-Token sofort.
-     * Das Token wird in die Blacklist eingetragen bis es natürlich abläuft.
-     */
+    @Operation(summary = "Abmelden — invalidiert Access- und Refresh-Token")
     @PostMapping("/logout")
     public ResponseEntity<?> logout(HttpServletRequest request,
                                     @RequestBody(required = false) Map<String, String> body) {
@@ -95,10 +106,7 @@ public class AuthController {
         return ResponseEntity.ok(Map.of("message", "Erfolgreich abgemeldet"));
     }
 
-    /**
-     * Refresh: Erzeugt neue Tokens anhand eines gültigen Refresh-Tokens.
-     * Das alte Refresh-Token wird dabei invalidiert (Rotation).
-     */
+    @Operation(summary = "Neue Tokens anhand Refresh-Token ausstellen (Token Rotation)")
     @PostMapping("/refresh")
     public ResponseEntity<?> refreshToken(@RequestBody Map<String, String> request) {
         String refreshToken = request.get("refreshToken");

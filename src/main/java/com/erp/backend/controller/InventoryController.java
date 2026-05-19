@@ -4,6 +4,8 @@ import com.erp.backend.domain.InventoryItem;
 import com.erp.backend.domain.Product;
 import com.erp.backend.service.InventoryService;
 import com.erp.backend.service.ProductService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -17,6 +19,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/inventory")
 @CrossOrigin
+@Tag(name = "Lagerbestand")
 public class InventoryController {
 
     private final InventoryService inventoryService;
@@ -27,6 +30,7 @@ public class InventoryController {
         this.productService = productService;
     }
 
+    @Operation(summary = "Alle Lagerbestandspositionen abrufen — optional paginiert")
     @PreAuthorize("hasAnyRole('ADMIN', 'USER', 'INVENTORY_READ')")
     @GetMapping
     public ResponseEntity<List<InventoryItem>> getAllInventoryItems(
@@ -49,6 +53,7 @@ public class InventoryController {
         return ResponseEntity.ok(inventoryService.getAllInventoryItems());
     }
 
+    @Operation(summary = "Lagerbestandsposition nach ID abrufen")
     @PreAuthorize("hasAnyRole('ADMIN', 'USER', 'INVENTORY_READ')")
     @GetMapping("/{id}")
     public ResponseEntity<InventoryItem> getInventoryItemById(@PathVariable Long id) {
@@ -57,6 +62,7 @@ public class InventoryController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
+    @Operation(summary = "Neue Lagerbestandsposition anlegen")
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping
     public ResponseEntity<InventoryItem> createInventoryItem(@RequestBody InventoryItem item) {
@@ -69,6 +75,7 @@ public class InventoryController {
         return ResponseEntity.ok(created);
     }
 
+    @Operation(summary = "Lagerbestandsposition aktualisieren")
     @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/{id}")
     public ResponseEntity<InventoryItem> updateInventoryItem(@PathVariable Long id, @RequestBody InventoryItem updated) {
@@ -86,6 +93,7 @@ public class InventoryController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
+    @Operation(summary = "Lagerbestandsposition löschen")
     @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteInventoryItem(@PathVariable Long id) {

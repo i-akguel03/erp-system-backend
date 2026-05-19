@@ -2,6 +2,8 @@ package com.erp.backend.controller;
 
 import com.erp.backend.domain.Product;
 import com.erp.backend.service.ProductService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.*;
@@ -15,6 +17,7 @@ import java.util.*;
 @RestController
 @RequestMapping("/api/products")
 @CrossOrigin
+@Tag(name = "Produkte")
 public class ProductController {
 
     private static final Logger logger = LoggerFactory.getLogger(ProductController.class);
@@ -25,6 +28,7 @@ public class ProductController {
         this.service = service;
     }
 
+    @Operation(summary = "Testprodukte erstellen (nur Init)")
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/init")
     public ResponseEntity<String> initTestProducts() {
@@ -32,6 +36,7 @@ public class ProductController {
         return ResponseEntity.ok("15 Testprodukte wurden erstellt.");
     }
 
+    @Operation(summary = "Alle Produkte abrufen — optional paginiert")
     @PreAuthorize("hasAnyRole('ADMIN', 'USER', 'PRODUCTS_READ')")
     @GetMapping
     public ResponseEntity<List<Product>> getAllProducts(
@@ -64,6 +69,7 @@ public class ProductController {
         }
     }
 
+    @Operation(summary = "Produkt nach ID abrufen")
     @PreAuthorize("hasAnyRole('ADMIN', 'USER', 'PRODUCTS_READ')")
     @GetMapping("/{id}")
     public ResponseEntity<Product> getProductById(@PathVariable UUID id) {
@@ -79,6 +85,7 @@ public class ProductController {
                 });
     }
 
+    @Operation(summary = "Produkt nach Produktnummer abrufen")
     @PreAuthorize("hasAnyRole('ADMIN', 'USER', 'PRODUCTS_READ')")
     @GetMapping("/by-number/{productNumber}")
     public ResponseEntity<Product> getProductByNumber(@PathVariable String productNumber) {
@@ -94,6 +101,7 @@ public class ProductController {
                 });
     }
 
+    @Operation(summary = "Produkte nach Name suchen")
     @PreAuthorize("hasAnyRole('ADMIN', 'USER', 'PRODUCTS_READ')")
     @GetMapping("/search")
     public ResponseEntity<List<Product>> searchProducts(@RequestParam String q) {
@@ -103,6 +111,7 @@ public class ProductController {
         return ResponseEntity.ok(products);
     }
 
+    @Operation(summary = "Gesamtanzahl Produkte")
     @PreAuthorize("hasAnyRole('ADMIN', 'USER', 'PRODUCTS_READ')")
     @GetMapping("/count")
     public ResponseEntity<Long> getProductCount() {
@@ -112,6 +121,7 @@ public class ProductController {
         return ResponseEntity.ok(count);
     }
 
+    @Operation(summary = "Neues Produkt anlegen")
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping
     public ResponseEntity<Product> createProduct(@RequestBody Product product) {
@@ -130,6 +140,7 @@ public class ProductController {
         }
     }
 
+    @Operation(summary = "Produkt aktualisieren")
     @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/{id}")
     public ResponseEntity<Product> updateProduct(@PathVariable UUID id, @RequestBody Product updated) {
@@ -165,6 +176,7 @@ public class ProductController {
         }
     }
 
+    @Operation(summary = "Produkt löschen")
     @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteProduct(@PathVariable UUID id) {

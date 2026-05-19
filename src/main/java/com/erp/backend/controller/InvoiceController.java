@@ -5,6 +5,8 @@ import com.erp.backend.dto.InvoiceDTO;
 import com.erp.backend.dto.InvoiceItemDTO;
 import com.erp.backend.mapper.InvoiceMapper;
 import com.erp.backend.service.InvoiceService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.*;
@@ -40,7 +42,8 @@ import java.util.UUID;
  */
 @RestController
 @RequestMapping("/api/invoices")
-@CrossOrigin  // Erlaubt Cross-Origin Requests (für Frontend)
+@CrossOrigin
+@Tag(name = "Rechnungen")
 public class InvoiceController {
 
     private static final Logger logger = LoggerFactory.getLogger(InvoiceController.class);
@@ -83,6 +86,7 @@ public class InvoiceController {
      *
      * @return Liste von InvoiceDTOs (+ Pagination-Headers falls aktiviert)
      */
+    @Operation(summary = "Alle Rechnungen abrufen — optional paginiert")
     @PreAuthorize("hasAnyRole('ADMIN', 'USER', 'INVOICES_READ')")
     @GetMapping
     public ResponseEntity<List<InvoiceDTO>> getAllInvoices(
@@ -139,6 +143,7 @@ public class InvoiceController {
      * @param subscriptionIds Liste von Subscription-IDs
      * @return Liste von InvoiceDTOs
      */
+    @Operation(summary = "Rechnungen nach Abonnement-IDs abrufen")
     @PreAuthorize("hasAnyRole('ADMIN', 'USER', 'INVOICES_READ')")
     @GetMapping("/by-subscriptions")
     public ResponseEntity<List<InvoiceDTO>> getInvoicesBySubscriptionIds(
@@ -173,6 +178,7 @@ public class InvoiceController {
      * @param id Die Rechnungs-ID
      * @return InvoiceDTO oder 404
      */
+    @Operation(summary = "Rechnung nach ID abrufen")
     @PreAuthorize("hasAnyRole('ADMIN', 'USER', 'INVOICES_READ')")
     @GetMapping("/{id}")
     public ResponseEntity<InvoiceDTO> getInvoiceById(@PathVariable UUID id) {
@@ -204,6 +210,7 @@ public class InvoiceController {
      * @param dto Die Rechnungsdaten als DTO
      * @return Die erstellte Rechnung (201 CREATED)
      */
+    @Operation(summary = "Neue Rechnung erstellen")
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping
     public ResponseEntity<InvoiceDTO> createInvoice(@RequestBody InvoiceDTO dto) {
@@ -241,6 +248,7 @@ public class InvoiceController {
      * @param dto Die aktualisierten Rechnungsdaten
      * @return Die aktualisierte Rechnung (200 OK)
      */
+    @Operation(summary = "Rechnung aktualisieren")
     @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/{id}")
     public ResponseEntity<InvoiceDTO> updateInvoice(@PathVariable UUID id, @RequestBody InvoiceDTO dto) {
@@ -280,6 +288,7 @@ public class InvoiceController {
      * @param id Die Rechnungs-ID
      * @return 204 NO CONTENT bei Erfolg
      */
+    @Operation(summary = "Rechnung löschen")
     @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteInvoice(@PathVariable UUID id) {
@@ -318,6 +327,7 @@ public class InvoiceController {
      * @param id Die Rechnungs-ID
      * @return Die stornierte Rechnung (200 OK)
      */
+    @Operation(summary = "Rechnung stornieren — storniert auch alle offenen Posten")
     @PreAuthorize("hasRole('ADMIN')")
     @PatchMapping("/{id}/cancel")
     public ResponseEntity<InvoiceDTO> cancelInvoice(@PathVariable UUID id) {
@@ -348,6 +358,7 @@ public class InvoiceController {
      * @param id Die Rechnungs-ID
      * @return Die aktualisierte Rechnung (200 OK)
      */
+    @Operation(summary = "Rechnung als versendet markieren")
     @PreAuthorize("hasRole('ADMIN')")
     @PatchMapping("/{id}/send")
     public ResponseEntity<InvoiceDTO> sendInvoice(@PathVariable UUID id) {
@@ -384,6 +395,7 @@ public class InvoiceController {
      * @param status Der neue Status
      * @return Die aktualisierte Rechnung (200 OK)
      */
+    @Operation(summary = "Rechnungsstatus manuell ändern")
     @PreAuthorize("hasRole('ADMIN')")
     @PatchMapping("/{id}/status")
     public ResponseEntity<InvoiceDTO> changeStatus(
@@ -428,6 +440,7 @@ public class InvoiceController {
      * @param itemDTO Die Item-Daten
      * @return Die aktualisierte Rechnung mit neuem Item (200 OK)
      */
+    @Operation(summary = "Rechnungsposition hinzufügen")
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/{id}/items")
     public ResponseEntity<InvoiceDTO> addItem(
@@ -471,6 +484,7 @@ public class InvoiceController {
      * @param itemId Die Item-ID
      * @return Die aktualisierte Rechnung ohne das Item (200 OK)
      */
+    @Operation(summary = "Rechnungsposition entfernen")
     @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}/items/{itemId}")
     public ResponseEntity<InvoiceDTO> removeItem(
@@ -508,6 +522,7 @@ public class InvoiceController {
      * @param customerId Die Kunden-ID
      * @return Liste von InvoiceDTOs
      */
+    @Operation(summary = "Rechnungen eines Kunden abrufen")
     @PreAuthorize("hasAnyRole('ADMIN', 'USER', 'INVOICES_READ')")
     @GetMapping("/customer/{customerId}")
     public ResponseEntity<List<InvoiceDTO>> getInvoicesByCustomer(@PathVariable UUID customerId) {
@@ -541,6 +556,7 @@ public class InvoiceController {
      * @param status Der gewünschte Status
      * @return Liste von InvoiceDTOs
      */
+    @Operation(summary = "Rechnungen nach Status filtern")
     @PreAuthorize("hasAnyRole('ADMIN', 'USER', 'INVOICES_READ')")
     @GetMapping("/status/{status}")
     public ResponseEntity<List<InvoiceDTO>> getInvoicesByStatus(
@@ -575,6 +591,7 @@ public class InvoiceController {
      * @param end Enddatum (inklusive)
      * @return Liste von InvoiceDTOs
      */
+    @Operation(summary = "Rechnungen in Datumsbereich abrufen")
     @PreAuthorize("hasAnyRole('ADMIN', 'USER', 'INVOICES_READ')")
     @GetMapping("/date-range")
     public ResponseEntity<List<InvoiceDTO>> getInvoicesByDateRange(

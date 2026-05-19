@@ -6,6 +6,8 @@ import com.erp.backend.service.*;
 import com.erp.backend.service.batch.*;
 import com.erp.backend.service.batch.InvoiceBatchResult;
 import com.erp.backend.util.SecurityUtils;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -16,6 +18,7 @@ import java.time.LocalDate;
 
 @RestController
 @RequestMapping("/api/invoices")
+@Tag(name = "Rechnungen")
 public class InvoiceBatchController {
 
     private final InvoiceBatchOrchestrator orchestrator;
@@ -26,9 +29,7 @@ public class InvoiceBatchController {
         this.analyzer = analyzer;
     }
 
-    /**
-     * Standard-Rechnungslauf: Alle offenen Monate
-     */
+    @Operation(summary = "Rechnungslauf zu einem Datum ausführen")
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/batch/run")
     public ResponseEntity<?> runInvoiceBatch(
@@ -45,9 +46,7 @@ public class InvoiceBatchController {
         }
     }
 
-    /**
-     * Rechnungslauf für heute
-     */
+    @Operation(summary = "Rechnungslauf für heute ausführen")
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/batch/run-today")
     public ResponseEntity<?> runInvoiceBatchToday(
@@ -63,9 +62,7 @@ public class InvoiceBatchController {
         }
     }
 
-    /**
-     * Vorschau eines geplanten Rechnungslaufs
-     */
+    @Operation(summary = "Vorschau eines Rechnungslaufs anzeigen")
     @PreAuthorize("hasAnyRole('ADMIN', 'USER', 'INVOICES_READ')")
     @GetMapping("/batch/preview")
     public ResponseEntity<?> previewInvoiceBatch(
@@ -91,9 +88,7 @@ public class InvoiceBatchController {
         }
     }
 
-    /**
-     * Prüft ob Rechnungslauf möglich ist
-     */
+    @Operation(summary = "Prüfen ob Rechnungslauf möglich ist")
     @PreAuthorize("hasAnyRole('ADMIN', 'USER', 'INVOICES_READ')")
     @GetMapping("/batch/can-run")
     public ResponseEntity<?> canRunInvoiceBatch(

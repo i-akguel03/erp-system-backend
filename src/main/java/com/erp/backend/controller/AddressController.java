@@ -3,6 +3,8 @@ package com.erp.backend.controller;
 import com.erp.backend.domain.Address;
 import com.erp.backend.dto.AddressDTO;
 import com.erp.backend.service.AddressService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -18,6 +20,7 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping("/api/addresses")
 @CrossOrigin
+@Tag(name = "Adressen")
 public class AddressController {
 
     private final AddressService service;
@@ -41,6 +44,7 @@ public class AddressController {
         return addr;
     }
 
+    @Operation(summary = "Alle Adressen abrufen — optional paginiert")
     @PreAuthorize("hasAnyRole('ADMIN', 'USER', 'ADDRESSES_READ')")
     @GetMapping
     public ResponseEntity<List<AddressDTO>> getAll(
@@ -64,6 +68,7 @@ public class AddressController {
         return ResponseEntity.ok(service.findAll().stream().map(this::toDTO).collect(Collectors.toList()));
     }
 
+    @Operation(summary = "Adressen suchen — Straße, PLZ, Ort")
     @PreAuthorize("hasAnyRole('ADMIN', 'USER', 'ADDRESSES_READ')")
     @GetMapping("/search")
     public ResponseEntity<List<AddressDTO>> search(@RequestParam String q) {
@@ -73,6 +78,7 @@ public class AddressController {
         return ResponseEntity.ok(service.search(q.trim()).stream().map(this::toDTO).toList());
     }
 
+    @Operation(summary = "Adresse nach ID abrufen")
     @PreAuthorize("hasAnyRole('ADMIN', 'USER', 'ADDRESSES_READ')")
     @GetMapping("/{id}")
     public ResponseEntity<AddressDTO> getById(@PathVariable Long id) {
@@ -81,6 +87,7 @@ public class AddressController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
+    @Operation(summary = "Testadressen erstellen (nur Init)")
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/init")
     public ResponseEntity<String> initTestAddresses() {
@@ -88,6 +95,7 @@ public class AddressController {
         return ResponseEntity.ok("15 Testadressen wurden erstellt.");
     }
 
+    @Operation(summary = "Neue Adresse anlegen")
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping
     public ResponseEntity<AddressDTO> create(@Valid @RequestBody AddressDTO dto) {
@@ -95,6 +103,7 @@ public class AddressController {
         return ResponseEntity.ok(toDTO(saved));
     }
 
+    @Operation(summary = "Adresse aktualisieren")
     @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/{id}")
     public ResponseEntity<AddressDTO> update(@PathVariable Long id, @Valid @RequestBody AddressDTO dto) {
@@ -107,6 +116,7 @@ public class AddressController {
     }
 
 
+    @Operation(summary = "Adresse löschen")
     @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) {

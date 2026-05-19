@@ -4,6 +4,8 @@ import com.erp.backend.domain.DueStatus;
 import com.erp.backend.dto.DueScheduleDto;
 import com.erp.backend.dto.DueScheduleStatisticsDto;
 import com.erp.backend.service.DueScheduleService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,14 +34,13 @@ import java.util.UUID;
 @RequestMapping("/api/due-schedules")
 @CrossOrigin(origins = "*")
 @PreAuthorize("hasAnyRole('ADMIN', 'USER', 'DUE_SCHEDULES_READ')")
+@Tag(name = "Fälligkeitspläne")
 public class DueScheduleController {
 
     @Autowired
     private DueScheduleService dueScheduleService;
 
-    /**
-     * Einzelnen Fälligkeitsplan abrufen.
-     */
+    @Operation(summary = "Einzelnen Fälligkeitsplan abrufen")
     @GetMapping("/{id}")
     public ResponseEntity<DueScheduleDto> getDueScheduleById(@PathVariable UUID id) {
         return dueScheduleService.getDueSchedulesBySubscription(id).stream()
@@ -48,9 +49,7 @@ public class DueScheduleController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    /**
-     * Alle Fälligkeitspläne abrufen.
-     */
+    @Operation(summary = "Alle Fälligkeitspläne abrufen — optional paginiert")
     @GetMapping
     public ResponseEntity<List<DueScheduleDto>> getAllDueSchedules(
             @RequestParam(defaultValue = "false") boolean paginated,
@@ -76,9 +75,7 @@ public class DueScheduleController {
         return ResponseEntity.ok(allSchedules);
     }
 
-    /**
-     * Neuen Fälligkeitsplan erstellen.
-     */
+    @Operation(summary = "Neuen Fälligkeitsplan erstellen")
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping
     public ResponseEntity<DueScheduleDto> createDueSchedule(@Valid @RequestBody DueScheduleDto dueScheduleDto) {
@@ -86,9 +83,7 @@ public class DueScheduleController {
         return ResponseEntity.status(HttpStatus.CREATED).body(createdDueSchedule);
     }
 
-    /**
-     * Fälligkeitsplan aktualisieren.
-     */
+    @Operation(summary = "Fälligkeitsplan aktualisieren")
     @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/{id}")
     public ResponseEntity<DueScheduleDto> updateDueSchedule(
@@ -98,9 +93,7 @@ public class DueScheduleController {
         return ResponseEntity.ok(updatedDueSchedule);
     }
 
-    /**
-     * Fälligkeitsplan löschen.
-     */
+    @Operation(summary = "Fälligkeitsplan löschen")
     @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteDueSchedule(@PathVariable UUID id) {
@@ -108,45 +101,35 @@ public class DueScheduleController {
         return ResponseEntity.noContent().build();
     }
 
-    /**
-     * Fälligkeitspläne nach Abonnement abrufen.
-     */
+    @Operation(summary = "Fälligkeitspläne eines Abonnements abrufen")
     @GetMapping("/subscription/{subscriptionId}")
     public ResponseEntity<List<DueScheduleDto>> getDueSchedulesBySubscription(@PathVariable UUID subscriptionId) {
         List<DueScheduleDto> dueSchedules = dueScheduleService.getDueSchedulesBySubscription(subscriptionId);
         return ResponseEntity.ok(dueSchedules);
     }
 
-    /**
-     * Fälligkeitspläne nach Status abrufen.
-     */
+    @Operation(summary = "Fälligkeitspläne nach Status filtern")
     @GetMapping("/status/{status}")
     public ResponseEntity<List<DueScheduleDto>> getDueSchedulesByStatus(@PathVariable DueStatus status) {
         List<DueScheduleDto> dueSchedules = dueScheduleService.getDueSchedulesByStatus(status);
         return ResponseEntity.ok(dueSchedules);
     }
 
-    /**
-     * Überfällige Fälligkeitspläne abrufen.
-     */
+    @Operation(summary = "Überfällige Fälligkeitspläne abrufen")
     @GetMapping("/overdue")
     public ResponseEntity<List<DueScheduleDto>> getOverdueDueSchedules() {
         List<DueScheduleDto> overdueDueSchedules = dueScheduleService.getOverdueDueSchedules();
         return ResponseEntity.ok(overdueDueSchedules);
     }
 
-    /**
-     * Fälligkeitspläne abrufen, die heute fällig sind.
-     */
+    @Operation(summary = "Heute fällige Fälligkeitspläne abrufen")
     @GetMapping("/due-today")
     public ResponseEntity<List<DueScheduleDto>> getDueTodaySchedules() {
         List<DueScheduleDto> dueTodaySchedules = dueScheduleService.getDueTodaySchedules();
         return ResponseEntity.ok(dueTodaySchedules);
     }
 
-    /**
-     * Kommende Fälligkeitspläne (innerhalb der nächsten X Tage).
-     */
+    @Operation(summary = "Kommende Fälligkeiten abrufen (nächste X Tage)")
     @GetMapping("/upcoming")
     public ResponseEntity<List<DueScheduleDto>> getUpcomingDueSchedules(
             @RequestParam(defaultValue = "7") int days) {
@@ -154,9 +137,7 @@ public class DueScheduleController {
         return ResponseEntity.ok(upcomingSchedules);
     }
 
-    /**
-     * Fälligkeitspläne in einem bestimmten Zeitraum abrufen.
-     */
+    @Operation(summary = "Fälligkeitspläne in Zeitraum abrufen")
     @GetMapping("/period")
     public ResponseEntity<List<DueScheduleDto>> getDueSchedulesByPeriod(
             @RequestParam LocalDate startDate,
@@ -165,27 +146,21 @@ public class DueScheduleController {
         return ResponseEntity.ok(dueSchedules);
     }
 
-    /**
-     * Fälligkeitspläne eines Kunden über alle Abonnements.
-     */
+    @Operation(summary = "Fälligkeitspläne eines Kunden abrufen")
     @GetMapping("/customer/{customerId}")
     public ResponseEntity<List<DueScheduleDto>> getDueSchedulesByCustomer(@PathVariable UUID customerId) {
         List<DueScheduleDto> dueSchedules = dueScheduleService.getDueSchedulesByCustomer(customerId);
         return ResponseEntity.ok(dueSchedules);
     }
 
-    /**
-     * Statistiken für Dashboard (z. B. Anzahl nach Status).
-     */
+    @Operation(summary = "Fälligkeitsplan-Statistiken abrufen")
     @GetMapping("/statistics")
     public ResponseEntity<DueScheduleStatisticsDto> getDueScheduleStatistics() {
         DueScheduleStatisticsDto statistics = dueScheduleService.getDueScheduleStatistics();
         return ResponseEntity.ok(statistics);
     }
 
-    /**
-     * Automatische Generierung von Fälligkeitsplänen für ein Abonnement.
-     */
+    @Operation(summary = "Fälligkeitspläne für Abonnement generieren")
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/subscription/{subscriptionId}/generate")
     public ResponseEntity<List<DueScheduleDto>> generateDueSchedulesForSubscription(
@@ -196,9 +171,7 @@ public class DueScheduleController {
         return  ResponseEntity.ok(null);
     }
 
-    /**
-     * Nächste fällige Fälligkeit für ein Abonnement.
-     */
+    @Operation(summary = "Nächste Fälligkeit eines Abonnements abrufen")
     @GetMapping("/subscription/{subscriptionId}/next-due")
     public ResponseEntity<DueScheduleDto> getNextDueScheduleBySubscription(@PathVariable UUID subscriptionId) {
         DueScheduleDto nextDueSchedule = dueScheduleService.getNextDueScheduleBySubscription(subscriptionId);

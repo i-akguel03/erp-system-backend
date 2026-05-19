@@ -3,6 +3,8 @@ package com.erp.backend.controller;
 import com.erp.backend.domain.Customer;
 import com.erp.backend.dto.CustomerDto;
 import com.erp.backend.service.CustomerService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,6 +24,7 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/api/customers")
 @CrossOrigin
+@Tag(name = "Kunden")
 public class CustomerController {
 
     private static final Logger logger = LoggerFactory.getLogger(CustomerController.class);
@@ -32,6 +35,7 @@ public class CustomerController {
         this.service = service;
     }
 
+    @Operation(summary = "Testkunden erstellen (nur Init)")
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/init")
     public ResponseEntity<String> initTestCustomers() {
@@ -39,6 +43,7 @@ public class CustomerController {
         return ResponseEntity.ok("20 Testkunden wurden erstellt.");
     }
 
+    @Operation(summary = "Alle Kunden abrufen — optional paginiert")
     @PreAuthorize("hasAnyRole('ADMIN', 'USER', 'CUSTOMERS_READ')")
     @GetMapping
     public ResponseEntity<List<CustomerDto>> getAllCustomers(
@@ -63,6 +68,7 @@ public class CustomerController {
         }
     }
 
+    @Operation(summary = "Kunden nach ID abrufen")
     @PreAuthorize("hasAnyRole('ADMIN', 'USER', 'CUSTOMERS_READ')")
     @GetMapping("/{id}")
     public ResponseEntity<CustomerDto> getCustomerById(@PathVariable UUID id) {
@@ -72,6 +78,7 @@ public class CustomerController {
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
+    @Operation(summary = "Kunden nach E-Mail abrufen")
     @PreAuthorize("hasAnyRole('ADMIN', 'USER', 'CUSTOMERS_READ')")
     @GetMapping("/by-email/{email}")
     public ResponseEntity<CustomerDto> getCustomerByEmail(@PathVariable String email) {
@@ -81,6 +88,7 @@ public class CustomerController {
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
+    @Operation(summary = "Kunden nach Kundennummer abrufen")
     @PreAuthorize("hasAnyRole('ADMIN', 'USER', 'CUSTOMERS_READ')")
     @GetMapping("/by-number/{customerNumber}")
     public ResponseEntity<CustomerDto> getCustomerByNumber(@PathVariable String customerNumber) {
@@ -90,6 +98,7 @@ public class CustomerController {
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
+    @Operation(summary = "Kunden nach Name suchen")
     @PreAuthorize("hasAnyRole('ADMIN', 'USER', 'CUSTOMERS_READ')")
     @GetMapping("/search")
     public ResponseEntity<List<CustomerDto>> searchCustomers(@RequestParam String q) {
@@ -99,12 +108,14 @@ public class CustomerController {
         return ResponseEntity.ok(dtos);
     }
 
+    @Operation(summary = "Gesamtanzahl Kunden")
     @PreAuthorize("hasAnyRole('ADMIN', 'USER', 'CUSTOMERS_READ')")
     @GetMapping("/count")
     public ResponseEntity<Long> getCustomerCount() {
         return ResponseEntity.ok(service.getTotalCustomerCount());
     }
 
+    @Operation(summary = "Neuen Kunden anlegen")
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping
     public ResponseEntity<CustomerDto> createCustomer(@Valid @RequestBody Customer customer) {
@@ -112,6 +123,7 @@ public class CustomerController {
         return ResponseEntity.status(HttpStatus.CREATED).body(CustomerDto.fromEntity(created));
     }
 
+    @Operation(summary = "Kunden aktualisieren")
     @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/{id}")
     public ResponseEntity<CustomerDto> updateCustomer(@PathVariable UUID id, @Valid @RequestBody Customer updated) {
@@ -133,6 +145,7 @@ public class CustomerController {
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
+    @Operation(summary = "Kunden löschen")
     @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteCustomer(@PathVariable UUID id) {
@@ -140,6 +153,7 @@ public class CustomerController {
         return ResponseEntity.noContent().build();
     }
 
+    @Operation(summary = "E-Mail-Adresse auf Duplikate prüfen")
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/{id}/validate-email")
     public ResponseEntity<Boolean> validateEmail(@PathVariable UUID id, @RequestParam String email) {

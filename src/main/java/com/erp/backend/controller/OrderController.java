@@ -2,6 +2,8 @@ package com.erp.backend.controller;
 
 import com.erp.backend.domain.Order;
 import com.erp.backend.service.OrderService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -16,6 +18,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/orders")
 @CrossOrigin
+@Tag(name = "Bestellungen")
 public class OrderController {
 
     private final OrderService service;
@@ -24,6 +27,7 @@ public class OrderController {
         this.service = service;
     }
 
+    @Operation(summary = "Alle Bestellungen abrufen — optional paginiert")
     @PreAuthorize("hasAnyRole('ADMIN', 'USER', 'ORDERS_READ')")
     @GetMapping
     public ResponseEntity<List<Order>> getAllOrders(
@@ -46,6 +50,7 @@ public class OrderController {
         return ResponseEntity.ok(service.findAll());
     }
 
+    @Operation(summary = "Bestellung nach ID abrufen")
     @PreAuthorize("hasAnyRole('ADMIN', 'USER', 'ORDERS_READ')")
     @GetMapping("/{id}")
     public ResponseEntity<Order> getOrderById(@PathVariable Long id) {
@@ -54,6 +59,7 @@ public class OrderController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
+    @Operation(summary = "Neue Bestellung anlegen")
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping
     public ResponseEntity<Order> createOrder(@RequestBody Order order) {
@@ -61,6 +67,7 @@ public class OrderController {
         return ResponseEntity.status(HttpStatus.CREATED).body(saved);
     }
 
+    @Operation(summary = "Bestellung aktualisieren")
     @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/{id}")
     public ResponseEntity<Order> updateOrder(@PathVariable Long id, @RequestBody Order updated) {
@@ -76,6 +83,7 @@ public class OrderController {
     }
 
 
+    @Operation(summary = "Bestellung löschen")
     @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteOrder(@PathVariable Long id) {

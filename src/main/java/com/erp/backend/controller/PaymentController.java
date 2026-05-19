@@ -4,6 +4,8 @@ import com.erp.backend.domain.Order;
 import com.erp.backend.domain.Payment;
 import com.erp.backend.service.OrderService;
 import com.erp.backend.service.PaymentService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -17,6 +19,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/payments")
 @CrossOrigin
+@Tag(name = "Zahlungen")
 public class PaymentController {
 
     private final PaymentService paymentService;
@@ -27,6 +30,7 @@ public class PaymentController {
         this.orderService = orderService;
     }
 
+    @Operation(summary = "Alle Zahlungen abrufen — optional paginiert")
     @PreAuthorize("hasAnyRole('ADMIN', 'USER', 'PAYMENTS_READ')")
     @GetMapping
     public ResponseEntity<List<Payment>> getAllPayments(
@@ -49,6 +53,7 @@ public class PaymentController {
         return ResponseEntity.ok(paymentService.getAllPayments());
     }
 
+    @Operation(summary = "Zahlung nach ID abrufen")
     @PreAuthorize("hasAnyRole('ADMIN', 'USER', 'PAYMENTS_READ')")
     @GetMapping("/{id}")
     public ResponseEntity<Payment> getPaymentById(@PathVariable Long id) {
@@ -57,6 +62,7 @@ public class PaymentController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
+    @Operation(summary = "Neue Zahlung erfassen")
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping
     public ResponseEntity<Payment> createPayment(@RequestBody Payment payment) {
@@ -72,6 +78,7 @@ public class PaymentController {
         return ResponseEntity.ok(created);
     }
 
+    @Operation(summary = "Zahlung aktualisieren")
     @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/{id}")
     public ResponseEntity<Payment> updatePayment(@PathVariable Long id, @RequestBody Payment updated) {
@@ -90,6 +97,7 @@ public class PaymentController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
+    @Operation(summary = "Zahlung löschen")
     @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deletePayment(@PathVariable Long id) {
