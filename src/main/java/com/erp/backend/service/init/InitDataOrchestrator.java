@@ -6,6 +6,7 @@ package com.erp.backend.service.init;
 
 import com.erp.backend.domain.VorgangTyp;
 import com.erp.backend.domain.Vorgang;
+import com.erp.backend.service.KontoService;
 import com.erp.backend.service.VorgangService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -46,6 +47,7 @@ public class InitDataOrchestrator implements ApplicationRunner {
     private final BillingDataInitializer billingDataInitializer;   // Abrechnungsdaten (Fälligkeiten, Rechnungen)
     private final VorgangService vorgangService;                   // Vorgang-Management
     private final DataStatusReporter dataStatusReporter;          // Status-Reporting
+    private final KontoService kontoService;                       // Kontenplan (SKR04)
 
     /**
      * KONSTRUKTOR mit Dependency Injection
@@ -55,12 +57,14 @@ public class InitDataOrchestrator implements ApplicationRunner {
                                 BusinessDataInitializer businessDataInitializer,
                                 BillingDataInitializer billingDataInitializer,
                                 VorgangService vorgangService,
-                                DataStatusReporter dataStatusReporter) {
+                                DataStatusReporter dataStatusReporter,
+                                KontoService kontoService) {
         this.masterDataInitializer = masterDataInitializer;
         this.businessDataInitializer = businessDataInitializer;
         this.billingDataInitializer = billingDataInitializer;
         this.vorgangService = vorgangService;
         this.dataStatusReporter = dataStatusReporter;
+        this.kontoService = kontoService;
     }
 
     /**
@@ -69,6 +73,18 @@ public class InitDataOrchestrator implements ApplicationRunner {
      */
     @Override
     public void run(ApplicationArguments args) throws Exception {
+
+        // SKR04 immer initialisieren — unabhängig von autoRunOnStartup
+        try {
+            int created = kontoService.initSkr04();
+            if (created > 0) {
+                logger.info("Buchhaltung: {} SKR04-Konten angelegt", created);
+            } else {
+                logger.info("Buchhaltung: Kontenplan bereits vorhanden");
+            }
+        } catch (Exception e) {
+            logger.warn("SKR04-Initialisierung fehlgeschlagen (nicht kritisch): {}", e.getMessage());
+        }
 
         if (!autoRunOnStartup) {
             logger.info("Auto-run-on-startup is disabled. Skipping automatic data initialization.");
@@ -134,6 +150,13 @@ public class InitDataOrchestrator implements ApplicationRunner {
 
             int totalSteps = 0;
             int completedSteps = 0;
+
+            // SCHRITT 0: KONTENPLAN (SKR04) INITIALISIEREN
+            if (executeInitializationStep("Kontenplan SKR04", () ->
+                    kontoService.initSkr04())) {
+                completedSteps++;
+            }
+            totalSteps++;
 
             // SCHRITT 1: STAMMDATEN INITIALISIEREN
             if (executeInitializationStep("Stammdaten", () ->

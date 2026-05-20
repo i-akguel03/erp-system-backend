@@ -5,6 +5,7 @@ import com.erp.backend.entity.Role;
 import com.erp.backend.repository.*;
 import com.erp.backend.service.batch.InvoiceBatchOrchestrator;
 import com.erp.backend.service.batch.InvoiceBatchResult;
+import com.erp.backend.service.KontoService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -200,6 +201,7 @@ public class InitDataService  {
     private final InvoiceBatchOrchestrator invoiceBatchOrchestrator;
     private final NumberGeneratorService numberGeneratorService;
     private final UserDetailsServiceImpl userDetailsService;
+    private final KontoService kontoService;
 
     private final Random random = new Random();
 
@@ -214,7 +216,8 @@ public class InitDataService  {
                            InvoiceService invoiceService,
                            InvoiceBatchOrchestrator invoiceBatchOrchestrator,
                            NumberGeneratorService numberGeneratorService,
-                           UserDetailsServiceImpl userDetailsService) {
+                           UserDetailsServiceImpl userDetailsService,
+                           KontoService kontoService) {
         this.addressRepository = addressRepository;
         this.customerRepository = customerRepository;
         this.productRepository = productRepository;
@@ -227,6 +230,7 @@ public class InitDataService  {
         this.invoiceBatchOrchestrator = invoiceBatchOrchestrator;
         this.numberGeneratorService = numberGeneratorService;
         this.userDetailsService = userDetailsService;
+        this.kontoService = kontoService;
     }
 
 
@@ -293,6 +297,14 @@ public class InitDataService  {
             logger.info("Rechnungslauf-Stichtag: {}", billingDate);
         }
         logger.info("===========================================");
+
+        // Kontenplan (immer zuerst — Voraussetzung für GL-Buchungen)
+        try {
+            int created = kontoService.initSkr04();
+            logger.info("Kontenplan: {} SKR04-Konten angelegt (0 = bereits vorhanden)", created);
+        } catch (Exception e) {
+            logger.warn("SKR04-Initialisierung fehlgeschlagen: {}", e.getMessage());
+        }
 
         // Basis-Daten (immer)
         initUser();

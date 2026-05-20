@@ -33,11 +33,11 @@ public class Order {
     private double totalPrice;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "status", nullable = false)
+    @Column(name = "status", columnDefinition = "varchar(255) not null default 'ENTWURF'")
     private OrderStatus status = OrderStatus.ENTWURF;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "order_source", nullable = false)
+    @Column(name = "order_source", columnDefinition = "varchar(255) not null default 'MANUELL'")
     private OrderSource orderSource = OrderSource.MANUELL;
 
     @Column(name = "external_order_id")
