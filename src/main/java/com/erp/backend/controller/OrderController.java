@@ -1,9 +1,14 @@
 package com.erp.backend.controller;
 
 import com.erp.backend.domain.Order;
+import com.erp.backend.domain.OrderStatus;
+import com.erp.backend.dto.ExternalOrderRequestDTO;
+import com.erp.backend.dto.OrderDTO;
+import com.erp.backend.service.ExternalOrderService;
 import com.erp.backend.service.OrderService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -14,6 +19,8 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/orders")
@@ -22,9 +29,11 @@ import java.util.List;
 public class OrderController {
 
     private final OrderService service;
+    private final ExternalOrderService externalOrderService;
 
-    public OrderController(OrderService service) {
+    public OrderController(OrderService service, ExternalOrderService externalOrderService) {
         this.service = service;
+        this.externalOrderService = externalOrderService;
     }
 
     @Operation(summary = "Alle Bestellungen abrufen — optional paginiert")
@@ -50,6 +59,13 @@ public class OrderController {
         return ResponseEntity.ok(service.findAll());
     }
 
+    @Operation(summary = "Alle Bestellungen als DTO")
+    @PreAuthorize("hasAnyRole('ADMIN', 'USER', 'ORDERS_READ')")
+    @GetMapping("/details")
+    public ResponseEntity<List<OrderDTO>> getAllDetails() {
+        return ResponseEntity.ok(service.findAllAsDTO());
+    }
+
     @Operation(summary = "Bestellung nach ID abrufen")
     @PreAuthorize("hasAnyRole('ADMIN', 'USER', 'ORDERS_READ')")
     @GetMapping("/{id}")
@@ -57,6 +73,20 @@ public class OrderController {
         return service.findById(id)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
+    }
+
+    @Operation(summary = "Bestellungen nach Status filtern")
+    @PreAuthorize("hasAnyRole('ADMIN', 'USER', 'ORDERS_READ')")
+    @GetMapping("/status/{status}")
+    public ResponseEntity<List<OrderDTO>> getByStatus(@PathVariable OrderStatus status) {
+        return ResponseEntity.ok(service.findByStatus(status));
+    }
+
+    @Operation(summary = "Bestellungen nach Kunde")
+    @PreAuthorize("hasAnyRole('ADMIN', 'USER', 'ORDERS_READ')")
+    @GetMapping("/kunde/{customerId}")
+    public ResponseEntity<List<OrderDTO>> getByKunde(@PathVariable UUID customerId) {
+        return ResponseEntity.ok(service.findByCustomer(customerId));
     }
 
     @Operation(summary = "Neue Bestellung anlegen")
@@ -67,6 +97,16 @@ public class OrderController {
         return ResponseEntity.status(HttpStatus.CREATED).body(saved);
     }
 
+    @Operation(summary = "Bestellungsstatus ändern")
+    @PreAuthorize("hasRole('ADMIN')")
+    @PatchMapping("/{id}/status")
+    public ResponseEntity<OrderDTO> statusAendern(
+            @PathVariable Long id,
+            @RequestBody Map<String, String> body) {
+        OrderStatus neuerStatus = OrderStatus.valueOf(body.get("status"));
+        return ResponseEntity.ok(service.statusAendern(id, neuerStatus));
+    }
+
     @Operation(summary = "Bestellung aktualisieren")
     @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/{id}")
@@ -74,14 +114,13 @@ public class OrderController {
         return service.findById(id)
                 .map(existing -> {
                     existing.setCustomer(updated.getCustomer());
-                    existing.setItems(updated.getItems());  // statt setProducts
-                    existing.setTotalPrice(updated.getTotalPrice()); // statt setTotalAmount
+                    existing.setItems(updated.getItems());
+                    existing.setTotalPrice(updated.getTotalPrice());
                     existing.setOrderDate(updated.getOrderDate());
                     return ResponseEntity.ok(service.save(existing));
                 })
                 .orElse(ResponseEntity.notFound().build());
     }
-
 
     @Operation(summary = "Bestellung löschen")
     @PreAuthorize("hasRole('ADMIN')")
@@ -89,5 +128,24 @@ public class OrderController {
     public ResponseEntity<Void> deleteOrder(@PathVariable Long id) {
         service.deleteById(id);
         return ResponseEntity.noContent().build();
+    }
+
+    // -------------------------------------------------------------------------
+    // Externer Endpunkt für Webshop-Bestellungen
+    // Authentifizierung: ROLE_WEBSHOP oder ROLE_ADMIN
+    // Der Webshop sendet einen JWT-Token eines dedizierten Webshop-Benutzers
+    // -------------------------------------------------------------------------
+
+    @Operation(
+        summary = "Webshop-Bestellung entgegennehmen",
+        description = "Nimmt eine Bestellung von einem externen Webshop entgegen. " +
+                      "Kunde wird per E-Mail gesucht oder neu angelegt. " +
+                      "Authentifizierung via JWT mit ROLE_WEBSHOP oder ROLE_ADMIN."
+    )
+    @PreAuthorize("hasAnyRole('ADMIN', 'WEBSHOP')")
+    @PostMapping("/external")
+    public ResponseEntity<OrderDTO> externalOrder(@Valid @RequestBody ExternalOrderRequestDTO request) {
+        OrderDTO order = externalOrderService.verarbeiteBestellung(request);
+        return ResponseEntity.status(HttpStatus.CREATED).body(order);
     }
 }

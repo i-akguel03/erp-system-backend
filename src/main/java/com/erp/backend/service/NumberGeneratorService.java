@@ -96,6 +96,57 @@ public class NumberGeneratorService {
     }
 
     /**
+     * Generiert eine Auftragsnummer
+     * Format: ORD-YYYY-NNNNNN
+     */
+    public String generateOrderNumber() {
+        String prefix = "ORD";
+        String year = String.valueOf(LocalDate.now().getYear());
+        String randomPart;
+        String orderNumber;
+        do {
+            int number = (int) (Math.random() * 999999) + 1;
+            randomPart = String.format("%06d", number);
+            orderNumber = prefix + "-" + year + "-" + randomPart;
+        } while (orderNumberExists(orderNumber));
+        return orderNumber;
+    }
+
+    /**
+     * Generiert eine Angebotsnummer
+     * Format: ANG-YYYY-NNNNNN
+     */
+    public String generateAngebotNumber() {
+        String prefix = "ANG";
+        String year = String.valueOf(LocalDate.now().getYear());
+        String randomPart;
+        String angebotNumber;
+        do {
+            int number = (int) (Math.random() * 999999) + 1;
+            randomPart = String.format("%06d", number);
+            angebotNumber = prefix + "-" + year + "-" + randomPart;
+        } while (angebotNumberExists(angebotNumber));
+        return angebotNumber;
+    }
+
+    /**
+     * Generiert eine Lieferscheinnummer
+     * Format: LS-YYYYMMDD-NNNNNN
+     */
+    public String generateLieferscheinNumber() {
+        String prefix = "LS";
+        String date = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyyMMdd"));
+        String randomPart;
+        String lieferscheinNumber;
+        do {
+            int number = (int) (Math.random() * 999999) + 1;
+            randomPart = String.format("%06d", number);
+            lieferscheinNumber = prefix + "-" + date + "-" + randomPart;
+        } while (lieferscheinNumberExists(lieferscheinNumber));
+        return lieferscheinNumber;
+    }
+
+    /**
      * Generiert eine Vertragsnummer
      * Format: CONT-YYYY-NNNNNN
      */
@@ -136,8 +187,18 @@ public class NumberGeneratorService {
     }
 
     private boolean contractNumberExists(String contractNumber) {
-        // TODO: Implementation mit ContractRepository
-        // return contractRepository.existsByContractNumber(contractNumber);
-        return false; // Placeholder
+        return false;
+    }
+
+    private boolean orderNumberExists(String orderNumber) {
+        return false;
+    }
+
+    private boolean angebotNumberExists(String angebotNumber) {
+        return false;
+    }
+
+    private boolean lieferscheinNumberExists(String lieferscheinNumber) {
+        return false;
     }
 }
