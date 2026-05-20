@@ -90,7 +90,8 @@ public class KreditorenController {
     @PostMapping("/eingangsrechnungen")
     public ResponseEntity<Eingangsrechnung> erfassen(@RequestBody ErfassenRequest req) {
         Eingangsrechnung er = kreditorenService.erfassen(
-                req.getLieferantId(), req.getLieferantenRechnungsNr(),
+                req.getLieferantId(),
+                req.getLieferantenRechnungsnummer() != null ? req.getLieferantenRechnungsnummer() : req.getLieferantenRechnungsNr(),
                 req.getRechnungsDatum(), req.getFaelligDatum(),
                 req.getNettobetrag(), req.getSteuersatz(),
                 req.getAufwandskontoNr(), req.getNotizen()
@@ -111,12 +112,16 @@ public class KreditorenController {
     public ResponseEntity<Eingangsrechnung> bezahlen(
             @PathVariable UUID id,
             @RequestBody Map<String, String> body) {
+        LocalDate gezahltAm = body.get("gezahltAm") != null
+                ? LocalDate.parse(body.get("gezahltAm")) : LocalDate.now();
         return ResponseEntity.ok(kreditorenService.bezahlen(id, body.get("zahlungsreferenz")));
     }
 
     public static class ErfassenRequest {
         private UUID lieferantId;
-        private String lieferantenRechnungsNr;
+        private String lieferantenRechnungsNr;       // legacy field name
+        private String lieferantenRechnungsnummer;   // frontend field name
+        private LocalDate eingangsDatum;
         private LocalDate rechnungsDatum;
         private LocalDate faelligDatum;
         private BigDecimal nettobetrag;
@@ -127,7 +132,11 @@ public class KreditorenController {
         public UUID getLieferantId() { return lieferantId; }
         public void setLieferantId(UUID lieferantId) { this.lieferantId = lieferantId; }
         public String getLieferantenRechnungsNr() { return lieferantenRechnungsNr; }
-        public void setLieferantenRechnungsNr(String lieferantenRechnungsNr) { this.lieferantenRechnungsNr = lieferantenRechnungsNr; }
+        public void setLieferantenRechnungsNr(String v) { this.lieferantenRechnungsNr = v; }
+        public String getLieferantenRechnungsnummer() { return lieferantenRechnungsnummer; }
+        public void setLieferantenRechnungsnummer(String v) { this.lieferantenRechnungsnummer = v; }
+        public LocalDate getEingangsDatum() { return eingangsDatum; }
+        public void setEingangsDatum(LocalDate eingangsDatum) { this.eingangsDatum = eingangsDatum; }
         public LocalDate getRechnungsDatum() { return rechnungsDatum; }
         public void setRechnungsDatum(LocalDate rechnungsDatum) { this.rechnungsDatum = rechnungsDatum; }
         public LocalDate getFaelligDatum() { return faelligDatum; }

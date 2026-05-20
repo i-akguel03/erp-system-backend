@@ -1,5 +1,6 @@
 package com.erp.backend.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -24,6 +25,7 @@ public class Eingangsrechnung {
     @Column(name = "lieferanten_rechnungsnummer")
     private String lieferantenRechnungsnummer;
 
+    @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "lieferant_id", nullable = false)
     private Lieferant lieferant;
@@ -97,6 +99,10 @@ public class Eingangsrechnung {
 
     public Lieferant getLieferant() { return lieferant; }
     public void setLieferant(Lieferant lieferant) { this.lieferant = lieferant; }
+
+    // Flache Felder für Frontend-Serialisierung (verhindert Zirkelreferenz)
+    public String getLieferantId() { return lieferant != null ? lieferant.getId().toString() : null; }
+    public String getLieferantName() { return lieferant != null ? lieferant.getName() : null; }
 
     public LocalDate getEingangsDatum() { return eingangsDatum; }
     public void setEingangsDatum(LocalDate eingangsDatum) { this.eingangsDatum = eingangsDatum; }

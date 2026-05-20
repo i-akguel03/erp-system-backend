@@ -1,5 +1,6 @@
 package com.erp.backend.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -38,6 +39,7 @@ public class Lieferant {
     @Column(name = "bic")
     private String bic;
 
+    @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "adresse_id")
     private Address adresse;
@@ -48,6 +50,7 @@ public class Lieferant {
     @Column(name = "notizen", columnDefinition = "TEXT")
     private String notizen;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "lieferant", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Eingangsrechnung> eingangsrechnungen = new ArrayList<>();
 

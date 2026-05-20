@@ -14,6 +14,8 @@ import com.erp.backend.repository.AddressRepository;
 import com.erp.backend.repository.CustomerRepository;
 import com.erp.backend.repository.InventoryRepository;
 import com.erp.backend.repository.ProductRepository;
+import com.erp.backend.repository.LieferantRepository;
+import com.erp.backend.service.KreditorenService;
 import com.erp.backend.service.NumberGeneratorService;
 import com.erp.backend.service.UserDetailsServiceImpl;
 import com.erp.backend.service.VorgangService;
@@ -48,11 +50,13 @@ public class MasterDataInitializer {
     private final CustomerRepository customerRepository;
     private final ProductRepository productRepository;
     private final InventoryRepository inventoryRepository;
+    private final LieferantRepository lieferantRepository;
 
     // Service-Dependencies
     private final NumberGeneratorService numberGeneratorService;
     private final UserDetailsServiceImpl userDetailsService;
     private final VorgangService vorgangService;
+    private final KreditorenService kreditorenService;
 
     private final Random random = new Random();
 
@@ -63,16 +67,20 @@ public class MasterDataInitializer {
                                  CustomerRepository customerRepository,
                                  ProductRepository productRepository,
                                  InventoryRepository inventoryRepository,
+                                 LieferantRepository lieferantRepository,
                                  NumberGeneratorService numberGeneratorService,
                                  UserDetailsServiceImpl userDetailsService,
-                                 VorgangService vorgangService) {
+                                 VorgangService vorgangService,
+                                 KreditorenService kreditorenService) {
         this.addressRepository = addressRepository;
         this.customerRepository = customerRepository;
         this.productRepository = productRepository;
         this.inventoryRepository = inventoryRepository;
+        this.lieferantRepository = lieferantRepository;
         this.numberGeneratorService = numberGeneratorService;
         this.userDetailsService = userDetailsService;
         this.vorgangService = vorgangService;
+        this.kreditorenService = kreditorenService;
     }
 
     /**
@@ -110,12 +118,16 @@ public class MasterDataInitializer {
             int inventoryCount = initializeInventory();
             totalOperations++;
 
+            // 6. Lieferanten initialisieren
+            int lieferantenCount = initializeLieferanten();
+            totalOperations++;
+
             // Vorgang erfolgreich abschließen
             vorgangService.vorgangErfolgreichAbschliessen(vorgang.getId(),
                     totalOperations, totalOperations, 0, null);
 
-            logger.info("✓ Stammdaten-Initialisierung abgeschlossen: {} Adressen, {} Kunden, {} Produkte, {} Lagerartikel",
-                    addressCount, customerCount, productCount, inventoryCount);
+            logger.info("✓ Stammdaten-Initialisierung abgeschlossen: {} Adressen, {} Kunden, {} Produkte, {} Lagerartikel, {} Lieferanten",
+                    addressCount, customerCount, productCount, inventoryCount, lieferantenCount);
 
         } catch (Exception e) {
             logger.error("Fehler bei Stammdaten-Initialisierung", e);
@@ -332,5 +344,38 @@ public class MasterDataInitializer {
 
         logger.debug("✓ {} Lagerartikel erstellt", created);
         return created;
+    }
+
+    private int initializeLieferanten() {
+        if (lieferantRepository.count() > 0) {
+            logger.info("Lieferanten bereits vorhanden - überspringe Initialisierung");
+            return (int) lieferantRepository.count();
+        }
+
+        logger.info("Initialisiere Lieferanten...");
+
+        Object[][] data = {
+            {"Büro & Schreibwaren GmbH",   "info@buero-schreibwaren.de",  "+493011223344", "DE123/456/78901", "DE12345678901", "DE89370400440532013000", "COBADEFFXXX"},
+            {"IT Solutions AG",             "kontakt@it-solutions.de",     "+498911223344", "DE234/567/89012", "DE23456789012", "DE27100777770209299700", "DEUTDEDB"},
+            {"Software Lizenz GmbH",        "lizenzen@software-gmbh.de",  "+492211223344", "DE345/678/90123", "DE34567890123", "DE75512108001245126199", "SSKMDEMM"},
+            {"Travel & Events GmbH",        "buchung@travel-events.de",    "+496911223344", "DE456/789/01234", "DE45678901234", "DE91100000000123456789", "BELADEBEXXX"},
+            {"Marketing Partner GmbH",      "team@marketing-partner.de",  "+494011223344", "DE567/890/12345", "DE56789012345", "DE36200400600095692100", "COBADEFFXXX"},
+            {"Logistik & Transport AG",     "service@logistik-ag.de",     "+493011223355", "DE678/901/23456", "DE67890123456", "DE02120300000000202051", "BYLADEM1001"}
+        };
+
+        for (Object[] row : data) {
+            Lieferant l = new Lieferant();
+            l.setName((String) row[0]);
+            l.setEmail((String) row[1]);
+            l.setTel((String) row[2]);
+            l.setSteuernummer((String) row[3]);
+            l.setUstIdNr((String) row[4]);
+            l.setIban((String) row[5]);
+            l.setBic((String) row[6]);
+            kreditorenService.lieferantAnlegen(l);
+        }
+
+        logger.debug("✓ {} Lieferanten erstellt", data.length);
+        return data.length;
     }
 }

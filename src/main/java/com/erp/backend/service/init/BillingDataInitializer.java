@@ -5,6 +5,8 @@ import com.erp.backend.repository.*;
 import com.erp.backend.service.*;
 import com.erp.backend.service.batch.InvoiceBatchOrchestrator;
 import com.erp.backend.service.batch.InvoiceBatchResult;
+import com.erp.backend.repository.EingangsrechnungRepository;
+import com.erp.backend.repository.LieferantRepository;
 import com.erp.backend.repository.OrderRepository;
 import com.erp.backend.repository.PaymentRepository;
 import org.slf4j.Logger;
@@ -42,12 +44,16 @@ public class BillingDataInitializer {
     private final ProductRepository productRepository;
     private final OrderRepository orderRepository;
     private final PaymentRepository paymentRepository;
+    private final LieferantRepository lieferantRepository;
+    private final EingangsrechnungRepository eingangsrechnungRepository;
 
     // Service-Dependencies
     private final VorgangService vorgangService;
     private final NumberGeneratorService numberGeneratorService;
     private final InvoiceService invoiceService;
     private final InvoiceBatchOrchestrator invoiceBatchOrchestrator;
+    private final BuchhaltungService buchhaltungService;
+    private final KreditorenService kreditorenService;
 
     private final Random random = new Random();
 
@@ -62,10 +68,14 @@ public class BillingDataInitializer {
                                   ProductRepository productRepository,
                                   OrderRepository orderRepository,
                                   PaymentRepository paymentRepository,
+                                  LieferantRepository lieferantRepository,
+                                  EingangsrechnungRepository eingangsrechnungRepository,
                                   VorgangService vorgangService,
                                   NumberGeneratorService numberGeneratorService,
                                   InvoiceService invoiceService,
-                                  InvoiceBatchOrchestrator invoiceBatchOrchestrator) {
+                                  InvoiceBatchOrchestrator invoiceBatchOrchestrator,
+                                  BuchhaltungService buchhaltungService,
+                                  KreditorenService kreditorenService) {
         this.subscriptionRepository = subscriptionRepository;
         this.dueScheduleRepository = dueScheduleRepository;
         this.invoiceRepository = invoiceRepository;
@@ -74,10 +84,14 @@ public class BillingDataInitializer {
         this.productRepository = productRepository;
         this.orderRepository = orderRepository;
         this.paymentRepository = paymentRepository;
+        this.lieferantRepository = lieferantRepository;
+        this.eingangsrechnungRepository = eingangsrechnungRepository;
         this.vorgangService = vorgangService;
         this.numberGeneratorService = numberGeneratorService;
         this.invoiceService = invoiceService;
         this.invoiceBatchOrchestrator = invoiceBatchOrchestrator;
+        this.buchhaltungService = buchhaltungService;
+        this.kreditorenService = kreditorenService;
     }
 
     /**
@@ -107,7 +121,8 @@ public class BillingDataInitializer {
                 if (mode == InitMode.INVOICES_MANUAL || mode == InitMode.FULL || mode == InitMode.FULL_WITH_BILLING) {
                     invoicesCreated = createSampleInvoices(config);
                     openItemsCreated = createSampleOpenItems(config);
-                    totalOperations += 2;
+                    initializeEingangsrechnungen();
+                    totalOperations += 3;
                 }
 
                 // 3. Automatischer Rechnungslauf (nur bei FULL Modi)
@@ -315,12 +330,19 @@ public class BillingDataInitializer {
                     invoice.addInvoiceItem(secondItem);
                 }
 
-                // Rechnung direkt speichern (InvoiceService würde automatisch ein OpenItem erstellen,
-                // aber createSampleOpenItems() übernimmt das separat mit konfigurierbaren Statuses)
                 invoice.setInvoiceNumber(numberGeneratorService.generateInvoiceNumber());
                 invoice.calculateTotals();
                 invoiceRepository.save(invoice);
                 invoicesCreated++;
+
+                // GL-Buchung: Forderung buchen wenn Rechnung versendet
+                if (Invoice.InvoiceStatus.SENT.equals(invoice.getStatus())) {
+                    try {
+                        buchhaltungService.bucheRechnung(invoice);
+                    } catch (Exception e) {
+                        logger.warn("GL-Buchung für Rechnung {} übersprungen: {}", invoice.getInvoiceNumber(), e.getMessage());
+                    }
+                }
 
             } catch (Exception e) {
                 logger.error("Fehler beim Erstellen einer Sample-Rechnung: {}", e.getMessage());
@@ -376,8 +398,18 @@ public class BillingDataInitializer {
                     case PARTIALLY_PAID -> partiallyPaidCount++;
                 }
 
-                openItemRepository.save(openItem);
+                OpenItem savedOpenItem = openItemRepository.save(openItem);
                 openItemsCreated++;
+
+                // GL-Buchung: Zahlungseingang buchen wenn bezahlt
+                if (savedOpenItem.getPaidAmount() != null &&
+                        savedOpenItem.getPaidAmount().compareTo(BigDecimal.ZERO) > 0) {
+                    try {
+                        buchhaltungService.bucheZahlungseingang(savedOpenItem, savedOpenItem.getPaidAmount());
+                    } catch (Exception e) {
+                        logger.warn("GL-Buchung Zahlungseingang für OpenItem übersprungen: {}", e.getMessage());
+                    }
+                }
 
             } catch (Exception e) {
                 logger.error("Fehler beim Erstellen eines OpenItems für Rechnung {}: {}",
@@ -534,6 +566,85 @@ public class BillingDataInitializer {
         logger.info("✓ {} Zahlungen erstellt: {} PAID, {} PENDING, {} FAILED",
                 created, paidCount, pendingCount, failedCount);
         return created;
+    }
+
+    /**
+     * PRIVATE METHODE: Eingangsrechnungen initialisieren
+     */
+    private void initializeEingangsrechnungen() {
+        if (eingangsrechnungRepository.count() > 0) {
+            logger.info("Eingangsrechnungen bereits vorhanden - überspringe Initialisierung");
+            return;
+        }
+
+        List<Lieferant> lieferanten = lieferantRepository.findAll();
+        if (lieferanten.isEmpty()) {
+            logger.warn("Keine Lieferanten für Eingangsrechnungen vorhanden");
+            return;
+        }
+
+        logger.info("Initialisiere Eingangsrechnungen...");
+
+        // [lieferantIndex, beschreibung, netto, steuersatz, aufwandskontoNr, monate_zurueck, status]
+        // status: 0=ERFASST, 1=FREIGEGEBEN, 2=BEZAHLT
+        Object[][] rechnungen = {
+            {0, "Büromaterial Q1",            BigDecimal.valueOf(420.00),  BigDecimal.valueOf(19), 6300L, 3, 2},
+            {0, "Büromaterial Q2",            BigDecimal.valueOf(380.50),  BigDecimal.valueOf(19), 6300L, 1, 1},
+            {1, "Server-Hosting März",        BigDecimal.valueOf(890.00),  BigDecimal.valueOf(19), 6400L, 2, 2},
+            {1, "IT-Support April",           BigDecimal.valueOf(1250.00), BigDecimal.valueOf(19), 6400L, 1, 1},
+            {1, "Netzwerk-Equipment",         BigDecimal.valueOf(2100.00), BigDecimal.valueOf(19), 6400L, 0, 0},
+            {2, "Adobe Lizenzen Jahres-Abo",  BigDecimal.valueOf(3600.00), BigDecimal.valueOf(19), 6400L, 2, 2},
+            {2, "Microsoft 365 Renewal",      BigDecimal.valueOf(2160.00), BigDecimal.valueOf(19), 6400L, 1, 1},
+            {3, "Geschäftsreise Berlin",      BigDecimal.valueOf(540.00),  BigDecimal.valueOf(19), 6500L, 2, 2},
+            {3, "Messe Frankfurt",            BigDecimal.valueOf(1100.00), BigDecimal.valueOf(19), 6500L, 1, 1},
+            {3, "Teamreise geplant",          BigDecimal.valueOf(780.00),  BigDecimal.valueOf(19), 6500L, 0, 0},
+            {4, "Social Media Kampagne",      BigDecimal.valueOf(1800.00), BigDecimal.valueOf(19), 6600L, 2, 2},
+            {4, "Google Ads April",           BigDecimal.valueOf(650.00),  BigDecimal.valueOf(19), 6600L, 1, 1},
+            {5, "Spedition Lieferung März",   BigDecimal.valueOf(320.00),  BigDecimal.valueOf(19), 6800L, 2, 2},
+            {5, "Expresslieferung April",     BigDecimal.valueOf(185.00),  BigDecimal.valueOf(19), 6800L, 1, 1},
+            {5, "Palettenlieferung Mai",      BigDecimal.valueOf(260.00),  BigDecimal.valueOf(19), 6800L, 0, 0},
+        };
+
+        int erfasst = 0, freigegeben = 0, bezahlt = 0;
+
+        for (Object[] r : rechnungen) {
+            try {
+                int liefIdx = (int) r[0];
+                Lieferant lieferant = lieferanten.get(liefIdx % lieferanten.size());
+                String beschreibung = (String) r[1];
+                BigDecimal netto = (BigDecimal) r[2];
+                BigDecimal steuer = (BigDecimal) r[3];
+                Long kontoNr = (Long) r[4];
+                int monateZurueck = (int) r[5];
+                int status = (int) r[6];
+
+                java.time.LocalDate rechnungsDatum = java.time.LocalDate.now().minusMonths(monateZurueck).withDayOfMonth(1 + random.nextInt(20));
+                java.time.LocalDate faelligDatum = rechnungsDatum.plusDays(30);
+                String liefRechnungsNr = "LR-" + rechnungsDatum.getYear() + "-" + String.format("%04d", random.nextInt(9999) + 1);
+
+                Eingangsrechnung er = kreditorenService.erfassen(
+                        lieferant.getId(), liefRechnungsNr, rechnungsDatum, faelligDatum,
+                        netto, steuer, kontoNr, beschreibung
+                );
+                erfasst++;
+
+                if (status >= 1) {
+                    er = kreditorenService.freigeben(er.getId());
+                    freigegeben++;
+                }
+
+                if (status >= 2) {
+                    kreditorenService.bezahlen(er.getId(), "ZA-" + System.currentTimeMillis());
+                    bezahlt++;
+                }
+
+            } catch (Exception e) {
+                logger.error("Fehler beim Erstellen einer Eingangsrechnung: {}", e.getMessage());
+            }
+        }
+
+        logger.info("✓ {} Eingangsrechnungen erstellt: {} freigegeben (GL-Buchung), {} bezahlt",
+                erfasst, freigegeben, bezahlt);
     }
 
     /**

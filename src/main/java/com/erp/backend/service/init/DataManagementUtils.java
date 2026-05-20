@@ -16,6 +16,7 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
 
+
 /**
  * =====================================================================================
  * DATA MANAGEMENT UTILITIES SERVICE
@@ -82,6 +83,11 @@ public class DataManagementUtils {
     private final OrderRepository orderRepository;
     private final NotificationRepository notificationRepository;
     private final InventoryRepository inventoryRepository;
+    private final BuchungssatzRepository buchungssatzRepository;
+    private final EingangsrechnungRepository eingangsrechnungRepository;
+    private final LieferantRepository lieferantRepository;
+    private final AngebotRepository angebotRepository;
+    private final LieferscheinRepository lieferscheinRepository;
 
     // Basis-Entitäten (können später gelöscht werden)
     private final CustomerRepository customerRepository;
@@ -138,6 +144,11 @@ public class DataManagementUtils {
                                OrderRepository orderRepository,
                                NotificationRepository notificationRepository,
                                InventoryRepository inventoryRepository,
+                               BuchungssatzRepository buchungssatzRepository,
+                               EingangsrechnungRepository eingangsrechnungRepository,
+                               LieferantRepository lieferantRepository,
+                               AngebotRepository angebotRepository,
+                               LieferscheinRepository lieferscheinRepository,
                                CustomerRepository customerRepository,
                                ProductRepository productRepository,
                                AddressRepository addressRepository,
@@ -155,6 +166,11 @@ public class DataManagementUtils {
         this.orderRepository = orderRepository;
         this.notificationRepository = notificationRepository;
         this.inventoryRepository = inventoryRepository;
+        this.buchungssatzRepository = buchungssatzRepository;
+        this.eingangsrechnungRepository = eingangsrechnungRepository;
+        this.lieferantRepository = lieferantRepository;
+        this.angebotRepository = angebotRepository;
+        this.lieferscheinRepository = lieferscheinRepository;
         this.customerRepository = customerRepository;
         this.productRepository = productRepository;
         this.addressRepository = addressRepository;
@@ -217,22 +233,28 @@ public class DataManagementUtils {
             // STUFE 1: Kindtabellen ohne eigenes Repository (via JPQL)
             totalDeleted += deleteAllInvoiceItems();
             totalDeleted += deleteAllOrderItems();
+            totalDeleted += deleteAllBuchungspositionen();
 
             // STUFE 2: Abhängige Geschäftsdaten löschen
             totalDeleted += deleteAllOpenItems("Vollständiger Reset");
             totalDeleted += deleteAllInvoices("Vollständiger Reset");
+            totalDeleted += deleteAllBuchungssaetze("Vollständiger Reset");
+            totalDeleted += deleteAllEingangsrechnungen("Vollständiger Reset");
             totalDeleted += deleteAllNotifications("Vollständiger Reset");
             totalDeleted += deleteAllPayments("Vollständiger Reset");
             totalDeleted += deleteAllDueSchedules("Vollständiger Reset");
             totalDeleted += deleteAllSubscriptions("Vollständiger Reset");
             totalDeleted += deleteAllContracts("Vollständiger Reset");
+            totalDeleted += deleteAllLieferscheine("Vollständiger Reset");
             totalDeleted += deleteAllOrders("Vollständiger Reset");
+            totalDeleted += deleteAllAngebote("Vollständiger Reset");
 
             // STUFE 3: Stammdaten löschen
             totalDeleted += deleteAllInventory("Vollständiger Reset");
             totalDeleted += deleteAllProducts("Vollständiger Reset");
             totalDeleted += deleteAllCustomers("Vollständiger Reset");
             totalDeleted += deleteAllAddresses("Vollständiger Reset");
+            totalDeleted += deleteAllLieferanten("Vollständiger Reset");
 
             // STUFE 3: Standard-Benutzer neu anlegen
             logger.info("   👤 Lege Standard-Benutzer neu an...");
@@ -333,14 +355,19 @@ public class DataManagementUtils {
             int totalDeleted = 0;
             totalDeleted += deleteAllInvoiceItems();
             totalDeleted += deleteAllOrderItems();
+            totalDeleted += deleteAllBuchungspositionen();
             totalDeleted += deleteAllOpenItems("Partielle Bereinigung");
             totalDeleted += deleteAllInvoices("Partielle Bereinigung");
+            totalDeleted += deleteAllBuchungssaetze("Partielle Bereinigung");
+            totalDeleted += deleteAllEingangsrechnungen("Partielle Bereinigung");
             totalDeleted += deleteAllNotifications("Partielle Bereinigung");
             totalDeleted += deleteAllPayments("Partielle Bereinigung");
             totalDeleted += deleteAllDueSchedules("Partielle Bereinigung");
             totalDeleted += deleteAllSubscriptions("Partielle Bereinigung");
             totalDeleted += deleteAllContracts("Partielle Bereinigung");
+            totalDeleted += deleteAllLieferscheine("Partielle Bereinigung");
             totalDeleted += deleteAllOrders("Partielle Bereinigung");
+            totalDeleted += deleteAllAngebote("Partielle Bereinigung");
 
             // Erfolg dokumentieren
             vorgangService.vorgangErfolgreichAbschliessen(
@@ -722,6 +749,15 @@ public class DataManagementUtils {
         return count;
     }
 
+    private int deleteAllBuchungspositionen() {
+        int count = ((Number) entityManager.createQuery("SELECT COUNT(bp) FROM Buchungsposition bp").getSingleResult()).intValue();
+        if (count > 0) {
+            logger.info("   🗑️ Lösche {} Buchungspositionen...", count);
+            entityManager.createQuery("DELETE FROM Buchungsposition").executeUpdate();
+        }
+        return count;
+    }
+
     private int deleteAllOrderItems() {
         int count = ((Number) entityManager.createQuery("SELECT COUNT(oi) FROM OrderItem oi").getSingleResult()).intValue();
         if (count > 0) {
@@ -763,6 +799,51 @@ public class DataManagementUtils {
         if (count > 0) {
             logger.info("   🗑️ Lösche {} Inventory-Einträge... (Kontext: {})", count, context);
             inventoryRepository.deleteAllInBatch();
+        }
+        return count;
+    }
+
+    private int deleteAllBuchungssaetze(String context) {
+        int count = (int) buchungssatzRepository.count();
+        if (count > 0) {
+            logger.info("   🗑️ Lösche {} Buchungssätze... (Kontext: {})", count, context);
+            buchungssatzRepository.deleteAllInBatch();
+        }
+        return count;
+    }
+
+    private int deleteAllEingangsrechnungen(String context) {
+        int count = (int) eingangsrechnungRepository.count();
+        if (count > 0) {
+            logger.info("   🗑️ Lösche {} Eingangsrechnungen... (Kontext: {})", count, context);
+            eingangsrechnungRepository.deleteAllInBatch();
+        }
+        return count;
+    }
+
+    private int deleteAllLieferanten(String context) {
+        int count = (int) lieferantRepository.count();
+        if (count > 0) {
+            logger.info("   🗑️ Lösche {} Lieferanten... (Kontext: {})", count, context);
+            lieferantRepository.deleteAllInBatch();
+        }
+        return count;
+    }
+
+    private int deleteAllAngebote(String context) {
+        int count = (int) angebotRepository.count();
+        if (count > 0) {
+            logger.info("   🗑️ Lösche {} Angebote... (Kontext: {})", count, context);
+            angebotRepository.deleteAllInBatch();
+        }
+        return count;
+    }
+
+    private int deleteAllLieferscheine(String context) {
+        int count = (int) lieferscheinRepository.count();
+        if (count > 0) {
+            logger.info("   🗑️ Lösche {} Lieferscheine... (Kontext: {})", count, context);
+            lieferscheinRepository.deleteAllInBatch();
         }
         return count;
     }
@@ -1138,6 +1219,11 @@ public class DataManagementUtils {
                 dueScheduleRepository.count() +
                 subscriptionRepository.count() +
                 contractRepository.count() +
+                buchungssatzRepository.count() +
+                eingangsrechnungRepository.count() +
+                lieferantRepository.count() +
+                angebotRepository.count() +
+                lieferscheinRepository.count() +
                 customerRepository.count() +
                 productRepository.count() +
                 addressRepository.count();
