@@ -68,18 +68,23 @@ public class InvoiceService {
      * - DueScheduleService für Rollback bei Stornierung
      * - DueScheduleRepository um DueSchedule über Invoice zu finden
      */
+    private BuchhaltungService buchhaltungService;
+
     public InvoiceService(InvoiceRepository invoiceRepository,
                           CustomerRepository customerRepository,
                           OpenItemRepository openItemRepository,
                           DueScheduleRepository dueScheduleRepository,
                           OpenItemFactory openItemFactory,
-                          DueScheduleService dueScheduleService) {
+                          DueScheduleService dueScheduleService,
+                          @org.springframework.beans.factory.annotation.Autowired(required = false)
+                          BuchhaltungService buchhaltungService) {
         this.invoiceRepository = invoiceRepository;
         this.customerRepository = customerRepository;
         this.openItemRepository = openItemRepository;
         this.dueScheduleRepository = dueScheduleRepository;
         this.openItemFactory = openItemFactory;
         this.dueScheduleService = dueScheduleService;
+        this.buchhaltungService = buchhaltungService;
     }
 
     // ========================================
@@ -255,6 +260,11 @@ public class InvoiceService {
         Invoice saved = invoiceRepository.save(invoice);
         logger.info("Changed invoice status: id={}, {} → {}",
                 invoiceId, oldStatus, newStatus);
+
+        // GL-Buchung bei Statuswechsel auf SENT
+        if (Invoice.InvoiceStatus.SENT.equals(newStatus) && buchhaltungService != null) {
+            buchhaltungService.bucheRechnung(saved);
+        }
 
         return saved;
     }

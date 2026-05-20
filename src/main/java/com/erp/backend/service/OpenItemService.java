@@ -32,13 +32,17 @@ public class OpenItemService {
     private final OpenItemRepository openItemRepository;
     private final InvoiceRepository invoiceRepository;
     private final CustomerRepository customerRepository;
+    private BuchhaltungService buchhaltungService;
 
     public OpenItemService(OpenItemRepository openItemRepository,
                            InvoiceRepository invoiceRepository,
-                           CustomerRepository customerRepository) {
+                           CustomerRepository customerRepository,
+                           @org.springframework.beans.factory.annotation.Autowired(required = false)
+                           BuchhaltungService buchhaltungService) {
         this.openItemRepository = openItemRepository;
         this.invoiceRepository = invoiceRepository;
         this.customerRepository = customerRepository;
+        this.buchhaltungService = buchhaltungService;
     }
 
     // ========================================
@@ -124,6 +128,11 @@ public class OpenItemService {
         OpenItem saved = openItemRepository.save(openItem);
         logger.info("Recorded payment: openItemId={}, amount={}, method={}, newStatus={}",
                 openItemId, paymentAmount, paymentMethod, saved.getStatus());
+
+        // GL-Buchung: Zahlungseingang
+        if (buchhaltungService != null) {
+            buchhaltungService.bucheZahlungseingang(saved, paymentAmount);
+        }
 
         return saved;
     }
