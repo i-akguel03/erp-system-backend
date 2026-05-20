@@ -87,8 +87,9 @@ public class SecurityConfig {
 
                 // Zugriffskontrolle für Endpoints
                 .authorizeHttpRequests(auth -> auth
+                        .requestMatchers(org.springframework.http.HttpMethod.OPTIONS, "/**").permitAll() // CORS preflight
                         .requestMatchers("/auth/**").permitAll()           // Authentifizierung frei
-                        .requestMatchers("/actuator/health").permitAll()   // Health-Check frei (z. B. für Frontend/Monitoring)
+                        .requestMatchers("/actuator/health").permitAll()   // Health-Check frei
                         .requestMatchers("/api/**").authenticated()        // alle /api/** brauchen Login
                         .anyRequest().permitAll()                         // Rest erlauben
                 )
@@ -120,7 +121,7 @@ public class SecurityConfig {
         ));
 
         // Erlaubte HTTP-Methoden
-        configuration.setAllowedMethods(List.of("GET","POST","PUT","DELETE","OPTIONS"));
+        configuration.setAllowedMethods(List.of("GET","POST","PUT","PATCH","DELETE","OPTIONS"));
 
         // Erlaubte Header (z. B. Authorization, Content-Type)
         configuration.setAllowedHeaders(List.of("*"));
