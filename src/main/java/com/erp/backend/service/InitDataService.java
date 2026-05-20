@@ -6,6 +6,7 @@ import com.erp.backend.repository.*;
 import com.erp.backend.service.batch.InvoiceBatchOrchestrator;
 import com.erp.backend.service.batch.InvoiceBatchResult;
 import com.erp.backend.service.KontoService;
+import com.erp.backend.service.BuchhaltungService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -202,6 +203,7 @@ public class InitDataService  {
     private final NumberGeneratorService numberGeneratorService;
     private final UserDetailsServiceImpl userDetailsService;
     private final KontoService kontoService;
+    private final BuchhaltungService buchhaltungService;
 
     private final Random random = new Random();
 
@@ -217,7 +219,8 @@ public class InitDataService  {
                            InvoiceBatchOrchestrator invoiceBatchOrchestrator,
                            NumberGeneratorService numberGeneratorService,
                            UserDetailsServiceImpl userDetailsService,
-                           KontoService kontoService) {
+                           KontoService kontoService,
+                           BuchhaltungService buchhaltungService) {
         this.addressRepository = addressRepository;
         this.customerRepository = customerRepository;
         this.productRepository = productRepository;
@@ -231,6 +234,7 @@ public class InitDataService  {
         this.numberGeneratorService = numberGeneratorService;
         this.userDetailsService = userDetailsService;
         this.kontoService = kontoService;
+        this.buchhaltungService = buchhaltungService;
     }
 
 
@@ -837,6 +841,15 @@ public class InitDataService  {
                 Invoice savedInvoice = invoiceService.createInvoice(invoice);
                 invoicesCreated++;
 
+                // GL-Buchung: Forderung buchen wenn Rechnung versendet
+                if (Invoice.InvoiceStatus.SENT.equals(savedInvoice.getStatus())) {
+                    try {
+                        buchhaltungService.bucheRechnung(savedInvoice);
+                    } catch (Exception e) {
+                        logger.warn("GL-Buchung für Sample-Rechnung {} übersprungen: {}", savedInvoice.getInvoiceNumber(), e.getMessage());
+                    }
+                }
+
                 // OpenItem nur für nicht-stornierte Rechnungen erstellen
                 if (savedInvoice.getStatus() != Invoice.InvoiceStatus.CANCELLED &&
                         savedInvoice.getTotalAmount() != null &&
@@ -853,6 +866,16 @@ public class InitDataService  {
 
                         OpenItem savedOpenItem = openItemRepository.save(openItem);
                         openItemsCreated++;
+
+                        // GL-Buchung: Zahlungseingang buchen wenn OpenItem bezahlt
+                        if (savedOpenItem.getPaidAmount() != null &&
+                                savedOpenItem.getPaidAmount().compareTo(BigDecimal.ZERO) > 0) {
+                            try {
+                                buchhaltungService.bucheZahlungseingang(savedOpenItem, savedOpenItem.getPaidAmount());
+                            } catch (Exception e) {
+                                logger.warn("GL-Buchung Zahlungseingang für Sample-OpenItem übersprungen: {}", e.getMessage());
+                            }
+                        }
 
                         logger.debug("OpenItem erstellt für Sample-Rechnung {}: {} EUR",
                                 savedInvoice.getInvoiceNumber(), savedInvoice.getTotalAmount());
@@ -910,11 +933,21 @@ public class InitDataService  {
                     case PARTIALLY_PAID -> partiallyPaidCount++;
                 }
 
-                openItemRepository.save(openItem);
+                OpenItem savedOpenItem = openItemRepository.save(openItem);
                 openItemsCreated++;
 
+                // GL-Buchung: Zahlungseingang buchen wenn OpenItem bezahlt
+                if (savedOpenItem.getPaidAmount() != null &&
+                        savedOpenItem.getPaidAmount().compareTo(BigDecimal.ZERO) > 0) {
+                    try {
+                        buchhaltungService.bucheZahlungseingang(savedOpenItem, savedOpenItem.getPaidAmount());
+                    } catch (Exception e) {
+                        logger.warn("GL-Buchung Zahlungseingang für OpenItem übersprungen: {}", e.getMessage());
+                    }
+                }
+
                 logger.debug("Zusätzlicher OpenItem erstellt für Rechnung {} mit Status {}",
-                        invoice.getInvoiceNumber(), openItem.getStatus());
+                        invoice.getInvoiceNumber(), savedOpenItem.getStatus());
 
             } catch (Exception e) {
                 logger.error("Fehler beim Erstellen eines zusätzlichen OpenItems für Rechnung {}: {}",
