@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.UUID;
 
 public interface EingangsrechnungRepository extends JpaRepository<Eingangsrechnung, UUID> {
-    List<Eingangsrechnung> findByLieferantId(UUID lieferantId);
+    List<Eingangsrechnung> findByLieferant_Id(UUID lieferantId);
     List<Eingangsrechnung> findByStatus(EingangsrechnungStatus status);
     List<Eingangsrechnung> findByFaelligDatumBefore(LocalDate datum);
     boolean existsByEingangsrechnungsnummer(String eingangsrechnungsnummer);
