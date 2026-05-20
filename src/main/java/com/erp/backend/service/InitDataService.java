@@ -7,6 +7,9 @@ import com.erp.backend.service.batch.InvoiceBatchOrchestrator;
 import com.erp.backend.service.batch.InvoiceBatchResult;
 import com.erp.backend.service.KontoService;
 import com.erp.backend.service.BuchhaltungService;
+import com.erp.backend.service.KreditorenService;
+import com.erp.backend.repository.LieferantRepository;
+import com.erp.backend.repository.EingangsrechnungRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -204,6 +207,9 @@ public class InitDataService  {
     private final UserDetailsServiceImpl userDetailsService;
     private final KontoService kontoService;
     private final BuchhaltungService buchhaltungService;
+    private final KreditorenService kreditorenService;
+    private final LieferantRepository lieferantRepository;
+    private final EingangsrechnungRepository eingangsrechnungRepository;
 
     private final Random random = new Random();
 
@@ -220,7 +226,10 @@ public class InitDataService  {
                            NumberGeneratorService numberGeneratorService,
                            UserDetailsServiceImpl userDetailsService,
                            KontoService kontoService,
-                           BuchhaltungService buchhaltungService) {
+                           BuchhaltungService buchhaltungService,
+                           KreditorenService kreditorenService,
+                           LieferantRepository lieferantRepository,
+                           EingangsrechnungRepository eingangsrechnungRepository) {
         this.addressRepository = addressRepository;
         this.customerRepository = customerRepository;
         this.productRepository = productRepository;
@@ -235,6 +244,9 @@ public class InitDataService  {
         this.userDetailsService = userDetailsService;
         this.kontoService = kontoService;
         this.buchhaltungService = buchhaltungService;
+        this.kreditorenService = kreditorenService;
+        this.lieferantRepository = lieferantRepository;
+        this.eingangsrechnungRepository = eingangsrechnungRepository;
     }
 
 
@@ -315,6 +327,7 @@ public class InitDataService  {
         initAddresses();
         initCustomers();
         initProducts();
+        initLieferanten();
 
         if (mode == InitMode.BASIC) {
             logger.info("Basis-Initialisierung abgeschlossen (BASIC Mode)");
@@ -345,6 +358,7 @@ public class InitDataService  {
         if (mode == InitMode.INVOICES_MANUAL || mode == InitMode.FULL) {
             createSampleInvoices(config);
             createSampleOpenItems(config);
+            initEingangsrechnungen();
         }
 
         if (mode == InitMode.INVOICES_MANUAL) {
@@ -989,6 +1003,118 @@ public class InitDataService  {
                 openItem.addReminder();
             }
         }
+    }
+
+    // ===============================================================================================
+    // KREDITOREN: LIEFERANTEN UND EINGANGSRECHNUNGEN
+    // ===============================================================================================
+
+    private void initLieferanten() {
+        if (lieferantRepository.count() > 0) {
+            logger.info("Lieferanten bereits vorhanden - Überspringe Initialisierung");
+            return;
+        }
+
+        logger.info("Initialisiere Lieferanten...");
+
+        Object[][] data = {
+            {"Büro & Schreibwaren GmbH",   "info@buero-schreibwaren.de",  "+493011223344", "DE123/456/78901", "DE12345678901", "DE89370400440532013000", "COBADEFFXXX"},
+            {"IT Solutions AG",             "kontakt@it-solutions.de",     "+498911223344", "DE234/567/89012", "DE23456789012", "DE27100777770209299700", "DEUTDEDB"},
+            {"Software Lizenz GmbH",        "lizenzen@software-gmbh.de",  "+492211223344", "DE345/678/90123", "DE34567890123", "DE75512108001245126199", "SSKMDEMM"},
+            {"Travel & Events GmbH",        "buchung@travel-events.de",    "+496911223344", "DE456/789/01234", "DE45678901234", "DE91100000000123456789", "BELADEBEXXX"},
+            {"Marketing Partner GmbH",      "team@marketing-partner.de",  "+494011223344", "DE567/890/12345", "DE56789012345", "DE36200400600095692100", "COBADEFFXXX"},
+            {"Logistik & Transport AG",     "service@logistik-ag.de",     "+493011223355", "DE678/901/23456", "DE67890123456", "DE02120300000000202051", "BYLADEM1001"}
+        };
+
+        for (Object[] row : data) {
+            Lieferant l = new Lieferant();
+            l.setName((String) row[0]);
+            l.setEmail((String) row[1]);
+            l.setTel((String) row[2]);
+            l.setSteuernummer((String) row[3]);
+            l.setUstIdNr((String) row[4]);
+            l.setIban((String) row[5]);
+            l.setBic((String) row[6]);
+            kreditorenService.lieferantAnlegen(l);
+        }
+
+        logger.info("✓ {} Lieferanten erstellt", data.length);
+    }
+
+    private void initEingangsrechnungen() {
+        if (eingangsrechnungRepository.count() > 0) {
+            logger.info("Eingangsrechnungen bereits vorhanden - Überspringe Initialisierung");
+            return;
+        }
+
+        List<com.erp.backend.domain.Lieferant> lieferanten = lieferantRepository.findAll();
+        if (lieferanten.isEmpty()) {
+            logger.warn("Keine Lieferanten für Eingangsrechnungen vorhanden");
+            return;
+        }
+
+        logger.info("Initialisiere Eingangsrechnungen...");
+
+        // [lieferantIndex, beschreibung, netto, steuersatz, aufwandskontoNr, monate_zurueck, status]
+        // status: 0=ERFASST, 1=FREIGEGEBEN, 2=BEZAHLT
+        Object[][] rechnungen = {
+            {0, "Büromaterial Q1",            BigDecimal.valueOf(420.00),  BigDecimal.valueOf(19), 6300L, 3, 2},
+            {0, "Büromaterial Q2",            BigDecimal.valueOf(380.50),  BigDecimal.valueOf(19), 6300L, 1, 1},
+            {1, "Server-Hosting März",        BigDecimal.valueOf(890.00),  BigDecimal.valueOf(19), 6400L, 2, 2},
+            {1, "IT-Support April",           BigDecimal.valueOf(1250.00), BigDecimal.valueOf(19), 6400L, 1, 1},
+            {1, "Netzwerk-Equipment",         BigDecimal.valueOf(2100.00), BigDecimal.valueOf(19), 6400L, 0, 0},
+            {2, "Adobe Lizenzen Jahres-Abo",  BigDecimal.valueOf(3600.00), BigDecimal.valueOf(19), 6400L, 2, 2},
+            {2, "Microsoft 365 Renewal",      BigDecimal.valueOf(2160.00), BigDecimal.valueOf(19), 6400L, 1, 1},
+            {3, "Geschäftsreise Berlin",      BigDecimal.valueOf(540.00),  BigDecimal.valueOf(19), 6500L, 2, 2},
+            {3, "Messe Frankfurt",            BigDecimal.valueOf(1100.00), BigDecimal.valueOf(19), 6500L, 1, 1},
+            {3, "Teamreise geplant",          BigDecimal.valueOf(780.00),  BigDecimal.valueOf(19), 6500L, 0, 0},
+            {4, "Social Media Kampagne",      BigDecimal.valueOf(1800.00), BigDecimal.valueOf(19), 6600L, 2, 2},
+            {4, "Google Ads April",           BigDecimal.valueOf(650.00),  BigDecimal.valueOf(19), 6600L, 1, 1},
+            {5, "Spedition Lieferung März",   BigDecimal.valueOf(320.00),  BigDecimal.valueOf(19), 6800L, 2, 2},
+            {5, "Expresslieferung April",     BigDecimal.valueOf(185.00),  BigDecimal.valueOf(19), 6800L, 1, 1},
+            {5, "Palettenlieferung Mai",      BigDecimal.valueOf(260.00),  BigDecimal.valueOf(19), 6800L, 0, 0},
+        };
+
+        int erfasst = 0, freigegeben = 0, bezahlt = 0;
+
+        for (Object[] r : rechnungen) {
+            try {
+                int liefIdx = (int) r[0];
+                Lieferant lieferant = lieferanten.get(liefIdx % lieferanten.size());
+                String beschreibung = (String) r[1];
+                BigDecimal netto = (BigDecimal) r[2];
+                BigDecimal steuer = (BigDecimal) r[3];
+                Long kontoNr = (Long) r[4];
+                int monateZurueck = (int) r[5];
+                int status = (int) r[6];
+
+                LocalDate rechnungsDatum = LocalDate.now().minusMonths(monateZurueck).withDayOfMonth(1 + random.nextInt(20));
+                LocalDate faelligDatum = rechnungsDatum.plusDays(30);
+                String liefRechnungsNr = "LR-" + rechnungsDatum.getYear() + "-" + String.format("%04d", random.nextInt(9999) + 1);
+
+                com.erp.backend.domain.Eingangsrechnung er = kreditorenService.erfassen(
+                        lieferant.getId(), liefRechnungsNr, rechnungsDatum, faelligDatum,
+                        netto, steuer, kontoNr, beschreibung
+                );
+                erfasst++;
+
+                if (status >= 1) {
+                    er = kreditorenService.freigeben(er.getId());
+                    freigegeben++;
+                }
+
+                if (status >= 2) {
+                    kreditorenService.bezahlen(er.getId(), "ZA-" + System.currentTimeMillis());
+                    bezahlt++;
+                }
+
+            } catch (Exception e) {
+                logger.error("Fehler beim Erstellen einer Eingangsrechnung: {}", e.getMessage());
+            }
+        }
+
+        logger.info("✓ {} Eingangsrechnungen erstellt: {} freigegeben (GL-Buchung), {} bezahlt",
+                erfasst, freigegeben, bezahlt);
     }
 
     // ===============================================================================================
