@@ -24,6 +24,12 @@ public enum VorgangTyp {
     STORNO("Stornierung von Geschäftsvorgängen"),
     ARCHIVIERUNG("Archivierung alter Daten"),
     VERTRAGSERNEUERUNG("Verlängerung von Verträgen und Abonnements"),
+    ANGEBOT("Erstellung oder Änderung eines Angebots"),
+    AUFTRAGSEINGANG("Eingang oder Anlage eines Auftrags"),
+    LIEFERSCHEIN("Erstellung oder Versand eines Lieferscheins"),
+    WEBSHOP_BESTELLUNG("Eingehende Bestellung vom Webshop"),
+    BUCHUNG("Manuelle Buchung im Hauptbuch"),
+    EINGANGSRECHNUNG("Erfassung einer Eingangsrechnung"),
     SONSTIGE("Sonstige Vorgänge");
 
     private final String beschreibung;
