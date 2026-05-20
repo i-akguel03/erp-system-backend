@@ -10,6 +10,7 @@ import com.erp.backend.repository.KontoRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
@@ -69,6 +70,7 @@ public class BuchhaltungService {
      * HABEN 4000 Umsatzerlöse = Nettobetrag
      * HABEN 4830 Umsatzsteuer = Steuerbetrag
      */
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public Optional<BuchungssatzDTO> bucheRechnung(Invoice invoice) {
         if (!kontoExistiert(KONTO_FORDERUNGEN) || !kontoExistiert(KONTO_UMSATZ_19)) {
             logger.warn("GL-Buchung für Rechnung {} übersprungen — Kontenplan nicht initialisiert",
@@ -97,6 +99,9 @@ public class BuchhaltungService {
 
         // HABEN: Umsatzerlöse (Netto) — wähle 7% oder 19% Konto je nach Steuersatz
         long umsatzKonto = ermiттleUmsatzKonto(invoice.getTaxRate());
+        if (!kontoExistiert(umsatzKonto)) {
+            umsatzKonto = KONTO_UMSATZ_19; // Fallback auf 19%-Konto
+        }
         buchung.addPosition(new Buchungsposition(
                 getKonto(umsatzKonto), BuchungsTyp.HABEN, netto,
                 "Umsatzerlöse Rechnung " + invoice.getInvoiceNumber()));

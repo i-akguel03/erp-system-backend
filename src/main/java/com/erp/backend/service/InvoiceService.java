@@ -261,9 +261,14 @@ public class InvoiceService {
         logger.info("Changed invoice status: id={}, {} → {}",
                 invoiceId, oldStatus, newStatus);
 
-        // GL-Buchung bei Statuswechsel auf SENT
+        // GL-Buchung bei Statuswechsel auf SENT — Fehler dürfen die Statusänderung nicht blockieren
         if (Invoice.InvoiceStatus.SENT.equals(newStatus) && buchhaltungService != null) {
-            buchhaltungService.bucheRechnung(saved);
+            try {
+                buchhaltungService.bucheRechnung(saved);
+            } catch (Exception e) {
+                logger.warn("GL-Buchung für Rechnung {} fehlgeschlagen (Kontenplan ggf. nicht initialisiert): {}",
+                        saved.getInvoiceNumber(), e.getMessage());
+            }
         }
 
         return saved;
