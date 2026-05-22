@@ -110,7 +110,10 @@ public class KreditorenService {
         er.setSteuersatz(steuersatz != null ? steuersatz : BigDecimal.ZERO);
         er.setSteuerbetrag(steuer);
         er.setBruttobetrag(brutto);
-        er.setAufwandskontoNr(aufwandskontoNr != null ? aufwandskontoNr : BuchhaltungService.KONTO_VERBINDLICHK);
+        if (aufwandskontoNr == null) {
+            throw new BusinessLogicException("Aufwandskonto ist Pflichtfeld und muss angegeben werden.");
+        }
+        er.setAufwandskontoNr(aufwandskontoNr);
         er.setNotizen(notizen);
         er.setStatus(EingangsrechnungStatus.ERFASST);
 
