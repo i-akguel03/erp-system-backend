@@ -71,6 +71,10 @@ public class Buchungssatz {
         if (buchungsDatum == null) buchungsDatum = LocalDate.now();
         geschaeftsjahr = buchungsDatum.getYear();
         monat = buchungsDatum.getMonthValue();
+        if (!positionen.isEmpty() && !isAusgeglichen()) {
+            throw new IllegalStateException(
+                "Buchungssatz nicht ausgeglichen: SOLL " + getSumSoll() + " ≠ HABEN " + getSumHaben());
+        }
     }
 
     public Buchungssatz() {}

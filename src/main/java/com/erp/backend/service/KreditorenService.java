@@ -142,7 +142,8 @@ public class KreditorenService {
                 er.getNettobetrag(),
                 er.getSteuerbetrag(),
                 er.getBruttobetrag(),
-                aufwandsKonto
+                aufwandsKonto,
+                er.getSteuersatz()
         ).ifPresent(b -> {
             saved.setBuchungssatzId(UUID.fromString(b.getId().toString()));
             eingangsrechnungRepository.save(saved);

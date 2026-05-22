@@ -168,7 +168,7 @@ public class BuchhaltungService {
     public Optional<BuchungssatzDTO> bucheEingangsrechnung(
             UUID eingangsrechnungId, String liefRechnungsNr, String lieferantName,
             BigDecimal netto, BigDecimal steuer, BigDecimal brutto,
-            long aufwandskontoNr) {
+            long aufwandskontoNr, BigDecimal steuersatz) {
 
         if (!kontoExistiert(KONTO_VERBINDLICHK) || !kontoExistiert(aufwandskontoNr)) {
             logger.warn("GL-Buchung Eingangsrechnung übersprungen — Konten fehlen");
@@ -182,20 +182,32 @@ public class BuchhaltungService {
                 "Eingangsrechnung " + liefRechnungsNr + " von " + lieferantName
         );
 
-        buchung.addPosition(new Buchungsposition(
-                getKonto(aufwandskontoNr), BuchungsTyp.SOLL, netto,
-                "Aufwand aus Eingangsrechnung " + liefRechnungsNr));
-
-        if (steuer.compareTo(BigDecimal.ZERO) > 0 && kontoExistiert(KONTO_VORSTEUER_19)) {
+        if (steuer.compareTo(BigDecimal.ZERO) > 0) {
+            long vorsteuerKonto = istSieben(steuersatz) ? KONTO_VORSTEUER_7 : KONTO_VORSTEUER_19;
+            if (kontoExistiert(vorsteuerKonto)) {
+                buchung.addPosition(new Buchungsposition(
+                        getKonto(aufwandskontoNr), BuchungsTyp.SOLL, netto,
+                        "Aufwand aus Eingangsrechnung " + liefRechnungsNr));
+                buchung.addPosition(new Buchungsposition(
+                        getKonto(vorsteuerKonto), BuchungsTyp.SOLL, steuer,
+                        "Vorsteuer aus Eingangsrechnung " + liefRechnungsNr));
+            } else {
+                // Vorsteuer-Konto fehlt → Steuer auf Aufwandskonto buchen (Brutto als Aufwand)
+                buchung.addPosition(new Buchungsposition(
+                        getKonto(aufwandskontoNr), BuchungsTyp.SOLL, brutto,
+                        "Aufwand (inkl. VSt) aus Eingangsrechnung " + liefRechnungsNr));
+            }
             buchung.addPosition(new Buchungsposition(
-                    getKonto(KONTO_VORSTEUER_19), BuchungsTyp.SOLL, steuer,
-                    "Vorsteuer aus Eingangsrechnung " + liefRechnungsNr));
+                    getKonto(KONTO_VERBINDLICHK), BuchungsTyp.HABEN, brutto,
+                    "Verbindlichkeit gegenüber " + lieferantName));
+        } else {
+            buchung.addPosition(new Buchungsposition(
+                    getKonto(aufwandskontoNr), BuchungsTyp.SOLL, netto,
+                    "Aufwand aus Eingangsrechnung " + liefRechnungsNr));
+            buchung.addPosition(new Buchungsposition(
+                    getKonto(KONTO_VERBINDLICHK), BuchungsTyp.HABEN, netto,
+                    "Verbindlichkeit gegenüber " + lieferantName));
         }
-
-        buchung.addPosition(new Buchungsposition(
-                getKonto(KONTO_VERBINDLICHK), BuchungsTyp.HABEN,
-                steuer.compareTo(BigDecimal.ZERO) > 0 ? brutto : netto,
-                "Verbindlichkeit gegenüber " + lieferantName));
 
         Buchungssatz saved = buchungssatzRepository.save(buchung);
         logger.info("GL-Buchung Eingangsrechnung {}: {}", liefRechnungsNr, saved.getBuchungsnummer());
@@ -291,6 +303,9 @@ public class BuchhaltungService {
 
         if (BuchungStatus.STORNIERT.equals(original.getStatus())) {
             throw new BusinessLogicException("Buchungssatz ist bereits storniert");
+        }
+        if (original.getStornoVonId() != null) {
+            throw new BusinessLogicException("Ein Storno-Buchungssatz kann nicht erneut storniert werden");
         }
 
         Buchungssatz storno = neuBuchungssatz(
