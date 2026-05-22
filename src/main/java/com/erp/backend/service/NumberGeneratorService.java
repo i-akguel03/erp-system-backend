@@ -1,5 +1,6 @@
 package com.erp.backend.service;
 
+import com.erp.backend.repository.*;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -9,14 +10,30 @@ import java.util.concurrent.atomic.AtomicLong;
 @Service
 public class NumberGeneratorService {
 
-    // Seeded from current time so restarts start at a different position
     private final AtomicLong dueCounter = new AtomicLong(System.currentTimeMillis() % 900_000 + 100_000);
     private final AtomicLong subscriptionCounter = new AtomicLong(1000);
 
-    /**
-     * Generiert eine eindeutige Fälligkeitsnummer
-     * Format: DUE-YYYY-NNNNNN
-     */
+    private final InvoiceRepository invoiceRepository;
+    private final CustomerRepository customerRepository;
+    private final ContractRepository contractRepository;
+    private final OrderRepository orderRepository;
+    private final AngebotRepository angebotRepository;
+    private final LieferscheinRepository lieferscheinRepository;
+
+    public NumberGeneratorService(InvoiceRepository invoiceRepository,
+                                   CustomerRepository customerRepository,
+                                   ContractRepository contractRepository,
+                                   OrderRepository orderRepository,
+                                   AngebotRepository angebotRepository,
+                                   LieferscheinRepository lieferscheinRepository) {
+        this.invoiceRepository = invoiceRepository;
+        this.customerRepository = customerRepository;
+        this.contractRepository = contractRepository;
+        this.orderRepository = orderRepository;
+        this.angebotRepository = angebotRepository;
+        this.lieferscheinRepository = lieferscheinRepository;
+    }
+
     public String generateDueNumber() {
         String year = String.valueOf(LocalDate.now().getYear());
         long seq = dueCounter.getAndIncrement() % 1_000_000;
@@ -29,176 +46,73 @@ public class NumberGeneratorService {
         return String.format("SUB-%s-%04d", dateStr, counter % 10000);
     }
 
-    /**
-     * Generiert eine Rechnungsnummer
-     * Format: INV-YYYY-MM-NNNNNN
-     */
     public String generateInvoiceNumber() {
         String prefix = "INV";
         String yearMonth = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy-MM"));
-        String randomPart;
         String invoiceNumber;
-
         do {
-            int number = (int) (Math.random() * 999999) + 1;
-            randomPart = String.format("%06d", number);
-            invoiceNumber = prefix + "-" + yearMonth + "-" + randomPart;
-        } while (invoiceNumberExists(invoiceNumber));
-
+            invoiceNumber = prefix + "-" + yearMonth + "-" + randomPart(6);
+        } while (invoiceRepository.existsByInvoiceNumber(invoiceNumber));
         return invoiceNumber;
     }
 
-    /**
-     * Generiert eine eindeutige Vorgangsnummer
-     * Format: VG-YYYYMMDD-XXXXX
-     */
     public String generateVorgangsnummer() {
         String datePart = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyyMMdd"));
         String sequencePart = String.format("%05d", System.currentTimeMillis() % 100000);
         return "VG-" + datePart + "-" + sequencePart;
     }
 
-    /**
-     * Generiert eine Referenznummer für Zahlungen
-     * Format: PAY-YYYYMMDD-NNNNNN
-     */
     public String generatePaymentReference() {
-        String prefix = "PAY";
         String date = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyyMMdd"));
-        String randomPart;
-        String paymentReference;
-
-        do {
-            int number = (int) (Math.random() * 999999) + 1;
-            randomPart = String.format("%06d", number);
-            paymentReference = prefix + "-" + date + "-" + randomPart;
-        } while (paymentReferenceExists(paymentReference));
-
-        return paymentReference;
+        return "PAY-" + date + "-" + randomPart(6);
     }
 
-    /**
-     * Generiert eine Kundennummer
-     * Format: CUST-NNNNNNNN
-     */
     public String generateCustomerNumber() {
-        String prefix = "CUST";
-        String randomPart;
         String customerNumber;
-
         do {
-            int number = (int) (Math.random() * 99999999) + 1;
-            randomPart = String.format("%08d", number);
-            customerNumber = prefix + "-" + randomPart;
-        } while (customerNumberExists(customerNumber));
-
+            customerNumber = "CUST-" + randomPart(8);
+        } while (customerRepository.existsByCustomerNumber(customerNumber));
         return customerNumber;
     }
 
-    /**
-     * Generiert eine Auftragsnummer
-     * Format: ORD-YYYY-NNNNNN
-     */
     public String generateOrderNumber() {
-        String prefix = "ORD";
         String year = String.valueOf(LocalDate.now().getYear());
-        String randomPart;
         String orderNumber;
         do {
-            int number = (int) (Math.random() * 999999) + 1;
-            randomPart = String.format("%06d", number);
-            orderNumber = prefix + "-" + year + "-" + randomPart;
-        } while (orderNumberExists(orderNumber));
+            orderNumber = "ORD-" + year + "-" + randomPart(6);
+        } while (orderRepository.existsByOrderNumber(orderNumber));
         return orderNumber;
     }
 
-    /**
-     * Generiert eine Angebotsnummer
-     * Format: ANG-YYYY-NNNNNN
-     */
     public String generateAngebotNumber() {
-        String prefix = "ANG";
         String year = String.valueOf(LocalDate.now().getYear());
-        String randomPart;
         String angebotNumber;
         do {
-            int number = (int) (Math.random() * 999999) + 1;
-            randomPart = String.format("%06d", number);
-            angebotNumber = prefix + "-" + year + "-" + randomPart;
-        } while (angebotNumberExists(angebotNumber));
+            angebotNumber = "ANG-" + year + "-" + randomPart(6);
+        } while (angebotRepository.existsByAngebotsnummer(angebotNumber));
         return angebotNumber;
     }
 
-    /**
-     * Generiert eine Lieferscheinnummer
-     * Format: LS-YYYYMMDD-NNNNNN
-     */
     public String generateLieferscheinNumber() {
-        String prefix = "LS";
         String date = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyyMMdd"));
-        String randomPart;
         String lieferscheinNumber;
         do {
-            int number = (int) (Math.random() * 999999) + 1;
-            randomPart = String.format("%06d", number);
-            lieferscheinNumber = prefix + "-" + date + "-" + randomPart;
-        } while (lieferscheinNumberExists(lieferscheinNumber));
+            lieferscheinNumber = "LS-" + date + "-" + randomPart(6);
+        } while (lieferscheinRepository.existsByLieferscheinnummer(lieferscheinNumber));
         return lieferscheinNumber;
     }
 
-    /**
-     * Generiert eine Vertragsnummer
-     * Format: CONT-YYYY-NNNNNN
-     */
     public String generateContractNumber() {
-        String prefix = "CONT";
         String year = String.valueOf(LocalDate.now().getYear());
-        String randomPart;
         String contractNumber;
-
         do {
-            int number = (int) (Math.random() * 999999) + 1;
-            randomPart = String.format("%06d", number);
-            contractNumber = prefix + "-" + year + "-" + randomPart;
-        } while (contractNumberExists(contractNumber));
-
+            contractNumber = "CONT-" + year + "-" + randomPart(6);
+        } while (contractRepository.existsByContractNumber(contractNumber));
         return contractNumber;
     }
 
-    // Hilfsmethoden zur Existenz-Prüfung
-    // Diese müssten entsprechend implementiert werden, je nach verfügbaren Repositories
-
-    private boolean invoiceNumberExists(String invoiceNumber) {
-        // TODO: Implementation mit InvoiceRepository
-        // return invoiceRepository.existsByInvoiceNumber(invoiceNumber);
-        return false; // Placeholder
-    }
-
-    private boolean paymentReferenceExists(String paymentReference) {
-        // TODO: Implementation mit PaymentRepository
-        // return paymentRepository.existsByPaymentReference(paymentReference);
-        return false; // Placeholder
-    }
-
-    private boolean customerNumberExists(String customerNumber) {
-        // TODO: Implementation mit CustomerRepository
-        // return customerRepository.existsByCustomerNumber(customerNumber);
-        return false; // Placeholder
-    }
-
-    private boolean contractNumberExists(String contractNumber) {
-        return false;
-    }
-
-    private boolean orderNumberExists(String orderNumber) {
-        return false;
-    }
-
-    private boolean angebotNumberExists(String angebotNumber) {
-        return false;
-    }
-
-    private boolean lieferscheinNumberExists(String lieferscheinNumber) {
-        return false;
+    private String randomPart(int digits) {
+        int max = (int) Math.pow(10, digits) - 1;
+        return String.format("%0" + digits + "d", (int) (Math.random() * max) + 1);
     }
 }

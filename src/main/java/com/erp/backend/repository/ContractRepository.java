@@ -18,6 +18,8 @@ import java.util.UUID;
 @Repository
 public interface ContractRepository extends JpaRepository<Contract, UUID> {
 
+    boolean existsByContractNumber(String contractNumber);
+
     // *** WICHTIG: Alle Queries mit JOIN FETCH für Customer ***
 
     // Überschreibt findAll() mit eager loading

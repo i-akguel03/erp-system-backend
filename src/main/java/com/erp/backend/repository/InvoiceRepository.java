@@ -17,7 +17,7 @@ import java.util.UUID;
 @Repository
 public interface InvoiceRepository extends JpaRepository<Invoice, UUID> {
 
-
+    boolean existsByInvoiceNumber(String invoiceNumber);
 
     // Alle überfälligen Rechnungen (z. B. für Rechnungslauf)
     List<Invoice> findByDueDateBeforeAndStatusNot(LocalDate date, Invoice.InvoiceStatus status);
