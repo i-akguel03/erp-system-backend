@@ -129,6 +129,9 @@ public class SecurityConfig {
         // Cookies/Credentials erlauben (z. B. für Auth)
         configuration.setAllowCredentials(true);
 
+        // Custom-Header für Paginierung im Browser sichtbar machen
+        configuration.setExposedHeaders(List.of("X-Total-Count", "X-Total-Pages", "X-Current-Page"));
+
         // Registriert die CORS-Konfiguration für alle Pfade
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
