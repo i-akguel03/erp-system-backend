@@ -5,6 +5,11 @@ import com.erp.backend.dto.KontoDTO;
 import com.erp.backend.service.BuchhaltungService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -27,11 +32,31 @@ public class BuchhaltungController {
         this.buchhaltungService = buchhaltungService;
     }
 
-    @Operation(summary = "Alle Buchungssätze abrufen")
+    @Operation(summary = "Alle Buchungssätze abrufen — optional paginiert")
     @PreAuthorize("hasAnyRole('ADMIN', 'USER', 'BUCHHALTUNG_READ')")
     @GetMapping("/buchungen")
-    public ResponseEntity<List<BuchungssatzDTO>> getAllBuchungen() {
-        return ResponseEntity.ok(buchhaltungService.findAll());
+    public ResponseEntity<List<BuchungssatzDTO>> getAllBuchungen(
+            @RequestParam(defaultValue = "false") boolean paginated,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size,
+            @RequestParam(defaultValue = "buchungsDatum") String sortBy,
+            @RequestParam(defaultValue = "DESC") String sortDirection) {
+        List<BuchungssatzDTO> all = buchhaltungService.findAll();
+        if (paginated) {
+            Sort sort = Sort.by(Sort.Direction.fromString(sortDirection), sortBy);
+            Pageable pageable = PageRequest.of(page, size, sort);
+            int start = (int) pageable.getOffset();
+            int end = Math.min(start + pageable.getPageSize(), all.size());
+            List<BuchungssatzDTO> pageContent = start >= all.size() ? List.of() : all.subList(start, end);
+            Page<BuchungssatzDTO> buchungenPage = new PageImpl<>(pageContent, pageable, all.size());
+            return ResponseEntity.ok()
+                    .header("X-Total-Count", String.valueOf(buchungenPage.getTotalElements()))
+                    .header("X-Total-Pages", String.valueOf(buchungenPage.getTotalPages()))
+                    .header("X-Current-Page", String.valueOf(page))
+                    .header("Access-Control-Expose-Headers", "X-Total-Count,X-Total-Pages,X-Current-Page")
+                    .body(buchungenPage.getContent());
+        }
+        return ResponseEntity.ok(all);
     }
 
     @Operation(summary = "Buchungssatz nach ID abrufen")

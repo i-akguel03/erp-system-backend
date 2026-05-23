@@ -10,6 +10,12 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
@@ -32,11 +38,28 @@ public class KreditorenController {
     // Lieferanten
     // -------------------------------------------------------------------------
 
-    @Operation(summary = "Alle Lieferanten abrufen")
+    @Operation(summary = "Alle Lieferanten abrufen — optional paginiert")
     @PreAuthorize("hasAnyRole('ADMIN', 'USER', 'KREDITOREN_READ')")
     @GetMapping("/lieferanten")
-    public ResponseEntity<List<Lieferant>> getAllLieferanten() {
-        return ResponseEntity.ok(kreditorenService.findAllLieferanten());
+    public ResponseEntity<List<Lieferant>> getAllLieferanten(
+            @RequestParam(defaultValue = "false") boolean paginated,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size) {
+        List<Lieferant> all = kreditorenService.findAllLieferanten();
+        if (paginated) {
+            Pageable pageable = PageRequest.of(page, size);
+            int start = (int) pageable.getOffset();
+            int end = Math.min(start + pageable.getPageSize(), all.size());
+            List<Lieferant> pageContent = start >= all.size() ? List.of() : all.subList(start, end);
+            Page<Lieferant> lieferantenPage = new PageImpl<>(pageContent, pageable, all.size());
+            return ResponseEntity.ok()
+                    .header("X-Total-Count", String.valueOf(lieferantenPage.getTotalElements()))
+                    .header("X-Total-Pages", String.valueOf(lieferantenPage.getTotalPages()))
+                    .header("X-Current-Page", String.valueOf(page))
+                    .header("Access-Control-Expose-Headers", "X-Total-Count,X-Total-Pages,X-Current-Page")
+                    .body(lieferantenPage.getContent());
+        }
+        return ResponseEntity.ok(all);
     }
 
     @Operation(summary = "Lieferant nach ID abrufen")
@@ -64,11 +87,28 @@ public class KreditorenController {
     // Eingangsrechnungen
     // -------------------------------------------------------------------------
 
-    @Operation(summary = "Alle Eingangsrechnungen abrufen")
+    @Operation(summary = "Alle Eingangsrechnungen abrufen — optional paginiert")
     @PreAuthorize("hasAnyRole('ADMIN', 'USER', 'KREDITOREN_READ')")
     @GetMapping("/eingangsrechnungen")
-    public ResponseEntity<List<Eingangsrechnung>> getAllEingangsrechnungen() {
-        return ResponseEntity.ok(kreditorenService.findAllEingangsrechnungen());
+    public ResponseEntity<List<Eingangsrechnung>> getAllEingangsrechnungen(
+            @RequestParam(defaultValue = "false") boolean paginated,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size) {
+        List<Eingangsrechnung> all = kreditorenService.findAllEingangsrechnungen();
+        if (paginated) {
+            Pageable pageable = PageRequest.of(page, size);
+            int start = (int) pageable.getOffset();
+            int end = Math.min(start + pageable.getPageSize(), all.size());
+            List<Eingangsrechnung> pageContent = start >= all.size() ? List.of() : all.subList(start, end);
+            Page<Eingangsrechnung> rechnungenPage = new PageImpl<>(pageContent, pageable, all.size());
+            return ResponseEntity.ok()
+                    .header("X-Total-Count", String.valueOf(rechnungenPage.getTotalElements()))
+                    .header("X-Total-Pages", String.valueOf(rechnungenPage.getTotalPages()))
+                    .header("X-Current-Page", String.valueOf(page))
+                    .header("Access-Control-Expose-Headers", "X-Total-Count,X-Total-Pages,X-Current-Page")
+                    .body(rechnungenPage.getContent());
+        }
+        return ResponseEntity.ok(all);
     }
 
     @Operation(summary = "Eingangsrechnung nach ID abrufen")
