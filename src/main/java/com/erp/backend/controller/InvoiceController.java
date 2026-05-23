@@ -104,20 +104,22 @@ public class InvoiceController {
             Sort sort = Sort.by(Sort.Direction.fromString(sortDirection), sortBy);
             Pageable pageable = PageRequest.of(page, size, sort);
 
-            // Alle Rechnungen holen und in Page wrappen
             List<Invoice> allInvoices = invoiceService.getAllInvoices();
-            Page<Invoice> invoicePage = new PageImpl<>(allInvoices, pageable, allInvoices.size());
+            int total = allInvoices.size();
+            int totalPages = (int) Math.ceil((double) total / size);
+            int fromIndex = Math.min(page * size, total);
+            int toIndex = Math.min(fromIndex + size, total);
+            List<Invoice> pageContent = allInvoices.subList(fromIndex, toIndex);
 
-            // In DTOs konvertieren
-            List<InvoiceDTO> dtoList = invoicePage.getContent().stream()
+            List<InvoiceDTO> dtoList = pageContent.stream()
                     .map(InvoiceMapper::toDTO)
                     .toList();
 
-            // Response mit Pagination-Metadaten in Headers
             return ResponseEntity.ok()
-                    .header("X-Total-Count", String.valueOf(invoicePage.getTotalElements()))
-                    .header("X-Total-Pages", String.valueOf(invoicePage.getTotalPages()))
+                    .header("X-Total-Count", String.valueOf(total))
+                    .header("X-Total-Pages", String.valueOf(totalPages))
                     .header("X-Current-Page", String.valueOf(page))
+                    .header("Access-Control-Expose-Headers", "X-Total-Count, X-Total-Pages, X-Current-Page")
                     .body(dtoList);
         } else {
             // STANDARD-AUSGABE (alle Rechnungen)

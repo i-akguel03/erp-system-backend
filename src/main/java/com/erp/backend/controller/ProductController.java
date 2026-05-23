@@ -52,16 +52,18 @@ public class ProductController {
             Sort sort = Sort.by(Sort.Direction.fromString(sortDirection), sortBy);
             Pageable pageable = PageRequest.of(page, size, sort);
             List<Product> all = service.getAllProducts();
-            Page<Product> productPage = new PageImpl<>(all, pageable, all.size());
-
-            logger.debug("Found {} products on page {}/{}",
-                    productPage.getNumberOfElements(), page + 1, productPage.getTotalPages());
+            int total = all.size();
+            int totalPages = (int) Math.ceil((double) total / size);
+            int fromIndex = Math.min(page * size, total);
+            int toIndex = Math.min(fromIndex + size, total);
+            List<Product> pageContent = all.subList(fromIndex, toIndex);
 
             return ResponseEntity.ok()
-                    .header("X-Total-Count", String.valueOf(productPage.getTotalElements()))
-                    .header("X-Total-Pages", String.valueOf(productPage.getTotalPages()))
+                    .header("X-Total-Count", String.valueOf(total))
+                    .header("X-Total-Pages", String.valueOf(totalPages))
                     .header("X-Current-Page", String.valueOf(page))
-                    .body(productPage.getContent());
+                    .header("Access-Control-Expose-Headers", "X-Total-Count, X-Total-Pages, X-Current-Page")
+                    .body(pageContent);
         } else {
             List<Product> products = service.getAllProducts();
             logger.debug("Found {} products", products.size());

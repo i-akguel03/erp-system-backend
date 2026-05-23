@@ -52,18 +52,22 @@ public class OpenItemController {
 
         if (paginated) {
             Sort sort = Sort.by(Sort.Direction.fromString(sortDirection), sortBy);
-            Pageable pageable = PageRequest.of(page, size, sort);
             List<OpenItem> allItems = openItemService.getAllOpenItems();
-            Page<OpenItem> itemPage = new PageImpl<>(allItems, pageable, allItems.size());
+            int total = allItems.size();
+            int totalPages = (int) Math.ceil((double) total / size);
+            int fromIndex = Math.min(page * size, total);
+            int toIndex = Math.min(fromIndex + size, total);
+            List<OpenItem> pageContent = allItems.subList(fromIndex, toIndex);
 
-            List<OpenItemDTO> dtoList = itemPage.getContent().stream()
+            List<OpenItemDTO> dtoList = pageContent.stream()
                     .map(OpenItemMapper::toDTO)
                     .toList();
 
             return ResponseEntity.ok()
-                    .header("X-Total-Count", String.valueOf(itemPage.getTotalElements()))
-                    .header("X-Total-Pages", String.valueOf(itemPage.getTotalPages()))
+                    .header("X-Total-Count", String.valueOf(total))
+                    .header("X-Total-Pages", String.valueOf(totalPages))
                     .header("X-Current-Page", String.valueOf(page))
+                    .header("Access-Control-Expose-Headers", "X-Total-Count, X-Total-Pages, X-Current-Page")
                     .body(dtoList);
         } else {
             List<OpenItemDTO> dtoList = openItemService.getAllOpenItems().stream()
