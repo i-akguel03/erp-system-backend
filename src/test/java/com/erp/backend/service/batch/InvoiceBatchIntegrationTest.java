@@ -6,6 +6,7 @@ package com.erp.backend.service.batch;
 
 import com.erp.backend.domain.*;
 import com.erp.backend.repository.*;
+import com.erp.backend.service.CustomerEmailService;
 import com.erp.backend.service.DueScheduleService;
 import com.erp.backend.service.InvoiceFactory;
 import com.erp.backend.service.OpenItemFactory;
@@ -13,13 +14,18 @@ import com.erp.backend.service.VorgangService;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.core.annotation.Order;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
+
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -364,6 +370,7 @@ class InvoiceBatchIntegrationTest {
         // Contract erstellen
         testContract = new Contract();
         testContract.setContractNumber("CONTR-001");
+        testContract.setContractTitle("Test-Vertrag");
         testContract.setCustomer(testCustomer);
         testContract.setStartDate(LocalDate.of(2024, 1, 1));
         testContract = contractRepository.save(testContract);
@@ -373,6 +380,7 @@ class InvoiceBatchIntegrationTest {
         testSubscription.setSubscriptionNumber("SUB-001");
         testSubscription.setContract(testContract);
         testSubscription.setStartDate(LocalDate.of(2024, 1, 1));
+        testSubscription.setProductName("Test-Abonnement");
         testSubscription.setMonthlyPrice(BigDecimal.valueOf(100));
         testSubscription = subscriptionRepository.save(testSubscription);
     }
@@ -491,6 +499,7 @@ class InvoiceBatchAnalyzerIntegrationTest {
 
         Contract contract = new Contract();
         contract.setContractNumber("CONTR-001");
+        contract.setContractTitle("Test-Vertrag");
         contract.setCustomer(customer);
         contract.setStartDate(LocalDate.of(2024, 1, 1));
         contract = contractRepository.save(contract);
@@ -499,6 +508,7 @@ class InvoiceBatchAnalyzerIntegrationTest {
         testSubscription.setSubscriptionNumber("SUB-001");
         testSubscription.setContract(contract);
         testSubscription.setStartDate(LocalDate.of(2024, 1, 1));
+        testSubscription.setProductName("Test-Abonnement");
         testSubscription.setMonthlyPrice(BigDecimal.valueOf(100));
         testSubscription = subscriptionRepository.save(testSubscription);
     }
@@ -514,6 +524,295 @@ class InvoiceBatchAnalyzerIntegrationTest {
         ds.setPeriodEnd(dueDate.withDayOfMonth(dueDate.lengthOfMonth()));
 
         return dueScheduleRepository.save(ds);
+    }
+}
+
+// ===============================================================================================
+// INTEGRATION TEST - Sicherheitsmassnahmen (mit echter DB)
+// ===============================================================================================
+
+/**
+ * Testet die Sicherheitsmassnahmen des Rechnungslaufs end-to-end:
+ * - Gleichzeitige Batches werden blockiert
+ * - Bereits abgerechnete DueSchedules werden als Fehler gemeldet
+ * - Vorgang-Statistiken werden auch bei partiellem Fehler korrekt gesetzt
+ */
+@SpringBootTest
+@ActiveProfiles("test")
+@DisplayName("Integration Tests: Rechnungslauf-Sicherheitsmassnahmen")
+class InvoiceBatchSecurityIntegrationTest {
+
+    @Autowired private InvoiceBatchOrchestrator orchestrator;
+    @Autowired private DueScheduleRepository dueScheduleRepository;
+    @Autowired private InvoiceRepository invoiceRepository;
+    @Autowired private OpenItemRepository openItemRepository;
+    @Autowired private SubscriptionRepository subscriptionRepository;
+    @Autowired private ContractRepository contractRepository;
+    @Autowired private CustomerRepository customerRepository;
+    @Autowired private VorgangRepository vorgangRepository;
+    @Autowired private org.springframework.jdbc.core.JdbcTemplate jdbcTemplate;
+
+    private LocalDate billingDate;
+    private Subscription testSubscription;
+
+    @BeforeEach
+    void setUp() {
+        billingDate = LocalDate.of(2025, 3, 15);
+        cleanupDatabase();
+        createBaseTestData();
+    }
+
+    @AfterEach
+    void tearDown() {
+        cleanupDatabase();
+    }
+
+    @Test
+    @DisplayName("Gleichzeitiger Batch: Sollte blockiert werden wenn bereits ein Lauf aktiv ist")
+    void testGleichzeitigerBatch_WirdAbgelehnt() {
+        // GIVEN: Manuell einen Vorgang mit Status LAUFEND anlegen
+        Vorgang laufenderVorgang = new Vorgang(VorgangTyp.RECHNUNGSLAUF, "Laufender Test-Batch");
+        laufenderVorgang.setVorgangsnummer("VG-TEST-LAUFEND");
+        laufenderVorgang.starten(); // → Status LAUFEND
+        vorgangRepository.save(laufenderVorgang);
+        vorgangRepository.flush();
+
+        // WHEN & THEN: Neuer Batch soll abgewiesen werden
+        IllegalStateException ex = assertThrows(IllegalStateException.class, () ->
+                orchestrator.runInvoiceBatch(billingDate, true, "admin"));
+
+        assertTrue(ex.getMessage().contains("läuft bereits"),
+                "Fehlermeldung soll auf laufenden Batch hinweisen");
+
+        // Kein neuer Vorgang ausser dem manuell angelegten
+        assertEquals(1, vorgangRepository.count(), "Es darf kein weiterer Vorgang erstellt worden sein");
+    }
+
+    @Test
+    @DisplayName("Doppelverarbeitung: DueSchedule mit gesetzter InvoiceId wird als Fehler gemeldet")
+    void testDoppelverarbeitung_WirdAlsFehlerGemeldet() {
+        // GIVEN: DueSchedule mit bereits gesetzter InvoiceId aber Status ACTIVE (inkonsistenter Zustand)
+        DueSchedule problematischeDue = new DueSchedule();
+        problematischeDue.setDueNumber("DUE-DOPPELT");
+        problematischeDue.setDueDate(billingDate);
+        problematischeDue.setStatus(DueStatus.ACTIVE);
+        problematischeDue.setInvoiceId(UUID.randomUUID()); // bereits abgerechnet!
+        problematischeDue.setInvoiceBatchId("BATCH-ALT");
+        problematischeDue.setSubscription(testSubscription);
+        problematischeDue.setPeriodStart(billingDate.withDayOfMonth(1));
+        problematischeDue.setPeriodEnd(billingDate.withDayOfMonth(billingDate.lengthOfMonth()));
+        dueScheduleRepository.save(problematischeDue);
+
+        // WHEN: Batch läuft
+        InvoiceBatchResult result = orchestrator.runInvoiceBatch(billingDate, true, "admin");
+
+        // THEN: Fehler für diese DueSchedule gemeldet, keine neue Rechnung erstellt
+        assertTrue(result.hasErrors(), "Sollte Fehler für die doppelte DueSchedule melden");
+        assertTrue(result.getErrors().stream().anyMatch(e -> e.contains("DUE-DOPPELT")),
+                "Fehlermeldung soll die betroffene DueNumber enthalten");
+        assertEquals(0, invoiceRepository.count(), "Keine neue Rechnung darf erstellt worden sein");
+
+        // Vorgang mit FEHLER-Status abgeschlossen
+        List<Vorgang> vorgaenge = vorgangRepository.findByTyp(VorgangTyp.RECHNUNGSLAUF);
+        assertEquals(1, vorgaenge.size());
+        assertEquals(VorgangStatus.FEHLER, vorgaenge.get(0).getStatus());
+    }
+
+    @Test
+    @DisplayName("Partieller Fehler: Vorgang-Statistiken werden auch bei Teilerfolg korrekt gesetzt")
+    void testPartialerFehler_VorgangStatistiken() {
+        // GIVEN: Eine gültige DueSchedule + eine mit bereits gesetzter InvoiceId
+        createDueSchedule("DUE-OK", billingDate, BigDecimal.valueOf(100));
+
+        DueSchedule dueDoppelt = new DueSchedule();
+        dueDoppelt.setDueNumber("DUE-DOPPELT");
+        dueDoppelt.setDueDate(billingDate);
+        dueDoppelt.setStatus(DueStatus.ACTIVE);
+        dueDoppelt.setInvoiceId(UUID.randomUUID());
+        dueDoppelt.setSubscription(testSubscription);
+        dueDoppelt.setPeriodStart(billingDate.withDayOfMonth(1));
+        dueDoppelt.setPeriodEnd(billingDate.withDayOfMonth(billingDate.lengthOfMonth()));
+        dueScheduleRepository.save(dueDoppelt);
+
+        // WHEN: Batch läuft — 1 Erfolg, 1 Fehler
+        InvoiceBatchResult result = orchestrator.runInvoiceBatch(billingDate, true, "admin");
+
+        // THEN: Ergebnis korrekt
+        assertEquals(1, result.getCreatedInvoices(), "Genau 1 Rechnung soll erstellt worden sein");
+        assertEquals(1, result.getErrorCount(), "Genau 1 Fehler soll vorliegen");
+        assertTrue(result.hasErrors());
+
+        // THEN: Vorgang-Statistiken gesetzt
+        List<Vorgang> vorgaenge = vorgangRepository.findByTyp(VorgangTyp.RECHNUNGSLAUF);
+        assertEquals(1, vorgaenge.size());
+        Vorgang vorgang = vorgaenge.get(0);
+
+        assertEquals(VorgangStatus.FEHLER, vorgang.getStatus());
+        assertEquals(2, vorgang.getAnzahlVerarbeitet(), "2 Versuche gesamt");
+        assertEquals(1, vorgang.getAnzahlErfolgreich(), "1 erfolgreicher Abschluss");
+        assertEquals(1, vorgang.getAnzahlFehler(), "1 Fehler");
+        assertNotNull(vorgang.getFehlerprotokoll(), "Fehlerprotokoll soll gesetzt sein");
+    }
+
+    // Helpers
+
+    // Natives SQL-Cleanup: bypassed Soft-Delete, sodass FK-Constraints nicht verletzt werden
+    private void cleanupDatabase() {
+        jdbcTemplate.execute("SET REFERENTIAL_INTEGRITY FALSE");
+        jdbcTemplate.execute("DELETE FROM open_items");
+        jdbcTemplate.execute("DELETE FROM invoice_items");
+        jdbcTemplate.execute("DELETE FROM invoices");
+        jdbcTemplate.execute("DELETE FROM due_schedules");
+        jdbcTemplate.execute("DELETE FROM subscriptions");
+        jdbcTemplate.execute("DELETE FROM contracts");
+        jdbcTemplate.execute("DELETE FROM customers");
+        jdbcTemplate.execute("DELETE FROM vorgaenge");
+        jdbcTemplate.execute("SET REFERENTIAL_INTEGRITY TRUE");
+    }
+
+    private void createBaseTestData() {
+        Customer customer = new Customer();
+        customer.setCustomerNumber("CUST-SEC-001");
+        customer.setFirstName("Security");
+        customer.setLastName("Test");
+        customer = customerRepository.save(customer);
+
+        Contract contract = new Contract();
+        contract.setContractNumber("CONTR-SEC-001");
+        contract.setContractTitle("Security-Test-Vertrag");
+        contract.setCustomer(customer);
+        contract.setStartDate(LocalDate.of(2024, 1, 1));
+        contract = contractRepository.save(contract);
+
+        testSubscription = new Subscription();
+        testSubscription.setSubscriptionNumber("SUB-SEC-001");
+        testSubscription.setContract(contract);
+        testSubscription.setStartDate(LocalDate.of(2024, 1, 1));
+        testSubscription.setProductName("Test-Abonnement");
+        testSubscription.setMonthlyPrice(BigDecimal.valueOf(100));
+        testSubscription = subscriptionRepository.save(testSubscription);
+    }
+
+    private DueSchedule createDueSchedule(String dueNumber, LocalDate dueDate, BigDecimal amount) {
+        DueSchedule ds = new DueSchedule();
+        ds.setDueNumber(dueNumber);
+        ds.setDueDate(dueDate);
+        ds.setStatus(DueStatus.ACTIVE);
+        ds.setSubscription(testSubscription);
+        ds.setPeriodStart(dueDate.withDayOfMonth(1));
+        ds.setPeriodEnd(dueDate.withDayOfMonth(dueDate.lengthOfMonth()));
+        return dueScheduleRepository.save(ds);
+    }
+}
+
+// ===============================================================================================
+// INTEGRATION TEST - E-Mail-Fallback (mit MockBean)
+// ===============================================================================================
+
+/**
+ * Testet dass ein E-Mail-Fehler die Buchung (Rechnung + OpenItem + DueSchedule) nicht verhindert.
+ * Verwendet @MockBean um den E-Mail-Dienst kontrolliert zum Fehlschlagen zu bringen.
+ */
+@SpringBootTest
+@ActiveProfiles("test")
+@DisplayName("Integration Tests: E-Mail-Fehler bricht Buchung nicht ab")
+class InvoiceBatchEmailFallbackTest {
+
+    @Autowired private InvoiceBatchOrchestrator orchestrator;
+    @Autowired private DueScheduleRepository dueScheduleRepository;
+    @Autowired private InvoiceRepository invoiceRepository;
+    @Autowired private OpenItemRepository openItemRepository;
+    @Autowired private SubscriptionRepository subscriptionRepository;
+    @Autowired private ContractRepository contractRepository;
+    @Autowired private CustomerRepository customerRepository;
+    @Autowired private VorgangRepository vorgangRepository;
+    @Autowired private org.springframework.jdbc.core.JdbcTemplate jdbcTemplate;
+
+    @MockBean
+    private CustomerEmailService customerEmailService;
+
+    private LocalDate billingDate;
+    private Subscription testSubscription;
+
+    @BeforeEach
+    void setUp() {
+        billingDate = LocalDate.of(2025, 3, 15);
+        cleanupDatabase();
+        createBaseTestData();
+
+        // E-Mail-Dienst wirft bei jedem Aufruf
+        doThrow(new RuntimeException("SMTP-Server nicht erreichbar"))
+                .when(customerEmailService).sendInvoiceEmail(any());
+    }
+
+    @Test
+    @DisplayName("E-Mail-Fehler: Rechnung und OpenItem werden trotzdem gespeichert")
+    void testEmailFehler_BrichtBuchungNichtAb() {
+        // GIVEN: Eine fällige DueSchedule
+        DueSchedule ds = new DueSchedule();
+        ds.setDueNumber("DUE-EMAIL-TEST");
+        ds.setDueDate(billingDate);
+        ds.setStatus(DueStatus.ACTIVE);
+        ds.setSubscription(testSubscription);
+        ds.setPeriodStart(billingDate.withDayOfMonth(1));
+        ds.setPeriodEnd(billingDate.withDayOfMonth(billingDate.lengthOfMonth()));
+        dueScheduleRepository.save(ds);
+
+        // WHEN: E-Mail-Dienst schlägt fehl
+        InvoiceBatchResult result = orchestrator.runInvoiceBatch(billingDate, true, "admin");
+
+        // THEN: Rechnung und OpenItem wurden trotzdem angelegt
+        assertEquals(1, result.getCreatedInvoices(), "Rechnung soll trotz E-Mail-Fehler erstellt worden sein");
+        assertEquals(1, result.getCreatedOpenItems(), "OpenItem soll trotz E-Mail-Fehler erstellt worden sein");
+        assertFalse(result.hasErrors(), "E-Mail-Fehler soll kein Batch-Fehler sein");
+
+        // THEN: DueSchedule korrekt abgeschlossen
+        DueSchedule verarbeitet = dueScheduleRepository.findByDueNumber("DUE-EMAIL-TEST").orElseThrow();
+        assertEquals(DueStatus.COMPLETED, verarbeitet.getStatus());
+        assertNotNull(verarbeitet.getInvoiceId());
+    }
+
+    @AfterEach
+    void tearDown() {
+        cleanupDatabase();
+    }
+
+    // Helpers
+
+    private void cleanupDatabase() {
+        jdbcTemplate.execute("SET REFERENTIAL_INTEGRITY FALSE");
+        jdbcTemplate.execute("DELETE FROM open_items");
+        jdbcTemplate.execute("DELETE FROM invoice_items");
+        jdbcTemplate.execute("DELETE FROM invoices");
+        jdbcTemplate.execute("DELETE FROM due_schedules");
+        jdbcTemplate.execute("DELETE FROM subscriptions");
+        jdbcTemplate.execute("DELETE FROM contracts");
+        jdbcTemplate.execute("DELETE FROM customers");
+        jdbcTemplate.execute("DELETE FROM vorgaenge");
+        jdbcTemplate.execute("SET REFERENTIAL_INTEGRITY TRUE");
+    }
+
+    private void createBaseTestData() {
+        Customer customer = new Customer();
+        customer.setCustomerNumber("CUST-EMAIL-001");
+        customer.setFirstName("Email");
+        customer.setLastName("Test");
+        customer = customerRepository.save(customer);
+
+        Contract contract = new Contract();
+        contract.setContractNumber("CONTR-EMAIL-001");
+        contract.setContractTitle("Email-Test-Vertrag");
+        contract.setCustomer(customer);
+        contract.setStartDate(LocalDate.of(2024, 1, 1));
+        contract = contractRepository.save(contract);
+
+        testSubscription = new Subscription();
+        testSubscription.setSubscriptionNumber("SUB-EMAIL-001");
+        testSubscription.setContract(contract);
+        testSubscription.setStartDate(LocalDate.of(2024, 1, 1));
+        testSubscription.setProductName("Test-Abonnement");
+        testSubscription.setMonthlyPrice(BigDecimal.valueOf(100));
+        testSubscription = subscriptionRepository.save(testSubscription);
     }
 }
 

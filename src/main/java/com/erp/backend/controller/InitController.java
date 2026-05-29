@@ -8,6 +8,7 @@ import com.erp.backend.service.init.InitMode;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -20,6 +21,7 @@ import java.time.LocalDate;
 @RequestMapping("/api/init")
 @PreAuthorize("hasRole('ADMIN')")
 @Tag(name = "Init")
+@ConditionalOnProperty(name = "app.init.enabled", havingValue = "true")
 public class InitController {
 
     private final InitDataOrchestrator initDataOrchestrator;

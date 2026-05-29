@@ -19,6 +19,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.context.ApplicationEventPublisher;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -26,6 +27,9 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
@@ -468,6 +472,272 @@ class InvoiceBatchOrchestratorTest {
                 .withBatchId("BATCH-001")
                 .addAmount(BigDecimal.valueOf(100))
                 .build();
+    }
+
+    private Vorgang createMockVorgang() {
+        Vorgang v = new Vorgang();
+        v.setId(UUID.randomUUID());
+        v.setVorgangsnummer("VG-001");
+        v.setTyp(VorgangTyp.RECHNUNGSLAUF);
+        v.setStartZeitpunkt(LocalDateTime.now());
+        return v;
+    }
+}
+
+// ===============================================================================================
+// UNIT TEST - InvoiceBatchOrchestrator (Sicherheitsmassnahmen)
+// ===============================================================================================
+
+/**
+ * Testet die neu eingebauten Sicherheitsmassnahmen im Orchestrator:
+ * - Gleichzeitige Batches werden blockiert
+ * - closeVorgang-Fehler verdeckt das Ergebnis nicht
+ * - Fachliche Fehler werden sauber behandelt
+ * - Partielle Fehler setzen Vorgang-Statistiken
+ */
+@ExtendWith(MockitoExtension.class)
+@DisplayName("Unit Tests: InvoiceBatchOrchestrator - Sicherheitsmassnahmen")
+class InvoiceBatchOrchestratorSecurityTest {
+
+    @Mock private InvoiceBatchProcessor processor;
+    @Mock private InvoiceBatchAnalyzer analyzer;
+    @Mock private VorgangService vorgangService;
+    @Mock private ApplicationEventPublisher eventPublisher;
+
+    @InjectMocks
+    private InvoiceBatchOrchestrator orchestrator;
+
+    private LocalDate billingDate;
+    private Vorgang mockVorgang;
+
+    @BeforeEach
+    void setUp() {
+        billingDate = LocalDate.of(2025, 3, 15);
+        mockVorgang = createMockVorgang();
+    }
+
+    @Test
+    @DisplayName("Sollte Exception werfen wenn bereits ein Rechnungslauf läuft")
+    void testConcurrentRun_BlockedWhenRunning() {
+        // GIVEN: Es gibt bereits einen laufenden Rechnungslauf
+        when(vorgangService.hatLaufendenRechnungslauf()).thenReturn(true);
+
+        // WHEN & THEN
+        IllegalStateException ex = assertThrows(IllegalStateException.class, () ->
+                orchestrator.runInvoiceBatch(billingDate, true, "admin"));
+
+        assertTrue(ex.getMessage().contains("läuft bereits"), "Fehlermeldung soll Hinweis auf laufenden Batch enthalten");
+
+        // Kein Vorgang gestartet, kein Analyzer aufgerufen
+        verify(vorgangService, never()).starteVorgang(any(), any(), any(), any(), anyBoolean());
+        verify(analyzer, never()).analyzeBillingScope(any(), anyBoolean());
+    }
+
+    @Test
+    @DisplayName("Sollte Ergebnis zurückgeben auch wenn closeVorgang fehlschlägt")
+    void testCloseVorgangFehler_VerdecktErgebnisNicht() {
+        // GIVEN
+        when(vorgangService.hatLaufendenRechnungslauf()).thenReturn(false);
+        when(vorgangService.starteVorgang(any(VorgangTyp.class), anyString(),
+                nullable(String.class), anyString(), anyBoolean())).thenReturn(mockVorgang);
+
+        InvoiceBatchAnalysis analysis = createMockAnalysis(1);
+        when(analyzer.analyzeBillingScope(any(), anyBoolean())).thenReturn(analysis);
+
+        InvoiceBatchResult mockResult = new InvoiceBatchResult.Builder()
+                .withVorgangsnummer("VG-001").withBatchId("BATCH-001").build();
+        when(processor.processBatch(any(), any(), any())).thenReturn(mockResult);
+
+        // updateMetadaten wirft — simuliert einen Fehler beim Vorgang-Abschluss
+        doThrow(new RuntimeException("DB-Fehler beim Metadaten-Speichern"))
+                .when(vorgangService).updateMetadaten(any(), anyString());
+
+        // WHEN
+        InvoiceBatchResult result = orchestrator.runInvoiceBatch(billingDate, true, "admin");
+
+        // THEN: Batch-Ergebnis wird trotzdem zurückgegeben
+        assertNotNull(result);
+        assertEquals("VG-001", result.getVorgangsnummer());
+    }
+
+    @Test
+    @DisplayName("Sollte IllegalStateException weiterwerfen und Vorgang als fehlerhaft markieren")
+    void testIllegalStateException_WirdWeitergeworfen() {
+        // GIVEN: Analyzer wirft fachlichen Fehler
+        when(vorgangService.hatLaufendenRechnungslauf()).thenReturn(false);
+        when(vorgangService.starteVorgang(any(VorgangTyp.class), anyString(),
+                nullable(String.class), anyString(), anyBoolean())).thenReturn(mockVorgang);
+        when(analyzer.analyzeBillingScope(any(), anyBoolean()))
+                .thenThrow(new IllegalStateException("Validierungsfehler"));
+
+        // WHEN & THEN: Exception wird unverändert weitergeworfen
+        assertThrows(IllegalStateException.class, () ->
+                orchestrator.runInvoiceBatch(billingDate, true, "admin"));
+
+        // Vorgang mit einfacher Fehlermeldung abgeschlossen (2-Argument-Variante)
+        verify(vorgangService, times(1)).vorgangMitFehlerAbschliessen(
+                any(UUID.class), anyString());
+    }
+
+    @Test
+    @DisplayName("Sollte bei partiellem Fehler die 6-Parameter-Variante mit Statistiken aufrufen")
+    void testPartialerFehler_SetsVorgangStatistiken() {
+        // GIVEN
+        when(vorgangService.hatLaufendenRechnungslauf()).thenReturn(false);
+        when(vorgangService.starteVorgang(any(VorgangTyp.class), anyString(),
+                nullable(String.class), anyString(), anyBoolean())).thenReturn(mockVorgang);
+
+        InvoiceBatchAnalysis analysis = createMockAnalysis(2);
+        when(analyzer.analyzeBillingScope(any(), anyBoolean())).thenReturn(analysis);
+
+        // Result mit Fehlern (partieller Erfolg)
+        InvoiceBatchResult resultWithErrors = new InvoiceBatchResult.Builder()
+                .withVorgangsnummer("VG-001")
+                .withBatchId("BATCH-001")
+                .addError("Fehler bei DUE-002: Doppelverarbeitung erkannt")
+                .build();
+        when(processor.processBatch(any(), any(), any())).thenReturn(resultWithErrors);
+
+        // WHEN
+        orchestrator.runInvoiceBatch(billingDate, true, "admin");
+
+        // THEN: vorgangMitFehlerAbschliessen MIT Statistiken aufgerufen
+        verify(vorgangService, times(1)).vorgangMitFehlerAbschliessen(
+                any(UUID.class), anyInt(), anyInt(), anyInt(), any(), anyString());
+        // Erfolgreiche Variante darf NICHT aufgerufen worden sein
+        verify(vorgangService, never()).vorgangErfolgreichAbschliessen(
+                any(UUID.class), anyInt(), anyInt(), anyInt(), any());
+    }
+
+    // Helpers
+    private InvoiceBatchAnalysis createMockAnalysis(int count) {
+        DueSchedule ds = new DueSchedule();
+        ds.setId(UUID.randomUUID());
+        ds.setDueNumber("DUE-001");
+        ds.setDueDate(billingDate);
+        ds.setSubscription(new Subscription());
+
+        List<DueSchedule> schedules = count > 0 ? List.of(ds) : List.of();
+        return new InvoiceBatchAnalysis(schedules, billingDate, true, 0L, (long) count,
+                count > 0 ? Map.of("2025-03", schedules) : Map.of());
+    }
+
+    private Vorgang createMockVorgang() {
+        Vorgang v = new Vorgang();
+        v.setId(UUID.randomUUID());
+        v.setVorgangsnummer("VG-001");
+        v.setTyp(VorgangTyp.RECHNUNGSLAUF);
+        v.setStartZeitpunkt(LocalDateTime.now());
+        return v;
+    }
+}
+
+// ===============================================================================================
+// UNIT TEST - InvoiceBatchProcessor (Abbruch bei hoher Fehlerquote)
+// ===============================================================================================
+
+/**
+ * Testet den automatischen Batch-Abbruch:
+ * - Bei >50% Fehlerquote nach mindestens 5 Items wird der Batch abgebrochen
+ * - Bei niedriger Fehlerquote läuft der Batch durch
+ */
+@ExtendWith(MockitoExtension.class)
+@DisplayName("Unit Tests: InvoiceBatchProcessor - Abbruch bei hoher Fehlerquote")
+class InvoiceBatchProcessorAbortTest {
+
+    @Mock private InvoiceBatchItemProcessor itemProcessor;
+
+    @InjectMocks
+    private InvoiceBatchProcessor processor;
+
+    private LocalDate billingDate;
+    private Vorgang mockVorgang;
+
+    @BeforeEach
+    void setUp() {
+        billingDate = LocalDate.of(2025, 3, 15);
+        mockVorgang = createMockVorgang();
+    }
+
+    @Test
+    @DisplayName("Sollte Batch abbrechen wenn alle Items fehlschlagen (100% Fehlerquote)")
+    void testAbbruch_BeiHoherFehlerquote() {
+        // GIVEN: 10 DueSchedules, alle schlagen fehl
+        List<DueSchedule> schedules = createDueSchedules(10);
+        InvoiceBatchAnalysis analysis = new InvoiceBatchAnalysis(
+                schedules, billingDate, true, 0L, 10L, Map.of("2025-03", schedules));
+
+        when(itemProcessor.process(any(), any(), any(), any()))
+                .thenThrow(new RuntimeException("Simulierter Item-Fehler"));
+
+        // WHEN
+        InvoiceBatchResult result = processor.processBatch(analysis, mockVorgang, billingDate);
+
+        // THEN: Abbruch-Meldung ist in den Fehlern
+        assertTrue(result.hasErrors());
+        assertTrue(result.getErrors().stream().anyMatch(e -> e.contains("vorzeitig abgebrochen")),
+                "Sollte Abbruchmeldung enthalten");
+
+        // THEN: Abbruch nach 5 Items (MIN_ITEMS_FOR_ABORT), nicht alle 10 verarbeitet
+        verify(itemProcessor, times(5)).process(any(), any(), any(), any());
+    }
+
+    @Test
+    @DisplayName("Sollte Batch NICHT abbrechen bei 30% Fehlerquote (unter 50%)")
+    void testKeinAbbruch_BeiNiedrigerFehlerquote() {
+        // GIVEN: 10 DueSchedules — 7 erfolgreich, 3 fehlerhaft = 30% Fehlerquote
+        List<DueSchedule> schedules = createDueSchedules(10);
+        InvoiceBatchAnalysis analysis = new InvoiceBatchAnalysis(
+                schedules, billingDate, true, 3L, 7L, Map.of("2025-03", schedules));
+
+        Invoice mockInvoice = createMockInvoice();
+        OpenItem mockOpenItem = createMockOpenItem();
+        InvoiceBatchItemProcessor.ProcessedItem successItem =
+                new InvoiceBatchItemProcessor.ProcessedItem(mockInvoice, mockOpenItem, schedules.get(0));
+
+        AtomicInteger callCount = new AtomicInteger(0);
+        when(itemProcessor.process(any(), any(), any(), any())).thenAnswer(inv -> {
+            int n = callCount.incrementAndGet();
+            if (n <= 7) return successItem;
+            throw new RuntimeException("Item-Fehler");
+        });
+
+        // WHEN
+        InvoiceBatchResult result = processor.processBatch(analysis, mockVorgang, billingDate);
+
+        // THEN: Alle 10 Items wurden verarbeitet (kein vorzeitiger Abbruch)
+        verify(itemProcessor, times(10)).process(any(), any(), any(), any());
+        assertFalse(result.getErrors().stream().anyMatch(e -> e.contains("vorzeitig abgebrochen")),
+                "Sollte KEINE Abbruchmeldung enthalten");
+        assertEquals(7, result.getCreatedInvoices());
+        assertEquals(3, result.getErrorCount());
+    }
+
+    // Helpers
+    private List<DueSchedule> createDueSchedules(int count) {
+        return IntStream.rangeClosed(1, count).mapToObj(i -> {
+            DueSchedule ds = new DueSchedule();
+            ds.setId(UUID.randomUUID());
+            ds.setDueNumber("DUE-" + String.format("%03d", i));
+            ds.setDueDate(billingDate);
+            ds.setStatus(DueStatus.ACTIVE);
+            return ds;
+        }).collect(Collectors.toList());
+    }
+
+    private Invoice createMockInvoice() {
+        Invoice invoice = new Invoice();
+        invoice.setId(UUID.randomUUID());
+        invoice.setInvoiceNumber("INV-001");
+        invoice.setTotalAmount(BigDecimal.valueOf(100));
+        return invoice;
+    }
+
+    private OpenItem createMockOpenItem() {
+        OpenItem oi = new OpenItem();
+        oi.setId(UUID.randomUUID());
+        oi.setAmount(BigDecimal.valueOf(100));
+        return oi;
     }
 
     private Vorgang createMockVorgang() {
