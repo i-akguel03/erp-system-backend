@@ -28,7 +28,22 @@ public class InvoiceFactory {
                                                String batchId, boolean isOverdue) {
 
         Subscription subscription = dueSchedule.getSubscription();
-        Customer customer = subscription.getContract().getCustomer();
+        if (subscription == null) {
+            throw new IllegalStateException(
+                    "DueSchedule " + dueSchedule.getDueNumber() + " hat keine Subscription");
+        }
+
+        Contract contract = subscription.getContract();
+        if (contract == null) {
+            throw new IllegalStateException(
+                    "Subscription " + subscription.getId() + " hat keinen Vertrag");
+        }
+
+        Customer customer = contract.getCustomer();
+        if (customer == null) {
+            throw new IllegalStateException(
+                    "Vertrag " + contract.getId() + " hat keinen Kunden");
+        }
 
         Invoice invoice = new Invoice();
         invoice.setInvoiceNumber(invoiceNumberGenerator.generateInvoiceNumber());

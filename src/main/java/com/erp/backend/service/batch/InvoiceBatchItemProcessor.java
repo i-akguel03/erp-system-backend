@@ -62,6 +62,17 @@ public class InvoiceBatchItemProcessor {
         DueSchedule dueSchedule = dueScheduleRepository.findById(dueScheduleId)
                 .orElseThrow(() -> new IllegalStateException("DueSchedule nicht gefunden: " + dueScheduleId));
 
+        // Schutz gegen Doppelverarbeitung: bereits abgerechnete Fälligkeiten ablehnen
+        if (dueSchedule.getInvoiceId() != null) {
+            throw new IllegalStateException(
+                    "DueSchedule " + dueSchedule.getDueNumber() + " wurde bereits abgerechnet " +
+                    "(Rechnung: " + dueSchedule.getInvoiceId() + ", Batch: " + dueSchedule.getInvoiceBatchId() + ")");
+        }
+        if (!dueSchedule.isActive()) {
+            throw new IllegalStateException(
+                    "DueSchedule " + dueSchedule.getDueNumber() + " kann nicht verarbeitet werden — Status: " + dueSchedule.getStatus());
+        }
+
         // Get a managed Vorgang reference for FK assignment
         Vorgang vorgang = entityManager.getReference(Vorgang.class, vorgangRef.getId());
 
@@ -77,7 +88,14 @@ public class InvoiceBatchItemProcessor {
         invoice.setVorgang(vorgang);
         invoice.setSubscriptionId(subscription.getId());
         Invoice savedInvoice = invoiceRepository.save(invoice);
-        customerEmailService.sendInvoiceEmail(savedInvoice);
+
+        // E-Mail-Versand darf die Buchung nicht blockieren oder zurückrollen
+        try {
+            customerEmailService.sendInvoiceEmail(savedInvoice);
+        } catch (Exception emailEx) {
+            logger.warn("E-Mail-Versand für Rechnung {} fehlgeschlagen (Buchung bleibt erhalten): {}",
+                    savedInvoice.getInvoiceNumber(), emailEx.getMessage());
+        }
 
         dueScheduleService.markAsCompleted(dueSchedule.getId(), savedInvoice.getId(), batchId);
 

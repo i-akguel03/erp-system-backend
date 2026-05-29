@@ -18,6 +18,10 @@ public class InvoiceBatchProcessor {
 
     private static final Logger logger = LoggerFactory.getLogger(InvoiceBatchProcessor.class);
 
+    // Batch wird abgebrochen wenn nach mindestens MIN_ITEMS_FOR_ABORT Items die Fehlerquote über MAX_ERROR_RATE liegt
+    private static final int MIN_ITEMS_FOR_ABORT = 5;
+    private static final double MAX_ERROR_RATE = 0.5;
+
     private final InvoiceBatchItemProcessor itemProcessor;
 
     public InvoiceBatchProcessor(InvoiceBatchItemProcessor itemProcessor) {
@@ -33,6 +37,9 @@ public class InvoiceBatchProcessor {
 
         logger.info("==================== BATCH-VERARBEITUNG START ====================");
 
+        int successCount = 0;
+        int errorCount = 0;
+
         for (DueSchedule dueSchedule : analysis.getDueSchedules()) {
             try {
                 InvoiceBatchItemProcessor.ProcessedItem item =
@@ -41,11 +48,27 @@ public class InvoiceBatchProcessor {
                         .addCreatedInvoice(item.invoice())
                         .addCreatedOpenItem(item.openItem())
                         .addProcessedDueSchedule(item.dueSchedule());
+                successCount++;
             } catch (Exception e) {
-                String error = String.format("Fehler bei Fälligkeit %s: %s",
-                        dueSchedule.getDueNumber(), e.getMessage());
+                String dueNumber = getDueNumberSafe(dueSchedule);
+                String error = String.format("Fehler bei Fälligkeit %s: %s", dueNumber, e.getMessage());
                 logger.error("✗ {}", error, e);
                 resultBuilder.addError(error);
+                errorCount++;
+
+                // Frühzeitiger Abbruch bei zu hoher Fehlerquote
+                int total = successCount + errorCount;
+                if (total >= MIN_ITEMS_FOR_ABORT) {
+                    double errorRate = (double) errorCount / total;
+                    if (errorRate > MAX_ERROR_RATE) {
+                        String abortMsg = String.format(
+                                "Batch vorzeitig abgebrochen: Fehlerquote %.0f%% (%d/%d Items) überschreitet Schwellwert von %.0f%%",
+                                errorRate * 100, errorCount, total, MAX_ERROR_RATE * 100);
+                        logger.error("✗ ABBRUCH — {}", abortMsg);
+                        resultBuilder.addError(abortMsg);
+                        break;
+                    }
+                }
             }
         }
 
@@ -56,13 +79,21 @@ public class InvoiceBatchProcessor {
         return result;
     }
 
+    private String getDueNumberSafe(DueSchedule dueSchedule) {
+        try {
+            return dueSchedule.getDueNumber() != null ? dueSchedule.getDueNumber() : dueSchedule.getId().toString();
+        } catch (Exception e) {
+            return "[unbekannt]";
+        }
+    }
+
     private void validateResult(InvoiceBatchResult result) {
         if (result.getCreatedInvoices() != result.getCreatedOpenItems()) {
-            logger.error("✗ INKONSISTENZ: {} Rechnungen vs {} OpenItems",
+            logger.error("✗ DATENKONSISTENZ-ALARM: {} Rechnungen vs {} OpenItems — manuelle Prüfung erforderlich!",
                     result.getCreatedInvoices(), result.getCreatedOpenItems());
         }
         if (result.getProcessedDueSchedules() != result.getCreatedInvoices()) {
-            logger.error("✗ INKONSISTENZ: {} DueSchedules vs {} Rechnungen",
+            logger.error("✗ DATENKONSISTENZ-ALARM: {} DueSchedules vs {} Rechnungen — manuelle Prüfung erforderlich!",
                     result.getProcessedDueSchedules(), result.getCreatedInvoices());
         }
     }

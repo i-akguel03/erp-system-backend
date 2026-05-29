@@ -133,6 +133,34 @@ public class VorgangService {
                 vorgang.getVorgangsnummer(), fehlerDetails);
     }
 
+    /**
+     * Schließt einen Vorgang mit Fehler ab und setzt gleichzeitig Verarbeitungsstatistiken.
+     * Für partielle Erfolge (einige Items ok, andere fehlerhaft).
+     */
+    public void vorgangMitFehlerAbschliessen(UUID vorgangId, int verarbeitet, int erfolgreich,
+                                              int fehler, java.math.BigDecimal betrag, String fehlerDetails) {
+        Vorgang vorgang = vorgangRepository.findById(vorgangId)
+                .orElseThrow(() -> new IllegalArgumentException("Vorgang nicht gefunden: " + vorgangId));
+
+        vorgang.updateStatistiken(verarbeitet, erfolgreich, fehler);
+        if (betrag != null) {
+            vorgang.setGesamtbetrag(betrag);
+        }
+        vorgang.mitFehlerAbschliessen(fehlerDetails);
+        vorgangRepository.save(vorgang);
+
+        logger.error("Vorgang mit Fehler abgeschlossen: {} — {}/{} erfolgreich, {} Fehler — {}",
+                vorgang.getVorgangsnummer(), erfolgreich, verarbeitet, fehler, fehlerDetails);
+    }
+
+    /**
+     * Prüft ob bereits ein Rechnungslauf-Vorgang mit Status LAUFEND existiert.
+     * Verhindert gleichzeitige Batch-Ausführungen.
+     */
+    public boolean hatLaufendenRechnungslauf() {
+        return !vorgangRepository.findByTypAndStatus(VorgangTyp.RECHNUNGSLAUF, VorgangStatus.LAUFEND).isEmpty();
+    }
+
     public void updateMetadaten(UUID vorgangId, String metadaten) {
         vorgangRepository.findById(vorgangId).ifPresent(v -> {
             v.setMetadaten(metadaten);

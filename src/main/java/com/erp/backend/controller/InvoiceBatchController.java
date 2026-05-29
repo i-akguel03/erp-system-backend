@@ -8,10 +8,15 @@ import com.erp.backend.service.batch.InvoiceBatchResult;
 import com.erp.backend.util.SecurityUtils;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Map;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -20,6 +25,8 @@ import java.time.LocalDate;
 @RequestMapping("/api/invoices")
 @Tag(name = "Rechnungen")
 public class InvoiceBatchController {
+
+    private static final Logger logger = LoggerFactory.getLogger(InvoiceBatchController.class);
 
     private final InvoiceBatchOrchestrator orchestrator;
     private final InvoiceBatchAnalyzer analyzer;
@@ -40,9 +47,15 @@ public class InvoiceBatchController {
             InvoiceBatchResult result = orchestrator.runInvoiceBatch(billingDate, includeAllPreviousMonths,
                     SecurityUtils.getCurrentUsername());
             return ResponseEntity.ok(result);
+        } catch (IllegalStateException e) {
+            // Fachliche Ablehnung (z.B. laufender Batch, Validierungsfehler)
+            logger.warn("Rechnungslauf für {} abgelehnt: {}", billingDate, e.getMessage());
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                    .body(Map.of("error", e.getMessage()));
         } catch (Exception e) {
+            logger.error("Unerwarteter Fehler beim Rechnungslauf für {}", billingDate, e);
             return ResponseEntity.internalServerError()
-                    .body("Fehler beim Rechnungslauf: " + e.getMessage());
+                    .body(Map.of("error", "Rechnungslauf fehlgeschlagen. Bitte Logs prüfen."));
         }
     }
 
@@ -56,9 +69,14 @@ public class InvoiceBatchController {
             InvoiceBatchResult result = orchestrator.runInvoiceBatch(LocalDate.now(), includeAllPreviousMonths,
                     SecurityUtils.getCurrentUsername());
             return ResponseEntity.ok(result);
+        } catch (IllegalStateException e) {
+            logger.warn("Rechnungslauf für heute abgelehnt: {}", e.getMessage());
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                    .body(Map.of("error", e.getMessage()));
         } catch (Exception e) {
+            logger.error("Unerwarteter Fehler beim Rechnungslauf für heute", e);
             return ResponseEntity.internalServerError()
-                    .body("Fehler beim Rechnungslauf: " + e.getMessage());
+                    .body(Map.of("error", "Rechnungslauf fehlgeschlagen. Bitte Logs prüfen."));
         }
     }
 
@@ -83,8 +101,9 @@ public class InvoiceBatchController {
             return ResponseEntity.ok(preview);
 
         } catch (Exception e) {
+            logger.error("Fehler bei Vorschau für {}", billingDate, e);
             return ResponseEntity.internalServerError()
-                    .body("Fehler bei der Vorschau: " + e.getMessage());
+                    .body(Map.of("error", "Vorschau konnte nicht erstellt werden. Bitte Logs prüfen."));
         }
     }
 
@@ -102,8 +121,9 @@ public class InvoiceBatchController {
                     "Prüfung für alle offenen Monate bis " + billingDate :
                     "Prüfung nur für " + billingDate));
         } catch (Exception e) {
+            logger.error("Fehler bei Batch-Prüfung für {}", billingDate, e);
             return ResponseEntity.internalServerError()
-                    .body("Fehler bei der Prüfung: " + e.getMessage());
+                    .body(Map.of("error", "Prüfung fehlgeschlagen. Bitte Logs prüfen."));
         }
     }
 

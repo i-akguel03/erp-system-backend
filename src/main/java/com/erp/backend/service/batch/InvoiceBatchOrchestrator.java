@@ -39,6 +39,12 @@ public class InvoiceBatchOrchestrator {
     }
 
     public InvoiceBatchResult runInvoiceBatch(LocalDate billingDate, boolean includeAllPreviousMonths, String benutzer) {
+        // Verhindert gleichzeitige Läufe — z.B. wenn zwei Admins parallel auslösen
+        if (vorgangService.hatLaufendenRechnungslauf()) {
+            throw new IllegalStateException(
+                    "Es läuft bereits ein Rechnungslauf. Bitte warten Sie bis dieser abgeschlossen ist.");
+        }
+
         Vorgang vorgang = startVorgang(billingDate, includeAllPreviousMonths, benutzer);
 
         try {
@@ -53,13 +59,35 @@ public class InvoiceBatchOrchestrator {
             }
 
             InvoiceBatchResult result = processor.processBatch(analysis, vorgang, billingDate);
-            closeVorgang(vorgang, result, analysis);
+
+            // closeVorgang in eigenem try-catch: ein Fehler beim Abschluss darf das Batch-Ergebnis nicht verdecken
+            try {
+                closeVorgang(vorgang, result, analysis);
+            } catch (Exception closeEx) {
+                logger.error("Fehler beim Abschließen des Vorgangs {} — Batch-Ergebnis bleibt gültig: {}",
+                        vorgang.getVorgangsnummer(), closeEx.getMessage(), closeEx);
+            }
+
             return result;
 
+        } catch (IllegalStateException e) {
+            // Fachliche Fehler (z.B. Validierungsprobleme) — Vorgang als fehlerhaft markieren und weiterwerfen
+            logger.error("Fachlicher Fehler im Rechnungslauf (Vorgang: {}): {}", vorgang.getVorgangsnummer(), e.getMessage());
+            safeMarkVorgangAsFailed(vorgang, e.getMessage());
+            throw e;
         } catch (Exception e) {
-            logger.error("Kritischer Fehler im Rechnungslauf", e);
-            vorgangService.vorgangMitFehlerAbschliessen(vorgang.getId(), e.getMessage());
+            logger.error("Kritischer Fehler im Rechnungslauf (Vorgang: {})", vorgang.getVorgangsnummer(), e);
+            safeMarkVorgangAsFailed(vorgang, e.getMessage());
             throw new RuntimeException("Rechnungslauf fehlgeschlagen (Vorgang: " + vorgang.getVorgangsnummer() + ")", e);
+        }
+    }
+
+    private void safeMarkVorgangAsFailed(Vorgang vorgang, String fehlerDetails) {
+        try {
+            vorgangService.vorgangMitFehlerAbschliessen(vorgang.getId(), fehlerDetails);
+        } catch (Exception ex) {
+            logger.error("Vorgang {} konnte nicht als fehlerhaft markiert werden: {}",
+                    vorgang.getVorgangsnummer(), ex.getMessage());
         }
     }
 
@@ -86,11 +114,20 @@ public class InvoiceBatchOrchestrator {
                 analysis.getBillingDate(), result.getBatchId(), analysis.getMonthCount());
         vorgangService.updateMetadaten(vorgang.getId(), metadaten);
 
+        int gesamtVersuche = result.getProcessedDueSchedules() + result.getErrorCount();
         String errorSummary = null;
+
         if (result.hasErrors()) {
             errorSummary = String.join("; ",
                     result.getErrors().subList(0, Math.min(3, result.getErrors().size())));
-            vorgangService.vorgangMitFehlerAbschliessen(vorgang.getId(), errorSummary);
+            // Statistiken auch bei Fehlern setzen, damit der Vorgang aussagekräftig bleibt
+            vorgangService.vorgangMitFehlerAbschliessen(
+                    vorgang.getId(),
+                    gesamtVersuche,
+                    result.getProcessedDueSchedules(),
+                    result.getErrorCount(),
+                    result.getTotalAmount(),
+                    errorSummary);
         } else {
             vorgangService.vorgangErfolgreichAbschliessen(
                     vorgang.getId(),
