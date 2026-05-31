@@ -69,6 +69,9 @@ public interface OpenItemRepository extends JpaRepository<OpenItem, UUID> {
     @Query("SELECT oi FROM OpenItem oi WHERE oi.invoice.customer.id = :customerId AND oi.status IN ('OPEN', 'PARTIALLY_PAID', 'OVERDUE')")
     List<OpenItem> findOpenItemsByCustomerId(@Param("customerId") UUID customerId);
 
+    @Query("SELECT oi FROM OpenItem oi JOIN FETCH oi.invoice i JOIN FETCH i.customer WHERE i.customer.id = :customerId ORDER BY oi.createdDate ASC")
+    List<OpenItem> findByCustomerIdForKontenblatt(@Param("customerId") UUID customerId);
+
     // ========================================
     // 5. Date-based Queries
     // ========================================

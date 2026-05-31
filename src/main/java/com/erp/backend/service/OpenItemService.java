@@ -9,6 +9,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.erp.backend.dto.KontenblattEintragDTO;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.*;
@@ -405,5 +406,82 @@ public class OpenItemService {
 
         logger.info("Created {} OpenItems for {} invoices", createdItems.size(), invoiceIds.size());
         return createdItems;
+    }
+
+    // ========================================
+    // 9. Kontenblatt
+    // ========================================
+
+    /**
+     * Baut einen Sparkassen-artigen Kontoauszug für einen Kunden.
+     *
+     * Jeder offene Posten erzeugt:
+     *   - Eine FORDERUNG-Zeile (Minus) zum Erstellungszeitpunkt
+     *   - Eine ZAHLUNG-Zeile (Plus) wenn Zahlung erfasst wurde
+     *
+     * Der laufende Saldo ist negativ solange der Kunde noch Geld schuldet.
+     */
+    @Transactional(readOnly = true)
+    public List<KontenblattEintragDTO> getKontenblattForCustomer(UUID customerId, String sortDirection) {
+        List<OpenItem> items = openItemRepository.findByCustomerIdForKontenblatt(customerId);
+
+        List<KontenblattEintragDTO> eintraege = new ArrayList<>();
+
+        for (OpenItem item : items) {
+            String rechnungsnummer = item.getInvoice() != null
+                    ? item.getInvoice().getInvoiceNumber() : "—";
+
+            // FORDERUNG (Minus): Rechnung wurde gestellt
+            KontenblattEintragDTO forderung = new KontenblattEintragDTO();
+            forderung.setOpenItemId(item.getId());
+            forderung.setDatum(item.getCreatedDate().toLocalDate());
+            forderung.setTyp("FORDERUNG");
+            forderung.setBeschreibung("Rechnung " + rechnungsnummer + " — " + item.getDescription());
+            forderung.setBetrag(item.getAmount());
+            forderung.setBewegung(item.getAmount().negate());
+            forderung.setRechnungsnummer(rechnungsnummer);
+            forderung.setOpenItemStatus(item.getStatus().name());
+            forderung.setOffenerBetrag(item.getOutstandingAmount());
+            eintraege.add(forderung);
+
+            // ZAHLUNG (Plus): Zahlung wurde erfasst
+            if (item.getPaidAmount() != null && item.getPaidAmount().compareTo(BigDecimal.ZERO) > 0) {
+                LocalDate zahlungsDatum = item.getPaidDate() != null
+                        ? item.getPaidDate()
+                        : (item.getUpdatedDate() != null ? item.getUpdatedDate().toLocalDate() : item.getCreatedDate().toLocalDate());
+
+                String zahlungsArt = item.getPaymentMethod() != null ? item.getPaymentMethod() : "";
+                KontenblattEintragDTO zahlung = new KontenblattEintragDTO();
+                zahlung.setOpenItemId(item.getId());
+                zahlung.setDatum(zahlungsDatum);
+                zahlung.setTyp("ZAHLUNG");
+                zahlung.setBeschreibung("Zahlung " + zahlungsArt + " — Rechnung " + rechnungsnummer);
+                zahlung.setBetrag(item.getPaidAmount());
+                zahlung.setBewegung(item.getPaidAmount());
+                zahlung.setRechnungsnummer(rechnungsnummer);
+                zahlung.setZahlungsart(item.getPaymentMethod());
+                zahlung.setZahlungsreferenz(item.getPaymentReference());
+                zahlung.setOpenItemStatus(item.getStatus().name());
+                zahlung.setOffenerBetrag(item.getOutstandingAmount());
+                eintraege.add(zahlung);
+            }
+        }
+
+        // Immer chronologisch aufsteigend sortieren für korrekten Saldo
+        eintraege.sort(Comparator.comparing(KontenblattEintragDTO::getDatum));
+
+        // Laufenden Saldo berechnen (von alt nach neu)
+        BigDecimal laufenderSaldo = BigDecimal.ZERO;
+        for (KontenblattEintragDTO eintrag : eintraege) {
+            laufenderSaldo = laufenderSaldo.add(eintrag.getBewegung());
+            eintrag.setSaldo(laufenderSaldo);
+        }
+
+        // Anzeigereihenfolge anpassen (Standard: neueste zuerst)
+        if ("ASC".equalsIgnoreCase(sortDirection)) {
+            return eintraege;
+        }
+        Collections.reverse(eintraege);
+        return eintraege;
     }
 }

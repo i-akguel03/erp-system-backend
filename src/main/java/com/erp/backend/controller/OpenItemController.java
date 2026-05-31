@@ -1,6 +1,7 @@
 package com.erp.backend.controller;
 
 import com.erp.backend.domain.OpenItem;
+import com.erp.backend.dto.KontenblattEintragDTO;
 import com.erp.backend.dto.OpenItemDTO;
 import com.erp.backend.mapper.OpenItemMapper;
 import com.erp.backend.service.OpenItemService;
@@ -359,6 +360,19 @@ public class OpenItemController {
     // ==============================
     // 7. Bulk Operations
     // ==============================
+
+    // ==============================
+    // 8. Kontenblatt
+    // ==============================
+
+    @Operation(summary = "Kontenblatt eines Kunden — Forderungen (Minus) und Zahlungen (Plus) mit laufendem Saldo")
+    @GetMapping("/kontenblatt/customer/{customerId}")
+    public ResponseEntity<List<KontenblattEintragDTO>> getKontenblatt(
+            @PathVariable UUID customerId,
+            @RequestParam(defaultValue = "DESC") String sortDirection) {
+        List<KontenblattEintragDTO> eintraege = openItemService.getKontenblattForCustomer(customerId, sortDirection);
+        return ResponseEntity.ok(eintraege);
+    }
 
     @Operation(summary = "Offene Posten für mehrere Rechnungen erstellen")
     @PreAuthorize("hasRole('ADMIN')")
