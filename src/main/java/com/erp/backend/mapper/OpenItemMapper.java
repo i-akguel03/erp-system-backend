@@ -49,13 +49,12 @@ public class OpenItemMapper {
 
             // Customer information (from invoice)
             if (openItem.getInvoice().getCustomer() != null) {
-                dto.setCustomerId(openItem.getInvoice().getCustomer().getId().toString());
-                // Passen Sie den Methodenaufruf an Ihre Customer-Klasse an:
-                // dto.setCustomerName(openItem.getInvoice().getCustomer().getName());
-                // oder
-                // dto.setCustomerName(openItem.getInvoice().getCustomer().getFirstName() + " " + openItem.getInvoice().getCustomer().getLastName());
-                // oder welche Methode auch immer in Ihrer Customer-Klasse existiert
-                dto.setCustomerName("Customer " + openItem.getInvoice().getCustomer().getId()); // Fallback
+                var customer = openItem.getInvoice().getCustomer();
+                dto.setCustomerId(customer.getId().toString());
+                dto.setCustomerFirstName(customer.getFirstName());
+                dto.setCustomerLastName(customer.getLastName());
+                dto.setCustomerNumber(customer.getCustomerNumber());
+                dto.setCustomerName(customer.getFirstName() + " " + customer.getLastName());
             }
         }
 

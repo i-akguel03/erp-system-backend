@@ -38,6 +38,9 @@ public class OpenItemDTO {
     // Customer Info (from Invoice)
     private String customerId;
     private String customerName;
+    private String customerFirstName;
+    private String customerLastName;
+    private String customerNumber;
 
     // Constructors
     public OpenItemDTO() {}
@@ -102,4 +105,13 @@ public class OpenItemDTO {
 
     public String getCustomerName() { return customerName; }
     public void setCustomerName(String customerName) { this.customerName = customerName; }
+
+    public String getCustomerFirstName() { return customerFirstName; }
+    public void setCustomerFirstName(String customerFirstName) { this.customerFirstName = customerFirstName; }
+
+    public String getCustomerLastName() { return customerLastName; }
+    public void setCustomerLastName(String customerLastName) { this.customerLastName = customerLastName; }
+
+    public String getCustomerNumber() { return customerNumber; }
+    public void setCustomerNumber(String customerNumber) { this.customerNumber = customerNumber; }
 }
