@@ -47,6 +47,12 @@ spring:
   # ===============================
   # JACKSON
   # ===============================
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 50MB
+      max-request-size: 55MB
+
   jackson:
     serialization:
       indent_output: true
@@ -129,6 +135,8 @@ app:
   renewal:
     default-extension-months: 12  # Verlängerungsdauer im Batch-Lauf
     batch-lookahead-days: 30      # Vorlauf: Verträge die in X Tagen ablaufen werden verlängert
+  crm:
+    upload-dir: ${CRM_UPLOAD_DIR:uploads/crm}
   notifications:
     email:
       enabled: ${NOTIFICATION_EMAIL_ENABLED:false}
