@@ -23,6 +23,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 /**
  * Kernservice der Finanzbuchhaltung.
@@ -254,6 +256,11 @@ public class BuchhaltungService {
         return buchungssatzRepository.findAll().stream()
                 .map(BuchungssatzDTO::fromEntity)
                 .collect(Collectors.toList());
+    }
+
+    @Transactional(readOnly = true)
+    public Page<BuchungssatzDTO> findAll(Pageable pageable) {
+        return buchungssatzRepository.findAll(pageable).map(BuchungssatzDTO::fromEntity);
     }
 
     @Transactional(readOnly = true)

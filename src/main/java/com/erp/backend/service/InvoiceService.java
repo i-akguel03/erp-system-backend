@@ -13,6 +13,11 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 
 /**
  * ===============================================================================
@@ -178,6 +183,26 @@ public class InvoiceService {
     @Transactional(readOnly = true)
     public List<Invoice> getAllInvoices() {
         return invoiceRepository.findAllWithItems();
+    }
+
+    /**
+     * Gibt eine Seite Rechnungen zurück — DB-seitige Paginierung via Two-Query-Pattern.
+     * Erst IDs paginiert laden, dann Items für diese IDs per JOIN FETCH nachladen.
+     */
+    @Transactional(readOnly = true)
+    public Page<Invoice> getAllInvoices(Pageable pageable) {
+        Page<UUID> idPage = invoiceRepository.findAllIdsPaged(pageable);
+        if (!idPage.hasContent()) {
+            return Page.empty(pageable);
+        }
+        List<Invoice> invoices = invoiceRepository.findByIdsWithItems(idPage.getContent());
+        Map<UUID, Invoice> invoiceMap = invoices.stream()
+                .collect(Collectors.toMap(Invoice::getId, Function.identity()));
+        List<Invoice> ordered = idPage.getContent().stream()
+                .map(invoiceMap::get)
+                .filter(Objects::nonNull)
+                .toList();
+        return new PageImpl<>(ordered, pageable, idPage.getTotalElements());
     }
 
     /**
@@ -420,10 +445,7 @@ public class InvoiceService {
      */
     @Transactional(readOnly = true)
     public List<Invoice> getInvoicesByDateRange(LocalDate startDate, LocalDate endDate) {
-        return invoiceRepository.findAll().stream()
-                .filter(invoice -> !invoice.getInvoiceDate().isBefore(startDate) &&
-                        !invoice.getInvoiceDate().isAfter(endDate))
-                .toList();
+        return invoiceRepository.findByInvoiceDateRange(startDate, endDate);
     }
 
     /**
@@ -434,9 +456,7 @@ public class InvoiceService {
      */
     @Transactional(readOnly = true)
     public List<Invoice> getInvoicesByBatchId(String batchId) {
-        return invoiceRepository.findAll().stream()
-                .filter(invoice -> Objects.equals(invoice.getInvoiceBatchId(), batchId))
-                .toList();
+        return invoiceRepository.findByInvoiceBatchId(batchId);
     }
 
     // ========================================

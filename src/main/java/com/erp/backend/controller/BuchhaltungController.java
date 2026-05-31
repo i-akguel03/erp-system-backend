@@ -6,7 +6,6 @@ import com.erp.backend.service.BuchhaltungService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -41,14 +40,10 @@ public class BuchhaltungController {
             @RequestParam(defaultValue = "20") int size,
             @RequestParam(defaultValue = "buchungsDatum") String sortBy,
             @RequestParam(defaultValue = "DESC") String sortDirection) {
-        List<BuchungssatzDTO> all = buchhaltungService.findAll();
         if (paginated) {
             Sort sort = Sort.by(Sort.Direction.fromString(sortDirection), sortBy);
             Pageable pageable = PageRequest.of(page, size, sort);
-            int start = (int) pageable.getOffset();
-            int end = Math.min(start + pageable.getPageSize(), all.size());
-            List<BuchungssatzDTO> pageContent = start >= all.size() ? List.of() : all.subList(start, end);
-            Page<BuchungssatzDTO> buchungenPage = new PageImpl<>(pageContent, pageable, all.size());
+            Page<BuchungssatzDTO> buchungenPage = buchhaltungService.findAll(pageable);
             return ResponseEntity.ok()
                     .header("X-Total-Count", String.valueOf(buchungenPage.getTotalElements()))
                     .header("X-Total-Pages", String.valueOf(buchungenPage.getTotalPages()))
@@ -56,7 +51,7 @@ public class BuchhaltungController {
                     .header("Access-Control-Expose-Headers", "X-Total-Count,X-Total-Pages,X-Current-Page")
                     .body(buchungenPage.getContent());
         }
-        return ResponseEntity.ok(all);
+        return ResponseEntity.ok(buchhaltungService.findAll());
     }
 
     @Operation(summary = "Buchungssatz nach ID abrufen")

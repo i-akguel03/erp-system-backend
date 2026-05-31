@@ -52,20 +52,14 @@ public class OpenItemController {
 
         if (paginated) {
             Sort sort = Sort.by(Sort.Direction.fromString(sortDirection), sortBy);
-            List<OpenItem> allItems = openItemService.getAllOpenItems();
-            int total = allItems.size();
-            int totalPages = (int) Math.ceil((double) total / size);
-            int fromIndex = Math.min(page * size, total);
-            int toIndex = Math.min(fromIndex + size, total);
-            List<OpenItem> pageContent = allItems.subList(fromIndex, toIndex);
-
-            List<OpenItemDTO> dtoList = pageContent.stream()
+            Pageable pageable = PageRequest.of(page, size, sort);
+            org.springframework.data.domain.Page<OpenItem> itemPage = openItemService.getAllOpenItems(pageable);
+            List<OpenItemDTO> dtoList = itemPage.getContent().stream()
                     .map(OpenItemMapper::toDTO)
                     .toList();
-
             return ResponseEntity.ok()
-                    .header("X-Total-Count", String.valueOf(total))
-                    .header("X-Total-Pages", String.valueOf(totalPages))
+                    .header("X-Total-Count", String.valueOf(itemPage.getTotalElements()))
+                    .header("X-Total-Pages", String.valueOf(itemPage.getTotalPages()))
                     .header("X-Current-Page", String.valueOf(page))
                     .header("Access-Control-Expose-Headers", "X-Total-Count, X-Total-Pages, X-Current-Page")
                     .body(dtoList);

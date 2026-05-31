@@ -3,6 +3,8 @@ package com.erp.backend.repository;
 import com.erp.backend.domain.Invoice;
 import com.erp.backend.domain.Customer;
 import com.erp.backend.domain.Subscription;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -69,6 +71,17 @@ public interface InvoiceRepository extends JpaRepository<Invoice, UUID> {
 
     @Query("SELECT i FROM Invoice i LEFT JOIN FETCH i.invoiceItems LEFT JOIN FETCH i.customer ORDER BY i.invoiceDate DESC")
     List<Invoice> findAllWithItems();
+
+    @Query("SELECT i.id FROM Invoice i")
+    Page<UUID> findAllIdsPaged(Pageable pageable);
+
+    @Query("SELECT i FROM Invoice i LEFT JOIN FETCH i.invoiceItems LEFT JOIN FETCH i.customer WHERE i.id IN :ids")
+    List<Invoice> findByIdsWithItems(@Param("ids") List<UUID> ids);
+
+    @Query("SELECT i FROM Invoice i WHERE i.invoiceDate >= :startDate AND i.invoiceDate <= :endDate")
+    List<Invoice> findByInvoiceDateRange(@Param("startDate") LocalDate startDate, @Param("endDate") LocalDate endDate);
+
+    List<Invoice> findByInvoiceBatchId(String invoiceBatchId);
 
     @Query("SELECT i FROM Invoice i LEFT JOIN FETCH i.invoiceItems LEFT JOIN FETCH i.customer WHERE i.id = :id")
     Optional<Invoice> findByIdWithItems(@Param("id") UUID id);

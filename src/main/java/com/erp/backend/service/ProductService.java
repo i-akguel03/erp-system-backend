@@ -14,6 +14,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Random;
 import java.util.UUID;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 @Service
 public class ProductService {
@@ -64,6 +66,10 @@ public class ProductService {
         List<Product> products = repository.findAll();
         logger.info("Fetched {} products", products.size());
         return products;
+    }
+
+    public Page<Product> getAllProducts(Pageable pageable) {
+        return repository.findAll(pageable);
     }
 
     public Optional<Product> getProductById(UUID id) {

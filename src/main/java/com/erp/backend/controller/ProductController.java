@@ -51,19 +51,13 @@ public class ProductController {
         if (paginated) {
             Sort sort = Sort.by(Sort.Direction.fromString(sortDirection), sortBy);
             Pageable pageable = PageRequest.of(page, size, sort);
-            List<Product> all = service.getAllProducts();
-            int total = all.size();
-            int totalPages = (int) Math.ceil((double) total / size);
-            int fromIndex = Math.min(page * size, total);
-            int toIndex = Math.min(fromIndex + size, total);
-            List<Product> pageContent = all.subList(fromIndex, toIndex);
-
+            org.springframework.data.domain.Page<Product> productPage = service.getAllProducts(pageable);
             return ResponseEntity.ok()
-                    .header("X-Total-Count", String.valueOf(total))
-                    .header("X-Total-Pages", String.valueOf(totalPages))
+                    .header("X-Total-Count", String.valueOf(productPage.getTotalElements()))
+                    .header("X-Total-Pages", String.valueOf(productPage.getTotalPages()))
                     .header("X-Current-Page", String.valueOf(page))
                     .header("Access-Control-Expose-Headers", "X-Total-Count, X-Total-Pages, X-Current-Page")
-                    .body(pageContent);
+                    .body(productPage.getContent());
         } else {
             List<Product> products = service.getAllProducts();
             logger.debug("Found {} products", products.size());

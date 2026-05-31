@@ -17,6 +17,8 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.UUID;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 @Service
 @Transactional
@@ -43,6 +45,11 @@ public class KreditorenService {
     @Transactional(readOnly = true)
     public List<Lieferant> findAllLieferanten() {
         return lieferantRepository.findAll();
+    }
+
+    @Transactional(readOnly = true)
+    public Page<Lieferant> findAllLieferanten(Pageable pageable) {
+        return lieferantRepository.findAll(pageable);
     }
 
     @Transactional(readOnly = true)
@@ -78,6 +85,11 @@ public class KreditorenService {
     @Transactional(readOnly = true)
     public List<Eingangsrechnung> findAllEingangsrechnungen() {
         return eingangsrechnungRepository.findAll();
+    }
+
+    @Transactional(readOnly = true)
+    public Page<Eingangsrechnung> findAllEingangsrechnungen(Pageable pageable) {
+        return eingangsrechnungRepository.findAll(pageable);
     }
 
     @Transactional(readOnly = true)

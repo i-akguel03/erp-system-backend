@@ -3,6 +3,8 @@ package com.erp.backend.repository;
 import com.erp.backend.domain.OpenItem;
 import com.erp.backend.domain.Invoice;
 import com.erp.backend.domain.Subscription;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -22,6 +24,10 @@ public interface OpenItemRepository extends JpaRepository<OpenItem, UUID> {
 
     @Query("SELECT oi FROM OpenItem oi JOIN FETCH oi.invoice i JOIN FETCH i.customer ORDER BY oi.dueDate ASC")
     List<OpenItem> findAllWithInvoiceAndCustomer();
+
+    @Query(value = "SELECT oi FROM OpenItem oi JOIN FETCH oi.invoice i JOIN FETCH i.customer",
+           countQuery = "SELECT COUNT(oi) FROM OpenItem oi")
+    Page<OpenItem> findAllWithInvoiceAndCustomerPaged(Pageable pageable);
 
     @Query("SELECT oi FROM OpenItem oi JOIN FETCH oi.invoice i JOIN FETCH i.customer WHERE oi.id = :id")
     OpenItem findByIdWithInvoiceAndCustomer(@Param("id") UUID id);

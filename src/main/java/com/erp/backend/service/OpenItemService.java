@@ -12,6 +12,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.*;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 /**
  * Service für OpenItem-Verwaltung (CRUD + Zahlungslogik).
@@ -91,6 +93,11 @@ public class OpenItemService {
     @Transactional(readOnly = true)
     public List<OpenItem> getAllOpenItems() {
         return openItemRepository.findAllWithInvoiceAndCustomer();
+    }
+
+    @Transactional(readOnly = true)
+    public Page<OpenItem> getAllOpenItems(Pageable pageable) {
+        return openItemRepository.findAllWithInvoiceAndCustomerPaged(pageable);
     }
 
     @Transactional(readOnly = true)
