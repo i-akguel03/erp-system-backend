@@ -15,12 +15,12 @@ import java.util.Set;
 public class AdminSettingsController {
 
     private final AuditSettings auditSettings;
+    private final String adminPassword;
 
-    @Value("${app.init.delete-password}")
-    private String adminPassword;
-
-    public AdminSettingsController(AuditSettings auditSettings) {
+    public AdminSettingsController(AuditSettings auditSettings,
+                                   @Value("${app.init.delete-password}") String adminPassword) {
         this.auditSettings = auditSettings;
+        this.adminPassword = adminPassword;
     }
 
     @GetMapping("/audit/excluded")
