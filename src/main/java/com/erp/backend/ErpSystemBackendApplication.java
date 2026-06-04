@@ -17,7 +17,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 public class ErpSystemBackendApplication {
 
 	public static void main(String[] args) {
-		Dotenv dotenv = Dotenv.configure().ignoreIfMissing().load();
+		Dotenv dotenv = Dotenv.configure().ignoreIfMissing().ignoreIfMalformed().load();
 		dotenv.entries().forEach(e -> {
 			if (System.getenv(e.getKey()) == null) {
 				System.setProperty(e.getKey(), e.getValue());
