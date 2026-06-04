@@ -1,6 +1,8 @@
 package com.erp.backend.controller;
 
 import com.erp.backend.audit.AuditSettings;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -14,6 +16,9 @@ public class AdminSettingsController {
 
     private final AuditSettings auditSettings;
 
+    @Value("${app.init.delete-password}")
+    private String adminPassword;
+
     public AdminSettingsController(AuditSettings auditSettings) {
         this.auditSettings = auditSettings;
     }
@@ -24,13 +29,23 @@ public class AdminSettingsController {
     }
 
     @PostMapping("/audit/excluded/{entityType}")
-    public ResponseEntity<Void> excludeEntityType(@PathVariable String entityType) {
+    public ResponseEntity<String> excludeEntityType(
+            @PathVariable String entityType,
+            @RequestParam String password) {
+        if (!adminPassword.equals(password)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Falsches Passwort");
+        }
         auditSettings.exclude(entityType);
         return ResponseEntity.noContent().build();
     }
 
     @DeleteMapping("/audit/excluded/{entityType}")
-    public ResponseEntity<Void> includeEntityType(@PathVariable String entityType) {
+    public ResponseEntity<String> includeEntityType(
+            @PathVariable String entityType,
+            @RequestParam String password) {
+        if (!adminPassword.equals(password)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Falsches Passwort");
+        }
         auditSettings.include(entityType);
         return ResponseEntity.noContent().build();
     }
