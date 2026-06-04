@@ -15,9 +15,11 @@ public class AuditAspect {
     private static final Logger log = LoggerFactory.getLogger(AuditAspect.class);
 
     private final AuditService auditService;
+    private final AuditSettings auditSettings;
 
-    public AuditAspect(AuditService auditService) {
+    public AuditAspect(AuditService auditService, AuditSettings auditSettings) {
         this.auditService = auditService;
+        this.auditSettings = auditSettings;
     }
 
     @Pointcut("execution(* com.erp.backend.service.*Service.create*(..)) || " +
@@ -36,6 +38,10 @@ public class AuditAspect {
         String entityType   = resolveEntityType(serviceName);
         AuditLog.AuditAction action = resolveAction(methodName);
         Object[] args = pjp.getArgs();
+
+        if (auditSettings.isExcluded(entityType)) {
+            return pjp.proceed();
+        }
 
         // Alten Zustand VOR der Änderung laden (nur bei Update und Delete sinnvoll)
         String oldValues = null;
