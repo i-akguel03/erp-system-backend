@@ -5,6 +5,8 @@ import com.erp.backend.domain.ContractStatus;
 import com.erp.backend.domain.Customer;
 import com.erp.backend.domain.SubscriptionStatus;
 import com.erp.backend.event.ContractCreatedEvent;
+import com.erp.backend.event.SubscriptionActivatedEvent;
+import org.springframework.context.event.EventListener;
 import com.erp.backend.exception.BusinessLogicException;
 import com.erp.backend.exception.InvalidStatusTransitionException;
 import com.erp.backend.exception.ResourceNotFoundException;
@@ -245,6 +247,14 @@ public class ContractService {
         logger.info("Soft-deleted contract with id={}", id);
     }
 
+
+    @EventListener
+    public void onSubscriptionActivated(SubscriptionActivatedEvent event) {
+        var contract = event.getSubscription().getContract();
+        if (contract != null && contract.getContractStatus() != ContractStatus.ACTIVE) {
+            activateContract(contract.getId());
+        }
+    }
 
     // --- Statusänderungen nur mit contractId ---
     public Contract activateContract(UUID contractId) {

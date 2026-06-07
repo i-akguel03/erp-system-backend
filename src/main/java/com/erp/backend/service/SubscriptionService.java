@@ -2,6 +2,7 @@ package com.erp.backend.service;
 
 import com.erp.backend.domain.*;
 import com.erp.backend.dto.SubscriptionDto;
+import com.erp.backend.event.SubscriptionActivatedEvent;
 import com.erp.backend.event.SubscriptionCreatedEvent;
 import com.erp.backend.exception.BusinessLogicException;
 import com.erp.backend.exception.InvalidStatusTransitionException;
@@ -349,8 +350,13 @@ public class SubscriptionService {
                             + subscription.getSubscriptionStatus().getDisplayName());
         }
 
-        // Bei Status-Änderungen auch die Fälligkeiten anpassen
         SubscriptionStatus oldStatus = subscription.getSubscriptionStatus();
+        if (dto.getSubscriptionStatus() != null && dto.getSubscriptionStatus() != oldStatus) {
+            throw new InvalidStatusTransitionException(
+                    "Statusänderungen sind über diesen Endpunkt nicht erlaubt. " +
+                    "Bitte die dedizierten PATCH-Endpunkte verwenden.");
+        }
+
         Subscription updated = saveFromDto(subscription, dto);
 
         // Wenn Status geändert wurde, auch die offenen Fälligkeiten anpassen
@@ -417,6 +423,7 @@ public class SubscriptionService {
         s.setSubscriptionStatus(SubscriptionStatus.ACTIVE);
         Subscription saved = subscriptionRepository.save(s);
         updateDueScheduleStatusForSubscription(id, SubscriptionStatus.ACTIVE);
+        eventPublisher.publishEvent(new SubscriptionActivatedEvent(this, saved));
         return saved;
     }
 
