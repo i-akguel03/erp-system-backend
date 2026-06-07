@@ -71,7 +71,13 @@ public interface DueScheduleRepository extends JpaRepository<DueSchedule, UUID> 
            "JOIN FETCH c.customer cu " +
            "LEFT JOIN FETCH cu.billingAddress " +
            "LEFT JOIN FETCH s.product " +
-           "WHERE ds.status = :status AND ds.dueDate <= :dueDate")
+           "WHERE ds.status = :status AND ds.dueDate <= :dueDate " +
+           "AND (s.subscriptionStatus = com.erp.backend.domain.SubscriptionStatus.ACTIVE " +
+           "     OR (s.subscriptionStatus = com.erp.backend.domain.SubscriptionStatus.TERMINATED " +
+           "         AND (s.endDate IS NULL OR s.endDate >= :dueDate))) " +
+           "AND (c.contractStatus = com.erp.backend.domain.ContractStatus.ACTIVE " +
+           "     OR (c.contractStatus = com.erp.backend.domain.ContractStatus.TERMINATED " +
+           "         AND (c.endDate IS NULL OR c.endDate >= :dueDate)))")
     List<DueSchedule> findByStatusAndDueDateLessThanEqualForBatch(
             @Param("status") DueStatus status,
             @Param("dueDate") LocalDate dueDate);
@@ -82,7 +88,13 @@ public interface DueScheduleRepository extends JpaRepository<DueSchedule, UUID> 
            "JOIN FETCH c.customer cu " +
            "LEFT JOIN FETCH cu.billingAddress " +
            "LEFT JOIN FETCH s.product " +
-           "WHERE ds.status = :status AND ds.dueDate = :dueDate")
+           "WHERE ds.status = :status AND ds.dueDate = :dueDate " +
+           "AND (s.subscriptionStatus = com.erp.backend.domain.SubscriptionStatus.ACTIVE " +
+           "     OR (s.subscriptionStatus = com.erp.backend.domain.SubscriptionStatus.TERMINATED " +
+           "         AND (s.endDate IS NULL OR s.endDate >= :dueDate))) " +
+           "AND (c.contractStatus = com.erp.backend.domain.ContractStatus.ACTIVE " +
+           "     OR (c.contractStatus = com.erp.backend.domain.ContractStatus.TERMINATED " +
+           "         AND (c.endDate IS NULL OR c.endDate >= :dueDate)))")
     List<DueSchedule> findByStatusAndDueDateForBatch(
             @Param("status") DueStatus status,
             @Param("dueDate") LocalDate dueDate);
